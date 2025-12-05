@@ -102,12 +102,13 @@ export default function Contact() {
         publicKey
       );
       
-      console.log("SUCCESS!");
+
       alert("Message sent successfully! I'll get back to you soon.");
       setFormState({ name: "", email: "", message: "" });
     } catch (error) {
-      console.error("FAILED...", error);
-      alert("Failed to send message. Please try again later or contact me directly via email.");
+
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Failed to send message: ${errorMessage}. Please try again later.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -185,6 +186,7 @@ export default function Contact() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <form
+              ref={formRef}
               onSubmit={handleSubmit}
               className="bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm hover:border-white/20 transition-all duration-300"
             >
