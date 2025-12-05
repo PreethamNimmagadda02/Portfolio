@@ -37,7 +37,7 @@ export default function Navbar() {
     >
       <div className="flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tighter text-white">
-          PREETHAM NIMMAGADDA<span className="text-primary"></span>
+          Preetham Nimmagadda<span className="text-primary"></span>
         </Link>
 
         {/* Desktop Menu */}

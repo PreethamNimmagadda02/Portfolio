@@ -154,8 +154,8 @@ export default function Contact() {
               <ContactItem 
                 icon={Mail} 
                 label="Email" 
-                value="23je0653@iitism.ac.in" 
-                href="mailto:23je0653@iitism.ac.in"
+                value="preethamnimmagadda@gmail.com" 
+                href="mailto:preethamnimmagadda@gmail.com"
                 delay={0.2}
                 color={contactColors.email}
               />

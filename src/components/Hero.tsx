@@ -400,7 +400,7 @@ export default function Hero() {
           >
             <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                ARCHITECTING
+                ENGINEERING
               </GlitchText>
             </h1>
           </motion.div>
@@ -423,7 +423,7 @@ export default function Hero() {
           >
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                AGENTS
+                INTELLIGENCE
               </GlitchText>
             </h1>
             <motion.div 
@@ -433,7 +433,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg text-gray-200 font-medium leading-relaxed text-right lg:text-left">
-                Building the future with <span className="text-purple-300 font-bold">Autonomous AI Agents</span>. Top 1% Competitive Programmer.
+                Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>. Top 1% Competitive Programmer.
               </p>
             </motion.div>
           </motion.div>
@@ -449,7 +449,7 @@ export default function Hero() {
         >
           <AnimatedStat value="1000+" label="Problems Solved" delay={1} />
           <AnimatedStat value="1%" label="Top Coder" delay={1.2} />
-          <AnimatedStat value="3+" label="Apps Built" delay={1.4} />
+          <AnimatedStat value="5+" label="Apps Built" delay={1.4} />
         </motion.div>
 
         {/* CTA Buttons - Centered below */}

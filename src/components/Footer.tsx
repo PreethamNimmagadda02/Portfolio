@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 const socialLinks = [
   { icon: Github, href: "https://github.com/preethamnimmagadda", label: "GitHub", color: "hover:text-white" },
   { icon: Linkedin, href: "https://linkedin.com/in/preethamnimmagadda", label: "LinkedIn", color: "hover:text-blue-400" },
-  { icon: Mail, href: "mailto:23je0653@iitism.ac.in", label: "Email", color: "hover:text-purple-400" },
+  { icon: Mail, href: "mailto:preethamnimmagadda@gmail.com", label: "Email", color: "hover:text-purple-400" },
 ];
 
 export default function Footer() {
@@ -38,8 +38,8 @@ export default function Footer() {
             viewport={{ amount: 0.3 }}
           >
             <Link href="/" className="text-2xl font-bold tracking-tighter group">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">PREETHAM</span>
-              <span className="text-purple-400 group-hover:text-white transition-colors">.</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
+              <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
             </Link>
             <p className="text-gray-500 text-sm mt-2">
               Building the future, one agent at a time.
