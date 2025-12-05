@@ -10,6 +10,10 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SERVICE_ID: ${{ env.NEXT_PUBLIC_SERVICE_ID }}
+          NEXT_PUBLIC_TEMPLATE_ID: ${{ env.NEXT_PUBLIC_TEMPLATE_ID }}
+          NEXT_PUBLIC_PUBLIC_KEY: ${{ env.NEXT_PUBLIC_PUBLIC_KEY }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
