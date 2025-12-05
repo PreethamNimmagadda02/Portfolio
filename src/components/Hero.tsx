@@ -112,14 +112,27 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
 // Glitch text effect on hover
 function GlitchText({ children, className = "" }: { children: string; className?: string }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [canHover, setCanHover] = useState(false);
+  
+  // Calculate animation duration: (length * stagger) + initial delay + buffer
+  // Stagger is 0.1s (from containerVariants), delayChildren is 0.1s
+  useEffect(() => {
+    const duration = (children.length * 100) + 500;
+    const timer = setTimeout(() => {
+      setCanHover(true);
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [children]);
   
   return (
     <motion.span
       className={`relative inline-block cursor-pointer ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => canHover && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10">
+        <AnimatedWord word={children} />
+      </span>
       {isHovered && (
         <>
           <motion.span
@@ -220,8 +233,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.25,
-      delayChildren: 0.25,
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
     },
   },
 };
@@ -433,7 +446,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg text-gray-200 font-medium leading-relaxed text-right lg:text-left">
-                Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>. Top 1% Competitive Programmer.
+                Upcoming Generative AI Intern @ <span className="text-purple-300 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>.
               </p>
             </motion.div>
           </motion.div>
@@ -448,7 +461,7 @@ export default function Hero() {
           transition={{ delay: 1 }}
         >
           <AnimatedStat value="1000+" label="Problems Solved" delay={1} />
-          <AnimatedStat value="1%" label="Top Coder" delay={1.2} />
+          <AnimatedStat value="1864" label="Max Rating" delay={1.2} />
           <AnimatedStat value="5+" label="Apps Built" delay={1.4} />
         </motion.div>
 
