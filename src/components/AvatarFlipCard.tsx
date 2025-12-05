@@ -18,7 +18,7 @@ const terminalLines = [
 export default function AvatarFlipCard() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
-  const [cursorVisible, setCursorVisible] = useState(true);
+  const [cursorVisible, setCursorVisible] = useState(true); 
 
   // Typing animation effect
   useEffect(() => {
