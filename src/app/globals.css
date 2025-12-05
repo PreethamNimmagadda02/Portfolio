@@ -72,8 +72,23 @@
 }
 
 body {
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow-x: hidden;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Enhanced Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 80px rgba(139, 92, 246, 0.3);
 }
 
 /* Animated gradient for text */
@@ -86,9 +101,18 @@ body {
   animation: gradient 3s ease infinite;
 }
 
-/* Glow effect */
+/* Enhanced glow effects */
 .glow {
-  text-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
+  text-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.6), 
+    0 0 40px rgba(139, 92, 246, 0.4),
+    0 0 60px rgba(139, 92, 246, 0.2);
+}
+
+.glow-white {
+  text-shadow: 
+    0 0 30px rgba(255, 255, 255, 0.5), 
+    0 0 60px rgba(255, 255, 255, 0.3);
 }
 
 /* Glass card effect */
@@ -106,4 +130,200 @@ body {
 .hover-lift:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 40px -20px rgba(139, 92, 246, 0.3);
+}
+
+/* Text enhancement utilities */
+.text-enhanced {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text-subtitle {
+  color: #e5e5e5;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Bounce animation */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20%); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* Scale pulse */
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-scale-pulse {
+  animation: scale-pulse 2s ease-in-out infinite;
+}
+
+/* Rotate animation */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* Typing cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Slide up reveal */
+@keyframes slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+/* Hover card lift */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px -15px rgba(139, 92, 246, 0.3),
+    0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+/* Glitch text effect */
+@keyframes glitch-1 {
+  0%, 100% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 0); }
+  25% { clip-path: inset(30% 0 40% 0); transform: translate(2px, 0); }
+  50% { clip-path: inset(50% 0 20% 0); transform: translate(-1px, 0); }
+  75% { clip-path: inset(20% 0 50% 0); transform: translate(1px, 0); }
+}
+
+@keyframes glitch-2 {
+  0%, 100% { clip-path: inset(50% 0 20% 0); transform: translate(2px, 0); }
+  25% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 0); }
+  50% { clip-path: inset(30% 0 40% 0); transform: translate(1px, 0); }
+  75% { clip-path: inset(40% 0 30% 0); transform: translate(-1px, 0); }
+}
+
+.glitch-effect {
+  position: relative;
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-effect:hover::before {
+  animation: glitch-1 0.15s infinite;
+  color: cyan;
+  opacity: 0.8;
+  z-index: -1;
+}
+
+.glitch-effect:hover::after {
+  animation: glitch-2 0.15s infinite;
+  color: red;
+  opacity: 0.8;
+  z-index: -1;
+}
+
+/* Grid pattern animation */
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+.animated-grid {
+  animation: grid-move 20s linear infinite;
+}
+
+/* Floating icon glow */
+@keyframes icon-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.icon-float {
+  animation: icon-glow 3s ease-in-out infinite;
+}
+
+/* Number counter glow */
+@keyframes number-pulse {
+  0%, 100% { text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+  50% { text-shadow: 0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.4); }
+}
+
+.number-glow {
+  animation: number-pulse 2s ease-in-out infinite;
 }

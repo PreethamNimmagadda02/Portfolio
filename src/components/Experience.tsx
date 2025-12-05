@@ -37,11 +37,11 @@ export default function Experience() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ amount: 0.3 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Experience & Ventures</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Experience & Ventures</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full" />
         </motion.div>
 
@@ -51,7 +51,7 @@ export default function Experience() {
               key={index}
               initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="relative pl-8 md:pl-0"
             >
@@ -64,7 +64,7 @@ export default function Experience() {
               <div className={`md:flex items-start justify-between gap-8 ${index % 2 === 0 ? "md:flex-row-reverse" : ""}`}>
                 <div className="hidden md:block flex-1" />
                 
-                <div className="flex-1 mb-1 bg-white/5 border border-white/10 p-6 rounded-2xl hover:border-primary/30 transition-colors duration-300">
+                <div className="flex-1 mb-1 bg-white/5 border border-white/10 p-6 rounded-2xl hover:border-primary/30 transition-all duration-300 card-hover">
                   <div className="flex items-center gap-2 text-primary mb-2">
                     <Briefcase size={16} />
                     <span className="font-semibold">{exp.company}</span>

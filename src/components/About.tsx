@@ -1,79 +1,73 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const features = [
   {
     icon: <Code className="w-6 h-6" />,
-    title: "AI Specialist",
-    description: "Building autonomous agents with CrewAI, Gemini API, and cutting-edge LLMs.",
+    title: "AI Architect",
+    description: "Pioneering autonomous agent systems with CrewAI, Gemini API, and state-of-the-art LLMs.",
     gradient: "from-blue-500 to-cyan-500",
     glow: "group-hover:shadow-blue-500/25"
   },
   {
     icon: <Rocket className="w-6 h-6" />,
-    title: "Competitive Coder",
-    description: "Codeforces Specialist (1450) and 4-Star Coder on CodeChef (1864).",
+    title: "Elite Coder",
+    description: "Top 1% on CodeChef (1864 rating). Codeforces Specialist with 800+ problems conquered.",
     gradient: "from-purple-500 to-pink-500",
     glow: "group-hover:shadow-purple-500/25"
   },
   {
     icon: <Globe className="w-6 h-6" />,
-    title: "Community Leader",
-    description: "Student Senator representing 1500+ peers and organizing major campus events.",
+    title: "Campus Leader",
+    description: "Student Senator championing 1500+ peers. Orchestrated 10+ major campus events.",
     gradient: "from-emerald-500 to-teal-500",
     glow: "group-hover:shadow-emerald-500/25"
   },
   {
     icon: <BookOpen className="w-6 h-6" />,
-    title: "Full Stack Dev",
-    description: "Developing scalable web apps with Next.js, React, Node.js, and Firebase.",
+    title: "Full Stack Engineer",
+    description: "Shipping production-ready apps with Next.js, React, Node.js, and Firebase at scale.",
     gradient: "from-orange-500 to-yellow-500",
     glow: "group-hover:shadow-orange-500/25"
   }
 ];
 
-// 3D Tilt Card Component
+// 3D Tilt Card Component - Optimized for performance
+// 3D Tilt Card Component - Ultra Optimized
 function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
   
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  
-  const springConfig = { stiffness: 300, damping: 30 };
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], ["10deg", "-10deg"]), springConfig);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], ["-10deg", "10deg"]), springConfig);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const xPos = (e.clientX - rect.left) / rect.width - 0.5;
-    const yPos = (e.clientY - rect.top) / rect.height - 0.5;
-    x.set(xPos);
-    y.set(yPos);
+    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    
+    // Calculate rotation - slightly increased range for better feel
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      const x = (e.clientX - left - width / 2) / 20; // dividing by 20 gives about +/- 10-15 degrees range
+      const y = (e.clientY - top - height / 2) / 20;
+      setTransform(`perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) scale3d(1.02, 1.02, 1.02)`);
+    });
   };
 
   const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
+    setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
   };
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-      }}
+      className={`${className} transition-transform ease-out duration-200 will-change-transform`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`[perspective:1000px] ${className}`}
+      style={{ transform }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -110,22 +104,22 @@ export default function About() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ amount: 0.3 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ amount: 0.3 }}
             transition={{ delay: 0.2, type: "spring" }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6"
           >
             <Sparkles size={14} className="text-purple-400" />
             <span className="text-sm text-gray-400">Who I Am</span>
           </motion.div>
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            About <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">Me</span>
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
+            About <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-black">Me</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full" />
         </motion.div>
@@ -134,22 +128,21 @@ export default function About() {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="space-y-6"
           >
             <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-              A <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">Tech Innovator</span> &{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">Community Leader</span>
+              A <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
             </h3>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              Currently pursuing a B.Tech in Electronics and Communication Engineering at IIT (ISM) Dhanbad. 
-              My focus lies in building autonomous AI agents and scalable full-stack applications.
+            <p className="text-gray-200 text-lg leading-relaxed font-normal">
+              Engineering student at <span className="text-white font-bold">IIT (ISM) Dhanbad</span> with a laser focus on 
+              building autonomous AI systems that solve real-world problems.
             </p>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              As a Student Senator, I actively represent over <span className="text-white font-semibold">1,500 peers</span>, 
-              advocating for better facilities and driving community engagement. I combine technical expertise with 
-              leadership to solve real-world problems.
+            <p className="text-gray-200 text-lg leading-relaxed font-normal">
+              As <span className="text-white font-bold">Student Senator</span>, I've amplified the voice of <span className="text-purple-300 font-bold">1,500+ peers</span>, 
+              driving policy changes and spearheading initiatives that transformed campus life.
             </p>
 
             {/* Stats */}
@@ -157,13 +150,13 @@ export default function About() {
               className="grid grid-cols-3 gap-4 pt-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ delay: 0.4 }}
             >
               {[
-                { value: "800+", label: "Problems Solved" },
-                { value: "1500+", label: "Peers Represented" },
-                { value: "3+", label: "Projects Shipped" }
+                { value: "1500+", label: "Peers Led" },
+                { value: "10+", label: "Events Hosted" },
+                { value: "1864", label: "Peak Rating" }
               ].map((stat, i) => (
                 <div key={i} className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
@@ -180,34 +173,27 @@ export default function About() {
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ amount: 0.3 }}
           >
             {features.map((feature, index) => (
               <motion.div key={index} variants={itemVariants}>
                 <TiltCard>
-                  <div className={`group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full`}>
+                  <div className={`group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full card-hover`}>
                     {/* Gradient overlay on hover */}
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                     
                     {/* Icon */}
                     <div 
-                      className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
-                      style={{ transform: "translateZ(20px)" }}
+                      className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit group-hover:scale-110 transition-all duration-300`}
                     >
                       <div className="text-white">{feature.icon}</div>
                     </div>
                     
                     {/* Content */}
-                    <h4 
-                      className="relative text-xl font-semibold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all"
-                      style={{ transform: "translateZ(15px)" }}
-                    >
+                    <h4 className="relative text-xl font-semibold text-white mb-2">
                       {feature.title}
                     </h4>
-                    <p 
-                      className="relative text-gray-400 text-sm leading-relaxed"
-                      style={{ transform: "translateZ(10px)" }}
-                    >
+                    <p className="relative text-gray-400 text-sm leading-relaxed">
                       {feature.description}
                     </p>
                   </div>

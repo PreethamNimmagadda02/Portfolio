@@ -1,11 +1,76 @@
 "use client";
 
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { ArrowRight, Sparkles, ChevronDown, Code2, Brain, Cpu, Zap, Terminal, Rocket } from "lucide-react";
 import Link from "next/link";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
+
+// Floating tech icons that orbit around the hero
+const floatingIcons = [
+  { Icon: Code2, delay: 0, size: 24, gradient: "from-blue-400 to-cyan-400" },
+  { Icon: Brain, delay: 0.5, size: 28, gradient: "from-purple-400 to-pink-400" },
+  { Icon: Cpu, delay: 1, size: 22, gradient: "from-green-400 to-emerald-400" },
+  { Icon: Zap, delay: 1.5, size: 26, gradient: "from-yellow-400 to-orange-400" },
+  { Icon: Terminal, delay: 2, size: 24, gradient: "from-red-400 to-rose-400" },
+  { Icon: Rocket, delay: 2.5, size: 26, gradient: "from-indigo-400 to-violet-400" },
+];
+
+// Floating Icon Component with mouse reactivity
+function FloatingIcon({ 
+  Icon, 
+  delay, 
+  size, 
+  gradient, 
+  index, 
+  mouseX, 
+  mouseY 
+}: { 
+  Icon: any; 
+  delay: number; 
+  size: number; 
+  gradient: string; 
+  index: number;
+  mouseX: number;
+  mouseY: number;
+}) {
+  const angle = (index / floatingIcons.length) * Math.PI * 2;
+  const radius = 280 + Math.sin(index * 1.5) * 60;
+  
+  // Base position in a circle
+  const baseX = Math.cos(angle) * radius;
+  const baseY = Math.sin(angle) * radius * 0.4; // Elliptical orbit
+  
+  // Mouse reactivity - icons get pushed away slightly
+  const pushX = mouseX * 0.05;
+  const pushY = mouseY * 0.05;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ 
+        opacity: [0.4, 0.8, 0.4],
+        scale: [1, 1.1, 1],
+        x: baseX + pushX,
+        y: baseY + pushY,
+        rotate: [0, 360],
+      }}
+      transition={{
+        opacity: { duration: 3, repeat: Infinity, delay },
+        scale: { duration: 3, repeat: Infinity, delay },
+        x: { duration: 0.3 },
+        y: { duration: 0.3 },
+        rotate: { duration: 20 + index * 5, repeat: Infinity, ease: "linear" },
+      }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+    >
+      <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} bg-opacity-20 backdrop-blur-sm border border-white/10 shadow-lg`}>
+        <Icon size={size} className="text-white/90" />
+      </div>
+    </motion.div>
+  );
+}
 
 // Animated gradient text component
 function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -23,13 +88,189 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.6, type: "spring" }}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm text-gray-300"
+      animate={{ 
+        opacity: 1, 
+        y: [0, -8, 0],
+      }}
+      transition={{ 
+        opacity: { delay, duration: 0.6 },
+        y: { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" }
+      }}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm text-gray-300 animate-pulse-glow"
     >
-      <Sparkles size={14} className="text-purple-400" />
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+      >
+        <Sparkles size={14} className="text-purple-400" />
+      </motion.div>
       {children}
     </motion.div>
+  );
+}
+
+// Glitch text effect on hover
+function GlitchText({ children, className = "" }: { children: string; className?: string }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <motion.span
+      className={`relative inline-block cursor-pointer ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span className="relative z-10">{children}</span>
+      {isHovered && (
+        <>
+          <motion.span
+            className="absolute inset-0 text-cyan-400 z-0"
+            animate={{ x: [-2, 2, -2], opacity: [0.8, 0.4, 0.8] }}
+            transition={{ duration: 0.15, repeat: Infinity }}
+            style={{ clipPath: "inset(10% 0 60% 0)" }}
+          >
+            {children}
+          </motion.span>
+          <motion.span
+            className="absolute inset-0 text-red-400 z-0"
+            animate={{ x: [2, -2, 2], opacity: [0.8, 0.4, 0.8] }}
+            transition={{ duration: 0.15, repeat: Infinity, delay: 0.05 }}
+            style={{ clipPath: "inset(50% 0 20% 0)" }}
+          >
+            {children}
+          </motion.span>
+        </>
+      )}
+    </motion.span>
+  );
+}
+
+// Scroll indicator component
+function ScrollIndicator() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.2, duration: 0.6 }}
+      className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+    >
+      <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
+      <motion.div
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        className="flex flex-col items-center"
+      >
+        <ChevronDown size={20} className="text-gray-500" />
+        <ChevronDown size={20} className="text-gray-600 -mt-3" />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Stats counter with count-up animation
+function AnimatedStat({ value, label, delay }: { value: string; label: string; delay: number }) {
+  const [displayValue, setDisplayValue] = useState("0");
+  const numericPart = value.match(/[\d.]+/)?.[0] || "0";
+  const suffix = value.replace(/[\d.]+/, "");
+  
+  useEffect(() => {
+    const target = parseFloat(numericPart);
+    const duration = 2000;
+    const startTime = Date.now();
+    const delayMs = delay * 1000;
+    
+    const timer = setTimeout(() => {
+      const animate = () => {
+        const elapsed = Date.now() - startTime - delayMs;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        
+        const current = Math.floor(target * eased);
+        setDisplayValue(current.toString());
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setDisplayValue(numericPart);
+        }
+      };
+      animate();
+    }, delayMs);
+    
+    return () => clearTimeout(timer);
+  }, [numericPart, delay]);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: delay + 0.5, duration: 0.5, type: "spring" }}
+      className="text-center"
+    >
+      <div className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+        {displayValue}{suffix}
+      </div>
+      <div className="text-xs text-gray-500 mt-1">{label}</div>
+    </motion.div>
+  );
+}
+
+// Container variants with staggerChildren for sequential reveal
+const containerVariants = {
+  hidden: { opacity: 1 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.25,
+      delayChildren: 0.25,
+    },
+  },
+};
+
+// Letter animation variants - trendy blur reveal
+const letterVariants = {
+  hidden: { 
+    opacity: 0, 
+    x: -20,
+    filter: "blur(10px)",
+    scale: 1.5,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    scale: 1,
+    transition: {
+      duration: 0.01,
+      ease: "backOut" as const,
+    },
+  },
+};
+
+// AnimatedWord component
+function AnimatedWord({ word, className, isOutline = false, reverse = false }: { word: string; className?: string; isOutline?: boolean; reverse?: boolean }) {
+  const isGradient = className?.includes("bg-clip-text");
+  const letters = reverse ? word.split("").reverse() : word.split("");
+  
+  return (
+    <motion.span 
+      className={`inline-flex px-1 ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {letters.map((letter, i) => (
+        <motion.span
+          key={i}
+          variants={letterVariants}
+          className={`inline-block ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
+          style={{ 
+            marginRight: letter === " " ? "0.25em" : "0"
+          }}
+        >
+          {letter}
+        </motion.span>
+      ))}
+    </motion.span>
   );
 }
 
@@ -45,69 +286,76 @@ export default function Hero() {
   const yRight = useTransform(scrollYProgress, [0, 1], [0, -150]);
   const yCenter = useTransform(scrollYProgress, [0, 1], [0, 50]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
-  // Mouse position for 3D tilt
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], ["5deg", "-5deg"]), { stiffness: 100, damping: 30 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], ["-5deg", "5deg"]), { stiffness: 100, damping: 30 });
+  // Mouse position tracking
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    
+    requestAnimationFrame(() => {
+      const x = (e.clientX - rect.left - rect.width / 2) / 25;
+      const y = (e.clientY - rect.top - rect.height / 2) / 25;
+      setTilt({ x, y });
+      setMousePos({ 
+        x: (e.clientX - rect.left - rect.width / 2), 
+        y: (e.clientY - rect.top - rect.height / 2) 
+      });
+    });
   };
 
   const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
+    setTilt({ x: 0, y: 0 });
+    setMousePos({ x: 0, y: 0 });
   };
 
-  // Letter animation variants
-  const letterVariants = {
-    hidden: { opacity: 0, y: 50, rotateX: -90 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.5,
-        ease: "easeOut" as const,
-      },
-    }),
-  };
 
-  const AnimatedWord = ({ word, className }: { word: string; className?: string }) => (
-    <span className={`inline-flex overflow-hidden ${className}`}>
-      {word.split("").map((letter, i) => (
-        <motion.span
-          key={i}
-          custom={i}
-          variants={letterVariants}
-          initial="hidden"
-          animate="visible"
-          className="inline-block"
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {letter}
-        </motion.span>
-      ))}
-    </span>
-  );
 
   return (
     <section
       ref={containerRef}
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Dynamic grid background */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: "50px 50px",
+          backgroundPosition: `${mousePos.x * 0.02}px ${mousePos.y * 0.02}px`,
+          transition: "background-position 0.3s ease-out",
+        }}
+      />
+
+      {/* Enhanced searchlight effect */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(circle 500px at ${tilt.x * 25 + 50 + "%"} ${tilt.y * 25 + 50 + "%"}, rgba(139, 92, 246, 0.2), transparent 70%)`
+        }}
+      />
+
+      {/* Floating tech icons */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {floatingIcons.map((icon, index) => (
+          <FloatingIcon 
+            key={index} 
+            {...icon} 
+            index={index}
+            mouseX={mousePos.x}
+            mouseY={mousePos.y}
+          />
+        ))}
+      </div>
+
       {/* Gradient orbs background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -128,9 +376,8 @@ export default function Hero() {
         />
       </div>
 
-      <motion.div 
-        style={{ scale, rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full"
+      <div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
       >
         {/* Top badge */}
         <motion.div 
@@ -140,29 +387,21 @@ export default function Hero() {
           transition={{ delay: 0.2 }}
         >
           <FloatingBadge delay={0.3}>
-            Available for exciting opportunities
+            🚀 Open to Internship & Full-time Opportunities
           </FloatingBadge>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
           
           {/* Left Side */}
           <motion.div 
             style={{ y: yLeft, opacity }}
-            className="flex flex-col items-end text-right [transform-style:preserve-3d]"
+            className="flex flex-col items-end text-right"
           >
-            <motion.div 
-              className="mb-[-10px] z-10"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <p className="text-lg md:text-xl font-medium text-gray-400 tracking-wide">
-                Preetham
-              </p>
-            </motion.div>
-            <h1 className="text-6xl md:text-9xl font-bold tracking-tighter leading-none [transform-style:preserve-3d]">
-              <AnimatedWord word="BUILDING" className="bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-300 to-white" />
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+              <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                ARCHITECTING
+              </GlitchText>
             </h1>
           </motion.div>
 
@@ -180,10 +419,12 @@ export default function Hero() {
           {/* Right Side */}
           <motion.div 
             style={{ y: yRight, opacity }}
-            className="flex flex-col items-start text-left [transform-style:preserve-3d]"
+            className="flex flex-col items-start text-left"
           >
-            <h1 className="text-6xl md:text-9xl font-bold tracking-tighter leading-none">
-              <AnimatedWord word="AGENTS" className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-white to-purple-300" />
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+              <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                AGENTS
+              </GlitchText>
             </h1>
             <motion.div 
               className="mt-4 max-w-xs"
@@ -191,79 +432,60 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-lg text-gray-400 leading-relaxed text-right lg:text-left">
-                Upcoming Generative AI Intern @ Introspect Labs. <span className="text-purple-400">Specialist @ Codeforces.</span>
+              <p className="text-lg text-gray-200 font-medium leading-relaxed text-right lg:text-left">
+                Building the future with <span className="text-purple-300 font-bold">Autonomous AI Agents</span>. Top 1% Competitive Programmer.
               </p>
             </motion.div>
           </motion.div>
 
         </div>
 
+        {/* Stats Row */}
+        <motion.div 
+          className="flex justify-center gap-8 md:gap-16 mt-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+        >
+          <AnimatedStat value="1000+" label="Problems Solved" delay={1} />
+          <AnimatedStat value="1%" label="Top Coder" delay={1.2} />
+          <AnimatedStat value="3+" label="Apps Built" delay={1.4} />
+        </motion.div>
+
         {/* CTA Buttons - Centered below */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="flex justify-center gap-6 mt-16"
+          className="flex justify-center gap-6 mt-10"
         >
           <MagneticButton strength={0.2}>
             <Link
               href="#projects"
-              className="relative px-8 py-4 rounded-full bg-white text-black font-bold overflow-hidden group"
+              className="relative px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold overflow-hidden group hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-300 ease-out"
             >
               <span className="relative z-10 flex items-center gap-2">
                 View My Work
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </span>
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ duration: 0.3 }}
-              />
+              {/* Sleek light beam effect */}
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out skew-x-12" />
             </Link>
           </MagneticButton>
-          
+
           <MagneticButton strength={0.2}>
             <Link
               href="#contact"
-              className="px-8 py-4 rounded-full border border-white/20 text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm relative overflow-hidden group"
+              className="px-8 py-4 rounded-full bg-transparent border border-white/20 text-white hover:bg-white/10 transition-colors font-semibold"
             >
-              <span className="relative z-10">Contact Me</span>
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20"
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
+              Contact Me
             </Link>
           </MagneticButton>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Scroll Indicator */}
-      <motion.div
-        style={{ opacity }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
-      >
-        <motion.div 
-          className="flex flex-col items-center gap-2"
-          animate={{ y: [0, 5, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
-          <div className="w-5 h-9 border border-white/20 rounded-full flex justify-center p-1">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="w-1 h-1 bg-white rounded-full"
-            />
-          </div>
-        </motion.div>
-      </motion.div>
+      <ScrollIndicator />
     </section>
   );
 }

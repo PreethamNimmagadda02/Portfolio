@@ -6,27 +6,27 @@ import { Trophy, Award, Star, Code } from "lucide-react";
 const achievements = [
   {
     title: "Codeforces Specialist",
-    description: "Attained a rating of 1450, placing in the top 20% of competitive programmers.",
+    description: "Conquered algorithmic challenges to reach 1450 rating, outperforming 80% of competitive programmers globally.",
     icon: <Code className="w-8 h-8 text-blue-400" />,
-    stats: "Rating: 1450",
+    stats: "Top 20%",
   },
   {
-    title: "CodeChef 4-Star",
-    description: "Achieved a rating of 1864, placing in the top 0.8% of over 2 million coders.",
+    title: "CodeChef Elite",
+    description: "Achieved 4-Star status with 1864 rating, placing in the elite top 0.8% among 2 million+ coders worldwide.",
     icon: <Star className="w-8 h-8 text-yellow-400" />,
     stats: "Top 0.8%",
   },
   {
-    title: "HackerRank Gold",
-    description: "Earned a 6-Star Gold badge, ranking in the top 0.07% of 26 million+ coders worldwide.",
+    title: "HackerRank Legend",
+    description: "Earned the prestigious 6-Star Gold badge, ranking in the ultra-elite top 0.07% of 26 million+ coders.",
     icon: <Trophy className="w-8 h-8 text-yellow-400" />,
-    stats: "6-Star Gold",
+    stats: "Top 0.07%",
   },
   {
-    title: "Problem Solving",
-    description: "Mastered DSA by completing 800+ coding challenges across various platforms.",
+    title: "Problem Crusher",
+    description: "Demolished 800+ algorithmic challenges across multiple platforms, mastering DSA inside and out.",
     icon: <Award className="w-8 h-8 text-green-400" />,
-    stats: "800+ Solved",
+    stats: "1000+ Solved",
   },
 ];
 
@@ -41,7 +41,7 @@ export default function Achievements() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Achievements</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Achievements</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full" />
         </motion.div>
 
@@ -57,10 +57,14 @@ export default function Achievements() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <div className="relative h-full bg-white/5 border border-white/10 p-8 rounded-2xl hover:border-white/20 transition-colors duration-300 flex flex-col items-center text-center">
-                <div className="mb-6 p-4 rounded-full bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-300">
+              <div className="relative h-full bg-white/5 border border-white/10 p-8 rounded-2xl hover:border-white/20 transition-all duration-300 flex flex-col items-center text-center card-hover">
+                <motion.div 
+                  className="mb-6 p-4 rounded-full bg-white/5 border border-white/10"
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   {item.icon}
-                </div>
+                </motion.div>
                 
                 <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                 <div className="text-primary font-mono font-bold text-lg mb-4">{item.stats}</div>

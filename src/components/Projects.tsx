@@ -7,26 +7,35 @@ import React, { useRef } from "react";
 
 const projects = [
   {
-    title: "FestFlow",
-    description: "AI-powered event orchestration platform using specialized agents. Built with React, Firebase, and Google Gemini API.",
-    tags: ["React", "Firebase", "Gemini API", "AI Agents"],
-    links: { demo: "#", repo: "#" },
-    gradient: "from-blue-500/20 to-cyan-500/20",
-    border: "group-hover:border-blue-500/50"
-  },
-  {
-    title: "BlinkIt Clone",
-    description: "E-commerce platform replicating BlinkIt's core functionalities. Features JWT auth, MVC architecture, and email verification.",
-    tags: ["MERN Stack", "Redis", "REST APIs", "Multer"],
-    links: { demo: "#", repo: "#" },
+    title: "College Central",
+    description: "A comprehensive student hub for IIT(ISM) Dhanbad, featuring a personalized dashboard, grade tracking, class schedules, an interactive campus map, and real-time event updates.",
+    tags: ["React", "Typescript", "Firebase", "REST APIs", "Tailwind CSS"],
+    links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     gradient: "from-purple-500/20 to-pink-500/20",
     border: "group-hover:border-purple-500/50"
   },
   {
-    title: "Automated Trading System",
-    description: "Multi-agent financial trading system using CrewAI and GPT-3.5. Analyzes real-time market data for decision making.",
+    title: "FestFlow",
+    description: "Revolutionary AI-powered event orchestration platform. Transforms complex goals into executable plans using specialized autonomous agents.",
+    tags: ["React", "Firebase", "Gemini API", "AI Agents"],
+    links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
+    gradient: "from-blue-500/20 to-cyan-500/20",
+    border: "group-hover:border-blue-500/50"
+  },
+  // {
+  //   title: "BlinkIt Clone",
+  //   description: "Enterprise-grade e-commerce platform with JWT authentication, MVC architecture, and bulletproof email verification.",
+  //   tags: ["MERN Stack", "Redis", "REST APIs", "Multer"],
+  //   links: { demo: "#", repo: "#" },
+  //   gradient: "from-purple-500/20 to-pink-500/20",
+  //   border: "group-hover:border-purple-500/50"
+  // },
+  
+  {
+    title: "AI Trading System",
+    description: "Multi-agent financial intelligence system. Deploys specialized AI agents for real-time market analysis and strategic decision-making.",
     tags: ["Python", "CrewAI", "GPT API", "Financial Tech"],
-    links: { demo: "#", repo: "#" },
+    links: { demo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System", repo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System" },
     gradient: "from-green-500/20 to-emerald-500/20",
     border: "group-hover:border-green-500/50"
   }
@@ -62,10 +71,6 @@ function ProjectCard({ project, index }: { project: typeof projects[0], index: n
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
       className="relative [perspective:1500px]"
     >
       <motion.div
@@ -76,7 +81,7 @@ function ProjectCard({ project, index }: { project: typeof projects[0], index: n
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className={`relative h-full rounded-3xl bg-white/5 border border-white/10 overflow-hidden transition-colors duration-500 ${project.border} group`}
+        className={`relative h-full rounded-3xl bg-white/5 border border-white/10 overflow-hidden transition-all duration-500 ${project.border} group card-hover`}
       >
         <div
           style={{ transform: "translateZ(75px)" }}
@@ -142,25 +147,54 @@ function ProjectCard({ project, index }: { project: typeof projects[0], index: n
 }
 
 export default function Projects() {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.6, ease: "easeOut" as const }
+    }
+  };
+
   return (
     <section id="projects" className="py-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ amount: 0.3 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Featured Projects</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Featured Projects</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ amount: 0.2 }}
+        >
           {projects.map((project, index) => (
-            <ProjectCard key={index} project={project} index={index} />
+            <motion.div key={index} variants={itemVariants}>
+              <ProjectCard project={project} index={index} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

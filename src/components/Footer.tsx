@@ -1,13 +1,12 @@
 "use client";
 
-import { Github, Linkedin, Twitter, Mail } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com/preethamnimmagadda", label: "GitHub", color: "hover:text-white" },
   { icon: Linkedin, href: "https://linkedin.com/in/preethamnimmagadda", label: "LinkedIn", color: "hover:text-blue-400" },
-  { icon: Twitter, href: "#", label: "Twitter", color: "hover:text-cyan-400" },
   { icon: Mail, href: "mailto:23je0653@iitism.ac.in", label: "Email", color: "hover:text-purple-400" },
 ];
 

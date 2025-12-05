@@ -15,7 +15,7 @@ export default function Skills() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ amount: 0.3 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
@@ -29,7 +29,7 @@ export default function Skills() {
               key={category}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
               className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary/30 transition-colors duration-300"
             >
