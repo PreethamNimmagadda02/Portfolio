@@ -65,7 +65,7 @@ const contactColors = {
     hoverBorder: "hover:border-cyan-500/50 group-hover:border-cyan-500/50",
     hoverBg: "group-hover:bg-cyan-500/10",
     hoverText: "group-hover:text-cyan-400",
-    labelHover: "group-hover:text-cyan-300"
+    labelHover: "group-hover:text-cyan-300" 
   }
 };
 
