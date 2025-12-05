@@ -42,7 +42,7 @@ export default function Footer() {
               <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
             </Link>
             <p className="text-gray-500 text-sm mt-2">
-              Building the future, one agent at a time.
+              Building the future, one product at a time.
             </p>
           </motion.div>
 
@@ -80,9 +80,6 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-8">
             <p className="text-gray-500 text-sm">
               © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
-            </p>
-            <p className="text-gray-600 text-xs">
-              Built with Next.js, Three.js & Framer Motion
             </p>
           </div>
 
