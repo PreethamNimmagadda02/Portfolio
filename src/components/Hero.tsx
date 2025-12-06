@@ -241,22 +241,22 @@ const containerVariants = {
   },
 };
 
-// Letter animation variants - trendy blur reveal
+// Letter animation variants - Classy 3D Flip Reveal
 const letterVariants = {
   hidden: { 
     opacity: 0, 
-    x: -20,
-    filter: "blur(10px)",
-    scale: 1.5,
+    rotateX: 90,
+    y: 20,
+    filter: "blur(4px)",
   },
   visible: {
     opacity: 1,
-    x: 0,
+    rotateX: 0,
+    y: 0,
     filter: "blur(0px)",
-    scale: 1,
     transition: {
-      duration: 0.01,
-      ease: "backOut" as const,
+      duration: 0.8,
+      ease: [0.2, 0.65, 0.3, 0.9], // Dramatic ease-out
     },
   },
 };
@@ -268,7 +268,7 @@ function AnimatedWord({ word, className, isOutline = false, reverse = false }: {
   
   return (
     <motion.span 
-      className={`inline-flex px-1 ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
+      className={`inline-flex px-1 [perspective:1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -277,7 +277,7 @@ function AnimatedWord({ word, className, isOutline = false, reverse = false }: {
         <motion.span
           key={i}
           variants={letterVariants}
-          className={`inline-block ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
+          className={`inline-block [transform-style:preserve-3d] ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
           style={{ 
             marginRight: letter === " " ? "0.25em" : "0"
           }}
@@ -431,9 +431,10 @@ export default function Hero() {
             className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <GlitchText className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.9)] md:[-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                ENGINEERING
-              </GlitchText>
+              <AnimatedWord 
+                word="ENGINEERING" 
+                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
+              />
             </h1>
           </motion.div>
 
@@ -454,9 +455,10 @@ export default function Hero() {
             className="flex flex-col items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <GlitchText className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.9)] md:[-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                INTELLIGENCE
-              </GlitchText>
+              <AnimatedWord 
+                word="INTELLIGENCE" 
+                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
+              />
             </h1>
             <motion.div 
               className="mt-6 max-w-xs sm:max-w-md lg:max-w-xs mx-auto lg:mx-0"
@@ -493,7 +495,7 @@ export default function Hero() {
           />
           <AnimatedStat 
             value="5+" 
-            label={<><span className="text-purple-400 font-bold">Apps</span> Built</>} 
+            label={<><span className="text-purple-400 font-bold">Products</span> Built</>} 
             delay={1.4} 
             gradient="from-purple-400 to-pink-400"
           />
