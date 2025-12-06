@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Code, Rocket, Globe, BookOpen, Sparkles } from "lucide-react";
-import { useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
+import { Code, Rocket, Globe, BookOpen, Sparkles, Trophy, Users, Target, Zap } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 
 const features = [
   {
@@ -15,7 +15,7 @@ const features = [
   {
     icon: <Rocket className="w-6 h-6" />,
     title: "Elite Coder",
-    description: "Top 1% on CodeChef (1864 rating). Codeforces Specialist with 800+ problems conquered.",
+    description: "Top 1% on CodeChef (1864 rating). Codeforces Specialist with 1000+ problems conquered.",
     gradient: "from-purple-500 to-pink-500",
     glow: "group-hover:shadow-purple-500/25"
   },
@@ -35,8 +35,37 @@ const features = [
   }
 ];
 
-// 3D Tilt Card Component - Optimized for performance
-// 3D Tilt Card Component - Ultra Optimized
+const skills = [
+  "React", "Next.js", "TypeScript", "Python", "CrewAI", "LangChain", 
+  "Node.js", "Firebase", "Tailwind CSS", "Gemini API"
+];
+
+// Animated counter component
+function AnimatedCounter({ value, suffix = "", duration = 2000 }: { value: number; suffix?: string; duration?: number }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+    
+    let startTime: number;
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(value * eased));
+      
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    
+    requestAnimationFrame(animate);
+  }, [isInView, value, duration]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+// 3D Tilt Card Component
 function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
@@ -45,10 +74,8 @@ function TiltCard({ children, className = "" }: { children: React.ReactNode; cla
     if (!ref.current) return;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
     
-    // Calculate rotation - slightly increased range for better feel
-    // Use requestAnimationFrame for smoother updates
     requestAnimationFrame(() => {
-      const x = (e.clientX - left - width / 2) / 20; // dividing by 20 gives about +/- 10-15 degrees range
+      const x = (e.clientX - left - width / 2) / 20;
       const y = (e.clientY - top - height / 2) / 20;
       setTransform(`perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) scale3d(1.02, 1.02, 1.02)`);
     });
@@ -72,6 +99,8 @@ function TiltCard({ children, className = "" }: { children: React.ReactNode; cla
 }
 
 export default function About() {
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -94,10 +123,18 @@ export default function About() {
 
   return (
     <section id="about" className="py-24 relative overflow-hidden">
-      {/* Background decoration */}
+      {/* Animated background decoration */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" />
+        <motion.div 
+          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[120px]" 
+        />
+        <motion.div 
+          animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" 
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -115,13 +152,24 @@ export default function About() {
             transition={{ delay: 0.2, type: "spring" }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6"
           >
-            <Sparkles size={14} className="text-purple-400" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles size={14} className="text-purple-400" />
+            </motion.div>
             <span className="text-sm text-gray-400">Who I Am</span>
           </motion.div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
             About <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-black">Me</span>
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full" />
+          <motion.div 
+            className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          />
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -141,11 +189,11 @@ export default function About() {
               building autonomous AI systems that solve real-world problems.
             </p>
             <p className="text-gray-200 text-lg leading-relaxed font-normal">
-              As <span className="text-white font-bold">Student Senator</span>, I've amplified the voice of <span className="text-purple-300 font-bold">1,500+ peers</span>, 
-              driving policy changes and spearheading initiatives that transformed campus life.
+              Former <span className="text-white font-bold">Student Senator</span> shaping policies for <span className="text-purple-300 font-bold">4,000+ students</span> & 
+              <span className="text-white font-bold"> Hostel Prefect</span> managing operations for <span className="text-purple-300 font-bold">1,800+ residents</span>.
             </p>
 
-            {/* Stats */}
+            {/* Animated Stats */}
             <motion.div 
               className="grid grid-cols-3 gap-4 pt-6"
               initial={{ opacity: 0, y: 20 }}
@@ -154,16 +202,21 @@ export default function About() {
               transition={{ delay: 0.4 }}
             >
               {[
-                { value: "1500+", label: "Peers Led" },
-                { value: "10+", label: "Events Hosted" },
-                { value: "1864", label: "Peak Rating" }
+                { value: 4000, suffix: "+", label: "Students Impacted", icon: Users, color: "from-purple-400 to-pink-400" },
+                { value: 20, suffix: "%", label: "Memory Reduced", icon: Zap, color: "from-yellow-400 to-orange-400" },
+                { value: 350, suffix: "+", label: "Participants Led", icon: Target, color: "from-emerald-400 to-cyan-400" }
               ].map((stat, i) => (
-                <div key={i} className="text-center p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
-                    {stat.value}
+                <motion.div 
+                  key={i} 
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all cursor-pointer"
+                >
+                  <stat.icon size={16} className="mx-auto mb-2 text-gray-500 group-hover:text-white transition-colors" />
+                  <div className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}>
+                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
-                </div>
+                  <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-400 transition-colors">{stat.label}</div>
+                </motion.div>
               ))}
             </motion.div>
           </motion.div>
@@ -183,11 +236,13 @@ export default function About() {
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                     
                     {/* Icon */}
-                    <div 
-                      className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit group-hover:scale-110 transition-all duration-300`}
+                    <motion.div 
+                      className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit`}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 400 }}
                     >
                       <div className="text-white">{feature.icon}</div>
-                    </div>
+                    </motion.div>
                     
                     {/* Content */}
                     <h4 className="relative text-xl font-semibold text-white mb-2">
@@ -196,6 +251,15 @@ export default function About() {
                     <p className="relative text-gray-400 text-sm leading-relaxed">
                       {feature.description}
                     </p>
+
+                    {/* Hover indicator */}
+                    <motion.div 
+                      className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                      initial={{ x: -10 }}
+                      whileHover={{ x: 0 }}
+                    >
+                      <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${feature.gradient}`} />
+                    </motion.div>
                   </div>
                 </TiltCard>
               </motion.div>

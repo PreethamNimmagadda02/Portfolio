@@ -24,7 +24,7 @@ const achievements = [
   },
   {
     title: "Problem Crusher",
-    description: "Demolished 800+ algorithmic challenges across multiple platforms, mastering DSA inside and out.",
+    description: "Demolished 1000+ algorithmic challenges across multiple platforms, mastering DSA inside and out.",
     icon: <Award className="w-8 h-8 text-green-400" />,
     stats: "1000+ Solved",
   },

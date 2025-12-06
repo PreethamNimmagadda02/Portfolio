@@ -185,131 +185,103 @@ export default function AvatarFlipCard() {
           </div>
         </div>
 
-        {/* Back Side - Terminal Theme */}
+        {/* Back Side - Holographic ID Card (Refined) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border-2 border-green-500/30 shadow-2xl bg-[#0a0a0a]"
+          className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.15)] bg-[#030303]"
           style={{ 
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)" 
           }}
         >
-          {/* Matrix rain effect */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute text-green-500 text-[8px] font-mono leading-none"
-                style={{ left: `${15 + i * 15}%` }}
-                animate={{ y: [-20, 320] }}
-                transition={{
-                  duration: 3 + i * 0.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: i * 0.4,
-                }}
-              >
-                {["0", "1", "0", "1", "0", "1"].map((char, j) => (
-                  <div key={j} className="my-1">{char}</div>
-                ))}
-              </motion.div>
-            ))}
+          {/* Subtle Holographic Sheen */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-pink-500/5 to-transparent opacity-40 z-10 pointer-events-none"
+            animate={{ opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          />
+          
+          {/* Elegant Scanning Line */}
+          <motion.div 
+            className="absolute left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent z-20 pointer-events-none opacity-50"
+            animate={{ top: ["0%", "100%", "0%"] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Center Watermark Logo */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-purple-500">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
           </div>
 
-          {/* Scanline effect */}
-          <div className="absolute inset-0 pointer-events-none opacity-10 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,0,0.03)_2px,rgba(0,255,0,0.03)_4px)]" />
-          
-          {/* CRT flicker overlay */}
-          <motion.div 
-            className="absolute inset-0 bg-green-500/5 pointer-events-none"
-            animate={{ opacity: [0.02, 0.05, 0.02] }}
-            transition={{ duration: 0.1, repeat: Infinity }}
-          />
+          {/* Clean Grid Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
-          {/* Glowing border effect */}
-          <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            animate={{
-              boxShadow: [
-                "inset 0 0 20px rgba(34, 197, 94, 0.1)",
-                "inset 0 0 40px rgba(34, 197, 94, 0.2)",
-                "inset 0 0 20px rgba(34, 197, 94, 0.1)",
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-
-          {/* Terminal content */}
-          <div className="absolute inset-0 p-4 font-mono text-xs">
-            {/* Terminal header */}
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-500/20">
-              <div className="flex gap-1.5">
-                <motion.div 
-                  className="w-2.5 h-2.5 rounded-full bg-red-500/80"
-                  whileHover={{ scale: 1.2 }}
-                />
-                <motion.div 
-                  className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"
-                  whileHover={{ scale: 1.2 }}
-                />
-                <motion.div 
-                  className="w-2.5 h-2.5 rounded-full bg-green-500/80"
-                  whileHover={{ scale: 1.2 }}
-                />
+          {/* Content Container */}
+          <div className="absolute inset-0 p-6 flex flex-col z-10 font-sans">
+            {/* Header */}
+            <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-purple-400 font-medium tracking-widest uppercase mb-0.5">Identity Card</span>
+                <span className="text-sm font-bold text-white tracking-wide">IIT (ISM) DHANBAD</span>
               </div>
-              <span className="text-green-400/60 text-[10px]">preetham@portfolio ~ </span>
+              {/* Small version in corner */}
+              <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/30">
+                 <span className="text-xs font-bold text-purple-400">PN</span>
+              </div>
             </div>
 
-            {/* Terminal lines */}
-            <div className="space-y-1 overflow-hidden">
-              <AnimatePresence>
-                {terminalLines.slice(0, visibleLines).map((line, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className={`${
-                      line.type === "command" 
-                        ? "text-green-400" 
-                        : line.type === "success"
-                        ? "text-emerald-400 font-bold"
-                        : line.type === "highlight"
-                        ? "text-cyan-400"
-                        : "text-green-300/70"
-                    }`}
-                  >
-                    {line.text}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              
-              {/* Blinking cursor */}
-              {isFlipped && (
-                <div className="flex items-center text-green-400">
-                  <span>$</span>
-                  <motion.span
-                    animate={{ opacity: cursorVisible ? 1 : 0 }}
-                    className="ml-1 w-2 h-4 bg-green-400"
-                  />
+            {/* Profile Details */}
+            <div className="flex-1 space-y-5">
+              <div className="group">
+                <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Name</div>
+                <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 tracking-wide">PREETHAM N.</div>
+              </div>
+
+              <div className="flex justify-between items-end">
+                <div>
+                  <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">ID Number</div>
+                  <div className="font-mono text-sm text-purple-200">23JE0653</div>
                 </div>
-              )}
+                <div className="text-right">
+                  <div className="text-[9px] text-emerald-500 font-bold tracking-wider flex items-center justify-end gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    VERIFIED
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Role</div>
+                <div className="text-sm font-medium text-white border-l-2 border-purple-500 pl-3 py-0.5">
+                  Generative AI Engineer
+                  <span className="block text-xs text-gray-400 font-normal mt-0.5">Full Stack Engineer</span>
+                </div>
+              </div>
             </div>
 
-            {/* Bottom status bar */}
-            <div className="absolute bottom-3 left-4 right-4 flex justify-between text-[9px] text-green-500/40 border-t border-green-500/10 pt-2">
-              <span className="flex items-center gap-1">
-                <motion.span
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  ▶
-                </motion.span>
-                v2.0.25
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                CONNECTED
-              </span>
+            {/* Bottom: Modern Barcode */}
+            <div className="mt-auto pt-4 relative">
+               {/* Decorative corner accents */}
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-purple-500/30" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-purple-500/30" />
+
+              <div className="h-6 flex items-end justify-between opacity-40 gap-[3px]">
+                {[...Array(28)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="bg-purple-300 rounded-full" 
+                    style={{ 
+                      width: '2px', 
+                      height: `${Math.random() * 60 + 20}%` 
+                    }} 
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <div className="text-[8px] text-purple-500/40 tracking-[0.2em]">807-402-1047</div>
+                <div className="text-[8px] text-purple-500/40 font-mono">LVL.5</div>
+              </div>
             </div>
           </div>
         </div>
