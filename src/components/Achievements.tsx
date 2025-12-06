@@ -74,7 +74,7 @@ function AchievementCard({ item, index }: { item: typeof achievements[0]; index:
 
   return (
     <motion.div
-      className="relative [perspective:1500px] group"
+      className="relative h-full [perspective:1500px] group"
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
@@ -143,6 +143,7 @@ export default function Achievements() {
           {achievements.map((item, index) => (
             <motion.div
               key={index}
+              className="h-full"
               variants={{
                 hidden: { opacity: 0, y: 50, scale: 0.9 },
                 visible: {

@@ -508,28 +508,7 @@ export default function Hero() {
           transition={{ delay: 0.6 }}
           className="flex justify-center gap-6 mt-10"
         >
-          <MagneticButton strength={0.2}>
-            <Link
-              href="#projects"
-              className="relative px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold overflow-hidden group hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-300 ease-out"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                View My Work
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </span>
-              {/* Sleek light beam effect */}
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out skew-x-12" />
-            </Link>
-          </MagneticButton>
-
-          <MagneticButton strength={0.2}>
-            <Link
-              href="#contact"
-              className="px-8 py-4 rounded-full bg-transparent border border-white/20 text-white hover:bg-white/10 transition-colors font-semibold"
-            >
-              Contact Me
-            </Link>
-          </MagneticButton>
+          
         </motion.div>
       </div>
 
