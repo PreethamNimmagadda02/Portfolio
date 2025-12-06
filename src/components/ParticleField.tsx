@@ -8,7 +8,7 @@ import { useRef, useMemo, Suspense } from "react";
 function StarField() {
   const ref = useRef<THREE.Points>(null);
   
-  const particlesCount = 5000;
+  const particlesCount = 1500;
   const positions = useMemo(() => {
     const positions = new Float32Array(particlesCount * 3);
     for (let i = 0; i < particlesCount; i++) {

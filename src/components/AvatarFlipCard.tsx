@@ -60,9 +60,9 @@ export default function AvatarFlipCard() {
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
     >
-      {/* Outer pulsing glow ring */}
+      {/* Outer pulsing glow ring - Desktop Only */}
       <motion.div
-        className="absolute -inset-4 rounded-3xl opacity-60"
+        className="absolute -inset-4 rounded-3xl opacity-60 hidden md:block"
         animate={{
           boxShadow: [
             "0 0 20px 5px rgba(139, 92, 246, 0.3)",
@@ -73,9 +73,9 @@ export default function AvatarFlipCard() {
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Orbiting ring 1 */}
+      {/* Orbiting ring 1 - Desktop Only */}
       <motion.div
-        className="absolute -inset-6 border border-purple-500/30 rounded-full pointer-events-none"
+        className="absolute -inset-6 border border-purple-500/30 rounded-full pointer-events-none hidden md:block"
         animate={{ rotate: 360 }}
         transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
         style={{ transformOrigin: "center center" }}
@@ -83,9 +83,9 @@ export default function AvatarFlipCard() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(139,92,246,0.8)]" />
       </motion.div>
 
-      {/* Orbiting ring 2 (reverse) */}
+      {/* Orbiting ring 2 (reverse) - Desktop Only */}
       <motion.div
-        className="absolute -inset-10 border border-blue-500/20 rounded-full pointer-events-none"
+        className="absolute -inset-10 border border-blue-500/20 rounded-full pointer-events-none hidden md:block"
         animate={{ rotate: -360 }}
         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
         style={{ transformOrigin: "center center" }}
@@ -93,41 +93,43 @@ export default function AvatarFlipCard() {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
       </motion.div>
 
-      {/* Floating particles */}
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute left-1/2 top-1/2 pointer-events-none"
-          animate={{
-            rotate: [particle.angle, particle.angle + 360],
-          }}
-          transition={{
-            duration: 8 + particle.id,
-            repeat: Infinity,
-            ease: "linear",
-            delay: particle.delay,
-          }}
-          style={{ transformOrigin: "center center" }}
-        >
+      {/* Floating particles - Desktop Only */}
+      <div className="hidden md:block">
+        {particles.map((particle) => (
           <motion.div
-            className="rounded-full bg-gradient-to-br from-purple-400 to-blue-400"
-            style={{
-              width: particle.size,
-              height: particle.size,
-              marginLeft: 140 + particle.id * 5,
-            }}
+            key={particle.id}
+            className="absolute left-1/2 top-1/2 pointer-events-none"
             animate={{
-              opacity: [0.4, 1, 0.4],
-              scale: [1, 1.3, 1],
+              rotate: [particle.angle, particle.angle + 360],
             }}
             transition={{
-              duration: 2,
+              duration: 8 + particle.id,
               repeat: Infinity,
+              ease: "linear",
               delay: particle.delay,
             }}
-          />
-        </motion.div>
-      ))}
+            style={{ transformOrigin: "center center" }}
+          >
+            <motion.div
+              className="rounded-full bg-gradient-to-br from-purple-400 to-blue-400"
+              style={{
+                width: particle.size,
+                height: particle.size,
+                marginLeft: 140 + particle.id * 5,
+              }}
+              animate={{
+                opacity: [0.4, 1, 0.4],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: particle.delay,
+              }}
+            />
+          </motion.div>
+        ))}
+      </div>
 
       {/* Main flip card */}
       <motion.div

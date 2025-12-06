@@ -366,8 +366,8 @@ export default function Hero() {
         }}
       />
 
-      {/* Floating tech icons */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Floating tech icons - Desktop Only */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         {floatingIcons.map((icon, index) => (
           <FloatingIcon 
             key={index} 
