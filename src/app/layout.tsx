@@ -18,6 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://preethamnimmagadda.github.io"),
   title: "Preetham Nimmagadda | AI Agent Developer & Full Stack Engineer",
   description: "Portfolio of Preetham Nimmagadda, an AI Engineer and Full Stack Developer from IIT (ISM) Dhanbad. Specializing in Autonomous AI Agents, CrewAI, Next.js, and System Architecture. Top 1% on CodeChef & Codeforces Specialist.",
   manifest: "/manifest.json",
@@ -30,10 +31,17 @@ export const metadata: Metadata = {
     "LangChain",
     "Next.js Developer",
     "Autonomous Agents",
-    "Software Engineer Portfolio"
+    "Software Engineer Portfolio",
+    "React Developer",
+    "Python Developer",
+    "Machine Learning",
+    "Generative AI"
   ],
   authors: [{ name: "Preetham Nimmagadda", url: "https://preethamnimmagadda.github.io" }],
   creator: "Preetham Nimmagadda",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -42,7 +50,7 @@ export const metadata: Metadata = {
     description: "Explore the portfolio of Preetham Nimmagadda - showcasing innovative projects in AI Agents, Full Stack Dev, and award-winning hackathon builds.",
     siteName: "Preetham Nimmagadda Portfolio",
     images: [{
-      url: "/og-image.png", // We should create this
+      url: "/og-image.png",
       width: 1200,
       height: 630,
       alt: "Preetham Nimmagadda Portfolio Preview"
@@ -69,6 +77,41 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
     apple: "/favicon.png",
   },
+  verification: {
+    google: "your-google-verification-code", // Replace with actual code when you have one
+  },
+};
+
+// JSON-LD Structured Data for SEO
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Preetham Nimmagadda",
+  url: "https://preethamnimmagadda.github.io",
+  image: "https://preethamnimmagadda.github.io/ai-headshot.jpeg",
+  jobTitle: "AI Agent Developer & Full Stack Engineer",
+  worksFor: {
+    "@type": "Organization",
+    name: "IIT (ISM) Dhanbad"
+  },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Indian Institute of Technology (ISM) Dhanbad"
+  },
+  knowsAbout: [
+    "Artificial Intelligence",
+    "Autonomous Agents",
+    "CrewAI",
+    "LangChain",
+    "Next.js",
+    "React",
+    "Python",
+    "Full Stack Development"
+  ],
+  sameAs: [
+    "https://github.com/preethamnimmagadda",
+    "https://linkedin.com/in/preethamnimmagadda"
+  ]
 };
 
 export default function RootLayout({
@@ -78,6 +121,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
@@ -92,3 +141,4 @@ export default function RootLayout({
     </html>
   );
 }
+
