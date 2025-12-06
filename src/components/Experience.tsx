@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import React from "react";
 import { Briefcase, Calendar, Users, Award, Code, Trophy, Star, Zap } from "lucide-react";
 
 type ExperienceType = "work" | "leadership" | "community";
@@ -74,6 +75,45 @@ const typeColors = {
 };
 
 export default function Experience() {
+  const [lineHeight, setLineHeight] = React.useState(0);
+  const firstDotRef = React.useRef<HTMLDivElement>(null);
+  const lastDotRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const calculateHeight = () => {
+      if (firstDotRef.current && lastDotRef.current) {
+        // Calculate the vertical distance between the top of the first dot and the top of the last dot
+        // The dots are 16px (h-4), so the line should connect their centers.
+        // We will make the line height exactly the distance between the two dots' tops plus half a dot height if we want centers,
+        // but typically "connecting dots" means border to border or center to center.
+        // Let's go center-to-center.
+        
+        const first = firstDotRef.current.getBoundingClientRect();
+        const last = lastDotRef.current.getBoundingClientRect();
+        // Distance from top of first dot to top of last dot
+        const distance = last.top - first.top;
+        setLineHeight(distance);
+      }
+    };
+
+    // Calculate initial
+    calculateHeight();
+
+    // Recalculate on resize
+    window.addEventListener('resize', calculateHeight);
+    
+    // Mutation observer for content changes causing reflow
+    const observer = new ResizeObserver(calculateHeight);
+    if (firstDotRef.current?.parentElement?.parentElement) {
+      observer.observe(firstDotRef.current.parentElement.parentElement);
+    }
+
+    return () => {
+      window.removeEventListener('resize', calculateHeight);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <section id="experience" className="py-20 relative overflow-hidden">
       {/* Background glow */}
@@ -96,8 +136,11 @@ export default function Experience() {
 
         {/* Timeline */}
         <div className="relative">
-          {/* Central glowing line */}
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px md:-translate-x-1/2">
+          {/* Central glowing line - Dynamic Height */}
+          <div 
+            className="absolute left-4 md:left-1/2 top-6 md:-translate-x-1/2 w-px overflow-hidden"
+            style={{ height: lineHeight + 10}}
+          >
             <div className="absolute inset-0 bg-gradient-to-b from-purple-500 via-blue-500 to-purple-500 opacity-30" />
             <motion.div
               className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-purple-500 to-transparent"
@@ -122,7 +165,8 @@ export default function Experience() {
                 >
                   {/* Timeline Dot */}
                   <motion.div 
-                    className={`absolute left-2 md:left-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-br ${gradient} md:-translate-x-1/2 ring-4 ring-black shadow-lg`}
+                    ref={index === 0 ? firstDotRef : index === experiences.length - 1 ? lastDotRef : null}
+                    className={`absolute left-2 md:left-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-br ${gradient} md:-translate-x-1/2 ring-4 ring-black shadow-lg z-10`}
                     whileHover={{ scale: 1.5 }}
                   />
 
