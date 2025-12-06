@@ -75,9 +75,9 @@ function ContactCard({
         >
           <Icon size={24} className="text-white" />
         </motion.div>
-        <div style={{ transform: "translateZ(15px)" }}>
+        <div style={{ transform: "translateZ(15px)" }} className="min-w-0 flex-1">
           <p className="text-sm text-gray-400">{label}</p>
-          <p className="font-semibold text-white">{value}</p>
+          <p className="font-semibold text-white text-sm sm:text-base break-all">{value}</p>
         </div>
       </motion.div>
     </motion.div>
