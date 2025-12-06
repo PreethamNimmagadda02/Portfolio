@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Menu, X, Terminal } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +26,6 @@ export default function Navbar() {
         window.requestAnimationFrame(() => {
           setScrolled(window.scrollY > 50);
           
-          // Detect active section
           const sections = navLinks.map(link => link.href.slice(1));
           for (const section of sections.reverse()) {
             const el = document.getElementById(section);
@@ -49,6 +47,16 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace("#", "");
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+    setIsOpen(false);
+  };
+
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}
@@ -62,33 +70,31 @@ export default function Navbar() {
       )}
     >
       <div className="flex items-center justify-between">
-        {/* Unique Brand Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          {/* Custom PN Monogram */}
+        {/* Brand Logo */}
+        <a 
+          href="#home" 
+          onClick={(e) => scrollToSection(e, "#home")}
+          className="flex items-center gap-2.5 group"
+        >
           <motion.div
             whileHover={{ scale: 1.1 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
             className="relative"
           >
-            {/* Outer glow ring */}
             <motion.div
               className="absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-50 blur-md transition-opacity duration-300"
             />
-            {/* Main logo container */}
             <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden">
               <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
-                {/* PN Letters */}
                 <span className="text-sm font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-purple-400 via-white to-blue-400">
                   PN
                 </span>
               </div>
-              {/* Animated shine effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
               />
             </div>
           </motion.div>
-          {/* Brand name */}
           <div className="flex flex-col">
             <span className="text-lg font-bold tracking-tight leading-none text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
               Preetham
@@ -97,16 +103,17 @@ export default function Navbar() {
               AI Engineer
             </span>
           </div>
-        </Link>
+        </a>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/5">
           {navLinks.map((link) => {
             const isActive = activeSection === link.href.slice(1);
             return (
-              <Link
+              <a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
                 className="relative px-4 py-1.5 text-sm font-medium transition-colors"
               >
                 {isActive && (
@@ -122,7 +129,7 @@ export default function Navbar() {
                 )}>
                   {link.name}
                 </span>
-              </Link>
+              </a>
             );
           })}
         </div>
@@ -133,10 +140,10 @@ export default function Navbar() {
           whileTap={{ scale: 0.95 }}
           className="hidden md:block relative group"
         >
-          {/* Subtle glow on hover */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-75 blur transition-opacity duration-300" />
-          <Link
+          <a
             href="#contact"
+            onClick={(e) => scrollToSection(e, "#contact")}
             className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold border border-white/10 hover:border-white/30 transition-all"
           >
             <span className="relative flex h-2 w-2">
@@ -144,7 +151,7 @@ export default function Navbar() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
             </span>
             Hire Me
-          </Link>
+          </a>
         </motion.div>
 
         {/* Mobile Menu Button */}
@@ -178,9 +185,9 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <Link
+                    <a
                       href={link.href}
-                      onClick={() => setIsOpen(false)}
+                      onClick={(e) => scrollToSection(e, link.href)}
                       className={cn(
                         "block px-4 py-3 rounded-xl text-lg font-medium transition-colors",
                         isActive 
@@ -189,26 +196,25 @@ export default function Navbar() {
                       )}
                     >
                       {link.name}
-                    </Link>
+                    </a>
                   </motion.div>
                 );
               })}
               
-              {/* Mobile CTA */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.25 }}
                 className="pt-2"
               >
-                <Link
+                <a
                   href="#contact"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => scrollToSection(e, "#contact")}
                   className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium"
                 >
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   Hire Me
-                </Link>
+                </a>
               </motion.div>
             </div>
           </motion.div>
