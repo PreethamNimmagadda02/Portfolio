@@ -158,7 +158,7 @@ function GlitchText({ children, className = "" }: { children: string; className?
 }
 
 // Scroll indicator component
-function ScrollIndicator() {
+function ScrollIndicator({ opacity }: { opacity: any }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -166,14 +166,16 @@ function ScrollIndicator() {
       transition={{ delay: 1.2, duration: 0.6 }}
       className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
     >
-      <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
-      <motion.div
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        className="flex flex-col items-center"
-      >
-        <ChevronDown size={20} className="text-gray-500" />
-        <ChevronDown size={20} className="text-gray-600 -mt-3" />
+      <motion.div style={{ opacity }} className="flex flex-col items-center gap-2">
+        <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center"
+        >
+          <ChevronDown size={20} className="text-gray-500" />
+          <ChevronDown size={20} className="text-gray-600 -mt-3" />
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -446,7 +448,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg text-gray-200 font-medium leading-relaxed text-right lg:text-left">
-                Upcoming Generative AI Intern @ <span className="text-purple-300 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>.
+                Generative AI Intern @ <span className="text-purple-300 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>.
               </p>
             </motion.div>
           </motion.div>
@@ -498,7 +500,7 @@ export default function Hero() {
       </div>
 
       {/* Scroll Indicator */}
-      <ScrollIndicator />
+      <ScrollIndicator opacity={opacity} />
     </section>
   );
 }
