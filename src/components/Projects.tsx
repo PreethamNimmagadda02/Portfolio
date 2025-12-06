@@ -9,7 +9,7 @@ const projects = [
   {
     title: "College Central",
     description: "A comprehensive student hub for IIT(ISM) Dhanbad, featuring a personalized dashboard, grade tracking, class schedules, an interactive campus map, and real-time event updates.",
-    tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS"],
+    tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
     links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     gradient: "from-purple-500 to-pink-500",
     status: "Live",
