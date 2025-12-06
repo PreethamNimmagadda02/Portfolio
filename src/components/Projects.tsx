@@ -8,7 +8,11 @@ import React from "react";
 const projects = [
   {
     title: "College Central",
-    description: "A comprehensive student hub for IIT(ISM) Dhanbad, featuring a personalized dashboard, grade tracking, class schedules, an interactive campus map, and real-time event updates.",
+    description: (
+      <>
+        A comprehensive <span className="text-purple-400 font-semibold">student hub</span> for IIT(ISM) Dhanbad, featuring a <span className="text-pink-400 font-semibold">personalized dashboard</span>, grade tracking, class schedules, an <span className="text-pink-400 font-semibold">interactive campus map</span>, and real-time event updates.
+      </>
+    ),
     tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
     links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     gradient: "from-purple-500 to-pink-500",
@@ -18,7 +22,11 @@ const projects = [
   },
   {
     title: "FestFlow",
-    description: "Revolutionary AI-powered event orchestration platform. Transforms complex goals into executable plans using specialized autonomous agents.",
+    description: (
+      <>
+        Revolutionary <span className="text-blue-400 font-semibold">AI-powered event orchestration</span> platform. Transforms complex goals into executable plans using specialized <span className="text-cyan-400 font-semibold">autonomous agents</span>.
+      </>
+    ),
     tags: ["React", "Firebase", "Gemini API", "AI Agents"],
     links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     gradient: "from-blue-500 to-cyan-500",
@@ -28,7 +36,11 @@ const projects = [
   },
   {
     title: "AI Trading System",
-    description: "Multi-agent financial intelligence system. Deploys specialized AI agents for real-time market analysis and strategic decision-making.",
+    description: (
+      <>
+        <span className="text-emerald-400 font-semibold">Multi-agent financial intelligence</span> system. Deploys specialized <span className="text-green-400 font-semibold">AI agents</span> for real-time market analysis and strategic decision-making.
+      </>
+    ),
     tags: ["Python", "CrewAI", "GPT API", "Financial Tech"],
     links: { demo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System", repo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System" },
     gradient: "from-green-500 to-emerald-500",
@@ -38,7 +50,7 @@ const projects = [
   }
 ];
 
-function ProjectCard({ project, index, isFeatured = false }: { project: typeof projects[0], index: number, isFeatured?: boolean }) {
+function ProjectCard({ project, index, isFeatured = false }: { project: { title: string, description: React.ReactNode, tags: string[], links: { demo: string, repo: string }, gradient: string, status: string, featured: boolean, icon: any }, index: number, isFeatured?: boolean }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -125,7 +137,7 @@ function ProjectCard({ project, index, isFeatured = false }: { project: typeof p
             </Link>
           </div>
 
-          <p className={`text-gray-400 mb-6 flex-grow leading-relaxed ${isFeatured ? 'text-base' : 'text-sm'}`} style={{ transform: "translateZ(25px)" }}>
+          <p className={`text-gray-200 font-[var(--font-inter)] mb-6 flex-grow leading-relaxed ${isFeatured ? 'text-base' : 'text-sm'}`} style={{ transform: "translateZ(25px)" }}>
             {project.description}
           </p>
 

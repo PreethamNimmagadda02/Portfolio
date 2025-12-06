@@ -182,7 +182,7 @@ function ScrollIndicator({ opacity }: { opacity: any }) {
 }
 
 // Stats counter with count-up animation
-function AnimatedStat({ value, label, delay }: { value: string; label: string; delay: number }) {
+function AnimatedStat({ value, label, delay, gradient }: { value: string; label: React.ReactNode; delay: number; gradient: string }) {
   const [displayValue, setDisplayValue] = useState("0");
   const numericPart = value.match(/[\d.]+/)?.[0] || "0";
   const suffix = value.replace(/[\d.]+/, "");
@@ -221,10 +221,10 @@ function AnimatedStat({ value, label, delay }: { value: string; label: string; d
       transition={{ delay: delay + 0.5, duration: 0.5, type: "spring" }}
       className="text-center"
     >
-      <div className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+      <div className={`text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
         {displayValue}{suffix}
       </div>
-      <div className="text-xs text-gray-500 mt-1">{label}</div>
+      <div className="text-sm text-gray-200 mt-1 font-medium font-[var(--font-inter)]">{label}</div>
     </motion.div>
   );
 }
@@ -464,8 +464,8 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-base sm:text-lg text-gray-200 font-medium leading-relaxed text-center lg:text-left">
-                Generative AI Intern @ <span className="text-purple-300 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>.
+              <p className="text-base sm:text-lg text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
+                Generative AI Intern @ <span className="text-purple-400 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-blue-400 font-bold">Autonomous Agents</span>.
               </p>
             </motion.div>
           </motion.div>
@@ -479,9 +479,24 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          <AnimatedStat value="1000+" label="Problems Solved" delay={1} />
-          <AnimatedStat value="1864" label="Max Rating" delay={1.2} />
-          <AnimatedStat value="5+" label="Apps Built" delay={1.4} />
+          <AnimatedStat 
+            value="1000+" 
+            label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>} 
+            delay={1} 
+            gradient="from-blue-400 to-cyan-400"
+          />
+          <AnimatedStat 
+            value="1864" 
+            label={<><span className="text-orange-400 font-bold">Max</span> Rating</>} 
+            delay={1.2} 
+            gradient="from-yellow-400 to-orange-400"
+          />
+          <AnimatedStat 
+            value="5+" 
+            label={<><span className="text-purple-400 font-bold">Apps</span> Built</>} 
+            delay={1.4} 
+            gradient="from-purple-400 to-pink-400"
+          />
         </motion.div>
 
         {/* CTA Buttons - Centered below */}

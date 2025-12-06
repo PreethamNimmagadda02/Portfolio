@@ -8,28 +8,44 @@ const features = [
   {
     icon: <Code className="w-6 h-6" />,
     title: "AI Architect",
-    description: "Pioneering autonomous agent systems with CrewAI, Gemini API, and state-of-the-art LLMs.",
+    description: (
+      <>
+        Pioneering <span className="text-blue-400 font-semibold">autonomous agent systems</span> with <span className="text-purple-400 font-semibold">CrewAI</span>, <span className="text-green-400 font-semibold">Gemini API</span>, and state-of-the-art <span className="text-pink-400 font-semibold">LLMs</span>.
+      </>
+    ),
     gradient: "from-blue-500 to-cyan-500",
     glow: "group-hover:shadow-blue-500/25"
   },
   {
     icon: <Rocket className="w-6 h-6" />,
     title: "Elite Coder",
-    description: "Top 1% on CodeChef (1864 rating). Codeforces Specialist with 1000+ problems conquered.",
+    description: (
+      <>
+        Top <span className="text-yellow-400 font-semibold">1% on CodeChef</span> (1864 rating). <span className="text-purple-400 font-semibold">Codeforces Specialist</span> with <span className="text-blue-400 font-semibold">1000+ problems</span> conquered.
+      </>
+    ),
     gradient: "from-purple-500 to-pink-500",
     glow: "group-hover:shadow-purple-500/25"
   },
   {
     icon: <Globe className="w-6 h-6" />,
     title: "Campus Leader",
-    description: "Student Senator championing 1500+ peers. Orchestrated 10+ major campus events.",
+    description: (
+      <>
+        <span className="text-emerald-400 font-semibold">Student Senator</span> championing <span className="text-teal-400 font-semibold">1500+ peers</span>. Orchestrated <span className="text-green-400 font-semibold">10+ major events</span>.
+      </>
+    ),
     gradient: "from-emerald-500 to-teal-500",
     glow: "group-hover:shadow-emerald-500/25"
   },
   {
     icon: <BookOpen className="w-6 h-6" />,
     title: "Full Stack Engineer",
-    description: "Shipping production-ready apps with Next.js, React, Node.js, and Firebase at scale.",
+    description: (
+      <>
+        Shipping production-ready apps with <span className="text-orange-400 font-semibold">Next.js</span>, <span className="text-yellow-400 font-semibold">React</span>, <span className="text-red-400 font-semibold">Node.js</span>, and <span className="text-amber-400 font-semibold">Firebase</span> at scale.
+      </>
+    ),
     gradient: "from-orange-500 to-yellow-500",
     glow: "group-hover:shadow-orange-500/25"
   }
@@ -184,11 +200,11 @@ export default function About() {
               A <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
             </h3>
-            <p className="text-gray-200 text-lg leading-relaxed font-normal">
+            <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
               Engineering student at <span className="text-white font-bold">IIT (ISM) Dhanbad</span> with a laser focus on 
               building autonomous AI systems that solve real-world problems.
             </p>
-            <p className="text-gray-200 text-lg leading-relaxed font-normal">
+            <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
               Former <span className="text-white font-bold">Student Senator</span> shaping policies for <span className="text-purple-300 font-bold">4,000+ students</span> & 
               <span className="text-white font-bold"> Hostel Prefect</span> managing operations for <span className="text-purple-300 font-bold">1,800+ residents</span>.
             </p>
@@ -202,9 +218,9 @@ export default function About() {
               transition={{ delay: 0.4 }}
             >
               {[
-                { value: 4000, suffix: "+", label: "Students Impacted", icon: Users, color: "from-purple-400 to-pink-400" },
-                { value: 20, suffix: "%", label: "Memory Reduced", icon: Zap, color: "from-yellow-400 to-orange-400" },
-                { value: 350, suffix: "+", label: "Participants Led", icon: Target, color: "from-emerald-400 to-cyan-400" }
+                { value: 4000, suffix: "+", label: <><span className="text-purple-400 font-semibold">Students</span> Impacted</>, icon: Users, color: "from-purple-400 to-pink-400" },
+                { value: 20, suffix: "%", label: <><span className="text-yellow-400 font-semibold">Memory</span> Reduced</>, icon: Zap, color: "from-yellow-400 to-orange-400" },
+                { value: 350, suffix: "+", label: <><span className="text-emerald-400 font-semibold">Participants</span> Led</>, icon: Target, color: "from-emerald-400 to-cyan-400" }
               ].map((stat, i) => (
                 <motion.div 
                   key={i} 
@@ -215,7 +231,7 @@ export default function About() {
                   <div className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}>
                     <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                   </div>
-                  <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-400 transition-colors">{stat.label}</div>
+                  <div className="text-sm text-gray-200 mt-1 group-hover:text-gray-100 transition-colors font-medium font-[var(--font-inter)]">{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -248,7 +264,7 @@ export default function About() {
                     <h4 className="relative text-xl font-semibold text-white mb-2">
                       {feature.title}
                     </h4>
-                    <p className="relative text-gray-400 text-sm leading-relaxed">
+                    <p className="relative text-gray-200 font-[var(--font-inter)] text-sm leading-relaxed">
                       {feature.description}
                     </p>
 

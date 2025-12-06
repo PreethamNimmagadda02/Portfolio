@@ -10,7 +10,7 @@ interface Experience {
   role: string;
   company: string;
   period: string;
-  description: string;
+  description: React.ReactNode;
   type: ExperienceType;
   skills: string[];
   highlight?: string;
@@ -21,7 +21,11 @@ const experiences: Experience[] = [
     role: "Software Developer Intern",
     company: "METAVERTEX",
     period: "June 2025 – July 2025",
-    description: "Built Autonomous AI agents reducing memory usage by 20%. Optimized page load time by 15% and improved SEO rankings by 10%.",
+    description: (
+      <>
+        Built <span className="text-blue-400 font-semibold">Autonomous AI agents</span> reducing memory usage by <span className="text-green-400 font-semibold">20%</span>. Optimized page load time by <span className="text-green-400 font-semibold">15%</span> and improved SEO rankings by <span className="text-green-400 font-semibold">10%</span>.
+      </>
+    ),
     type: "work",
     skills: ["AI Agents", "React", "Performance"],
     highlight: "20% Memory Optimization"
@@ -30,7 +34,11 @@ const experiences: Experience[] = [
     role: "Campus Ambassador",
     company: "Perplexity",
     period: "Sept 2025 - Nov 2025",
-    description: "Promoted Perplexity and Comet browsers, organized workshops, and collaborated with peers to drive adoption of innovative browsing solutions.",
+    description: (
+      <>
+        Promoted <span className="text-cyan-400 font-semibold">Perplexity</span> and Comet browsers, organized workshops, and collaborated with peers to drive adoption of <span className="text-blue-400 font-semibold">innovative browsing solutions</span>.
+      </>
+    ),
     type: "community",
     skills: ["Marketing", "Workshops", "Outreach"],
     highlight: "20+ Leads Generated"
@@ -39,7 +47,11 @@ const experiences: Experience[] = [
     role: "Student Senator",
     company: "Students' Gymkhana, IIT (ISM)",
     period: "March 2024 - March 2025",
-    description: "Represented 1,500+ peers, enhanced student engagement by 30%, and collaborated with administration to improve facilities.",
+    description: (
+      <>
+        Represented <span className="text-purple-400 font-semibold">1,500+ peers</span>, enhanced student engagement by <span className="text-green-400 font-semibold">30%</span>, and collaborated with administration to improve facilities.
+      </>
+    ),
     type: "leadership",
     skills: ["Leadership", "Advocacy", "Public Speaking"],
     highlight: "1,500+ Students Represented"
@@ -48,7 +60,11 @@ const experiences: Experience[] = [
     role: "Hostel Prefect",
     company: "Hostel Executive Committee",
     period: "Sept 2024 - Sept 2025",
-    description: "Organized 10+ community events boosting engagement by 40% and implemented conflict resolution strategies reducing disputes by 30%.",
+    description: (
+      <>
+        Organized <span className="text-pink-400 font-semibold">10+ community events</span> boosting engagement by <span className="text-green-400 font-semibold">40%</span> and implemented conflict resolution strategies reducing disputes by <span className="text-green-400 font-semibold">30%</span>.
+      </>
+    ),
     type: "leadership",
     skills: ["Event Management", "Conflict Resolution"],
     highlight: "40% Engagement Boost"
@@ -203,7 +219,7 @@ export default function Experience() {
                           <span>{exp.period}</span>
                         </div>
                         
-                        <p className="text-gray-400 leading-relaxed mb-4">
+                        <p className="text-gray-200 font-[var(--font-inter)] leading-relaxed mb-4">
                           {exp.description}
                         </p>
                         

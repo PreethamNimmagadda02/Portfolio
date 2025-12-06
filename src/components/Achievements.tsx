@@ -6,26 +6,42 @@ import { Trophy, Award, Star, Code } from "lucide-react";
 const achievements = [
   {
     title: "Codeforces Specialist",
-    description: "Conquered algorithmic challenges to reach 1450 rating, outperforming 80% of competitive programmers globally.",
-    icon: <Code className="w-8 h-8 text-blue-400" />,
+    description: (
+      <>
+        Conquered algorithmic challenges to reach <span className="text-cyan-400 font-semibold">1450 rating</span>, outperforming <span className="text-cyan-400 font-semibold">80%</span> of competitive programmers globally.
+      </>
+    ),
+    icon: <Code className="w-8 h-8 text-cyan-400" />,
     stats: "Top 20%",
   },
   {
     title: "CodeChef Elite",
-    description: "Achieved 4-Star status with 1864 rating, placing in the elite top 0.8% among 2 million+ coders worldwide.",
-    icon: <Star className="w-8 h-8 text-yellow-400" />,
+    description: (
+      <>
+        Achieved <span className="text-orange-400 font-semibold">4-Star status</span> with <span className="text-orange-400 font-semibold">1864 rating</span>, placing in the elite <span className="text-orange-400 font-semibold">top 0.8%</span> among 2 million+ coders worldwide.
+      </>
+    ),
+    icon: <Star className="w-8 h-8 text-orange-400" />,
     stats: "Top 0.8%",
   },
   {
     title: "HackerRank Legend",
-    description: "Earned the prestigious 6-Star Gold badge, ranking in the ultra-elite top 0.07% of 26 million+ coders.",
-    icon: <Trophy className="w-8 h-8 text-yellow-400" />,
+    description: (
+      <>
+        Earned the prestigious <span className="text-green-500 font-semibold">6-Star Gold badge</span>, ranking in the ultra-elite <span className="text-green-500 font-semibold">top 0.07%</span> of 26 million+ coders.
+      </>
+    ),
+    icon: <Trophy className="w-8 h-8 text-green-400" />,
     stats: "Top 0.07%",
   },
   {
     title: "Problem Crusher",
-    description: "Demolished 1000+ algorithmic challenges across multiple platforms, mastering DSA inside and out.",
-    icon: <Award className="w-8 h-8 text-green-400" />,
+    description: (
+      <>
+        Demolished <span className="text-pink-400 font-semibold">1000+ algorithmic challenges</span> across multiple platforms, mastering <span className="text-pink-400 font-semibold">DSA</span> inside and out.
+      </>
+    ),
+    icon: <Award className="w-8 h-8 text-pink-400" />,
     stats: "1000+ Solved",
   },
 ];
@@ -68,7 +84,7 @@ export default function Achievements() {
                 
                 <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                 <div className="text-primary font-mono font-bold text-lg mb-4">{item.stats}</div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-200 font-[var(--font-inter)] text-sm leading-relaxed">
                   {item.description}
                 </p>
               </div>
