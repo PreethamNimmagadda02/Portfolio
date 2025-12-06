@@ -14,6 +14,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Preetham Nimmagadda | AI Agent Developer & Full Stack Engineer",
   description: "Portfolio of Preetham Nimmagadda, an AI Engineer and Full Stack Developer from IIT (ISM) Dhanbad. Specializing in Autonomous AI Agents, CrewAI, Next.js, and System Architecture. Top 1% on CodeChef & Codeforces Specialist.",
+  manifest: "/manifest.json",
   keywords: [
     "Preetham Nimmagadda", 
     "AI Agent Developer", 
