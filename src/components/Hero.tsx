@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence, Variants } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Brain, Cpu, Zap, Terminal, Rocket } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo } from "react";
@@ -242,7 +242,7 @@ const containerVariants = {
 };
 
 // Letter animation variants - Classy 3D Flip Reveal
-const letterVariants = {
+const letterVariants: Variants = {
   hidden: { 
     opacity: 0, 
     rotateX: 90,
@@ -256,7 +256,7 @@ const letterVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.8,
-      ease: [0.2, 0.65, 0.3, 0.9], // Dramatic ease-out
+      ease: "easeOut",
     },
   },
 };
