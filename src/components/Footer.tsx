@@ -113,22 +113,7 @@ export default function Footer() {
             </div>
           </motion.button>
         </motion.div>
-      </div>
-
-      {/* Floating Scroll Top Button (Visible when scrolling) */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-            onClick={scrollToTop}
-            className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 p-3 md:p-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/30 backdrop-blur-sm border border-white/10 hover:shadow-purple-500/40 transition-shadow"
-          >
-            <ArrowUp size={20} className="md:w-6 md:h-6" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      </div>   
     </footer>
   );
 }
