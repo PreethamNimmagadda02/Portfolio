@@ -9,6 +9,7 @@ const skills = [
   { name: "Python", color: "from-yellow-400 to-green-500" },
   { name: "CrewAI", color: "from-purple-400 to-pink-500" },
   { name: "Gemini API", color: "from-blue-400 to-cyan-400" },
+  { name: "Tailwind CSS", color: "from-cyan-400 to-blue-400" },
   { name: "Node.js", color: "from-green-400 to-emerald-500" },
   { name: "Firebase", color: "from-yellow-400 to-orange-500" },
   { name: "MongoDB", color: "from-green-500 to-emerald-600" },

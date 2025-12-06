@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 
 const skills = {
-  Languages: ["C/C++", "Python", "JavaScript", "TypeScript", "SQL", "HTML/CSS"],
-  "AI & ML": ["CrewAI", "Google Gemini API", "n8n", "Firebase Studio", "Claude Code", "Ollama"],
-  "Web & Tools": ["React.js", "Node.js", "Express.js", "MongoDB", "Git/GitHub", "Postman", "Firebase"]
+  Languages: ["C/C++", "Python", "JavaScript", "TypeScript", "SQL", "HTML/CSS", "Java"],
+  "AI & ML": ["CrewAI", "LangChain", "OpenAI API", "Google Gemini API", "n8n", "Firebase Studio", "Claude Code", "Ollama"],
+  "Web Dev": ["React.js", "Next.js", "Node.js", "Express.js", "Tailwind CSS", "Recoil", "MongoDB", "Firebase"],
+  "Tools & Platforms": ["Git/GitHub", "Postman", "Figma", "Agile Methodologies"]
 };
 
 export default function Skills() {
