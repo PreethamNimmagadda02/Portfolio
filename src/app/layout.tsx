@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageProgress from "@/components/PageProgress";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -26,6 +27,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${spaceGrotesk.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
       >
+        <PageProgress />
         <Navbar />
         <main className="min-h-screen">
           {children}
