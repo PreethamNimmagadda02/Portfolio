@@ -326,7 +326,15 @@ export default function Hero() {
     setMousePos({ x: 0, y: 0 });
   };
 
+  // Mobile detection for parallax
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   return (
     <section
@@ -378,25 +386,34 @@ export default function Hero() {
             x: [0, 50, 0],
             y: [0, 30, 0],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]"
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]"
         />
         <motion.div
           animate={{
             x: [0, -30, 0],
             y: [0, 50, 0],
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]"
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]"
         />
       </div>
 
       <div 
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
         {/* Top badge */}
         <motion.div 
-          className="flex justify-center mb-8"
+          className="mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -406,48 +423,48 @@ export default function Hero() {
           </FloatingBadge>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 mt-8 lg:mt-0">
           
-          {/* Left Side */}
+          {/* Left Side - Text */}
           <motion.div 
-            style={{ y: yLeft, opacity }}
-            className="flex flex-col items-end text-right"
+            style={{ y: isMobile ? 0 : yLeft, opacity }}
+            className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
-            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+              <GlitchText className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.9)] md:[-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
                 ENGINEERING
               </GlitchText>
             </h1>
           </motion.div>
 
-          {/* Center Avatar */}
+          {/* Center Avatar - Scaled on Mobile */}
           <motion.div
-            style={{ y: yCenter }}
+            style={{ y: isMobile ? 0 : yCenter }}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, type: "spring" }}
-            className="z-20 my-8 lg:my-0"
+            className="z-20 my-2 lg:my-0 order-1 lg:order-2 scale-[0.65] sm:scale-90 md:scale-100"
           >
             <AvatarFlipCard />
           </motion.div>
 
-          {/* Right Side */}
+          {/* Right Side - Text */}
           <motion.div 
-            style={{ y: yRight, opacity }}
-            className="flex flex-col items-start text-left"
+            style={{ y: isMobile ? 0 : yRight, opacity }}
+            className="flex flex-col items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <GlitchText className="text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+              <GlitchText className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.9)] md:[-webkit-text-stroke:2px_rgba(255,255,255,0.9)] glow-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
                 INTELLIGENCE
               </GlitchText>
             </h1>
             <motion.div 
-              className="mt-4 max-w-xs"
+              className="mt-6 max-w-xs sm:max-w-md lg:max-w-xs mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-lg text-gray-200 font-medium leading-relaxed text-right lg:text-left">
+              <p className="text-base sm:text-lg text-gray-200 font-medium leading-relaxed text-center lg:text-left">
                 Generative AI Intern @ <span className="text-purple-300 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-purple-300 font-bold">Autonomous Agents</span>.
               </p>
             </motion.div>

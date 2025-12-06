@@ -59,10 +59,10 @@ export default function Footer() {
                 <Link 
                   href={social.href} 
                   target="_blank"
-                  className={`flex items-center justify-center w-12 h-12 rounded-full bg-white/5 border border-white/10 text-gray-400 ${social.color} transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]`}
+                  className={`flex items-center justify-center w-14 h-14 rounded-full bg-white/10 border border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] ${social.color} transition-all duration-300 hover:border-white/40 hover:bg-white/20 hover:scale-110 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]`}
                   aria-label={social.label}
                 >
-                  <social.icon size={20} />
+                  <social.icon size={26} />
                 </Link>
               </MagneticButton>
             ))}

@@ -31,7 +31,8 @@ const experiences: Experience[] = [
     period: "Sept 2025 - Nov 2025",
     description: "Promoted Perplexity and Comet browsers, organized workshops, and collaborated with peers to drive adoption of innovative browsing solutions.",
     type: "community",
-    skills: ["Marketing", "Workshops", "Outreach"]
+    skills: ["Marketing", "Workshops", "Outreach"],
+    highlight: "20+ Leads Generated"
   },
   {
     role: "Student Senator",

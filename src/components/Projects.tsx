@@ -95,15 +95,15 @@ function ProjectCard({ project, index, isFeatured = false }: { project: typeof p
           }}
         />
 
-        <div className={`relative p-6 ${isFeatured ? 'md:p-8' : ''} h-full flex flex-col [transform-style:preserve-3d]`}>
+        <div className={`relative p-6 md:p-8 h-full flex flex-col [transform-style:preserve-3d]`}>
           {/* Header */}
-          <div className="flex justify-between items-start mb-4" style={{ transform: "translateZ(50px)" }}>
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4" style={{ transform: "translateZ(50px)" }}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl bg-gradient-to-br ${project.gradient} shadow-lg`}>
+              <div className={`p-2 rounded-xl bg-gradient-to-br ${project.gradient} shadow-lg shrink-0`}>
                 <Icon size={isFeatured ? 24 : 20} className="text-white" />
               </div>
-              <div>
-                <h3 className={`${isFeatured ? 'text-2xl md:text-3xl' : 'text-xl'} font-bold text-white`}>
+              <div className="min-w-0">
+                <h3 className={`${isFeatured ? 'text-2xl md:text-3xl' : 'text-xl'} font-bold text-white truncate`}>
                   {project.title}
                 </h3>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 ${

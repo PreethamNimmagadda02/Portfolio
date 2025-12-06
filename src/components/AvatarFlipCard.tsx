@@ -267,13 +267,13 @@ export default function AvatarFlipCard() {
               <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-purple-500/30" />
 
               <div className="h-6 flex items-end justify-between opacity-40 gap-[3px]">
-                {[...Array(28)].map((_, i) => (
+                {particles.slice(0, 28).map((p, i) => (
                   <div 
                     key={i} 
                     className="bg-purple-300 rounded-full" 
                     style={{ 
                       width: '2px', 
-                      height: `${Math.random() * 60 + 20}%` 
+                      height: `${Math.abs(Math.sin(i * 1337)) * 60 + 20}%` 
                     }} 
                   />
                 ))}
