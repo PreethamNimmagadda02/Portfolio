@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import React from "react";
 import { Briefcase, Calendar, Users, Award, Code, Trophy, Star, Zap } from "lucide-react";
 
@@ -71,13 +71,6 @@ const experiences: Experience[] = [
   }
 ];
 
-const achievements = [
-  { icon: Trophy, title: "1864 Peak Rating", subtitle: "Codeforces", color: "from-yellow-500 to-orange-500" },
-  { icon: Code, title: "500+ Problems", subtitle: "DSA Solved", color: "from-blue-500 to-cyan-500" },
-  { icon: Star, title: "5+ Projects", subtitle: "Built & Shipped", color: "from-purple-500 to-pink-500" },
-  { icon: Zap, title: "3 Hackathons", subtitle: "Participated", color: "from-green-500 to-emerald-500" },
-];
-
 const typeIcons = {
   work: Briefcase,
   leadership: Users,
@@ -90,6 +83,96 @@ const typeColors = {
   community: "from-green-500 to-emerald-500",
 };
 
+function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; index: number; gradient: string; TypeIcon: any }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
+
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]);
+
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    x.set((clientX - left) / width - 0.5);
+    y.set((clientY - top) / height - 0.5);
+  }
+
+  function onMouseLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <motion.div
+      className="relative [perspective:1500px] group"
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
+      {/* Animated gradient border */}
+      <motion.div
+        className={`absolute -inset-[1px] bg-gradient-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
+        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        style={{ backgroundSize: "200% 200%" }}
+      />
+
+      <motion.div
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="relative p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden"
+      >
+        {/* Hover gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+        
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 mb-3 relative" style={{ transform: "translateZ(30px)" }}>
+          <div className="flex items-center gap-2">
+            <motion.div 
+              className={`p-1.5 rounded-lg bg-gradient-to-br ${gradient}`}
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <TypeIcon size={14} className="text-white" />
+            </motion.div>
+            <span className="font-medium text-gray-300">{exp.company}</span>
+          </div>
+          {exp.highlight && (
+            <span className="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
+              {exp.highlight}
+            </span>
+          )}
+        </div>
+        
+        <h3 className="text-xl font-bold text-white mb-2 relative" style={{ transform: "translateZ(20px)" }}>{exp.role}</h3>
+        
+        <div className="flex items-center gap-2 text-gray-500 text-sm mb-4 relative" style={{ transform: "translateZ(15px)" }}>
+          <Calendar size={14} />
+          <span>{exp.period}</span>
+        </div>
+        
+        <p className="text-gray-200 font-[var(--font-inter)] leading-relaxed mb-4 relative" style={{ transform: "translateZ(10px)" }}>
+          {exp.description}
+        </p>
+        
+        {/* Skills */}
+        <div className="flex flex-wrap gap-2 relative" style={{ transform: "translateZ(20px)" }}>
+          {exp.skills.map((skill) => (
+            <span 
+              key={skill}
+              className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 hover:scale-105 transition-all cursor-default"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function Experience() {
   const [lineHeight, setLineHeight] = React.useState(0);
   const firstDotRef = React.useRef<HTMLDivElement>(null);
@@ -98,27 +181,16 @@ export default function Experience() {
   React.useEffect(() => {
     const calculateHeight = () => {
       if (firstDotRef.current && lastDotRef.current) {
-        // Calculate the vertical distance between the top of the first dot and the top of the last dot
-        // The dots are 16px (h-4), so the line should connect their centers.
-        // We will make the line height exactly the distance between the two dots' tops plus half a dot height if we want centers,
-        // but typically "connecting dots" means border to border or center to center.
-        // Let's go center-to-center.
-        
         const first = firstDotRef.current.getBoundingClientRect();
         const last = lastDotRef.current.getBoundingClientRect();
-        // Distance from top of first dot to top of last dot
         const distance = last.top - first.top;
         setLineHeight(distance);
       }
     };
 
-    // Calculate initial
     calculateHeight();
-
-    // Recalculate on resize
     window.addEventListener('resize', calculateHeight);
     
-    // Mutation observer for content changes causing reflow
     const observer = new ResizeObserver(calculateHeight);
     if (firstDotRef.current?.parentElement?.parentElement) {
       observer.observe(firstDotRef.current.parentElement.parentElement);
@@ -138,10 +210,10 @@ export default function Experience() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ amount: 0.3 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
@@ -165,7 +237,19 @@ export default function Experience() {
             />
           </div>
 
-          <div className="space-y-8">
+          <motion.div 
+            className="space-y-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ amount: 0.1 }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.2, delayChildren: 0.1 }
+              }
+            }}
+          >
             {experiences.map((exp, index) => {
               const TypeIcon = typeIcons[exp.type];
               const gradient = typeColors[exp.type];
@@ -173,10 +257,15 @@ export default function Experience() {
               return (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ amount: 0.3 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  variants={{
+                    hidden: { opacity: 0, y: 50, scale: 0.9 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { type: "spring" as const, stiffness: 50, damping: 15 }
+                    }
+                  }}
                   className="relative pl-12 md:pl-0"
                 >
                   {/* Timeline Dot */}
@@ -189,60 +278,17 @@ export default function Experience() {
                   <div className={`md:flex items-start gap-8 ${index % 2 === 0 ? "md:flex-row-reverse" : ""}`}>
                     <div className="hidden md:block flex-1" />
                     
-                    <motion.div 
-                      whileHover={{ scale: 1.02 }}
-                      className="flex-1 group"
-                    >
-                      <div className="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-hidden">
-                        {/* Hover gradient */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-                        
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-4 mb-3 relative">
-                          <div className="flex items-center gap-2">
-                            <div className={`p-1.5 rounded-lg bg-gradient-to-br ${gradient}`}>
-                              <TypeIcon size={14} className="text-white" />
-                            </div>
-                            <span className="font-medium text-gray-300">{exp.company}</span>
-                          </div>
-                          {exp.highlight && (
-                            <span className="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
-                              {exp.highlight}
-                            </span>
-                          )}
-                        </div>
-                        
-                        <h3 className="text-xl font-bold text-white mb-2">{exp.role}</h3>
-                        
-                        <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
-                          <Calendar size={14} />
-                          <span>{exp.period}</span>
-                        </div>
-                        
-                        <p className="text-gray-200 font-[var(--font-inter)] leading-relaxed mb-4">
-                          {exp.description}
-                        </p>
-                        
-                        {/* Skills */}
-                        <div className="flex flex-wrap gap-2">
-                          {exp.skills.map((skill) => (
-                            <span 
-                              key={skill}
-                              className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
+                    <div className="flex-1">
+                      <ExperienceCard exp={exp} index={index} gradient={gradient} TypeIcon={TypeIcon} />
+                    </div>
                   </div>
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
   );
 }
+

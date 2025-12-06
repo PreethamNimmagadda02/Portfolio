@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Trophy, Users, Target, Zap } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import React from "react";
 
 const features = [
   {
@@ -81,36 +82,50 @@ function AnimatedCounter({ value, suffix = "", duration = 2000 }: { value: numbe
   return <span ref={ref}>{count}{suffix}</span>;
 }
 
-// 3D Tilt Card Component
-function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
-  
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
-    
-    requestAnimationFrame(() => {
-      const x = (e.clientX - left - width / 2) / 20;
-      const y = (e.clientY - top - height / 2) / 20;
-      setTransform(`perspective(1000px) rotateX(${-y}deg) rotateY(${x}deg) scale3d(1.02, 1.02, 1.02)`);
-    });
-  };
+// 3D Tilt Card Component with Framer Motion springs
+function TiltCard({ children, gradient, className = "" }: { children: React.ReactNode; gradient: string; className?: string }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-  const handleMouseLeave = () => {
-    setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
-  };
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
+
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
+
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    x.set((clientX - left) / width - 0.5);
+    y.set((clientY - top) / height - 0.5);
+  }
+
+  function onMouseLeave() {
+    x.set(0);
+    y.set(0);
+  }
 
   return (
-    <div
-      ref={ref}
-      className={`${className} transition-transform ease-out duration-200 will-change-transform`}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ transform }}
+    <motion.div
+      className={`relative [perspective:1500px] group ${className}`}
+      whileHover={{ scale: 1.03 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
-      {children}
-    </div>
+      {/* Animated gradient border */}
+      <motion.div
+        className={`absolute -inset-[1px] bg-gradient-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
+        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        style={{ backgroundSize: "200% 200%" }}
+      />
+      <motion.div
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="relative h-full"
+      >
+        {children}
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -129,11 +144,12 @@ export default function About() {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 }
+      scale: 1,
+      transition: { type: "spring" as const, stiffness: 50, damping: 15 }
     }
   };
 
@@ -246,16 +262,17 @@ export default function About() {
           >
             {features.map((feature, index) => (
               <motion.div key={index} variants={itemVariants}>
-                <TiltCard>
-                  <div className={`group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full card-hover`}>
+                <TiltCard gradient={feature.gradient}>
+                  <div className={`relative p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full`}>
                     {/* Gradient overlay on hover */}
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                     
-                    {/* Icon */}
+                    {/* Floating Icon */}
                     <motion.div 
                       className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 400 }}
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      style={{ transform: "translateZ(30px)" }}
                     >
                       <div className="text-white">{feature.icon}</div>
                     </motion.div>
