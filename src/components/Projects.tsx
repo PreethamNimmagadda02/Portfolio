@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ExternalLink, Github, ArrowUpRight, Sparkles, Rocket, Cpu } from "lucide-react";
+import { ExternalLink, Github, ArrowUpRight, GraduationCap, Ticket, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -18,7 +18,7 @@ const projects = [
     gradient: "from-purple-500 to-pink-500",
     status: "Live",
     featured: true,
-    icon: Sparkles
+    icon: GraduationCap
   },
   {
     title: "FestFlow",
@@ -32,7 +32,7 @@ const projects = [
     gradient: "from-blue-500 to-cyan-500",
     status: "Live",
     featured: false,
-    icon: Rocket
+    icon: Ticket
   },
   {
     title: "AI Trading System",
@@ -46,7 +46,7 @@ const projects = [
     gradient: "from-green-500 to-emerald-500",
     status: "Complete",
     featured: false,
-    icon: Cpu
+    icon: TrendingUp
   }
 ];
 
@@ -54,11 +54,12 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
-  const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
+  // Smoother spring configuration
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
 
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["15deg", "-15deg"]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-15deg", "15deg"]);
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
   
   const glareX = useTransform(mouseX, [-0.5, 0.5], ["0%", "100%"]);
   const glareY = useTransform(mouseY, [-0.5, 0.5], ["0%", "100%"]);
@@ -79,9 +80,25 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
   const Icon = project.icon;
 
   return (
-    <motion.div className="relative [perspective:1500px] h-full">
-      {/* Animated gradient border */}
-      <div className={`absolute -inset-[1px] bg-gradient-to-r ${project.gradient} rounded-3xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`} />
+    <motion.div 
+      className="relative [perspective:1500px] h-full"
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    >
+      {/* Animated gradient border - Spinning effect */}
+      <motion.div 
+        className={`absolute -inset-[1px] bg-gradient-to-r ${project.gradient} rounded-3xl opacity-70 blur-sm group-hover:opacity-100 transition-opacity duration-500`}
+        animate={{ 
+          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+        }}
+        transition={{ 
+          duration: 5, 
+          repeat: Infinity, 
+          ease: "linear",
+          repeatType: "mirror"
+        }}
+        style={{ backgroundSize: "200% 200%" }}
+      />
       
       <motion.div
         onMouseMove={onMouseMove}
@@ -91,10 +108,10 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        className="relative h-full rounded-3xl bg-zinc-900/80 border border-white/10 overflow-hidden transition-all duration-500 group"
+        className="relative h-full rounded-3xl bg-zinc-900/90 border border-white/10 overflow-hidden transition-all duration-500 group backdrop-blur-xl"
       >
         {/* Background gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
+        <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-5 group-hover:opacity-15 transition-opacity duration-500`} />
         
         {/* Glare Effect */}
         <motion.div 
@@ -102,7 +119,7 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
           style={{
             background: useTransform(
               [glareX, glareY],
-              ([x, y]) => `radial-gradient(circle at ${x} ${y}, rgba(255,255,255,0.2) 0%, transparent 80%)`
+              ([x, y]) => `radial-gradient(circle at ${x} ${y}, rgba(255,255,255,0.3) 0%, transparent 80%)`
             )
           }}
         />
@@ -111,9 +128,13 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4" style={{ transform: "translateZ(50px)" }}>
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl bg-gradient-to-br ${project.gradient} shadow-lg shrink-0`}>
+              <motion.div 
+                className={`p-2 rounded-xl bg-gradient-to-br ${project.gradient} shadow-lg shrink-0`}
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
                 <Icon size={isFeatured ? 24 : 20} className="text-white" />
-              </div>
+              </motion.div>
               <div className="min-w-0">
                 <h3 className={`${isFeatured ? 'text-2xl md:text-3xl' : 'text-xl'} font-bold text-white truncate`}>
                   {project.title}
@@ -131,7 +152,7 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
             <Link 
               href={project.links.demo}
               target="_blank"
-              className={`p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white transition-all z-20 hover:scale-110`}
+              className={`p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white transition-all z-20 hover:scale-110 hover:rotate-45 active:scale-95`}
             >
               <ArrowUpRight size={isFeatured ? 22 : 18} />
             </Link>
@@ -144,7 +165,7 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6" style={{ transform: "translateZ(30px)" }}>
             {project.tags.map((tag, i) => (
-              <span key={i} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 transition-colors">
+              <span key={i} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:scale-105 transition-all cursor-default">
                 {tag}
               </span>
             ))}
@@ -188,14 +209,14 @@ export default function Projects() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ amount: 0.3 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
           className="text-center mb-16"
         >
           <motion.span 
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4"
           >
@@ -210,10 +231,10 @@ export default function Projects() {
         {/* Featured Project */}
         {featuredProject && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ amount: 0.2 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, type: "spring", stiffness: 50 }}
             className="mb-8"
           >
             <ProjectCard project={featuredProject} index={0} isFeatured={true} />
@@ -230,7 +251,7 @@ export default function Projects() {
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+              transition: { staggerChildren: 0.2, delayChildren: 0.1 }
             }
           }}
         >
@@ -238,8 +259,13 @@ export default function Projects() {
             <motion.div 
               key={index}
               variants={{
-                hidden: { opacity: 0, y: 30 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                hidden: { opacity: 0, y: 50, scale: 0.9 },
+                visible: { 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: { type: "spring", stiffness: 50, damping: 15 } 
+                }
               }}
             >
               <ProjectCard project={project} index={index + 1} />
