@@ -128,13 +128,24 @@ export default function Navbar() {
         </div>
 
         {/* CTA Button */}
-        <Link
-          href="#contact"
-          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-shadow"
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="hidden md:block relative group"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          Hire Me
-        </Link>
+          {/* Subtle glow on hover */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-75 blur transition-opacity duration-300" />
+          <Link
+            href="#contact"
+            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold border border-white/10 hover:border-white/30 transition-all"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+            </span>
+            Hire Me
+          </Link>
+        </motion.div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden">
