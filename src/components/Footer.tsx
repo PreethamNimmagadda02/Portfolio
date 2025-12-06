@@ -28,27 +28,28 @@ export default function Footer() {
   };
 
   return (
-    <footer className="py-12 relative z-10 border-t border-white/5 bg-black/20 backdrop-blur-sm">
+    <footer className="py-6 md:py-12 relative z-10 border-t border-white/5 bg-black/20 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-8">
           {/* Logo/Name */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.3 }}
+            className="text-center md:text-left"
           >
-            <Link href="/" className="text-2xl font-bold tracking-tighter group">
+            <Link href="/" className="text-xl md:text-2xl font-bold tracking-tighter group">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
               <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
             </Link>
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-gray-500 text-xs md:text-sm mt-1 md:mt-2">
               Building the future, one product at a time.
             </p>
           </motion.div>
 
           {/* Social Links */}
           <motion.div 
-            className="flex items-center gap-4"
+            className="flex items-center gap-3 md:gap-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.3 }}
@@ -59,10 +60,10 @@ export default function Footer() {
                 <Link 
                   href={social.href} 
                   target="_blank"
-                  className={`flex items-center justify-center w-14 h-14 rounded-full bg-white/10 border border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] ${social.color} transition-all duration-300 hover:border-white/40 hover:bg-white/20 hover:scale-110 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]`}
+                  className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/10 border border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)] ${social.color} transition-all duration-300 hover:border-white/40 hover:bg-white/20 hover:scale-110 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]`}
                   aria-label={social.label}
                 >
-                  <social.icon size={26} />
+                  <social.icon size={18} className="md:w-[26px] md:h-[26px]" />
                 </Link>
               </MagneticButton>
             ))}
@@ -71,14 +72,14 @@ export default function Footer() {
 
         {/* Bottom */}
         <motion.div 
-          className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4"
+          className="mt-4 pt-4 md:mt-8 md:pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ amount: 0.3 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-8">
-            <p className="text-gray-500 text-sm">
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-8">
+            <p className="text-gray-500 text-[10px] md:text-sm">
               © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
             </p>
           </div>
@@ -87,11 +88,11 @@ export default function Footer() {
             onClick={scrollToTop}
             whileHover={{ scale: 1.1, y: -2 }}
             whileTap={{ scale: 0.9 }}
-            className="group flex items-center gap-2 text-sm text-gray-500 hover:text-purple-400 transition-colors"
+            className="group flex items-center gap-2 text-[10px] md:text-sm text-gray-500 hover:text-purple-400 transition-colors"
           >
             <span>Back to Top</span>
-            <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 transition-all">
-              <ArrowUp size={16} className="text-gray-400 group-hover:text-purple-400" />
+            <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 transition-all">
+              <ArrowUp size={12} className="text-gray-400 group-hover:text-purple-400 md:w-4 md:h-4" />
             </div>
           </motion.button>
         </motion.div>
@@ -105,9 +106,9 @@ export default function Footer() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 p-4 rounded-full bg-purple-600/90 text-white shadow-lg shadow-purple-900/20 backdrop-blur-sm border border-white/10 hover:bg-purple-500 transition-colors"
+            className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 p-3 md:p-4 rounded-full bg-purple-600/90 text-white shadow-lg shadow-purple-900/20 backdrop-blur-sm border border-white/10 hover:bg-purple-500 transition-colors"
           >
-            <ArrowUp size={24} />
+            <ArrowUp size={20} className="md:w-6 md:h-6" />
           </motion.button>
         )}
       </AnimatePresence>

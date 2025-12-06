@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Preetham Nimmagadda | Modern AI & Full Stack Portfolio
 
-## Getting Started
+A high-performance, interactive, and mobile-responsive portfolio website built with the latest web technologies. This project showcases my work as an AI Agent Developer and Full Stack Engineer.
 
-First, run the development server:
+![Portfolio Preview](/og-image.png)
+
+## 🚀 Key Features
+
+- **Modern UI/UX:** Built with a "dark mode" first aesthetic, glassmorphism effects, and smooth transitions.
+- **Interactive Animations:** Powered by `framer-motion` for complex scroll animations, floating elements, and parallax effects.
+- **3D Elements:** Integrated `three.js` and `@react-three/fiber` for immersive 3D experiences.
+- **Progressive Web App (PWA):** Fully installable as a native-like app on mobile and desktop devices.
+- **Responsive Design:** Mobile-first approach ensuring a seamless experience across all screen sizes.
+- **Performance Optimized:** Server-side rendered with Next.js 16 for blazing fast load times and SEO.
+
+## 🛠️ Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **3D:** [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
+- **PWA:** [next-pwa](https://www.npmjs.com/package/next-pwa)
+- **Deployment:** GitHub Pages / Vercel
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Node.js 18.17 or later
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/PreethamNimmagadda02/portfolio.git
+   cd portfolio
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+   *Note: PWA features are disabled in development mode to prevent caching issues.*
+
+4. **Open your browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🏗️ Building for Production
+
+To create a production build with full PWA support:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📱 PWA Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This portfolio is a certified Progressive Web App. It allows users to:
+- Install the website as an app on iOS and Android.
+- Launch from the home screen with a custom splash screen.
+- Experience an app-like standalone interface without browser bars.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Designed & Built by **Preetham Nimmagadda**
