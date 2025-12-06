@@ -218,7 +218,7 @@ export default function About() {
             </h3>
             <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
               Engineering student at <span className="text-white font-bold">IIT (ISM) Dhanbad</span> with a laser focus on 
-              building autonomous AI systems that solve real-world problems.
+              building autonomous AI systems that solve real-world problems. Engineered <span className="text-yellow-300 font-bold">20% memory optimization</span> in multi-agent architectures, pushing the boundaries of efficient AI at scale.
             </p>
             <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
               Former <span className="text-white font-bold">Student Senator</span> shaping policies for <span className="text-purple-300 font-bold">4,000+ students</span> & 
@@ -234,8 +234,8 @@ export default function About() {
               transition={{ delay: 0.4 }}
             >
               {[
-                { value: 4000, suffix: "+", label: <><span className="text-purple-400 font-semibold">Students</span> Impacted</>, icon: Users, color: "from-purple-400 to-pink-400" },
-                { value: 20, suffix: "%", label: <><span className="text-yellow-400 font-semibold">Memory</span> Reduced</>, icon: Zap, color: "from-yellow-400 to-orange-400" },
+                { value: 4000, suffix: "+", label: <><span className="text-purple-400 font-semibold">Students</span> Influenced</>, icon: Users, color: "from-purple-400 to-pink-400" },
+                { value: 20, suffix: "%", label: <><span className="text-yellow-400 font-semibold">Memory</span> Reduction</>, icon: Zap, color: "from-yellow-400 to-orange-400" },
                 { value: 350, suffix: "+", label: <><span className="text-emerald-400 font-semibold">Participants</span> Led</>, icon: Target, color: "from-emerald-400 to-cyan-400" }
               ].map((stat, i) => (
                 <motion.div 
