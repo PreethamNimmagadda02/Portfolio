@@ -54,18 +54,41 @@ export default function Navbar() {
       )}
     >
       <div className="flex items-center justify-between">
-        {/* Logo with terminal icon */}
-        <Link href="/" className="flex items-center gap-2 group">
+        {/* Unique Brand Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group">
+          {/* Custom PN Monogram */}
           <motion.div
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
-            className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 group-hover:border-purple-500/60 transition-colors"
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="relative"
           >
-            <Terminal size={16} className="text-purple-400" />
+            {/* Outer glow ring */}
+            <motion.div
+              className="absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-50 blur-md transition-opacity duration-300"
+            />
+            {/* Main logo container */}
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden">
+              <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
+                {/* PN Letters */}
+                <span className="text-sm font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-purple-400 via-white to-blue-400">
+                  PN
+                </span>
+              </div>
+              {/* Animated shine effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+              />
+            </div>
           </motion.div>
-          <span className="text-lg font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors">
-            Preetham<span className="text-purple-400">.</span>
-          </span>
+          {/* Brand name */}
+          <div className="flex flex-col">
+            <span className="text-lg font-bold tracking-tight leading-none text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
+              Preetham
+            </span>
+            <span className="text-[10px] text-gray-500 tracking-widest uppercase group-hover:text-purple-400/70 transition-colors">
+              AI Engineer
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Menu */}

@@ -14,6 +14,10 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Preetham Nimmagadda | AI Agent Developer",
   description: "Building autonomous AI agents. Full-stack developer and Codeforces Specialist at IIT (ISM) Dhanbad.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
