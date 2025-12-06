@@ -1,8 +1,10 @@
 # Preetham Nimmagadda | Modern AI & Full Stack Portfolio
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=firebase)](https://preethamnimmagaddaportfolio.web.app)
+
 A high-performance, interactive, and mobile-responsive portfolio website built with the latest web technologies. This project showcases my work as an AI Agent Developer and Full Stack Engineer.
 
-![Portfolio Preview](/og-image.png)
+![Portfolio Preview](public/og-image.png)
 
 ## 🚀 Key Features
 
@@ -22,7 +24,7 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
 - **Icons:** [Lucide React](https://lucide.dev/)
 - **3D:** [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 - **PWA:** [next-pwa](https://www.npmjs.com/package/next-pwa)
-- **Deployment:** GitHub Pages / Vercel
+- **Deployment:** Firebase Hosting
 
 ## 📦 Getting Started
 
