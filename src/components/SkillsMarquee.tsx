@@ -8,6 +8,9 @@ const skills = [
   { name: "TypeScript", color: "from-blue-400 to-blue-600" },
   { name: "Python", color: "from-yellow-400 to-green-500" },
   { name: "CrewAI", color: "from-purple-400 to-pink-500" },
+  { name: "OpenAI API", color: "from-emerald-500 to-green-600" },
+  { name: "RAG", color: "from-pink-400 to-rose-500" },
+  { name: "Context Engineering", color: "from-fuchsia-400 to-pink-500" },
   { name: "Gemini API", color: "from-blue-400 to-cyan-400" },
   { name: "Tailwind CSS", color: "from-cyan-400 to-blue-400" },
   { name: "Node.js", color: "from-green-400 to-emerald-500" },
@@ -16,6 +19,9 @@ const skills = [
   { name: "C/C++", color: "from-blue-500 to-indigo-600" },
   { name: "Git/GitHub", color: "from-gray-400 to-gray-600" },
   { name: "SQL", color: "from-orange-400 to-red-500" },
+  { name: "Ollama", color: "from-gray-100 to-gray-400" },
+  { name: "n8n", color: "from-orange-400 to-amber-500" },
+  { name: "Postman", color: "from-orange-500 to-orange-600" },
 ];
 
 export default function SkillsMarquee() {
