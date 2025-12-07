@@ -96,10 +96,11 @@ export default function Navbar() {
             </div>
           </motion.div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold tracking-tight leading-none text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
-              Preetham Nimmagadda
+            <span className="relative text-lg font-bold tracking-tight leading-none">
+              <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
+              <span className="absolute inset-0 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
             </span>
-            <span className="text-[10px] text-gray-500 tracking-widest uppercase group-hover:text-purple-400/70 transition-colors">
+            <span className="text-[11px] text-purple-400/80 tracking-widest uppercase font-medium group-hover:text-white transition-colors">
               AI Engineer
             </span>
           </div>
