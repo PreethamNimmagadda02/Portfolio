@@ -97,7 +97,7 @@ export default function Navbar() {
           </motion.div>
           <div className="flex flex-col">
             <span className="text-lg font-bold tracking-tight leading-none text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-blue-400 transition-all duration-300">
-              Preetham
+              Preetham Nimmagadda
             </span>
             <span className="text-[10px] text-gray-500 tracking-widest uppercase group-hover:text-purple-400/70 transition-colors">
               AI Engineer
