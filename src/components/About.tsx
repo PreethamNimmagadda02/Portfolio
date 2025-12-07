@@ -8,7 +8,7 @@ import React from "react";
 const features = [
   {
     icon: <Code className="w-6 h-6" />,
-    title: "AI Architect",
+    title: "AI Engineer",
     description: (
       <>
         Pioneering <span className="text-blue-400 font-semibold">autonomous agent systems</span> with <span className="text-purple-400 font-semibold">CrewAI</span>, <span className="text-green-400 font-semibold">Gemini API</span>, and state-of-the-art <span className="text-pink-400 font-semibold">LLMs</span>.
