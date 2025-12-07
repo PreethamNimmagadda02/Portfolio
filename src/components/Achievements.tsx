@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
 import { Trophy, Award, Star, Code } from "lucide-react";
-import React from "react";
+import React, { useRef } from "react";
 
 const achievements = [
   {
@@ -112,52 +112,59 @@ function AchievementCard({ item, index }: { item: typeof achievements[0]; index:
   );
 }
 
-export default function Achievements() {
+function ScrollAnimatedCard({ item, index }: { item: typeof achievements[0]; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Create smooth scroll-linked animations with more visible effects
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0.3]);
+  const scale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.6, 1, 1, 0.85]);
+  const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [100, 0, 0, -50]);
+  const rotate = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [8, 0, 0, -5]);
+  const x = useTransform(scrollYProgress, [0, 0.3], [index % 2 === 0 ? -50 : 50, 0]);
+
   return (
-    <section id="achievements" className="py-20 relative overflow-hidden">
+    <motion.div
+      ref={cardRef}
+      className="h-full"
+      style={{ opacity, scale, y }}
+    >
+      <AchievementCard item={item} index={index} />
+    </motion.div>
+  );
+}
+
+export default function Achievements() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Header animation based on scroll
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0, 1, 1, 0.5]);
+  const headerY = useTransform(scrollYProgress, [0, 0.15], [40, 0]);
+  const headerScale = useTransform(scrollYProgress, [0, 0.15], [0.95, 1]);
+
+  return (
+    <section ref={sectionRef} id="achievements" className="py-20 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+          style={{ opacity: headerOpacity, y: headerY, scale: headerScale }}
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Achievements</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full" />
         </motion.div>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.15, delayChildren: 0.1 }
-            }
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {achievements.map((item, index) => (
-            <motion.div
-              key={index}
-              className="h-full"
-              variants={{
-                hidden: { opacity: 0, y: 50, scale: 0.9 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  transition: { type: "spring", stiffness: 50, damping: 15 }
-                }
-              }}
-            >
-              <AchievementCard item={item} index={index} />
-            </motion.div>
+            <ScrollAnimatedCard key={index} item={item} index={index} />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
