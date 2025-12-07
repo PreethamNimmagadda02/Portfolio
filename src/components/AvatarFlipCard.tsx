@@ -254,10 +254,10 @@ export default function AvatarFlipCard() {
               </div>
 
               <div>
-                <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Role</div>
+                <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Vision</div>
                 <div className="text-sm font-medium text-white border-l-2 border-purple-500 pl-3 py-0.5">
-                  Generative AI Engineer
-                  <span className="block text-xs text-gray-400 font-normal mt-0.5">Full Stack Engineer</span>
+                  Turning Ideas Into Intelligent Systems
+                  <span className="block text-xs text-gray-400 font-normal mt-0.5 italic">"Building AI that thinks with you"</span>
                 </div>
               </div>
             </div>

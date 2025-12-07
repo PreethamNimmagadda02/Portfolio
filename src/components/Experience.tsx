@@ -4,7 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import React from "react";
 import { Briefcase, Calendar, Users, Award, Code, Trophy, Star, Zap } from "lucide-react";
 
-type ExperienceType = "work" | "leadership" | "community";
+type ExperienceType = "work" | "leadership" | "community" | "achievement" | "organization";
 
 interface Experience {
   role: string;
@@ -17,19 +17,6 @@ interface Experience {
 }
 
 const experiences: Experience[] = [
-  {
-    role: "Software Developer Intern",
-    company: "METAVERTEX",
-    period: "June 2025 – July 2025",
-    description: (
-      <>
-        Built <span className="text-blue-400 font-semibold">Autonomous AI agents</span> reducing memory usage by <span className="text-green-400 font-semibold">20%</span>. Optimized page load time by <span className="text-green-400 font-semibold">15%</span> and improved SEO rankings by <span className="text-green-400 font-semibold">10%</span>.
-      </>
-    ),
-    type: "work",
-    skills: ["AI Agents", "React", "Performance"],
-    highlight: "20% Memory Optimization"
-  },
   {
     role: "Campus Ambassador",
     company: "Perplexity",
@@ -44,17 +31,17 @@ const experiences: Experience[] = [
     highlight: "20+ Leads Generated"
   },
   {
-    role: "Student Senator",
-    company: "Students' Gymkhana, IIT (ISM)",
-    period: "March 2024 - March 2025",
+    role: "Software Developer Intern",
+    company: "METAVERTEX",
+    period: "June 2025 – July 2025",
     description: (
       <>
-        Represented <span className="text-purple-400 font-semibold">1,500+ peers</span>, enhanced student engagement by <span className="text-green-400 font-semibold">30%</span>, and collaborated with administration to improve facilities.
+        Built <span className="text-blue-400 font-semibold">Autonomous AI agents</span> reducing memory usage by <span className="text-green-400 font-semibold">20%</span>. Optimized page load time by <span className="text-green-400 font-semibold">15%</span> and improved SEO rankings by <span className="text-green-400 font-semibold">10%</span>.
       </>
     ),
-    type: "leadership",
-    skills: ["Leadership", "Advocacy", "Public Speaking"],
-    highlight: "1,500+ Students Represented"
+    type: "work",
+    skills: ["AI Agents", "React", "Performance"],
+    highlight: "20% Memory Optimization"
   },
   {
     role: "Hostel Prefect",
@@ -65,9 +52,22 @@ const experiences: Experience[] = [
         Organized <span className="text-pink-400 font-semibold">10+ community events</span> boosting engagement by <span className="text-green-400 font-semibold">40%</span> and implemented conflict resolution strategies reducing disputes by <span className="text-green-400 font-semibold">30%</span>.
       </>
     ),
-    type: "leadership",
+    type: "organization",
     skills: ["Event Management", "Conflict Resolution"],
     highlight: "40% Engagement Boost"
+  },
+  {
+    role: "Student Senator",
+    company: "Students' Gymkhana, IIT (ISM)",
+    period: "March 2024 - March 2025",
+    description: (
+      <>
+        Represented <span className="text-purple-400 font-semibold">1,500+ peers</span>, enhanced student engagement by <span className="text-green-400 font-semibold">30%</span>, and collaborated with administration to improve facilities.
+      </>
+    ),
+    type: "achievement",
+    skills: ["Leadership", "Advocacy", "Public Speaking"],
+    highlight: "1,500+ Students Represented"
   }
 ];
 
@@ -75,12 +75,16 @@ const typeIcons = {
   work: Briefcase,
   leadership: Users,
   community: Award,
+  achievement: Trophy,
+  organization: Star,
 };
 
 const typeColors = {
   work: "from-blue-500 to-cyan-500",
   leadership: "from-purple-500 to-pink-500",
   community: "from-green-500 to-emerald-500",
+  achievement: "from-amber-500 to-orange-500",
+  organization: "from-purple-500 to-pink-500",
 };
 
 function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; index: number; gradient: string; TypeIcon: any }) {
