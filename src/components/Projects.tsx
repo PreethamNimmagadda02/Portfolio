@@ -152,6 +152,7 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
             <Link 
               href={project.links.demo}
               target="_blank"
+              aria-label={`Visit ${project.title} live demo`}
               className={`p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white transition-all z-20 hover:scale-110 hover:rotate-45 active:scale-95`}
             >
               <ArrowUpRight size={isFeatured ? 22 : 18} />
