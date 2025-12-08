@@ -43,7 +43,7 @@ export default function Footer() {
             className="text-center md:text-left"
           >
             <Link href="/" className="text-xl md:text-2xl font-bold tracking-tighter group">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
               <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
             </Link>
             <p className="text-gray-500 text-xs md:text-sm mt-1 md:mt-2">
