@@ -145,7 +145,7 @@ export default function Navbar() {
           <a
             href="#contact"
             onClick={(e) => scrollToSection(e, "#contact")}
-            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold border border-white/10 hover:border-white/30 transition-all"
+            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all shadow-lg shadow-purple-500/25"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
