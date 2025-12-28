@@ -192,16 +192,42 @@ export default function About() {
             </motion.div>
             <span className="text-sm text-gray-400">Who I Am</span>
           </motion.div>
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
-            About <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-black">Me</span>
-          </h2>
+          <motion.h2 
+            className="text-4xl md:text-6xl font-black text-white mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            About{" "}
+            <motion.span 
+              className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-black"
+              style={{
+                background: "linear-gradient(90deg, #d8b4fe 0%, #f9a8d4 50%, #d8b4fe 100%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              Me
+            </motion.span>
+          </motion.h2>
           <motion.div 
-            className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"
+            className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full overflow-hidden"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ amount: 0.3 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-          />
+          >
+            {/* Shimmer effect on underline */}
+            <motion.div
+              className="w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+            />
+          </motion.div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -240,13 +266,42 @@ export default function About() {
               ].map((stat, i) => (
                 <motion.div 
                   key={i} 
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all cursor-pointer"
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    delay: i * 0.15, 
+                    type: "spring", 
+                    stiffness: 100 
+                  }}
+                  whileHover={{ scale: 1.1, y: -8 }}
+                  className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 transition-all cursor-pointer relative overflow-hidden"
                 >
-                  <stat.icon size={16} className="mx-auto mb-2 text-gray-500 group-hover:text-white transition-colors" />
-                  <div className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}>
+                  {/* Glow effect on hover */}
+                  <motion.div
+                    className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 blur-xl`}
+                  />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.15 + 0.2, type: "spring" }}
+                  >
+                    <stat.icon size={16} className="mx-auto mb-2 text-gray-500 group-hover:text-white transition-colors" />
+                  </motion.div>
+                  <motion.div 
+                    className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}
+                    animate={{
+                      textShadow: [
+                        "0 0 0px rgba(168, 85, 247, 0)",
+                        "0 0 20px rgba(168, 85, 247, 0.5)",
+                        "0 0 0px rgba(168, 85, 247, 0)",
+                      ],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                  >
                     <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                  </div>
+                  </motion.div>
                   <div className="text-sm text-gray-200 mt-1 group-hover:text-gray-100 transition-colors font-medium font-[var(--font-inter)]">{stat.label}</div>
                 </motion.div>
               ))}

@@ -330,3 +330,302 @@ h1 {
 .number-glow {
   animation: number-pulse 2s ease-in-out infinite;
 }
+
+/* === NEW 3D ANIMATION EFFECTS === */
+
+/* Morphing gradient background */
+@keyframes morph-gradient {
+  0%, 100% { 
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+  50% { 
+    background-position: 100% 50%;
+    filter: hue-rotate(30deg);
+  }
+}
+
+.animate-morph-gradient {
+  background-size: 400% 400%;
+  animation: morph-gradient 8s ease infinite;
+}
+
+/* Holographic shimmer effect */
+@keyframes holographic {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.5;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.8;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.5;
+  }
+}
+
+.animate-holographic {
+  background: linear-gradient(
+    45deg,
+    rgba(139, 92, 246, 0.3) 0%,
+    rgba(236, 72, 153, 0.3) 25%,
+    rgba(6, 182, 212, 0.3) 50%,
+    rgba(34, 197, 94, 0.3) 75%,
+    rgba(139, 92, 246, 0.3) 100%
+  );
+  background-size: 400% 400%;
+  animation: holographic 4s ease infinite;
+}
+
+/* Energy pulse ring */
+@keyframes energy-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+    box-shadow: 0 0 0 20px rgba(139, 92, 246, 0);
+  }
+}
+
+.animate-energy-pulse {
+  animation: energy-pulse 2s ease-out infinite;
+}
+
+/* 3D flip on hover */
+@keyframes flip-3d {
+  0% { transform: perspective(1000px) rotateY(0deg); }
+  100% { transform: perspective(1000px) rotateY(180deg); }
+}
+
+.hover-flip-3d:hover {
+  animation: flip-3d 0.6s ease forwards;
+}
+
+/* Neon glow pulse */
+@keyframes neon-pulse {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px rgba(139, 92, 246, 0.8),
+      0 0 10px rgba(139, 92, 246, 0.6),
+      0 0 20px rgba(139, 92, 246, 0.4),
+      0 0 40px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 10px rgba(139, 92, 246, 1),
+      0 0 20px rgba(139, 92, 246, 0.8),
+      0 0 40px rgba(139, 92, 246, 0.6),
+      0 0 80px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* Scanner line effect */
+@keyframes scanner {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.3;
+  }
+}
+
+.scanner-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
+  animation: scanner 3s linear infinite;
+}
+
+/* Orbit animation */
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+.animate-orbit {
+  animation: orbit 10s linear infinite;
+}
+
+/* Floating with rotation */
+@keyframes float-rotate {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg);
+  }
+  50% { 
+    transform: translateY(-15px) rotate(180deg);
+  }
+}
+
+.animate-float-rotate {
+  animation: float-rotate 6s ease-in-out infinite;
+}
+
+/* Breathing glow */
+@keyframes breathe-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(139, 92, 246, 0.3),
+      inset 0 0 20px rgba(139, 92, 246, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(139, 92, 246, 0.5),
+      inset 0 0 40px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.animate-breathe-glow {
+  animation: breathe-glow 3s ease-in-out infinite;
+}
+
+/* Electric spark */
+@keyframes electric-spark {
+  0%, 100% { 
+    opacity: 0;
+    transform: translateX(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+  20% {
+    opacity: 0;
+    transform: translateX(-2px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(1px);
+  }
+  40%, 100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+.animate-electric {
+  animation: electric-spark 2s linear infinite;
+}
+
+/* Matrix rain effect */
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.animate-matrix-rain {
+  animation: matrix-rain 3s linear infinite;
+}
+
+/* Depth zoom effect */
+@keyframes depth-zoom {
+  0% {
+    transform: perspective(1000px) translateZ(-200px);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(1000px) translateZ(0);
+    opacity: 1;
+  }
+}
+
+.animate-depth-zoom {
+  animation: depth-zoom 1s ease-out forwards;
+}
+
+/* Particle explosion */
+@keyframes particle-explode {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+.animate-particle-explode {
+  animation: particle-explode 0.5s ease-out forwards;
+}
+
+/* Magnetic hover effect */
+.magnetic-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.magnetic-hover:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+/* Interactive card 3D */
+.interactive-3d-card {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.interactive-3d-card:hover {
+  transform: perspective(1000px) rotateY(10deg) rotateX(5deg);
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  border-radius: inherit;
+}
+
+.ripple-effect:hover::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Typewriter cursor */
+@keyframes typewriter-cursor {
+  0%, 50% { border-color: transparent; }
+  51%, 100% { border-color: rgba(139, 92, 246, 0.8); }
+}
+
+.typewriter-cursor {
+  border-right: 2px solid rgba(139, 92, 246, 0.8);
+  animation: typewriter-cursor 1s step-end infinite;
+}
+

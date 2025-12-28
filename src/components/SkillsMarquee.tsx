@@ -45,7 +45,8 @@ export default function SkillsMarquee() {
           {[...skills, ...skills].map((skill, index) => (
             <motion.div
               key={index}
-              whileHover={{ scale: 1.1, y: -5 }}
+              whileHover={{ scale: 1.15, y: -8 }}
+              whileTap={{ scale: 0.95 }}
               className="group relative px-6 py-3 rounded-full bg-white/5 border border-white/10 whitespace-nowrap cursor-pointer overflow-hidden"
             >
               {/* Glowing background on hover */}
@@ -55,6 +56,19 @@ export default function SkillsMarquee() {
               <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} style={{ padding: "1px" }}>
                 <div className="w-full h-full rounded-full bg-black" />
               </div>
+              
+              {/* Shimmer sweep effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                initial={{ x: "-200%" }}
+                animate={{ x: "200%" }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity, 
+                  repeatDelay: 3,
+                  ease: "linear",
+                }}
+              />
               
               {/* Text */}
               <span className={`relative z-10 text-gray-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${skill.color} font-medium transition-all duration-300`}>
@@ -77,13 +91,26 @@ export default function SkillsMarquee() {
           {[...skills, ...skills].map((skill, index) => (
             <motion.div
               key={`duplicate-${index}`}
-              whileHover={{ scale: 1.1, y: -5 }}
+              whileHover={{ scale: 1.15, y: -8 }}
+              whileTap={{ scale: 0.95 }}
               className="group relative px-6 py-3 rounded-full bg-white/5 border border-white/10 whitespace-nowrap cursor-pointer overflow-hidden"
             >
               <div className={`absolute inset-0 bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl`} />
               <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} style={{ padding: "1px" }}>
                 <div className="w-full h-full rounded-full bg-black" />
               </div>
+              {/* Shimmer sweep effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                initial={{ x: "-200%" }}
+                animate={{ x: "200%" }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity, 
+                  repeatDelay: 3,
+                  ease: "linear",
+                }}
+              />
               <span className={`relative z-10 text-gray-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${skill.color} font-medium transition-all duration-300`}>
                 {skill.name}
               </span>

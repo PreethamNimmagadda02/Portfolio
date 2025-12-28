@@ -161,17 +161,34 @@ function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; i
           {exp.description}
         </p>
         
-        {/* Skills */}
-        <div className="flex flex-wrap gap-2 relative" style={{ transform: "translateZ(20px)" }}>
-          {exp.skills.map((skill) => (
-            <span 
+        {/* Skills with wave entrance */}
+        <motion.div 
+          className="flex flex-wrap gap-2 relative" 
+          style={{ transform: "translateZ(20px)" }}
+        >
+          {exp.skills.map((skill, i) => (
+            <motion.span 
               key={skill}
-              className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 hover:scale-105 transition-all cursor-default"
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ 
+                delay: i * 0.1, 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 15 
+              }}
+              whileHover={{ 
+                scale: 1.1, 
+                y: -2,
+                boxShadow: "0 4px 12px rgba(139, 92, 246, 0.25)",
+              }}
+              className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 hover:text-white hover:border-purple-500/30 transition-colors cursor-default"
             >
               {skill}
-            </span>
+            </motion.span>
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -220,10 +237,37 @@ export default function Experience() {
           transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-            Experiences & <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Ventures</span>
-          </h2>
-          <p className="text-gray-400 max-w-lg mx-auto">Building expertise through diverse roles and continuous learning</p>
+          <motion.h2 
+            className="text-3xl md:text-5xl font-black text-white mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            Experiences &{" "}
+            <motion.span 
+              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
+              style={{
+                background: "linear-gradient(90deg, #c084fc 0%, #60a5fa 50%, #c084fc 100%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              Ventures
+            </motion.span>
+          </motion.h2>
+          <motion.p 
+            className="text-gray-400 max-w-lg mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            Building expertise through diverse roles and continuous learning
+          </motion.p>
         </motion.div>
 
         {/* Timeline */}
@@ -272,12 +316,31 @@ export default function Experience() {
                   }}
                   className="relative pl-12 md:pl-0"
                 >
-                  {/* Timeline Dot */}
+                  {/* Timeline Dot with pulsing glow */}
                   <motion.div 
                     ref={index === 0 ? firstDotRef : index === experiences.length - 1 ? lastDotRef : null}
                     className={`absolute left-2 md:left-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-br ${gradient} md:-translate-x-1/2 ring-4 ring-black shadow-lg z-10`}
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
                     whileHover={{ scale: 1.5 }}
-                  />
+                    transition={{ type: "spring", stiffness: 200 }}
+                  >
+                    {/* Pulsing glow ring */}
+                    <motion.div
+                      className={`absolute inset-0 rounded-full bg-gradient-to-br ${gradient}`}
+                      animate={{ 
+                        scale: [1, 1.8, 1],
+                        opacity: [0.6, 0, 0.6],
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: index * 0.3,
+                      }}
+                    />
+                  </motion.div>
 
                   <div className={`md:flex items-start gap-8 ${index % 2 === 0 ? "md:flex-row-reverse" : ""}`}>
                     <div className="hidden md:block flex-1" />

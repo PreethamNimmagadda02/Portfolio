@@ -90,20 +90,60 @@ function AchievementCard({ item, index }: { item: typeof achievements[0]; index:
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative h-full bg-zinc-900/90 backdrop-blur-xl border border-white/10 p-8 rounded-2xl hover:border-white/20 transition-all duration-300 flex flex-col items-center text-center"
+        className="relative h-full bg-zinc-900/90 backdrop-blur-xl border border-white/10 p-8 rounded-2xl hover:border-white/20 transition-all duration-300 flex flex-col items-center text-center overflow-hidden"
       >
-        {/* Floating Icon */}
+        {/* Shimmer sweep effect */}
         <motion.div
-          className="mb-6 p-4 rounded-full bg-white/5 border border-white/10"
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transform: "translateZ(30px)" }}
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12"
+          initial={{ x: "-200%" }}
+          whileInView={{ x: "200%" }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.5, delay: index * 0.2 }}
+        />
+        
+        {/* Floating Icon with bounce entrance */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          whileInView={{ scale: 1, rotate: 0 }}
+          viewport={{ once: true }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 200, 
+            damping: 15, 
+            delay: index * 0.15 
+          }}
+          whileHover={{ scale: 1.2 }}
         >
-          {item.icon}
+          <motion.div
+            className="mb-6 p-4 rounded-full bg-white/5 border border-white/10"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transform: "translateZ(30px)" }}
+          >
+            {item.icon}
+          </motion.div>
         </motion.div>
 
-        <h3 className="text-xl font-bold text-white mb-2" style={{ transform: "translateZ(20px)" }}>{item.title}</h3>
-        <div className={`font-mono font-bold text-lg mb-4 bg-clip-text text-transparent bg-gradient-to-r ${item.gradient}`} style={{ transform: "translateZ(20px)" }}>{item.stats}</div>
+        <motion.h3 
+          className="text-xl font-bold text-white mb-2" 
+          style={{ transform: "translateZ(20px)" }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: index * 0.1 + 0.2 }}
+        >
+          {item.title}
+        </motion.h3>
+        <motion.div 
+          className={`font-mono font-bold text-lg mb-4 bg-clip-text text-transparent bg-gradient-to-r ${item.gradient}`} 
+          style={{ transform: "translateZ(20px)" }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", delay: index * 0.1 + 0.3 }}
+        >
+          {item.stats}
+        </motion.div>
         <p className="text-gray-200 font-[var(--font-inter)] text-sm leading-relaxed" style={{ transform: "translateZ(10px)" }}>
           {item.description}
         </p>
@@ -156,8 +196,33 @@ export default function Achievements() {
           style={{ opacity: headerOpacity, y: headerY, scale: headerScale }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-6">Achievements</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full" />
+          <motion.h2 
+            className="text-3xl md:text-5xl font-black text-white mb-6"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <motion.span
+              style={{
+                background: "linear-gradient(90deg, #fff 0%, #fff 40%, #fbbf24 50%, #fff 60%, #fff 100%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+              animate={{ backgroundPosition: ["200% 0%", "-200% 0%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              Achievements
+            </motion.span>
+          </motion.h2>
+          <motion.div 
+            className="w-24 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto rounded-full"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          />
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

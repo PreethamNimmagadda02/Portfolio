@@ -82,22 +82,31 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
   return (
     <motion.div 
       className="relative [perspective:1500px] h-full"
+      initial={{ opacity: 0, y: 50, rotateX: 10 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
       whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
     >
-      {/* Animated gradient border - Spinning effect */}
+      {/* Animated shimmer border - Traveling glow effect */}
       <motion.div 
-        className={`absolute -inset-[1px] bg-gradient-to-r ${project.gradient} rounded-3xl opacity-70 blur-sm group-hover:opacity-100 transition-opacity duration-500`}
+        className={`absolute -inset-[2px] bg-gradient-to-r ${project.gradient} rounded-3xl opacity-50 blur-md`}
         animate={{ 
-          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+          backgroundPosition: ["0% 50%", "100% 50%", "200% 50%"],
+          opacity: [0.4, 0.7, 0.4],
         }}
         transition={{ 
-          duration: 5, 
+          duration: 3, 
           repeat: Infinity, 
           ease: "linear",
-          repeatType: "mirror"
         }}
         style={{ backgroundSize: "200% 200%" }}
+      />
+      {/* Inner glow pulse */}
+      <motion.div 
+        className={`absolute inset-0 bg-gradient-to-br ${project.gradient} rounded-3xl opacity-0 group-hover:opacity-20 blur-2xl transition-opacity duration-500`}
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       />
       
       <motion.div
@@ -163,14 +172,34 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
             {project.description}
           </p>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6" style={{ transform: "translateZ(30px)" }}>
+          {/* Tags with pop animation */}
+          <motion.div 
+            className="flex flex-wrap gap-2 mb-6" 
+            style={{ transform: "translateZ(30px)" }}
+          >
             {project.tags.map((tag, i) => (
-              <span key={i} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:scale-105 transition-all cursor-default">
+              <motion.span 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  delay: i * 0.05, 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 15 
+                }}
+                whileHover={{ 
+                  scale: 1.15, 
+                  y: -3,
+                  boxShadow: "0 4px 15px rgba(139, 92, 246, 0.3)",
+                }}
+                className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-purple-500/30 transition-colors cursor-default"
+              >
                 {tag}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
 
           {/* Links */}
           <div className="flex items-center gap-4 mt-auto pt-4 border-t border-white/5" style={{ transform: "translateZ(40px)" }}>
@@ -223,10 +252,38 @@ export default function Projects() {
           >
             Portfolio
           </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-            Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Projects</span>
-          </h2>
-          <p className="text-gray-400 max-w-lg mx-auto">Crafting solutions that make an impact</p>
+          <motion.h2 
+            className="text-3xl md:text-5xl font-black text-white mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            Featured{" "}
+            <motion.span 
+              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
+              style={{
+                background: "linear-gradient(90deg, #c084fc 0%, #60a5fa 50%, #c084fc 100%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              Projects
+            </motion.span>
+          </motion.h2>
+          <motion.p 
+            className="text-gray-400 max-w-lg mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            Crafting solutions that make an impact
+          </motion.p>
         </motion.div>
 
         {/* Featured Project */}
