@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Hook for mouse position (normalized -1 to 1)
 function useMousePosition() {
@@ -26,7 +27,7 @@ function useMousePosition() {
 // Interactive flowing particles that react to mouse
 function ReactiveParticles({ mouse, count = 800 }: { mouse: { x: number; y: number }; count?: number }) {
   const pointsRef = useRef<THREE.Points>(null);
-  
+
   const { positions, velocities, originalPositions } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const velocities = new Float32Array(count * 3);
@@ -217,13 +218,13 @@ function MouseFollower({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    
+
     targetPos.set(mouse.x * 3, mouse.y * 3, -2);
     meshRef.current.position.lerp(targetPos, 0.05);
-    
+
     meshRef.current.rotation.x = state.clock.elapsedTime * 0.3;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-    
+
     // Pulsing scale
     const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
     meshRef.current.scale.setScalar(scale);
@@ -254,7 +255,7 @@ function MouseTrails({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame(() => {
     if (!trailRef.current) return;
-    
+
     const positions = positionsRef.current;
     const opacities = opacitiesRef.current;
 
@@ -301,7 +302,7 @@ function MouseReactiveSceneContent({ mouse }: { mouse: { x: number; y: number } 
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
       <pointLight position={[-10, -10, 10]} intensity={0.3} color="#ec4899" />
-      
+
       <ReactiveParticles mouse={mouse} count={600} />
       <MagneticLines mouse={mouse} />
       <MouseFollower mouse={mouse} />
@@ -312,6 +313,9 @@ function MouseReactiveSceneContent({ mouse }: { mouse: { x: number; y: number } 
 
 export default function MouseReactiveBackground() {
   const mouse = useMousePosition();
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none opacity-50">

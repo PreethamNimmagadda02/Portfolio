@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, MeshDistortMaterial, MeshWobbleMaterial, Sphere, Torus, Box, Icosahedron, Octahedron, TorusKnot } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Mouse tracker hook
 function useMousePosition() {
@@ -31,11 +32,11 @@ function MorphingBlob({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    
+
     // Smooth follow mouse
     targetPosition.set(mouse.x * 2, mouse.y * 2, 0);
     meshRef.current.position.lerp(targetPosition, 0.02);
-    
+
     // Continuous rotation
     meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
@@ -113,16 +114,16 @@ function ReactiveGrid({ mouse }: { mouse: { x: number; y: number } }) {
       if (!cube) return;
       const basePos = cubes[i];
       const distToMouse = Math.sqrt(
-        Math.pow((basePos[0] / 3) - mouse.x, 2) + 
+        Math.pow((basePos[0] / 3) - mouse.x, 2) +
         Math.pow((basePos[1] / 3) - mouse.y, 2)
       );
-      
+
       // Push cubes away from mouse
       const pushStrength = Math.max(0, 1 - distToMouse);
       cube.position.z = -5 + pushStrength * 2;
       cube.rotation.x = state.clock.elapsedTime + i * 0.1;
       cube.rotation.y = state.clock.elapsedTime * 0.5 + i * 0.1;
-      
+
       // Scale based on proximity
       const scale = 0.15 + pushStrength * 0.1;
       cube.scale.setScalar(scale);
@@ -251,7 +252,7 @@ function SceneContent({ mouse }: { mouse: { x: number; y: number } }) {
       <pointLight position={[10, 10, 10]} intensity={1} color="#8b5cf6" />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#ec4899" />
       <spotLight position={[0, 10, 0]} angle={0.3} penumbra={1} intensity={0.5} color="#06b6d4" />
-      
+
       <MorphingBlob mouse={mouse} />
       <FloatingRings />
       <FloatingCrystals />
@@ -262,6 +263,9 @@ function SceneContent({ mouse }: { mouse: { x: number; y: number } }) {
 
 export default function InteractiveGeometry() {
   const mouse = useMousePosition();
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none opacity-60">

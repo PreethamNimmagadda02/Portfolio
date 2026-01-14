@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Points, PointMaterial, Float } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Hook for mouse position
 function useMousePosition() {
@@ -42,10 +43,10 @@ function useScrollPosition() {
 }
 
 // Enhanced star field with scroll parallax and mouse interaction
-function EnhancedStarField({ mouse, scroll }: { mouse: { x: number; y: number }; scroll: number }) {
+function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y: number }; scroll: number; isMobile: boolean }) {
   const ref = useRef<THREE.Points>(null);
-  const particlesCount = 2000;
-  
+  const particlesCount = isMobile ? 200 : 2000;
+
   const { positions, originalPositions, sizes, colors } = useMemo(() => {
     const positions = new Float32Array(particlesCount * 3);
     const originalPositions = new Float32Array(particlesCount * 3);
@@ -99,10 +100,10 @@ function EnhancedStarField({ mouse, scroll }: { mouse: { x: number; y: number };
       const dx = ox - mouse.x * 3;
       const dy = oy - mouse.y * 3;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      
+
       let newX = ox;
       let newY = oy;
-      
+
       if (dist < 2) {
         const force = (2 - dist) / 2;
         newX = ox + dx * force * 0.3;
@@ -146,7 +147,7 @@ function EnhancedStarField({ mouse, scroll }: { mouse: { x: number; y: number };
 // Nebula clouds - large glowing orbs
 function NebulaClouds({ mouse }: { mouse: { x: number; y: number } }) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   const clouds = useMemo(() => {
     return [
       { position: [-3, 2, -4] as [number, number, number], scale: 2, color: "#8b5cf6", speed: 0.3 },
@@ -161,15 +162,15 @@ function NebulaClouds({ mouse }: { mouse: { x: number; y: number } }) {
     groupRef.current.children.forEach((child, i) => {
       const cloud = clouds[i];
       const mesh = child as THREE.Mesh;
-      
+
       // Breathing animation
       const breathe = Math.sin(state.clock.elapsedTime * cloud.speed) * 0.2 + 1;
       mesh.scale.setScalar(cloud.scale * breathe);
-      
+
       // Slight movement toward mouse
       mesh.position.x = cloud.position[0] + mouse.x * 0.3;
       mesh.position.y = cloud.position[1] + mouse.y * 0.3;
-      
+
       // Floating motion
       mesh.position.y += Math.sin(state.clock.elapsedTime * cloud.speed + i) * 0.3;
     });
@@ -194,7 +195,7 @@ function NebulaClouds({ mouse }: { mouse: { x: number; y: number } }) {
 // Floating geometric shapes
 function FloatingShapes({ scroll }: { scroll: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   const shapes = useMemo(() => {
     return [
       { type: "icosahedron", position: [-4, 2, -3] as [number, number, number], color: "#8b5cf6", size: 0.3 },
@@ -298,7 +299,7 @@ function ConstellationLines() {
 // Enhanced floating orbs with glow
 function EnhancedOrbs({ mouse }: { mouse: { x: number; y: number } }) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   const orbs = useMemo(() => {
     return Array.from({ length: 12 }, (_, i) => ({
       position: [
@@ -317,15 +318,15 @@ function EnhancedOrbs({ mouse }: { mouse: { x: number; y: number } }) {
     groupRef.current.children.forEach((child, i) => {
       const orb = orbs[i];
       const mesh = child as THREE.Mesh;
-      
+
       // Floating animation
       mesh.position.y = orb.position[1] + Math.sin(state.clock.elapsedTime * orb.speed + i) * 0.5;
       mesh.position.x = orb.position[0] + Math.cos(state.clock.elapsedTime * orb.speed * 0.5 + i) * 0.3;
-      
+
       // React to mouse slightly
       mesh.position.x += mouse.x * 0.2;
       mesh.position.y += mouse.y * 0.2;
-      
+
       // Pulsing
       const pulse = Math.sin(state.clock.elapsedTime * 2 + i) * 0.1 + 1;
       mesh.scale.setScalar(orb.scale * pulse);
@@ -350,26 +351,12 @@ function EnhancedOrbs({ mouse }: { mouse: { x: number; y: number } }) {
   );
 }
 
-// Main scene content
-function SceneContent({ mouse, scroll }: { mouse: { x: number; y: number }; scroll: number }) {
-  return (
-    <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
-      <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
-      
-      <EnhancedStarField mouse={mouse} scroll={scroll} />
-      <NebulaClouds mouse={mouse} />
-      <FloatingShapes scroll={scroll} />
-      <ConstellationLines />
-      <EnhancedOrbs mouse={mouse} />
-    </>
-  );
-}
+
 
 export default function ParticleField() {
   const mouse = useMousePosition();
   const scroll = useScrollPosition();
+  const isMobile = useIsMobile();
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
@@ -379,7 +366,19 @@ export default function ParticleField() {
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
-          <SceneContent mouse={mouse} scroll={scroll} />
+          <ambientLight intensity={0.4} />
+          <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
+          <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
+
+          <EnhancedStarField mouse={mouse} scroll={scroll} isMobile={isMobile} />
+          {!isMobile && (
+            <>
+              <NebulaClouds mouse={mouse} />
+              <FloatingShapes scroll={scroll} />
+              <ConstellationLines />
+              <EnhancedOrbs mouse={mouse} />
+            </>
+          )}
         </Suspense>
       </Canvas>
     </div>

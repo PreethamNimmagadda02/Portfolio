@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Animated wave mesh
 function WavePlane() {
@@ -25,9 +26,9 @@ function WavePlane() {
         originalPositions.push(x, 0, z);
       }
     }
-    return { 
-      positions: new Float32Array(positions), 
-      originalPositions: new Float32Array(originalPositions) 
+    return {
+      positions: new Float32Array(positions),
+      originalPositions: new Float32Array(originalPositions)
     };
   }, []);
 
@@ -40,12 +41,12 @@ function WavePlane() {
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = originalPositions[i * 3];
       const z = originalPositions[i * 3 + 2];
-      
+
       // Complex wave pattern
       const wave1 = Math.sin(x * 0.3 + time * 0.5) * 0.3;
       const wave2 = Math.sin(z * 0.4 + time * 0.7) * 0.2;
       const wave3 = Math.cos((x + z) * 0.2 + time * 0.3) * 0.15;
-      
+
       positionAttribute.setY(i, wave1 + wave2 + wave3);
     }
     positionAttribute.needsUpdate = true;
@@ -83,7 +84,7 @@ function RippleWave() {
       const x = positionAttribute.getX(i);
       const z = positionAttribute.getZ(i);
       const dist = Math.sqrt(x * x + z * z);
-      
+
       // Ripple from center
       const y = Math.sin(dist * 0.5 - time * 2) * Math.exp(-dist * 0.1) * 0.5;
       positionAttribute.setY(i, y);
@@ -154,7 +155,7 @@ function WaveRibbons() {
 // Particle waves
 function ParticleWaves({ count = 500 }) {
   const pointsRef = useRef<THREE.Points>(null);
-  
+
   const { positions, originalPositions, colors } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const originalPositions = new Float32Array(count * 3);
@@ -191,7 +192,7 @@ function ParticleWaves({ count = 500 }) {
     for (let i = 0; i < count; i++) {
       const x = originalPositions[i * 3];
       const origY = originalPositions[i * 3 + 1];
-      
+
       const wave = Math.sin(x * 0.5 + time) * 0.5 + Math.cos(x * 0.3 + time * 0.5) * 0.3;
       positionAttribute.setY(i, origY + wave);
     }
@@ -229,7 +230,7 @@ function WaveSceneContent() {
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} color="#8b5cf6" />
       <pointLight position={[-10, 5, -10]} intensity={0.5} color="#06b6d4" />
-      
+
       <WavePlane />
       <RippleWave />
       <WaveRibbons />
@@ -239,6 +240,10 @@ function WaveSceneContent() {
 }
 
 export default function WaveBackground() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none opacity-50">
       <Canvas

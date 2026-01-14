@@ -5,6 +5,7 @@ import { Text3D, Float, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GlowingSphereProps {
   position: [number, number, number];
@@ -17,7 +18,7 @@ interface GlowingSphereProps {
 function GlowingSphere({ position, color, size = 0.5, speed = 1 }: GlowingSphereProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const initialY = position[1];
-  
+
   useFrame((state) => {
     if (!meshRef.current) return;
     // Floating animation
@@ -122,7 +123,7 @@ function PulsingRings() {
       const baseScale = 1 + i * 0.5;
       const pulse = Math.sin(state.clock.elapsedTime * 2 - i * 0.3) * 0.1;
       ring.scale.setScalar(baseScale + pulse);
-      
+
       const material = ring.material as THREE.MeshStandardMaterial;
       material.opacity = 0.3 - i * 0.05 + pulse * 0.1;
     });
@@ -185,12 +186,12 @@ function DividerSceneContent() {
       <ambientLight intensity={0.4} />
       <pointLight position={[5, 5, 5]} intensity={1} color="#8b5cf6" />
       <pointLight position={[-5, -5, 5]} intensity={0.5} color="#ec4899" />
-      
+
       <PulsingRings />
       <EnergyBeams />
       <OrbitingParticles radius={3.5} count={24} />
       <GlassOrb position={[0, 0, 0]} />
-      
+
       <GlowingSphere position={[-3, 0, -2]} color="#ec4899" size={0.3} speed={1.2} />
       <GlowingSphere position={[3, 0, -2]} color="#06b6d4" size={0.3} speed={0.8} />
       <GlowingSphere position={[0, 2.5, -1]} color="#22c55e" size={0.2} speed={1.5} />
@@ -200,11 +201,22 @@ function DividerSceneContent() {
 
 // Component for section dividers
 export default function SectionDivider3D() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="relative w-full h-32 overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-64 overflow-hidden">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
-      
+
       {/* 3D Canvas */}
       <div className="absolute inset-0">
         <Canvas
@@ -230,6 +242,10 @@ export default function SectionDivider3D() {
 
 // Alternative floating orbs for page background
 export function FloatingOrbs3D() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
       <Canvas
@@ -240,7 +256,7 @@ export function FloatingOrbs3D() {
         <Suspense fallback={null}>
           <ambientLight intensity={0.3} />
           <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
-          
+
           <GlowingSphere position={[-4, 2, -3]} color="#8b5cf6" size={0.8} speed={0.6} />
           <GlowingSphere position={[4, -2, -4]} color="#ec4899" size={0.6} speed={0.8} />
           <GlowingSphere position={[-2, -3, -2]} color="#06b6d4" size={0.5} speed={1} />
