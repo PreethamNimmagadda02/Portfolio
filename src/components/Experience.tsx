@@ -23,12 +23,12 @@ const experiences: Experience[] = [
     period: "Sept 2025 - Nov 2025",
     description: (
       <>
-        Promoted <span className="text-cyan-400 font-semibold">Perplexity</span> and Comet browsers, organized workshops, and collaborated with peers to drive adoption of <span className="text-blue-400 font-semibold">innovative browsing solutions</span>.
+        Spearheaded <span className="text-cyan-400 font-semibold">market expansion strategies</span> for Perplexity. Orchestrated adoption campaigns & built strategic partnerships to drive <span className="text-blue-400 font-semibold">user acquisition</span>.
       </>
     ),
     type: "community",
-    skills: ["Marketing", "Workshops", "Outreach"],
-    highlight: "20+ Leads Generated"
+    skills: ["Growth Hacking", "Strategic Partnerships", "Brand Strategy"],
+    highlight: "Generated 20+ Strategic Leads"
   },
   {
     role: "Software Developer Intern",
@@ -36,12 +36,12 @@ const experiences: Experience[] = [
     period: "June 2025 – July 2025",
     description: (
       <>
-        Built <span className="text-blue-400 font-semibold">Autonomous AI agents</span> reducing memory usage by <span className="text-green-400 font-semibold">20%</span>. Optimized page load time by <span className="text-green-400 font-semibold">15%</span> and improved SEO rankings by <span className="text-green-400 font-semibold">10%</span>.
+        Architected <span className="text-blue-400 font-semibold">Autonomous AI Agents</span> reducing system resource load by <span className="text-green-400 font-semibold">20%</span>. Engineered performance optimizations that boosted SEO visibility by <span className="text-green-400 font-semibold">10%</span>.
       </>
     ),
     type: "work",
-    skills: ["AI Agents", "React", "Performance"],
-    highlight: "20% Memory Optimization"
+    skills: ["AI Architecture", "System Optimization", "Scalable Tech"],
+    highlight: "20% Efficiency Gain"
   },
   {
     role: "Hostel Prefect",
@@ -49,12 +49,12 @@ const experiences: Experience[] = [
     period: "Sept 2024 - Sept 2025",
     description: (
       <>
-        Organized <span className="text-pink-400 font-semibold">10+ community events</span> boosting engagement by <span className="text-green-400 font-semibold">40%</span> and implemented conflict resolution strategies reducing disputes by <span className="text-green-400 font-semibold">30%</span>.
+        Managed operations for <span className="text-pink-400 font-semibold">1,800+ residents</span>. Implemented conflict resolution protocols reducing disputes by <span className="text-green-400 font-semibold">30%</span> and boosted community engagement by <span className="text-green-400 font-semibold">40%</span>.
       </>
     ),
     type: "organization",
-    skills: ["Event Management", "Conflict Resolution"],
-    highlight: "40% Engagement Boost"
+    skills: ["Operations Management", "Conflict Resolution", "Community Building"],
+    highlight: "LEAD 1800+ Residents"
   },
   {
     role: "Student Senator",
@@ -62,12 +62,12 @@ const experiences: Experience[] = [
     period: "March 2024 - March 2025",
     description: (
       <>
-        Represented <span className="text-purple-400 font-semibold">1,500+ peers</span>, enhanced student engagement by <span className="text-green-400 font-semibold">30%</span>, and collaborated with administration to improve facilities.
+        Elected representative for <span className="text-purple-400 font-semibold">1,500+ peers</span>. Facilitated policy changes and infrastructure improvements, enhancing student satisfaction and <span className="text-green-400 font-semibold">campus life quality</span>.
       </>
     ),
     type: "achievement",
-    skills: ["Leadership", "Advocacy", "Public Speaking"],
-    highlight: "1,500+ Students Represented"
+    skills: ["Strategic Leadership", "Policy Advocacy", "Governance"],
+    highlight: "Elected Representative"
   }
 ];
 
@@ -130,11 +130,11 @@ function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; i
       >
         {/* Hover gradient */}
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-        
+
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-3 relative" style={{ transform: "translateZ(30px)" }}>
           <div className="flex items-center gap-2">
-            <motion.div 
+            <motion.div
               className={`p-1.5 rounded-lg bg-gradient-to-br ${gradient}`}
               animate={{ y: [0, -3, 0] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -149,37 +149,37 @@ function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; i
             </span>
           )}
         </div>
-        
+
         <h3 className="text-xl font-bold text-white mb-2 relative" style={{ transform: "translateZ(20px)" }}>{exp.role}</h3>
-        
+
         <div className="flex items-center gap-2 text-gray-500 text-sm mb-4 relative" style={{ transform: "translateZ(15px)" }}>
           <Calendar size={14} />
           <span>{exp.period}</span>
         </div>
-        
+
         <p className="text-gray-200 font-[var(--font-inter)] leading-relaxed mb-4 relative" style={{ transform: "translateZ(10px)" }}>
           {exp.description}
         </p>
-        
+
         {/* Skills with wave entrance */}
-        <motion.div 
-          className="flex flex-wrap gap-2 relative" 
+        <motion.div
+          className="flex flex-wrap gap-2 relative"
           style={{ transform: "translateZ(20px)" }}
         >
           {exp.skills.map((skill, i) => (
-            <motion.span 
+            <motion.span
               key={skill}
               initial={{ opacity: 0, y: 20, scale: 0.8 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ 
-                delay: i * 0.1, 
-                type: "spring", 
-                stiffness: 200, 
-                damping: 15 
+              transition={{
+                delay: i * 0.1,
+                type: "spring",
+                stiffness: 200,
+                damping: 15
               }}
-              whileHover={{ 
-                scale: 1.1, 
+              whileHover={{
+                scale: 1.1,
                 y: -2,
                 boxShadow: "0 4px 12px rgba(139, 92, 246, 0.25)",
               }}
@@ -211,7 +211,7 @@ export default function Experience() {
 
     calculateHeight();
     window.addEventListener('resize', calculateHeight);
-    
+
     const observer = new ResizeObserver(calculateHeight);
     if (firstDotRef.current?.parentElement?.parentElement) {
       observer.observe(firstDotRef.current.parentElement.parentElement);
@@ -227,7 +227,7 @@ export default function Experience() {
     <section id="experience" className="py-20 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-      
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
@@ -237,14 +237,14 @@ export default function Experience() {
           transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
           className="text-center mb-16"
         >
-          <motion.h2 
+          <motion.h2
             className="text-3xl md:text-5xl font-black text-white mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             Experiences &{" "}
-            <motion.span 
+            <motion.span
               className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
               style={{
                 background: "linear-gradient(90deg, #c084fc 0%, #60a5fa 50%, #c084fc 100%)",
@@ -259,7 +259,7 @@ export default function Experience() {
               Ventures
             </motion.span>
           </motion.h2>
-          <motion.p 
+          <motion.p
             className="text-gray-400 max-w-lg mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -273,9 +273,9 @@ export default function Experience() {
         {/* Timeline */}
         <div className="relative">
           {/* Central glowing line - Dynamic Height */}
-          <div 
+          <div
             className="absolute left-4 md:left-1/2 top-6 md:-translate-x-1/2 w-px overflow-hidden"
-            style={{ height: lineHeight + 10}}
+            style={{ height: lineHeight + 10 }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-purple-500 via-blue-500 to-purple-500 opacity-30" />
             <motion.div
@@ -285,7 +285,7 @@ export default function Experience() {
             />
           </div>
 
-          <motion.div 
+          <motion.div
             className="space-y-8"
             initial="hidden"
             whileInView="visible"
@@ -301,7 +301,7 @@ export default function Experience() {
             {experiences.map((exp, index) => {
               const TypeIcon = typeIcons[exp.type];
               const gradient = typeColors[exp.type];
-              
+
               return (
                 <motion.div
                   key={index}
@@ -317,7 +317,7 @@ export default function Experience() {
                   className="relative pl-12 md:pl-0"
                 >
                   {/* Timeline Dot with pulsing glow */}
-                  <motion.div 
+                  <motion.div
                     ref={index === 0 ? firstDotRef : index === experiences.length - 1 ? lastDotRef : null}
                     className={`absolute left-2 md:left-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-br ${gradient} md:-translate-x-1/2 ring-4 ring-black shadow-lg z-10`}
                     initial={{ scale: 0 }}
@@ -329,13 +329,13 @@ export default function Experience() {
                     {/* Pulsing glow ring */}
                     <motion.div
                       className={`absolute inset-0 rounded-full bg-gradient-to-br ${gradient}`}
-                      animate={{ 
+                      animate={{
                         scale: [1, 1.8, 1],
                         opacity: [0.6, 0, 0.6],
                       }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity, 
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
                         ease: "easeInOut",
                         delay: index * 0.3,
                       }}
@@ -344,7 +344,7 @@ export default function Experience() {
 
                   <div className={`md:flex items-start gap-8 ${index % 2 === 0 ? "md:flex-row-reverse" : ""}`}>
                     <div className="hidden md:block flex-1" />
-                    
+
                     <div className="flex-1">
                       <ExperienceCard exp={exp} index={index} gradient={gradient} TypeIcon={TypeIcon} />
                     </div>

@@ -11,7 +11,7 @@ const features = [
     title: "AI Engineer",
     description: (
       <>
-        Pioneering <span className="text-blue-400 font-semibold">autonomous agent systems</span> with <span className="text-purple-400 font-semibold">CrewAI</span>, <span className="text-green-400 font-semibold">Gemini API</span>, and state-of-the-art <span className="text-pink-400 font-semibold">LLMs</span>.
+        Pioneering <span className="text-blue-400 font-semibold">autonomous agent systems</span> that redefine workflow automation. Architecting the future with <span className="text-purple-400 font-semibold">CrewAI</span> & <span className="text-pink-400 font-semibold">n8n</span>.
       </>
     ),
     gradient: "from-blue-500 to-cyan-500",
@@ -33,7 +33,7 @@ const features = [
     title: "Campus Leader",
     description: (
       <>
-        <span className="text-emerald-400 font-semibold">Student Senator</span> championing <span className="text-teal-400 font-semibold">1500+ peers</span>. Orchestrated <span className="text-green-400 font-semibold">10+ major events</span>.
+        <span className="text-emerald-400 font-semibold">Strategic Leader</span> orchestrating impacted changes for <span className="text-teal-400 font-semibold">4000+ students</span>. Managed budgets & logistics for <span className="text-green-400 font-semibold">large-scale operations</span>.
       </>
     ),
     gradient: "from-emerald-500 to-teal-500",
@@ -44,7 +44,7 @@ const features = [
     title: "Full Stack Engineer",
     description: (
       <>
-        Shipping production-ready apps with <span className="text-orange-400 font-semibold">Next.js</span>, <span className="text-yellow-400 font-semibold">React</span>, <span className="text-red-400 font-semibold">Node.js</span>, and <span className="text-amber-400 font-semibold">Firebase</span> at scale.
+        Shipping <span className="text-orange-400 font-semibold">0-to-1 products</span>. Expert in <span className="text-yellow-400 font-semibold">Modern Web Stack</span> (Next.js, React) & Cloud Infrastructure (<span className="text-amber-400 font-semibold">Firebase, AWS</span>).
       </>
     ),
     gradient: "from-orange-500 to-yellow-500",
@@ -53,7 +53,7 @@ const features = [
 ];
 
 const skills = [
-  "React", "Next.js", "TypeScript", "Python", "CrewAI", "LangChain", 
+  "React", "Next.js", "TypeScript", "Python", "CrewAI", "LangChain",
   "Node.js", "Firebase", "Tailwind CSS", "Gemini API"
 ];
 
@@ -65,17 +65,17 @@ function AnimatedCounter({ value, suffix = "", duration = 2000 }: { value: numbe
 
   useEffect(() => {
     if (!isInView) return;
-    
+
     let startTime: number;
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(value * eased));
-      
+
       if (progress < 1) requestAnimationFrame(animate);
     };
-    
+
     requestAnimationFrame(animate);
   }, [isInView, value, duration]);
 
@@ -157,15 +157,15 @@ export default function About() {
     <section id="about" className="py-24 relative overflow-hidden">
       {/* Animated background decoration */}
       <div className="absolute inset-0 pointer-events-none">
-        <motion.div 
+        <motion.div
           animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[120px]" 
+          className="absolute top-1/2 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[120px]"
         />
-        <motion.div 
+        <motion.div
           animate={{ x: [0, -30, 0], y: [0, 30, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" 
+          className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]"
         />
       </div>
 
@@ -192,14 +192,14 @@ export default function About() {
             </motion.div>
             <span className="text-sm text-gray-400">Who I Am</span>
           </motion.div>
-          <motion.h2 
+          <motion.h2
             className="text-4xl md:text-6xl font-black text-white mb-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             About{" "}
-            <motion.span 
+            <motion.span
               className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-black"
               style={{
                 background: "linear-gradient(90deg, #d8b4fe 0%, #f9a8d4 50%, #d8b4fe 100%)",
@@ -214,7 +214,7 @@ export default function About() {
               Me
             </motion.span>
           </motion.h2>
-          <motion.div 
+          <motion.div
             className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full overflow-hidden"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
@@ -243,16 +243,14 @@ export default function About() {
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
             </h3>
             <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
-              Engineering student at <span className="text-white font-bold">IIT (ISM) Dhanbad</span> with a laser focus on 
-              building autonomous AI systems that solve real-world problems. Engineered <span className="text-yellow-300 font-bold">20% memory optimization</span> in multi-agent architectures, pushing the boundaries of efficient AI at scale.
+              Building <span className="text-white font-bold">autonomous AI agents</span> that solve complex problems. Engineered systems with <span className="text-yellow-300 font-bold">20% efficiency gains</span>, pushing the boundaries of what's possible with AI.
             </p>
             <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
-              Former <span className="text-white font-bold">Student Senator</span> shaping policies for <span className="text-purple-300 font-bold">4,000+ students</span> & 
-              <span className="text-white font-bold"> Hostel Prefect</span> managing operations for <span className="text-purple-300 font-bold">1,800+ residents</span>.
+              <span className="text-white font-bold">Strategic Leader</span> with a track record of impact. Orchestrating initiatives for <span className="text-purple-300 font-bold">4,000+ stakeholders</span> & managing large-scale operations with precision.
             </p>
 
             {/* Animated Stats */}
-            <motion.div 
+            <motion.div
               className="grid grid-cols-3 gap-4 pt-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -264,15 +262,15 @@ export default function About() {
                 { value: 20, suffix: "%", label: <><span className="text-yellow-400 font-semibold">Memory</span> Reduction</>, icon: Zap, color: "from-yellow-400 to-orange-400" },
                 { value: 350, suffix: "+", label: <><span className="text-emerald-400 font-semibold">Participants</span> Led</>, icon: Target, color: "from-emerald-400 to-cyan-400" }
               ].map((stat, i) => (
-                <motion.div 
-                  key={i} 
+                <motion.div
+                  key={i}
                   initial={{ opacity: 0, y: 30, scale: 0.8 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ 
-                    delay: i * 0.15, 
-                    type: "spring", 
-                    stiffness: 100 
+                  transition={{
+                    delay: i * 0.15,
+                    type: "spring",
+                    stiffness: 100
                   }}
                   whileHover={{ scale: 1.1, y: -8 }}
                   className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 transition-all cursor-pointer relative overflow-hidden"
@@ -289,7 +287,7 @@ export default function About() {
                   >
                     <stat.icon size={16} className="mx-auto mb-2 text-gray-500 group-hover:text-white transition-colors" />
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color}`}
                     animate={{
                       textShadow: [
@@ -308,7 +306,7 @@ export default function About() {
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 gap-5"
             variants={containerVariants}
             initial="hidden"
@@ -321,9 +319,9 @@ export default function About() {
                   <div className={`relative p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full`}>
                     {/* Gradient overlay on hover */}
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-                    
+
                     {/* Floating Icon */}
-                    <motion.div 
+                    <motion.div
                       className={`relative mb-4 p-3 rounded-xl bg-gradient-to-br ${feature.gradient} w-fit`}
                       animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -331,7 +329,7 @@ export default function About() {
                     >
                       <div className="text-white">{feature.icon}</div>
                     </motion.div>
-                    
+
                     {/* Content */}
                     <h4 className="relative text-xl font-semibold text-white mb-2">
                       {feature.title}
@@ -341,7 +339,7 @@ export default function About() {
                     </p>
 
                     {/* Hover indicator */}
-                    <motion.div 
+                    <motion.div
                       className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
                       initial={{ x: -10 }}
                       whileHover={{ x: 0 }}

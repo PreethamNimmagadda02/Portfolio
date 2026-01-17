@@ -18,30 +18,30 @@ const floatingIcons = [
 ];
 
 // Floating Icon Component with mouse reactivity
-function FloatingIcon({ 
-  Icon, 
-  delay, 
-  size, 
-  gradient, 
-  index, 
-  mouseX, 
-  mouseY 
-}: { 
-  Icon: any; 
-  delay: number; 
-  size: number; 
-  gradient: string; 
+function FloatingIcon({
+  Icon,
+  delay,
+  size,
+  gradient,
+  index,
+  mouseX,
+  mouseY
+}: {
+  Icon: any;
+  delay: number;
+  size: number;
+  gradient: string;
   index: number;
   mouseX: number;
   mouseY: number;
 }) {
   const angle = (index / floatingIcons.length) * Math.PI * 2;
   const radius = 280 + Math.sin(index * 1.5) * 60;
-  
+
   // Base position in a circle
   const baseX = Math.cos(angle) * radius;
   const baseY = Math.sin(angle) * radius * 0.4; // Elliptical orbit
-  
+
   // Mouse reactivity - icons get pushed away slightly
   const pushX = mouseX * 0.05;
   const pushY = mouseY * 0.05;
@@ -49,7 +49,7 @@ function FloatingIcon({
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
-      animate={{ 
+      animate={{
         opacity: [0.4, 0.8, 0.4],
         scale: [1, 1.1, 1],
         x: baseX + pushX,
@@ -88,11 +88,11 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ 
-        opacity: 1, 
+      animate={{
+        opacity: 1,
         y: [0, -8, 0],
       }}
-      transition={{ 
+      transition={{
         opacity: { delay, duration: 0.6 },
         y: { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" }
       }}
@@ -113,7 +113,7 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
 function GlitchText({ children, className = "" }: { children: string; className?: string }) {
   const [isHovered, setIsHovered] = useState(false);
   const [canHover, setCanHover] = useState(false);
-  
+
   // Calculate animation duration: (length * stagger) + initial delay + buffer
   // Stagger is 0.1s (from containerVariants), delayChildren is 0.1s
   useEffect(() => {
@@ -123,7 +123,7 @@ function GlitchText({ children, className = "" }: { children: string; className?
     }, duration);
     return () => clearTimeout(timer);
   }, [children]);
-  
+
   return (
     <motion.span
       className={`relative inline-block cursor-pointer ${className}`}
@@ -186,22 +186,22 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
   const [displayValue, setDisplayValue] = useState("0");
   const numericPart = value.match(/[\d.]+/)?.[0] || "0";
   const suffix = value.replace(/[\d.]+/, "");
-  
+
   useEffect(() => {
     const target = parseFloat(numericPart);
     const duration = 2000;
     const startTime = Date.now();
     const delayMs = delay * 1000;
-    
+
     const timer = setTimeout(() => {
       const animate = () => {
         const elapsed = Date.now() - startTime - delayMs;
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-        
+
         const current = Math.floor(target * eased);
         setDisplayValue(current.toString());
-        
+
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
@@ -210,10 +210,10 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
       };
       animate();
     }, delayMs);
-    
+
     return () => clearTimeout(timer);
   }, [numericPart, delay]);
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.5 }}
@@ -243,8 +243,8 @@ const containerVariants = {
 
 // Letter animation variants - Classy 3D Flip Reveal
 const letterVariants: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     rotateX: 90,
     y: 20,
     filter: "blur(4px)",
@@ -265,9 +265,9 @@ const letterVariants: Variants = {
 function AnimatedWord({ word, className, isOutline = false, reverse = false }: { word: string; className?: string; isOutline?: boolean; reverse?: boolean }) {
   const isGradient = className?.includes("bg-clip-text");
   const letters = reverse ? word.split("").reverse() : word.split("");
-  
+
   return (
-    <motion.span 
+    <motion.span
       className={`inline-flex px-1 [perspective:1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
       variants={containerVariants}
       initial="hidden"
@@ -278,7 +278,7 @@ function AnimatedWord({ word, className, isOutline = false, reverse = false }: {
           key={i}
           variants={letterVariants}
           className={`inline-block [transform-style:preserve-3d] ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
-          style={{ 
+          style={{
             marginRight: letter === " " ? "0.25em" : "0"
           }}
         >
@@ -309,14 +309,14 @@ export default function Hero() {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    
+
     requestAnimationFrame(() => {
       const x = (e.clientX - rect.left - rect.width / 2) / 25;
       const y = (e.clientY - rect.top - rect.height / 2) / 25;
       setTilt({ x, y });
-      setMousePos({ 
-        x: (e.clientX - rect.left - rect.width / 2), 
-        y: (e.clientY - rect.top - rect.height / 2) 
+      setMousePos({
+        x: (e.clientX - rect.left - rect.width / 2),
+        y: (e.clientY - rect.top - rect.height / 2)
       });
     });
   };
@@ -345,7 +345,7 @@ export default function Hero() {
       onMouseLeave={handleMouseLeave}
     >
       {/* Dynamic grid background */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
@@ -359,7 +359,7 @@ export default function Hero() {
       />
 
       {/* Enhanced searchlight effect */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-300"
         style={{
           background: `radial-gradient(circle 500px at ${tilt.x * 25 + 50 + "%"} ${tilt.y * 25 + 50 + "%"}, rgba(139, 92, 246, 0.2), transparent 70%)`
@@ -369,9 +369,9 @@ export default function Hero() {
       {/* Floating tech icons - Desktop Only */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         {floatingIcons.map((icon, index) => (
-          <FloatingIcon 
-            key={index} 
-            {...icon} 
+          <FloatingIcon
+            key={index}
+            {...icon}
             index={index}
             mouseX={mousePos.x}
             mouseY={mousePos.y}
@@ -408,31 +408,31 @@ export default function Hero() {
         />
       </div>
 
-      <div 
+      <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
         {/* Top badge */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
           <FloatingBadge delay={0.3}>
-            🚀 Open to Internship & Full-time Opportunities
+            🚀 Innovating at the Edge of AI
           </FloatingBadge>
         </motion.div>
 
         <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 mt-8 lg:mt-0">
-          
+
           {/* Left Side - Text */}
-          <motion.div 
+          <motion.div
             style={{ y: isMobile ? 0 : yLeft, opacity }}
             className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <AnimatedWord 
-                word="ENGINEERING" 
+              <AnimatedWord
+                word="ENGINEERING"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
               />
             </h1>
@@ -450,17 +450,17 @@ export default function Hero() {
           </motion.div>
 
           {/* Right Side - Text */}
-          <motion.div 
+          <motion.div
             style={{ y: isMobile ? 0 : yRight, opacity }}
             className="flex flex-col items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
-              <AnimatedWord 
-                word="INTELLIGENCE" 
+              <AnimatedWord
+                word="INTELLIGENCE"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
               />
             </h1>
-            <motion.div 
+            <motion.div
               className="mt-6 max-w-xs sm:max-w-md lg:max-w-xs mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -475,45 +475,45 @@ export default function Hero() {
         </div>
 
         {/* Stats Row */}
-        <motion.div 
+        <motion.div
           className="flex justify-center gap-8 md:gap-16 mt-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          <AnimatedStat 
-            value="1000+" 
-            label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>} 
-            delay={1} 
+          <AnimatedStat
+            value="1000+"
+            label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
+            delay={1}
             gradient="from-blue-400 to-cyan-400"
           />
-          <AnimatedStat 
-            value="1864" 
-            label={<><span className="text-orange-400 font-bold">Max</span> Rating</>} 
-            delay={1.2} 
+          <AnimatedStat
+            value="1864"
+            label={<><span className="text-orange-400 font-bold">Max</span> Rating</>}
+            delay={1.2}
             gradient="from-yellow-400 to-orange-400"
           />
-          <AnimatedStat 
-            value="5+" 
-            label={<><span className="text-purple-400 font-bold">Products</span> Built</>} 
-            delay={1.4} 
+          <AnimatedStat
+            value="5+"
+            label={<><span className="text-purple-400 font-bold">Products</span> Built</>}
+            delay={1.4}
             gradient="from-purple-400 to-pink-400"
           />
         </motion.div>
 
         {/* CTA Buttons - Centered below */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="flex justify-center gap-6 mt-10"
         >
-          
+
         </motion.div>
       </div>
 
       {/* Scroll Indicator */}
       <ScrollIndicator opacity={opacity} />
-    </section>
+    </section >
   );
 }
