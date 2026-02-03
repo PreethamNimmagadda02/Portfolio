@@ -239,7 +239,7 @@ export default function About() {
             className="space-y-6 text-center lg:text-left"
           >
             <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-              A <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
+              AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
             </h3>
             <p className="text-gray-100 font-[var(--font-inter)] text-lg leading-relaxed">
