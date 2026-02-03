@@ -1,73 +1,11 @@
 "use client";
 
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence, Variants } from "framer-motion";
-import { ArrowRight, Sparkles, ChevronDown, Code2, Brain, Cpu, Zap, Library, Workflow, Database, Share2, MessageSquareCode } from "lucide-react";
+import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo } from "react";
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
-
-// Floating tech icons that orbit around the hero
-// Floating tech icons that orbit around the hero
-const floatingIcons = [
-  { Icon: Brain, delay: 0, size: 28, gradient: "from-purple-400 to-pink-400" }, // AI Core
-  { Icon: Workflow, delay: 0.5, size: 24, gradient: "from-blue-400 to-cyan-400" }, // Agents
-  { Icon: Database, delay: 1, size: 24, gradient: "from-green-400 to-emerald-400" }, // Vector DB
-  { Icon: Share2, delay: 1.5, size: 26, gradient: "from-yellow-400 to-orange-400" }, // Knowledge Graph
-  { Icon: MessageSquareCode, delay: 2, size: 24, gradient: "from-red-400 to-rose-400" }, // NLP/LLM
-  { Icon: Cpu, delay: 2.5, size: 26, gradient: "from-indigo-400 to-violet-400" }, // Compute
-];
-
-// Floating Icon Component with mouse reactivity
-function FloatingIcon({
-  Icon,
-  delay,
-  size,
-  gradient,
-  index,
-  mouseX,
-  mouseY
-}: {
-  Icon: any;
-  delay: number;
-  size: number;
-  gradient: string;
-  index: number;
-  mouseX: any;
-  mouseY: any;
-}) {
-  const angle = (index / floatingIcons.length) * Math.PI * 2;
-  const radius = 280 + Math.sin(index * 1.5) * 60;
-
-  // Base position in a circle
-  const baseX = Math.cos(angle) * radius;
-  const baseY = Math.sin(angle) * radius * 0.4; // Elliptical orbit
-
-  const x = useTransform(mouseX, (val: number) => baseX + val * 0.05);
-  const y = useTransform(mouseY, (val: number) => baseY + val * 0.05);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{
-        opacity: [0.4, 0.8, 0.4],
-        scale: [1, 1.1, 1],
-        rotate: [0, 360],
-      }}
-      style={{ x, y }}
-      transition={{
-        opacity: { duration: 3, repeat: Infinity, delay },
-        scale: { duration: 3, repeat: Infinity, delay },
-        rotate: { duration: 20 + index * 5, repeat: Infinity, ease: "linear" },
-      }}
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-    >
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} bg-opacity-20 backdrop-blur-sm border border-white/10 shadow-lg`}>
-        <Icon size={size} className="text-white/90" />
-      </div>
-    </motion.div>
-  );
-}
 
 // Animated gradient text component
 function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -241,21 +179,19 @@ const containerVariants = {
   },
 };
 
-// Letter animation variants - Classy 3D Flip Reveal
+// Letter animation variants - Classy Fade Reveal
 const letterVariants: Variants = {
   hidden: {
     opacity: 0,
-    rotateX: 90,
-    y: 20,
+    y: 10,
     filter: "blur(4px)",
   },
   visible: {
     opacity: 1,
-    rotateX: 0,
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.8,
+      duration: 0.5,
       ease: "easeOut",
     },
   },
@@ -277,7 +213,7 @@ function AnimatedWord({ word, className, isOutline = false, reverse = false }: {
         <motion.span
           key={i}
           variants={letterVariants}
-          className={`inline-block [transform-style:preserve-3d] ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
+          className={`inline-block ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
           style={{
             marginRight: letter === " " ? "0.25em" : "0"
           }}
@@ -326,14 +262,6 @@ export default function Hero() {
   };
 
   // Derived transforms for background effects - outside render cycle
-  const gridX = useTransform(mouseXSpring, (val: number) => val * 0.02);
-  const gridY = useTransform(mouseYSpring, (val: number) => val * 0.02);
-  const searchlightX = useTransform(mouseXSpring, (val: number) => (val / 25) * 25 + 50 + "%");
-  const searchlightY = useTransform(mouseYSpring, (val: number) => (val / 25) * 25 + 50 + "%");
-  const searchlightGradient = useTransform(
-    [searchlightX, searchlightY],
-    ([sx, sy]) => `radial-gradient(circle 500px at ${sx} ${sy}, rgba(139, 92, 246, 0.2), transparent 70%)`
-  );
 
   // Hydration fix & Mobile detection
   const [mounted, setMounted] = useState(false);
@@ -355,8 +283,8 @@ export default function Hero() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Dynamic grid background */}
-      <motion.div
+      {/* Static grid background */}
+      <div
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
@@ -364,60 +292,8 @@ export default function Hero() {
             linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: "50px 50px",
-          translateX: gridX,
-          translateY: gridY,
         }}
       />
-
-      {/* Enhanced searchlight effect */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none opacity-40"
-        style={{
-          background: searchlightGradient
-        }}
-      />
-
-      {/* Floating tech icons - Desktop Only, Client Only */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-        {mounted && floatingIcons.map((icon, index) => (
-          <FloatingIcon
-            key={index}
-            {...icon}
-            index={index}
-            mouseX={mouseXSpring}
-            mouseY={mouseYSpring}
-          />
-        ))}
-      </div>
-
-      {/* Gradient orbs background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]"
-        />
-        <motion.div
-          animate={{
-            x: [0, -30, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]"
-        />
-      </div>
 
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
