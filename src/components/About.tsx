@@ -8,10 +8,10 @@ import React from "react";
 const features = [
   {
     icon: <Code className="w-6 h-6" />,
-    title: "AI Engineer",
+    title: "Generative AI Specialist",
     description: (
       <>
-        Pioneering <span className="text-blue-400 font-semibold">autonomous agent systems</span> that redefine workflow automation. Architecting the future with <span className="text-purple-400 font-semibold">CrewAI</span> & <span className="text-pink-400 font-semibold">n8n</span>.
+        Pioneering <span className="text-blue-400 font-bold">Multimodal Systems</span> that see beyond the pixel. Architecting <span className="text-purple-400 font-bold">Cognitive Agents</span> capable of complex reasoning and autonomous decision-making in dynamic environments.
       </>
     ),
     gradient: "from-blue-500 to-cyan-500",
@@ -22,7 +22,7 @@ const features = [
     title: "Elite Coder",
     description: (
       <>
-        Top <span className="text-yellow-400 font-semibold">1% on CodeChef</span> (1864 rating). <span className="text-purple-400 font-semibold">Codeforces Specialist</span> with <span className="text-blue-400 font-semibold">1000+ problems</span> conquered.
+        <span className="text-yellow-400 font-semibold">Global Top 1%</span> on CodeChef (1864 Rating) demonstrating exceptional algorithmic speed. <span className="text-purple-400 font-semibold">Codeforces Specialist</span> with <span className="text-blue-400 font-semibold">1000+ problems</span> solved, showcasing mastery of complex data structures.
       </>
     ),
     gradient: "from-purple-500 to-pink-500",
@@ -41,10 +41,10 @@ const features = [
   },
   {
     icon: <BookOpen className="w-6 h-6" />,
-    title: "Full Stack Engineer",
+    title: "Agent Systems Architect",
     description: (
       <>
-        Shipping <span className="text-orange-400 font-semibold">0-to-1 products</span>. Expert in <span className="text-yellow-400 font-semibold">Modern Web Stack</span> (Next.js, React) & Cloud Infrastructure (<span className="text-amber-400 font-semibold">Firebase, AWS</span>).
+        Building <span className="text-orange-400 font-semibold">Autonomous Swarms</span> for Trading & Logistics. Expert in <span className="text-yellow-400 font-semibold">Multi-Agent Orchestration</span> (CrewAI, LangChain) & <span className="text-amber-400 font-semibold">Scalable Infrastructure</span>.
       </>
     ),
     gradient: "from-orange-500 to-yellow-500",
@@ -314,8 +314,8 @@ export default function About() {
             viewport={{ amount: 0.3 }}
           >
             {features.map((feature, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <TiltCard gradient={feature.gradient}>
+              <motion.div key={index} variants={itemVariants} className="h-full">
+                <TiltCard gradient={feature.gradient} className="h-full">
                   <div className={`relative p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 ${feature.glow} hover:shadow-2xl h-full`}>
                     {/* Gradient overlay on hover */}
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />

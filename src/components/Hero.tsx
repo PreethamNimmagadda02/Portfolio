@@ -1,20 +1,21 @@
 "use client";
 
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence, Variants } from "framer-motion";
-import { ArrowRight, Sparkles, ChevronDown, Code2, Brain, Cpu, Zap, Terminal, Rocket } from "lucide-react";
+import { ArrowRight, Sparkles, ChevronDown, Code2, Brain, Cpu, Zap, Library, Workflow, Database, Share2, MessageSquareCode } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo } from "react";
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
 
 // Floating tech icons that orbit around the hero
+// Floating tech icons that orbit around the hero
 const floatingIcons = [
-  { Icon: Code2, delay: 0, size: 24, gradient: "from-blue-400 to-cyan-400" },
-  { Icon: Brain, delay: 0.5, size: 28, gradient: "from-purple-400 to-pink-400" },
-  { Icon: Cpu, delay: 1, size: 22, gradient: "from-green-400 to-emerald-400" },
-  { Icon: Zap, delay: 1.5, size: 26, gradient: "from-yellow-400 to-orange-400" },
-  { Icon: Terminal, delay: 2, size: 24, gradient: "from-red-400 to-rose-400" },
-  { Icon: Rocket, delay: 2.5, size: 26, gradient: "from-indigo-400 to-violet-400" },
+  { Icon: Brain, delay: 0, size: 28, gradient: "from-purple-400 to-pink-400" }, // AI Core
+  { Icon: Workflow, delay: 0.5, size: 24, gradient: "from-blue-400 to-cyan-400" }, // Agents
+  { Icon: Database, delay: 1, size: 24, gradient: "from-green-400 to-emerald-400" }, // Vector DB
+  { Icon: Share2, delay: 1.5, size: 26, gradient: "from-yellow-400 to-orange-400" }, // Knowledge Graph
+  { Icon: MessageSquareCode, delay: 2, size: 24, gradient: "from-red-400 to-rose-400" }, // NLP/LLM
+  { Icon: Cpu, delay: 2.5, size: 26, gradient: "from-indigo-400 to-violet-400" }, // Compute
 ];
 
 // Floating Icon Component with mouse reactivity
@@ -32,8 +33,8 @@ function FloatingIcon({
   size: number;
   gradient: string;
   index: number;
-  mouseX: number;
-  mouseY: number;
+  mouseX: any;
+  mouseY: any;
 }) {
   const angle = (index / floatingIcons.length) * Math.PI * 2;
   const radius = 280 + Math.sin(index * 1.5) * 60;
@@ -42,9 +43,8 @@ function FloatingIcon({
   const baseX = Math.cos(angle) * radius;
   const baseY = Math.sin(angle) * radius * 0.4; // Elliptical orbit
 
-  // Mouse reactivity - icons get pushed away slightly
-  const pushX = mouseX * 0.05;
-  const pushY = mouseY * 0.05;
+  const x = useTransform(mouseX, (val: number) => baseX + val * 0.05);
+  const y = useTransform(mouseY, (val: number) => baseY + val * 0.05);
 
   return (
     <motion.div
@@ -52,15 +52,12 @@ function FloatingIcon({
       animate={{
         opacity: [0.4, 0.8, 0.4],
         scale: [1, 1.1, 1],
-        x: baseX + pushX,
-        y: baseY + pushY,
         rotate: [0, 360],
       }}
+      style={{ x, y }}
       transition={{
         opacity: { duration: 3, repeat: Infinity, delay },
         scale: { duration: 3, repeat: Infinity, delay },
-        x: { duration: 0.3 },
-        y: { duration: 0.3 },
         rotate: { duration: 20 + index * 5, repeat: Infinity, ease: "linear" },
       }}
       className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
@@ -76,7 +73,7 @@ function FloatingIcon({
 function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <span className={`relative ${className}`}>
-      <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white bg-[length:200%_100%] animate-gradient">
+      <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-white bg-[length:200%_100%] animate-gradient">
         {children}
       </span>
     </span>
@@ -193,7 +190,9 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
     const startTime = Date.now();
     const delayMs = delay * 1000;
 
+    // Only start animation after mount
     const timer = setTimeout(() => {
+      let animationFrameId: number;
       const animate = () => {
         const elapsed = Date.now() - startTime - delayMs;
         const progress = Math.min(elapsed / duration, 1);
@@ -203,12 +202,13 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
         setDisplayValue(current.toString());
 
         if (progress < 1) {
-          requestAnimationFrame(animate);
+          animationFrameId = requestAnimationFrame(animate);
         } else {
           setDisplayValue(numericPart);
         }
       };
       animate();
+      return () => cancelAnimationFrame(animationFrameId);
     }, delayMs);
 
     return () => clearTimeout(timer);
@@ -302,34 +302,45 @@ export default function Hero() {
   const yCenter = useTransform(scrollYProgress, [0, 1], [0, 50]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  // Mouse position tracking
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  // Mouse position tracking using MotionValues for performance
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  // Smooth springs for tracking
+  const mouseXSpring = useSpring(x, { stiffness: 50, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 50, damping: 20 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-    requestAnimationFrame(() => {
-      const x = (e.clientX - rect.left - rect.width / 2) / 25;
-      const y = (e.clientY - rect.top - rect.height / 2) / 25;
-      setTilt({ x, y });
-      setMousePos({
-        x: (e.clientX - rect.left - rect.width / 2),
-        y: (e.clientY - rect.top - rect.height / 2)
-      });
-    });
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
   };
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
-    setMousePos({ x: 0, y: 0 });
+    x.set(0);
+    y.set(0);
   };
 
-  // Mobile detection for parallax
+  // Derived transforms for background effects - outside render cycle
+  const gridX = useTransform(mouseXSpring, (val: number) => val * 0.02);
+  const gridY = useTransform(mouseYSpring, (val: number) => val * 0.02);
+  const searchlightX = useTransform(mouseXSpring, (val: number) => (val / 25) * 25 + 50 + "%");
+  const searchlightY = useTransform(mouseYSpring, (val: number) => (val / 25) * 25 + 50 + "%");
+  const searchlightGradient = useTransform(
+    [searchlightX, searchlightY],
+    ([sx, sy]) => `radial-gradient(circle 500px at ${sx} ${sy}, rgba(139, 92, 246, 0.2), transparent 70%)`
+  );
+
+  // Hydration fix & Mobile detection
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -345,7 +356,7 @@ export default function Hero() {
       onMouseLeave={handleMouseLeave}
     >
       {/* Dynamic grid background */}
-      <div
+      <motion.div
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
@@ -353,28 +364,28 @@ export default function Hero() {
             linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: "50px 50px",
-          backgroundPosition: `${mousePos.x * 0.02}px ${mousePos.y * 0.02}px`,
-          transition: "background-position 0.3s ease-out",
+          translateX: gridX,
+          translateY: gridY,
         }}
       />
 
       {/* Enhanced searchlight effect */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-300"
+      <motion.div
+        className="absolute inset-0 pointer-events-none opacity-40"
         style={{
-          background: `radial-gradient(circle 500px at ${tilt.x * 25 + 50 + "%"} ${tilt.y * 25 + 50 + "%"}, rgba(139, 92, 246, 0.2), transparent 70%)`
+          background: searchlightGradient
         }}
       />
 
-      {/* Floating tech icons - Desktop Only */}
+      {/* Floating tech icons - Desktop Only, Client Only */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-        {floatingIcons.map((icon, index) => (
+        {mounted && floatingIcons.map((icon, index) => (
           <FloatingIcon
             key={index}
             {...icon}
             index={index}
-            mouseX={mousePos.x}
-            mouseY={mousePos.y}
+            mouseX={mouseXSpring}
+            mouseY={mouseYSpring}
           />
         ))}
       </div>
@@ -411,18 +422,6 @@ export default function Hero() {
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
-        {/* Top badge */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <FloatingBadge delay={0.3}>
-            🚀 Innovating at the Edge of AI
-          </FloatingBadge>
-        </motion.div>
-
         <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 mt-8 lg:mt-0">
 
           {/* Left Side - Text */}
@@ -430,10 +429,14 @@ export default function Hero() {
             style={{ y: isMobile ? 0 : yLeft, opacity }}
             className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+            <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
-                word="ENGINEERING"
-                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
+                word="GENERATIVE"
+                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
+              />
+              <AnimatedWord
+                word="AI"
+                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-purple-300 to-pink-400 drop-shadow-2xl"
               />
             </h1>
           </motion.div>
@@ -441,12 +444,28 @@ export default function Hero() {
           {/* Center Avatar - Scaled on Mobile */}
           <motion.div
             style={{ y: isMobile ? 0 : yCenter }}
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring" }}
-            className="z-20 my-2 lg:my-0 order-1 lg:order-2 scale-[0.65] sm:scale-90 md:scale-100"
+            className="relative z-20 my-2 lg:my-0 order-1 lg:order-2 flex flex-col items-center"
           >
-            <AvatarFlipCard />
+            {/* Badge - Absolute Positioned */}
+            <motion.div
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 lg:mb-12 whitespace-nowrap"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <FloatingBadge delay={0.3}>
+                🚀 Innovating at the Edge of AI
+              </FloatingBadge>
+            </motion.div>
+
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ duration: 0.8, type: "spring" }}
+              className="scale-[0.65] sm:scale-90 md:scale-100"
+            >
+              <AvatarFlipCard />
+            </motion.div>
           </motion.div>
 
           {/* Right Side - Text */}
@@ -456,18 +475,18 @@ export default function Hero() {
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
-                word="INTELLIGENCE"
-                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-gray-500 drop-shadow-2xl"
+                word="SPECIALIST"
+                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
               />
             </h1>
             <motion.div
-              className="mt-6 max-w-xs sm:max-w-md lg:max-w-xs mx-auto lg:mx-0"
+              className="mt-8 max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-base sm:text-lg text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
-                Generative AI Intern @ <span className="text-purple-400 font-bold">Introspect Labs</span>. Crafting scalable systems & <span className="text-blue-400 font-bold">Autonomous Agents</span>.
+              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
+                Synthesizing <span className="text-purple-400 font-bold">Vision, Logic & Empathy</span> to architect the senses of the Agentic Age. At <span className="text-white font-bold">Introspect Labs</span>, I pioneer <span className="text-blue-400 font-bold">VideoRAG</span> systems—weaving the <span className="text-pink-400 font-bold">Neural Fabric</span> for machines that perceive, reason, and understand.
               </p>
             </motion.div>
           </motion.div>
@@ -481,24 +500,28 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          <AnimatedStat
-            value="1000+"
-            label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
-            delay={1}
-            gradient="from-blue-400 to-cyan-400"
-          />
-          <AnimatedStat
-            value="1864"
-            label={<><span className="text-orange-400 font-bold">Max</span> Rating</>}
-            delay={1.2}
-            gradient="from-yellow-400 to-orange-400"
-          />
-          <AnimatedStat
-            value="5+"
-            label={<><span className="text-purple-400 font-bold">Products</span> Built</>}
-            delay={1.4}
-            gradient="from-purple-400 to-pink-400"
-          />
+          {mounted && (
+            <>
+              <AnimatedStat
+                value="10,000+"
+                label={<><span className="text-pink-400 font-bold">Hours</span> of Coding</>}
+                delay={1.2}
+                gradient="from-[#a855f7] via-[#ec4899] to-[#fb923c]"
+              />
+              <AnimatedStat
+                value="1000+"
+                label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
+                delay={1}
+                gradient="from-[#3b82f6] via-[#2dd4bf] to-[#4ade80]"
+              />
+              <AnimatedStat
+                value="5+"
+                label={<><span className="text-orange-400 font-bold">Products</span> Built</>}
+                delay={1.4}
+                gradient="from-[#f43f5e] via-[#f59e0b] to-[#fbbf24]"
+              />
+            </>
+          )}
         </motion.div>
 
         {/* CTA Buttons - Centered below */}

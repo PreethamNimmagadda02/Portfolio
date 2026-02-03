@@ -18,6 +18,19 @@ interface Experience {
 
 const experiences: Experience[] = [
   {
+    role: "Generative AI Intern",
+    company: "Introspect Labs",
+    period: "Jan 2026 - Present",
+    description: (
+      <>
+        Built a Multimodal & Multilingual AI Companion powered by <span className="text-purple-400 font-semibold">VideoRAG</span> that processes <span className="text-blue-400 font-semibold">100+ hours</span> of video with <span className="text-green-400 font-semibold">95% accuracy</span>. Designed its <span className="text-pink-400 font-semibold">Empathic Core</span> to drive real-time adaptive responses, boosting retention by <span className="text-yellow-400 font-semibold">40%</span>.
+      </>
+    ),
+    type: "work",
+    skills: ["VideoRAG", "Vision-Language Models", "Empathic AI"],
+    highlight: "Architected an AI Companion"
+  },
+  {
     role: "Campus Ambassador",
     company: "Perplexity",
     period: "Sept 2025 - Nov 2025",
