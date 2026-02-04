@@ -25,7 +25,7 @@ export default function Navbar() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           setScrolled(window.scrollY > 50);
-          
+
           const sections = navLinks.map(link => link.href.slice(1));
           for (const section of sections.reverse()) {
             const el = document.getElementById(section);
@@ -42,7 +42,7 @@ export default function Navbar() {
         ticking = true;
       }
     };
-    
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -71,8 +71,8 @@ export default function Navbar() {
     >
       <div className="flex items-center justify-between">
         {/* Brand Logo */}
-        <a 
-          href="#home" 
+        <a
+          href="#home"
           onClick={(e) => scrollToSection(e, "#home")}
           className="flex items-center gap-2.5 group"
         >
@@ -86,7 +86,7 @@ export default function Navbar() {
             />
             <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden">
               <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
-                <span className="text-sm font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-purple-400 via-white to-blue-400">
+                <span className="text-sm font-black tracking-tighter text-white">
                   PN
                 </span>
               </div>
@@ -101,7 +101,7 @@ export default function Navbar() {
               <span className="absolute inset-0 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
             </span>
             <span className="text-[11px] text-purple-400/80 tracking-widest uppercase font-medium group-hover:text-white transition-colors">
-              AI Engineer
+              AI & Full Stack Engineer
             </span>
           </div>
         </a>
@@ -191,8 +191,8 @@ export default function Navbar() {
                       onClick={(e) => scrollToSection(e, link.href)}
                       className={cn(
                         "block px-4 py-3 rounded-xl text-lg font-medium transition-colors",
-                        isActive 
-                          ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30" 
+                        isActive
+                          ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
                           : "text-gray-400 hover:bg-white/5 hover:text-white"
                       )}
                     >
@@ -201,7 +201,7 @@ export default function Navbar() {
                   </motion.div>
                 );
               })}
-              
+
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
