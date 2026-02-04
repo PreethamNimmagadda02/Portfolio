@@ -32,7 +32,7 @@ const particles = [
 export default function AvatarFlipCard() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
-  const [cursorVisible, setCursorVisible] = useState(true); 
+  const [cursorVisible, setCursorVisible] = useState(true);
 
   // Typing animation effect
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function AvatarFlipCard() {
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Front Side */}
-        <div 
+        <div
           className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border-2 border-purple-500/30 shadow-2xl"
           style={{ backfaceVisibility: "hidden" }}
         >
@@ -153,16 +153,16 @@ export default function AvatarFlipCard() {
           />
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          
+
           {/* Animated corner accents */}
           <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-purple-400/60 rounded-tl" />
           <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-purple-400/60 rounded-tr" />
           <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-purple-400/60 rounded-bl" />
           <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-purple-400/60 rounded-br" />
-          
+
           {/* Name and hint */}
           <div className="absolute bottom-4 left-4 right-4 text-white">
-            <motion.p 
+            <motion.p
               className="font-bold text-lg"
               animate={{ opacity: [1, 0.7, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -190,20 +190,20 @@ export default function AvatarFlipCard() {
         {/* Back Side - Holographic ID Card (Refined) */}
         <div
           className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.15)] bg-[#030303]"
-          style={{ 
+          style={{
             backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)" 
+            transform: "rotateY(180deg)"
           }}
         >
           {/* Subtle Holographic Sheen */}
-          <motion.div 
+          <motion.div
             className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-pink-500/5 to-transparent opacity-40 z-10 pointer-events-none"
             animate={{ opacity: [0.2, 0.4, 0.2] }}
             transition={{ duration: 4, repeat: Infinity }}
           />
-          
+
           {/* Elegant Scanning Line */}
-          <motion.div 
+          <motion.div
             className="absolute left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent z-20 pointer-events-none opacity-50"
             animate={{ top: ["0%", "100%", "0%"] }}
             transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
@@ -212,7 +212,7 @@ export default function AvatarFlipCard() {
           {/* Center Watermark Logo */}
           <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
             <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-purple-500">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
 
@@ -229,7 +229,7 @@ export default function AvatarFlipCard() {
               </div>
               {/* Small version in corner */}
               <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/30">
-                 <span className="text-xs font-bold text-purple-400">PN</span>
+                <span className="text-xs font-bold text-purple-400">PN</span>
               </div>
             </div>
 
@@ -256,27 +256,27 @@ export default function AvatarFlipCard() {
               <div>
                 <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Vision</div>
                 <div className="text-sm font-medium text-white border-l-2 border-purple-500 pl-3 py-0.5">
-                  Turning Ideas Into Intelligent Systems
-                  <span className="block text-xs text-gray-400 font-normal mt-0.5 italic">"Building AI that thinks with you"</span>
+                  Engineering Intelligence From First Principles
+                  <span className="block text-xs text-gray-400 font-normal mt-0.5 italic">"Forging intuition from logic"</span>
                 </div>
               </div>
             </div>
 
             {/* Bottom: Modern Barcode */}
             <div className="mt-auto pt-4 relative">
-               {/* Decorative corner accents */}
+              {/* Decorative corner accents */}
               <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-purple-500/30" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-purple-500/30" />
 
               <div className="h-6 flex items-end justify-between opacity-40 gap-[3px]">
                 {particles.slice(0, 28).map((p, i) => (
-                  <div 
-                    key={i} 
-                    className="bg-purple-300 rounded-full" 
-                    style={{ 
-                      width: '2px', 
-                      height: `${Math.abs(Math.sin(i * 1337)) * 60 + 20}%` 
-                    }} 
+                  <div
+                    key={i}
+                    className="bg-purple-300 rounded-full"
+                    style={{
+                      width: '2px',
+                      height: `${Math.abs(Math.sin(i * 1337)) * 60 + 20}%`
+                    }}
                   />
                 ))}
               </div>
