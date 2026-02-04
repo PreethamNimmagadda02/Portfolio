@@ -27,7 +27,7 @@ const projects = [
         <span className="text-blue-400 font-semibold">Autonomous Event Orchestration</span> at scale. Leveraging <span className="text-cyan-400 font-semibold">multi-agent AI</span> to transform abstract constraints into executable logistical plans.
       </>
     ),
-    tags: ["React", "Firebase", "Gemini API", "AI Agents"],
+    tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
     links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     gradient: "from-blue-500 to-cyan-500",
     status: "Live",
@@ -149,8 +149,8 @@ function ProjectCard({ project, index, isFeatured = false }: { project: { title:
                   {project.title}
                 </h3>
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 ${project.status === "Live"
-                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                    : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                  : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
                   }`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${project.status === "Live" ? "bg-green-400 animate-pulse" : "bg-blue-400"}`} />
                   {project.status}

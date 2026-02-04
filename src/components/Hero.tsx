@@ -362,7 +362,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
-                Synthesizing <span className="text-purple-400 font-bold">Vision, Logic & Empathy</span> to architect the senses of the Agentic Age. At <span className="text-white font-bold">Introspect Labs</span>, I pioneer <span className="text-blue-400 font-bold">VideoRAG</span> systems—weaving the <span className="text-pink-400 font-bold">Neural Fabric</span> for machines that perceive, reason, and understand.
+                Synthesizing <span className="text-purple-400 font-bold">Vision, Logic & Empathy</span> to architect the senses of the Agentic Age. At <span className="text-white font-bold">Introspect Labs</span>, I pioneer <span className="text-blue-400 font-bold">VideoRAG</span> systems—weaving the <span className="text-pink-400 font-bold">Neural Fabric</span> for machines that perceive, reason and understand.
               </p>
             </motion.div>
           </motion.div>
