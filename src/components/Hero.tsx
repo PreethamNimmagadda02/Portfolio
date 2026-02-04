@@ -298,12 +298,12 @@ export default function Hero() {
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 mt-8 lg:mt-0">
+        <div className="flex flex-col lg:flex-row items-center justify-center lg:items-center w-full mt-8 lg:mt-0 relative z-10">
 
           {/* Left Side - Text */}
           <motion.div
             style={{ y: isMobile ? 0 : yLeft, opacity }}
-            className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
+            className="flex flex-col flex-1 w-full items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
             <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
@@ -317,10 +317,10 @@ export default function Hero() {
             </h1>
           </motion.div>
 
-          {/* Center Avatar - Scaled on Mobile */}
+          {/* Center Avatar - Dead Center */}
           <motion.div
             style={{ y: isMobile ? 0 : yCenter }}
-            className="relative z-20 my-2 lg:my-0 order-1 lg:order-2 flex flex-col items-center"
+            className="relative z-20 my-2 lg:my-0 order-1 lg:order-2 flex flex-col items-center flex-none px-4 lg:px-12"
           >
             {/* Badge - Absolute Positioned */}
             <motion.div
@@ -347,7 +347,7 @@ export default function Hero() {
           {/* Right Side - Text */}
           <motion.div
             style={{ y: isMobile ? 0 : yRight, opacity }}
-            className="flex flex-col items-center lg:items-start text-center lg:text-left order-3 relative z-10"
+            className="flex flex-col flex-1 w-full items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
