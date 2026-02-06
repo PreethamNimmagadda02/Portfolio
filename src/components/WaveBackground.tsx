@@ -1,21 +1,50 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useRef, useMemo, Suspense, useEffect, useState } from "react";
+import { useRef, useMemo, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Animated wave mesh
-function WavePlane() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const geometryRef = useRef<THREE.PlaneGeometry>(null);
+// Hook for mouse position
+function useMousePosition() {
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const targetMouse = useRef({ x: 0, y: 0 });
 
-  // Create initial positions
-  const { positions, originalPositions } = useMemo(() => {
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      targetMouse.current = {
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: -(e.clientY / window.innerHeight) * 2 + 1,
+      };
+    };
+
+    // Smooth lerp update
+    const interval = setInterval(() => {
+      setMouse(prev => ({
+        x: prev.x + (targetMouse.current.x - prev.x) * 0.08,
+        y: prev.y + (targetMouse.current.y - prev.y) * 0.08,
+      }));
+    }, 16);
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearInterval(interval);
+    };
+  }, []);
+
+  return mouse;
+}
+
+// Premium unified wave mesh with cursor interaction
+function PremiumWaveSurface({ mouse }: { mouse: { x: number; y: number } }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  // Create initial positions for a large uniform grid
+  const { originalPositions } = useMemo(() => {
     const positions: number[] = [];
-    const originalPositions: number[] = [];
-    const size = 40;
-    const segments = 100;
+    const size = 200;
+    const segments = 150;
     const step = size / segments;
 
     for (let i = 0; i <= segments; i++) {
@@ -23,12 +52,10 @@ function WavePlane() {
         const x = i * step - size / 2;
         const z = j * step - size / 2;
         positions.push(x, 0, z);
-        originalPositions.push(x, 0, z);
       }
     }
     return {
-      positions: new Float32Array(positions),
-      originalPositions: new Float32Array(originalPositions)
+      originalPositions: new Float32Array(positions)
     };
   }, []);
 
@@ -38,16 +65,32 @@ function WavePlane() {
     const positionAttribute = geometry.attributes.position;
     const time = state.clock.elapsedTime;
 
+    // Convert mouse to world-ish coordinates
+    const mouseWorldX = mouse.x * 50;
+    const mouseWorldZ = mouse.y * 30;
+
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = originalPositions[i * 3];
       const z = originalPositions[i * 3 + 2];
 
-      // Complex wave pattern
-      const wave1 = Math.sin(x * 0.3 + time * 0.5) * 0.3;
-      const wave2 = Math.sin(z * 0.4 + time * 0.7) * 0.2;
-      const wave3 = Math.cos((x + z) * 0.2 + time * 0.3) * 0.15;
+      // Distance from cursor
+      const dx = x - mouseWorldX;
+      const dz = z - mouseWorldZ;
+      const distFromCursor = Math.sqrt(dx * dx + dz * dz);
 
-      positionAttribute.setY(i, wave1 + wave2 + wave3);
+      // Cursor-reactive ripple effect - tighter radius
+      const cursorInfluence = Math.exp(-distFromCursor * 0.08) * 3.0;
+      const cursorWave = Math.sin(distFromCursor * 0.2 - time * 2.5) * cursorInfluence;
+
+      // Base wave pattern - slow and flowing
+      const wave1 = Math.sin(x * 0.08 + time * 0.4) * 0.6;
+      const wave2 = Math.sin(z * 0.06 + time * 0.3) * 0.4;
+      const wave3 = Math.cos((x + z) * 0.04 + time * 0.25) * 0.3;
+
+      // Subtle breathing effect
+      const breathing = Math.sin(time * 0.2) * 0.1;
+
+      positionAttribute.setY(i, wave1 + wave2 + wave3 + breathing + cursorWave);
     }
     positionAttribute.needsUpdate = true;
   });
@@ -55,23 +98,23 @@ function WavePlane() {
   return (
     <mesh
       ref={meshRef}
-      rotation={[-Math.PI / 2.5, 0, 0]}
-      position={[0, -2, -5]}
+      rotation={[-Math.PI / 2.2, 0, 0]}
+      position={[0, -4, -10]}
     >
-      <planeGeometry args={[40, 40, 100, 100]} />
+      <planeGeometry args={[200, 100, 150, 150]} />
       <meshStandardMaterial
         color="#8b5cf6"
         wireframe
         transparent
-        opacity={0.15}
+        opacity={0.35}
         side={THREE.DoubleSide}
       />
     </mesh>
   );
 }
 
-// Ripple effect from center
-function RippleWave() {
+// Secondary subtle wave layer with cursor interaction
+function SecondaryWaveLayer({ mouse }: { mouse: { x: number; y: number } }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
@@ -80,14 +123,25 @@ function RippleWave() {
     const positionAttribute = geometry.attributes.position;
     const time = state.clock.elapsedTime;
 
+    const mouseWorldX = mouse.x * 60;
+    const mouseWorldZ = mouse.y * 40;
+
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = positionAttribute.getX(i);
       const z = positionAttribute.getZ(i);
-      const dist = Math.sqrt(x * x + z * z);
 
-      // Ripple from center
-      const y = Math.sin(dist * 0.5 - time * 2) * Math.exp(-dist * 0.1) * 0.5;
-      positionAttribute.setY(i, y);
+      // Cursor influence - tighter radius
+      const dx = x - mouseWorldX;
+      const dz = z - mouseWorldZ;
+      const distFromCursor = Math.sqrt(dx * dx + dz * dz);
+      const cursorInfluence = Math.exp(-distFromCursor * 0.06) * 2.0;
+      const cursorWave = Math.sin(distFromCursor * 0.15 - time * 2) * cursorInfluence;
+
+      // Base wave
+      const wave = Math.sin(x * 0.05 + z * 0.05 + time * 0.35) * 0.4;
+      const wave2 = Math.cos(x * 0.03 - time * 0.2) * 0.25;
+
+      positionAttribute.setY(i, wave + wave2 + cursorWave);
     }
     positionAttribute.needsUpdate = true;
   });
@@ -95,164 +149,51 @@ function RippleWave() {
   return (
     <mesh
       ref={meshRef}
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -3, 0]}
+      rotation={[-Math.PI / 2.3, 0, 0]}
+      position={[0, -6, -15]}
     >
-      <planeGeometry args={[30, 30, 80, 80]} />
+      <planeGeometry args={[220, 120, 100, 100]} />
       <meshStandardMaterial
         color="#06b6d4"
         wireframe
         transparent
-        opacity={0.1}
+        opacity={0.2}
         side={THREE.DoubleSide}
       />
     </mesh>
   );
 }
 
-// Vertical wave ribbons
-function WaveRibbons() {
-  const ribbonsRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (!ribbonsRef.current) return;
-    ribbonsRef.current.children.forEach((ribbon, i) => {
-      const mesh = ribbon as THREE.Mesh;
-      const geometry = mesh.geometry as THREE.PlaneGeometry;
-      const positionAttribute = geometry.attributes.position;
-      const time = state.clock.elapsedTime + i * 0.5;
-
-      for (let j = 0; j < positionAttribute.count; j++) {
-        const x = positionAttribute.getX(j);
-        const offset = Math.sin(x * 0.5 + time) * 0.3;
-        positionAttribute.setZ(j, offset);
-      }
-      positionAttribute.needsUpdate = true;
-    });
-  });
-
-  return (
-    <group ref={ribbonsRef}>
-      {[...Array(5)].map((_, i) => (
-        <mesh
-          key={i}
-          position={[-6 + i * 3, 0, -8]}
-          rotation={[0, 0, 0]}
-        >
-          <planeGeometry args={[0.5, 15, 50, 1]} />
-          <meshStandardMaterial
-            color={["#8b5cf6", "#ec4899", "#06b6d4", "#22c55e", "#f59e0b"][i]}
-            transparent
-            opacity={0.15}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// Particle waves
-function ParticleWaves({ count = 500 }) {
-  const pointsRef = useRef<THREE.Points>(null);
-
-  const { positions, originalPositions, colors } = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const originalPositions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
-    for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 20;
-      const y = (Math.random() - 0.5) * 10;
-      const z = (Math.random() - 0.5) * 10 - 5;
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      originalPositions[i * 3] = x;
-      originalPositions[i * 3 + 1] = y;
-      originalPositions[i * 3 + 2] = z;
-
-      // Purple to cyan gradient
-      const t = (x + 10) / 20;
-      colors[i * 3] = 0.55 + t * 0.2;     // R
-      colors[i * 3 + 1] = 0.36 - t * 0.2; // G
-      colors[i * 3 + 2] = 0.96;           // B
-    }
-
-    return { positions, originalPositions, colors };
-  }, [count]);
-
-  useFrame((state) => {
-    if (!pointsRef.current) return;
-    const positionAttribute = pointsRef.current.geometry.attributes.position;
-    const time = state.clock.elapsedTime;
-
-    for (let i = 0; i < count; i++) {
-      const x = originalPositions[i * 3];
-      const origY = originalPositions[i * 3 + 1];
-
-      const wave = Math.sin(x * 0.5 + time) * 0.5 + Math.cos(x * 0.3 + time * 0.5) * 0.3;
-      positionAttribute.setY(i, origY + wave);
-    }
-    positionAttribute.needsUpdate = true;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[colors, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.05}
-        vertexColors
-        transparent
-        opacity={0.6}
-        sizeAttenuation
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
-
-// Scene content
-function WaveSceneContent() {
+// Scene content with mouse passed down
+function WaveSceneContent({ mouse }: { mouse: { x: number; y: number } }) {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#8b5cf6" />
-      <pointLight position={[-10, 5, -10]} intensity={0.5} color="#06b6d4" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={0.8} color="#8b5cf6" />
+      <pointLight position={[-10, 5, -10]} intensity={0.4} color="#06b6d4" />
+      <pointLight position={[0, 5, 5]} intensity={0.3} color="#ec4899" />
 
-      <WavePlane />
-      <RippleWave />
-      <WaveRibbons />
-      <ParticleWaves count={300} />
+      <PremiumWaveSurface mouse={mouse} />
+      <SecondaryWaveLayer mouse={mouse} />
     </>
   );
 }
 
 export default function WaveBackground() {
   const isMobile = useIsMobile();
+  const mouse = useMousePosition();
 
   if (isMobile) return null;
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none opacity-50">
+    <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
-        camera={{ position: [0, 3, 10], fov: 60 }}
+        camera={{ position: [0, 5, 15], fov: 55 }}
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
-          <WaveSceneContent />
+          <WaveSceneContent mouse={mouse} />
         </Suspense>
       </Canvas>
     </div>

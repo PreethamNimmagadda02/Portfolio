@@ -258,7 +258,7 @@ export default function Projects() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Featured{" "}
+            Signature{" "}
             <motion.span
               className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
               style={{
@@ -271,7 +271,7 @@ export default function Projects() {
               animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
             >
-              Ventures
+              Projects
             </motion.span>
           </motion.h2>
           <motion.p

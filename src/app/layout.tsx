@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   description: "Portfolio of Preetham Nimmagadda, an AI Engineer and Full Stack Developer from IIT (ISM) Dhanbad. Specializing in Autonomous AI Agents, CrewAI, Next.js, and System Architecture. Top 1% on CodeChef & Codeforces Specialist.",
   manifest: "/manifest.json",
   keywords: [
-    "Preetham Nimmagadda", 
-    "AI Agent Developer", 
-    "Full Stack Engineer", 
-    "IIT Dhanbad", 
-    "CrewAI", 
+    "Preetham Nimmagadda",
+    "AI Agent Developer",
+    "Full Stack Engineer",
+    "IIT Dhanbad",
+    "CrewAI",
     "LangChain",
     "Next.js Developer",
     "Autonomous Agents",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Preetham Nimmagadda | AI Agent Developer",
     description: "Building the future with Autonomous Agents and Scalable Systems.",
-    images: ["/og-image.png"], 
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -114,6 +114,10 @@ const jsonLd = {
   ]
 };
 
+import SmoothScroll from "@/components/SmoothScroll";
+
+// ... existing imports ...
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -131,12 +135,14 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
       >
-        <PageProgress />
-        <Navbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <SmoothScroll>
+          <PageProgress />
+          <Navbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </SmoothScroll>
       </body>
     </html>
   );
