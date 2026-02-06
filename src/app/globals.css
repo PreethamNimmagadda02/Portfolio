@@ -58,9 +58,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     scroll-behavior: smooth;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -82,7 +84,12 @@ body {
 }
 
 /* Enhanced Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   letter-spacing: -0.02em;
   text-rendering: optimizeLegibility;
@@ -96,8 +103,15 @@ h1 {
 
 /* Animated gradient for text */
 @keyframes gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .animate-gradient {
@@ -106,15 +120,15 @@ h1 {
 
 /* Enhanced glow effects */
 .glow {
-  text-shadow: 
-    0 0 20px rgba(139, 92, 246, 0.6), 
+  text-shadow:
+    0 0 20px rgba(139, 92, 246, 0.6),
     0 0 40px rgba(139, 92, 246, 0.4),
     0 0 60px rgba(139, 92, 246, 0.2);
 }
 
 .glow-white {
-  text-shadow: 
-    0 0 30px rgba(255, 255, 255, 0.5), 
+  text-shadow:
+    0 0 30px rgba(255, 255, 255, 0.5),
     0 0 60px rgba(255, 255, 255, 0.3);
 }
 
@@ -150,8 +164,15 @@ h1 {
 
 /* Float animation */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -160,10 +181,13 @@ h1 {
 
 /* Pulse glow animation */
 @keyframes pulse-glow {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
   }
 }
@@ -174,20 +198,32 @@ h1 {
 
 /* Shimmer effect */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
 /* Bounce animation */
 @keyframes bounce-slow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20%); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20%);
+  }
 }
 
 .animate-bounce-slow {
@@ -196,8 +232,15 @@ h1 {
 
 /* Scale pulse */
 @keyframes scale-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .animate-scale-pulse {
@@ -206,8 +249,13 @@ h1 {
 
 /* Rotate animation */
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin-slow {
@@ -216,8 +264,15 @@ h1 {
 
 /* Typing cursor */
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 .animate-blink {
@@ -226,11 +281,12 @@ h1 {
 
 /* Slide up reveal */
 @keyframes slide-up {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(30px);
   }
-  to { 
+
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -247,24 +303,58 @@ h1 {
 
 .card-hover:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 20px 40px -15px rgba(139, 92, 246, 0.3),
     0 0 20px rgba(139, 92, 246, 0.1);
 }
 
 /* Glitch text effect */
 @keyframes glitch-1 {
-  0%, 100% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 0); }
-  25% { clip-path: inset(30% 0 40% 0); transform: translate(2px, 0); }
-  50% { clip-path: inset(50% 0 20% 0); transform: translate(-1px, 0); }
-  75% { clip-path: inset(20% 0 50% 0); transform: translate(1px, 0); }
+
+  0%,
+  100% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translate(-2px, 0);
+  }
+
+  25% {
+    clip-path: inset(30% 0 40% 0);
+    transform: translate(2px, 0);
+  }
+
+  50% {
+    clip-path: inset(50% 0 20% 0);
+    transform: translate(-1px, 0);
+  }
+
+  75% {
+    clip-path: inset(20% 0 50% 0);
+    transform: translate(1px, 0);
+  }
 }
 
 @keyframes glitch-2 {
-  0%, 100% { clip-path: inset(50% 0 20% 0); transform: translate(2px, 0); }
-  25% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 0); }
-  50% { clip-path: inset(30% 0 40% 0); transform: translate(1px, 0); }
-  75% { clip-path: inset(40% 0 30% 0); transform: translate(-1px, 0); }
+
+  0%,
+  100% {
+    clip-path: inset(50% 0 20% 0);
+    transform: translate(2px, 0);
+  }
+
+  25% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translate(-2px, 0);
+  }
+
+  50% {
+    clip-path: inset(30% 0 40% 0);
+    transform: translate(1px, 0);
+  }
+
+  75% {
+    clip-path: inset(40% 0 30% 0);
+    transform: translate(-1px, 0);
+  }
 }
 
 .glitch-effect {
@@ -299,8 +389,13 @@ h1 {
 
 /* Grid pattern animation */
 @keyframes grid-move {
-  0% { background-position: 0 0; }
-  100% { background-position: 50px 50px; }
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 50px 50px;
+  }
 }
 
 .animated-grid {
@@ -309,10 +404,13 @@ h1 {
 
 /* Floating icon glow */
 @keyframes icon-glow {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
   }
 }
@@ -323,8 +421,15 @@ h1 {
 
 /* Number counter glow */
 @keyframes number-pulse {
-  0%, 100% { text-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
-  50% { text-shadow: 0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.4); }
+
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+
+  50% {
+    text-shadow: 0 0 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.4);
+  }
 }
 
 .number-glow {
@@ -335,11 +440,14 @@ h1 {
 
 /* Morphing gradient background */
 @keyframes morph-gradient {
-  0%, 100% { 
+
+  0%,
+  100% {
     background-position: 0% 50%;
     filter: hue-rotate(0deg);
   }
-  50% { 
+
+  50% {
     background-position: 100% 50%;
     filter: hue-rotate(30deg);
   }
@@ -356,10 +464,12 @@ h1 {
     background-position: 0% 50%;
     opacity: 0.5;
   }
+
   50% {
     background-position: 100% 50%;
     opacity: 0.8;
   }
+
   100% {
     background-position: 0% 50%;
     opacity: 0.5;
@@ -367,14 +477,12 @@ h1 {
 }
 
 .animate-holographic {
-  background: linear-gradient(
-    45deg,
-    rgba(139, 92, 246, 0.3) 0%,
-    rgba(236, 72, 153, 0.3) 25%,
-    rgba(6, 182, 212, 0.3) 50%,
-    rgba(34, 197, 94, 0.3) 75%,
-    rgba(139, 92, 246, 0.3) 100%
-  );
+  background: linear-gradient(45deg,
+      rgba(139, 92, 246, 0.3) 0%,
+      rgba(236, 72, 153, 0.3) 25%,
+      rgba(6, 182, 212, 0.3) 50%,
+      rgba(34, 197, 94, 0.3) 75%,
+      rgba(139, 92, 246, 0.3) 100%);
   background-size: 400% 400%;
   animation: holographic 4s ease infinite;
 }
@@ -386,10 +494,12 @@ h1 {
     opacity: 0.8;
     box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
   }
+
   50% {
     transform: scale(1);
     opacity: 0.4;
   }
+
   100% {
     transform: scale(1.2);
     opacity: 0;
@@ -403,8 +513,13 @@ h1 {
 
 /* 3D flip on hover */
 @keyframes flip-3d {
-  0% { transform: perspective(1000px) rotateY(0deg); }
-  100% { transform: perspective(1000px) rotateY(180deg); }
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+
+  100% {
+    transform: perspective(1000px) rotateY(180deg);
+  }
 }
 
 .hover-flip-3d:hover {
@@ -413,15 +528,18 @@ h1 {
 
 /* Neon glow pulse */
 @keyframes neon-pulse {
-  0%, 100% {
-    text-shadow: 
+
+  0%,
+  100% {
+    text-shadow:
       0 0 5px rgba(139, 92, 246, 0.8),
       0 0 10px rgba(139, 92, 246, 0.6),
       0 0 20px rgba(139, 92, 246, 0.4),
       0 0 40px rgba(139, 92, 246, 0.2);
   }
+
   50% {
-    text-shadow: 
+    text-shadow:
       0 0 10px rgba(139, 92, 246, 1),
       0 0 20px rgba(139, 92, 246, 0.8),
       0 0 40px rgba(139, 92, 246, 0.6),
@@ -439,6 +557,7 @@ h1 {
     top: 0;
     opacity: 1;
   }
+
   100% {
     top: 100%;
     opacity: 0.3;
@@ -457,8 +576,13 @@ h1 {
 
 /* Orbit animation */
 @keyframes orbit {
-  0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
-  100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+  0% {
+    transform: rotate(0deg) translateX(100px) rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+  }
 }
 
 .animate-orbit {
@@ -467,10 +591,13 @@ h1 {
 
 /* Floating with rotation */
 @keyframes float-rotate {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
-  50% { 
+
+  50% {
     transform: translateY(-15px) rotate(180deg);
   }
 }
@@ -481,13 +608,16 @@ h1 {
 
 /* Breathing glow */
 @keyframes breathe-glow {
-  0%, 100% {
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 0 20px rgba(139, 92, 246, 0.3),
       inset 0 0 20px rgba(139, 92, 246, 0.1);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 40px rgba(139, 92, 246, 0.5),
       inset 0 0 40px rgba(139, 92, 246, 0.2);
   }
@@ -499,23 +629,30 @@ h1 {
 
 /* Electric spark */
 @keyframes electric-spark {
-  0%, 100% { 
+
+  0%,
+  100% {
     opacity: 0;
     transform: translateX(0);
   }
+
   10% {
     opacity: 1;
     transform: translateX(2px);
   }
+
   20% {
     opacity: 0;
     transform: translateX(-2px);
   }
+
   30% {
     opacity: 1;
     transform: translateX(1px);
   }
-  40%, 100% {
+
+  40%,
+  100% {
     opacity: 0;
     transform: translateX(0);
   }
@@ -531,6 +668,7 @@ h1 {
     transform: translateY(-100%);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh);
     opacity: 0;
@@ -547,6 +685,7 @@ h1 {
     transform: perspective(1000px) translateZ(-200px);
     opacity: 0;
   }
+
   100% {
     transform: perspective(1000px) translateZ(0);
     opacity: 1;
@@ -563,6 +702,7 @@ h1 {
     transform: scale(0) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: scale(2) rotate(180deg);
     opacity: 0;
@@ -598,6 +738,7 @@ h1 {
     transform: scale(0);
     opacity: 0.5;
   }
+
   100% {
     transform: scale(4);
     opacity: 0;
@@ -620,12 +761,19 @@ h1 {
 
 /* Typewriter cursor */
 @keyframes typewriter-cursor {
-  0%, 50% { border-color: transparent; }
-  51%, 100% { border-color: rgba(139, 92, 246, 0.8); }
+
+  0%,
+  50% {
+    border-color: transparent;
+  }
+
+  51%,
+  100% {
+    border-color: rgba(139, 92, 246, 0.8);
+  }
 }
 
 .typewriter-cursor {
   border-right: 2px solid rgba(139, 92, 246, 0.8);
   animation: typewriter-cursor 1s step-end infinite;
 }
-
