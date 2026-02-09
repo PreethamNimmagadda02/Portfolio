@@ -25,18 +25,36 @@ function useMousePosition() {
   return mouse;
 }
 
-// Hook for scroll position
+// Hook for scroll position with smoothing
 function useScrollPosition() {
   const [scroll, setScroll] = useState(0);
+  const targetScrollRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      setScroll(scrollPercent);
+      targetScrollRef.current = isNaN(scrollPercent) ? 0 : scrollPercent;
+    };
+
+    // Smooth interpolation loop
+    let animationId: number;
+    const smoothScroll = () => {
+      setScroll(prev => {
+        const diff = targetScrollRef.current - prev;
+        // Smooth interpolation - prevents jarring jumps when using "scroll to top"
+        return prev + diff * 0.08;
+      });
+      animationId = requestAnimationFrame(smoothScroll);
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    handleScroll(); // Initialize
+    animationId = requestAnimationFrame(smoothScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(animationId);
+    };
   }, []);
 
   return scroll;
