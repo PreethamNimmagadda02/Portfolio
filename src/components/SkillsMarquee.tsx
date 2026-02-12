@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 
 const skills = [
   { name: "VideoRAG", color: "from-orange-400 to-pink-600" },
@@ -36,99 +37,92 @@ const skills = [
 ];
 
 export default function SkillsMarquee() {
+  // Split skills into two rows
+  const { topRow, bottomRow } = useMemo(() => {
+    const halfLength = Math.ceil(skills.length / 2);
+    return {
+      topRow: skills.slice(0, halfLength),
+      bottomRow: skills.slice(halfLength)
+    };
+  }, []);
+
   return (
-    <section id="skills-marquee" className="py-12 bg-black overflow-hidden relative z-10 border-y border-white/5">
-      {/* Gradient fade edges */}
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+    <section id="skills-marquee" className="py-20 overflow-hidden relative z-10 w-full">
 
-      <div className="flex">
-        <motion.div
-          initial={{ x: 0 }}
-          animate={{ x: "-50%" }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex flex-shrink-0 gap-6 pr-6"
-        >
-          {[...skills, ...skills].map((skill, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.15, y: -8 }}
-              whileTap={{ scale: 0.95 }}
-              className="group relative px-6 py-3 rounded-full bg-white/5 border border-white/10 whitespace-nowrap cursor-pointer overflow-hidden"
-            >
-              {/* Glowing background on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl`} />
+      {/* Container with mask for fade effect */}
+      <div
+        className="flex flex-col gap-10 w-full"
+        style={{
+          maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)"
+        }}
+      >
+        {/* Top Row: Left to Right */}
+        <MarqueeRow items={topRow} direction="left" speed={30} />
 
-              {/* Animated border */}
-              <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} style={{ padding: "1px" }}>
-                <div className="w-full h-full rounded-full bg-black" />
-              </div>
-
-              {/* Shimmer sweep effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
-                initial={{ x: "-200%" }}
-                animate={{ x: "200%" }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: "linear",
-                }}
-              />
-
-              {/* Text */}
-              <span className={`relative z-10 text-gray-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${skill.color} font-medium transition-all duration-300`}>
-                {skill.name}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          initial={{ x: 0 }}
-          animate={{ x: "-50%" }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex flex-shrink-0 gap-6 pr-6"
-        >
-          {[...skills, ...skills].map((skill, index) => (
-            <motion.div
-              key={`duplicate-${index}`}
-              whileHover={{ scale: 1.15, y: -8 }}
-              whileTap={{ scale: 0.95 }}
-              className="group relative px-6 py-3 rounded-full bg-white/5 border border-white/10 whitespace-nowrap cursor-pointer overflow-hidden"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl`} />
-              <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} style={{ padding: "1px" }}>
-                <div className="w-full h-full rounded-full bg-black" />
-              </div>
-              {/* Shimmer sweep effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
-                initial={{ x: "-200%" }}
-                animate={{ x: "200%" }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: "linear",
-                }}
-              />
-              <span className={`relative z-10 text-gray-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${skill.color} font-medium transition-all duration-300`}>
-                {skill.name}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* Bottom Row: Right to Left */}
+        <MarqueeRow items={bottomRow} direction="right" speed={35} />
       </div>
     </section>
   );
+}
+
+function MarqueeRow({ items, direction, speed }: { items: typeof skills; direction: "left" | "right"; speed: number }) {
+  return (
+    <div className="flex overflow-hidden py-5">
+      <motion.div
+        initial={{ x: direction === "left" ? 0 : "-50%" }}
+        animate={{ x: direction === "left" ? "-50%" : 0 }}
+        transition={{
+          duration: speed,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="flex flex-shrink-0 gap-8 px-4"
+      >
+        {[...items, ...items].map((skill, index) => (
+          <SkillBadge key={`${skill.name}-${index}`} skill={skill} />
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+function SkillBadge({ skill }: { skill: (typeof skills)[0] }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.1, y: -4 }}
+      whileTap={{ scale: 0.95 }}
+      className="group relative px-6 py-3 rounded-2xl bg-white/5 border border-white/10 whitespace-nowrap cursor-pointer overflow-hidden backdrop-blur-sm"
+    >
+      {/* Glowing background on hover */}
+      <div className={`absolute inset-0 bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl`} />
+
+      {/* Animated border gradient */}
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${skill.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ padding: "1px" }}>
+        <div className="w-full h-full rounded-2xl bg-black/90" />
+      </div>
+
+      {/* Shimmer sweep effect */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+        initial={{ x: "-200%" }}
+        animate={{ x: "200%" }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          repeatDelay: 4,
+          ease: "linear",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex items-center gap-2">
+        {/* We can add icons here in future if needed */}
+        <span className={`text-lg font-medium text-gray-400 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${skill.color} transition-all duration-300`}>
+          {skill.name}
+        </span>
+      </div>
+    </motion.div>
+  )
 }

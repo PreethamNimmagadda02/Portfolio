@@ -17,16 +17,12 @@ const terminalLines = [
   { type: "success", text: "● READY FOR HIRE" },
 ];
 
-// Floating particles around the avatar - use deterministic sizes to avoid hydration mismatch
+// Floating particles around the avatar - reduced for performance
 const particles = [
   { id: 0, angle: 0, delay: 0, size: 5 },
-  { id: 1, angle: 45, delay: 0.3, size: 6 },
-  { id: 2, angle: 90, delay: 0.6, size: 4 },
-  { id: 3, angle: 135, delay: 0.9, size: 7 },
-  { id: 4, angle: 180, delay: 1.2, size: 5 },
-  { id: 5, angle: 225, delay: 1.5, size: 6 },
-  { id: 6, angle: 270, delay: 1.8, size: 4 },
-  { id: 7, angle: 315, delay: 2.1, size: 7 },
+  { id: 1, angle: 90, delay: 0.5, size: 6 },
+  { id: 2, angle: 180, delay: 1.0, size: 4 },
+  { id: 3, angle: 270, delay: 1.5, size: 7 },
 ];
 
 export default function AvatarFlipCard() {
@@ -60,40 +56,28 @@ export default function AvatarFlipCard() {
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
     >
-      {/* Outer pulsing glow ring - Desktop Only */}
-      <motion.div
-        className="absolute -inset-4 rounded-3xl opacity-60 hidden md:block"
-        animate={{
-          boxShadow: [
-            "0 0 20px 5px rgba(139, 92, 246, 0.3)",
-            "0 0 40px 10px rgba(139, 92, 246, 0.5)",
-            "0 0 20px 5px rgba(139, 92, 246, 0.3)",
-          ],
-        }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      {/* Outer pulsing glow ring - CSS animation for compositor thread - Desktop Only */}
+      <div
+        className="absolute -inset-4 rounded-3xl opacity-60 hidden md:block animate-pulse-glow"
       />
 
-      {/* Orbiting ring 1 - Desktop Only */}
-      <motion.div
-        className="absolute -inset-6 border border-purple-500/30 rounded-full pointer-events-none hidden md:block"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-        style={{ transformOrigin: "center center" }}
+      {/* Orbiting ring 1 - CSS animation for compositor thread - Desktop Only */}
+      <div
+        className="absolute -inset-6 border border-purple-500/30 rounded-full pointer-events-none hidden md:block animate-spin-slow"
+        style={{ animationDuration: '10s' }}
       >
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(139,92,246,0.8)]" />
-      </motion.div>
+      </div>
 
-      {/* Orbiting ring 2 (reverse) - Desktop Only */}
-      <motion.div
-        className="absolute -inset-10 border border-blue-500/20 rounded-full pointer-events-none hidden md:block"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        style={{ transformOrigin: "center center" }}
+      {/* Orbiting ring 2 (reverse) - CSS animation for compositor thread - Desktop Only */}
+      <div
+        className="absolute -inset-10 border border-blue-500/20 rounded-full pointer-events-none hidden md:block animate-spin-slow"
+        style={{ animationDuration: '15s', animationDirection: 'reverse' }}
       >
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-      </motion.div>
+      </div>
 
-      {/* Floating particles - Desktop Only */}
+      {/* Floating particles - Desktop Only - simplified single rotation */}
       <div className="hidden md:block">
         {particles.map((particle) => (
           <motion.div
@@ -103,28 +87,19 @@ export default function AvatarFlipCard() {
               rotate: [particle.angle, particle.angle + 360],
             }}
             transition={{
-              duration: 8 + particle.id,
+              duration: 8 + particle.id * 2,
               repeat: Infinity,
               ease: "linear",
               delay: particle.delay,
             }}
             style={{ transformOrigin: "center center" }}
           >
-            <motion.div
-              className="rounded-full bg-gradient-to-br from-purple-400 to-blue-400"
+            <div
+              className="rounded-full bg-gradient-to-br from-purple-400 to-blue-400 opacity-60"
               style={{
                 width: particle.size,
                 height: particle.size,
-                marginLeft: 140 + particle.id * 5,
-              }}
-              animate={{
-                opacity: [0.4, 1, 0.4],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: particle.delay,
+                marginLeft: 140 + particle.id * 10,
               }}
             />
           </motion.div>
@@ -164,8 +139,9 @@ export default function AvatarFlipCard() {
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <motion.p
               className="font-bold text-lg"
-              animate={{ opacity: [1, 0.7, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
             >
               Preetham
             </motion.p>

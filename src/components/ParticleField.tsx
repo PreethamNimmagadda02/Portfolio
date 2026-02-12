@@ -6,23 +6,23 @@ import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Hook for mouse position
+// Hook for mouse position — uses a ref to avoid React re-renders on every move
 function useMousePosition() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMouse({
+      mouseRef.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1,
-      });
+      };
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  return mouse;
+  return mouseRef;
 }
 
 // Hook for scroll position with smoothing
@@ -63,7 +63,7 @@ function useScrollPosition() {
 // Enhanced star field with scroll parallax and mouse interaction
 function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y: number }; scroll: number; isMobile: boolean }) {
   const ref = useRef<THREE.Points>(null);
-  const particlesCount = isMobile ? 500 : 5000;
+  const particlesCount = isMobile ? 400 : 2000;
 
   const { positions, originalPositions, sizes, colors } = useMemo(() => {
     const positions = new Float32Array(particlesCount * 3);
@@ -109,20 +109,22 @@ function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y:
     ref.current.rotation.y = time * 0.03;
 
     // Update particle positions based on mouse
+    const mx = mouse.x * 3;
+    const my = mouse.y * 3;
     for (let i = 0; i < particlesCount; i++) {
       const ox = originalPositions[i * 3];
       const oy = originalPositions[i * 3 + 1];
-      const oz = originalPositions[i * 3 + 2];
 
-      // Mouse repulsion
-      const dx = ox - mouse.x * 3;
-      const dy = oy - mouse.y * 3;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Mouse repulsion — squared distance avoids sqrt
+      const dx = ox - mx;
+      const dy = oy - my;
+      const distSq = dx * dx + dy * dy;
 
       let newX = ox;
       let newY = oy;
 
-      if (dist < 2) {
+      if (distSq < 4) { // equivalent to dist < 2
+        const dist = Math.sqrt(distSq);
         const force = (2 - dist) / 2;
         newX = ox + dx * force * 0.3;
         newY = oy + dy * force * 0.3;
@@ -131,7 +133,7 @@ function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y:
       // Add wave motion
       newY += Math.sin(time * 0.5 + ox * 0.5) * 0.1;
 
-      positionAttribute.setXYZ(i, newX, newY, oz);
+      positionAttribute.setXYZ(i, newX, newY, originalPositions[i * 3 + 2]);
     }
     positionAttribute.needsUpdate = true;
   });
@@ -228,7 +230,7 @@ function ConstellationLines() {
 
 
 export default function ParticleField() {
-  const mouse = useMousePosition();
+  const mouseRef = useMousePosition();
   const scroll = useScrollPosition();
   const isMobile = useIsMobile();
 
@@ -244,7 +246,7 @@ export default function ParticleField() {
           <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
           <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
 
-          <EnhancedStarField mouse={mouse} scroll={scroll} isMobile={isMobile} />
+          <EnhancedStarField mouse={mouseRef.current} scroll={scroll} isMobile={isMobile} />
           {!isMobile && (
             <>
               <ConstellationLines />

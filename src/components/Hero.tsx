@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence, Variants } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, Variants } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo } from "react";
@@ -18,7 +18,7 @@ function GradientText({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
-// Floating badge component
+// Floating badge component — simplified for performance
 function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
     <motion.div
@@ -31,14 +31,9 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
         opacity: { delay, duration: 0.6 },
         y: { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" }
       }}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm text-gray-300 animate-pulse-glow"
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/10 text-sm text-gray-300"
     >
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-      >
-        <Sparkles size={14} className="text-purple-400" />
-      </motion.div>
+      <Sparkles size={14} className="text-purple-400" />
       {children}
     </motion.div>
   );
@@ -179,17 +174,15 @@ const containerVariants = {
   },
 };
 
-// Letter animation variants - Classy Fade Reveal
+// Letter animation variants - Classy Fade Reveal (no blur filter for perf)
 const letterVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 10,
-    filter: "blur(4px)",
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
       duration: 0.5,
       ease: "easeOut",
@@ -238,29 +231,6 @@ export default function Hero() {
   const yCenter = useTransform(scrollYProgress, [0, 1], [0, 50]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  // Mouse position tracking using MotionValues for performance
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  // Smooth springs for tracking
-  const mouseXSpring = useSpring(x, { stiffness: 50, damping: 20 });
-  const mouseYSpring = useSpring(y, { stiffness: 50, damping: 20 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    x.set(e.clientX - centerX);
-    y.set(e.clientY - centerY);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
   // Derived transforms for background effects - outside render cycle
 
   // Hydration fix & Mobile detection
@@ -280,8 +250,6 @@ export default function Hero() {
       ref={containerRef}
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Static grid background */}
       <div

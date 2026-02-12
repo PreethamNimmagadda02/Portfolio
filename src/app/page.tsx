@@ -27,13 +27,14 @@ export default function Home() {
       {/* Hero Section */}
       <Hero />
 
+      {/* 3D Section Divider */}
+      <SectionDivider3D />
+
       {/* Skills Marquee with 3D divider */}
       <ScrollReveal>
         <SkillsMarquee />
       </ScrollReveal>
 
-      {/* 3D Section Divider */}
-      <SectionDivider3D />
 
       {/* About Section */}
       <ScrollReveal delay={0.1}>
