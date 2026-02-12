@@ -18,7 +18,7 @@ export default function ScrollReveal({
     className = "",
     delay = 0,
     direction = "up",
-    duration = 0.5,
+    duration = 0.4,
     once = true,
     amount = 0.2,
 }: ScrollRevealProps) {
@@ -29,10 +29,10 @@ export default function ScrollReveal({
     });
 
     const directions = {
-        up: { y: 30, x: 0 },
-        down: { y: -30, x: 0 },
-        left: { x: 30, y: 0 },
-        right: { x: -30, y: 0 },
+        up: { y: 20, x: 0 },
+        down: { y: -20, x: 0 },
+        left: { x: 20, y: 0 },
+        right: { x: -20, y: 0 },
         none: { x: 0, y: 0 },
     };
 

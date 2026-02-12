@@ -27,17 +27,29 @@ export default function Navbar() {
         window.requestAnimationFrame(() => {
           setScrolled(window.scrollY > 50);
 
-          const sections = navLinks.map(link => link.href.slice(1));
-          for (const section of sections.reverse()) {
-            const el = document.getElementById(section);
-            if (el) {
-              const rect = el.getBoundingClientRect();
-              if (rect.top <= 150) {
-                setActiveSection(section);
-                break;
-              }
+          // Find which section occupies the most viewport space
+          const viewportHeight = window.innerHeight;
+          let bestSection = "home";
+          let bestOverlap = 0;
+
+          for (const link of navLinks) {
+            const sectionId = link.href.slice(1);
+            const el = document.getElementById(sectionId);
+            if (!el) continue;
+
+            const rect = el.getBoundingClientRect();
+            // Calculate how much of this section is visible in the viewport
+            const visibleTop = Math.max(0, rect.top);
+            const visibleBottom = Math.min(viewportHeight, rect.bottom);
+            const overlap = Math.max(0, visibleBottom - visibleTop);
+
+            if (overlap > bestOverlap) {
+              bestOverlap = overlap;
+              bestSection = sectionId;
             }
           }
+
+          setActiveSection(bestSection);
           ticking = false;
         });
         ticking = true;
@@ -45,6 +57,7 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Set initial state
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -52,7 +65,17 @@ export default function Navbar() {
     e.preventDefault();
     const targetId = href.replace("#", "");
     const element = document.getElementById(targetId);
-    if (element) {
+    if (!element) return;
+
+    // Use Lenis for consistent smooth scrolling
+    const lenis = (window as unknown as { lenis?: { scrollTo: (target: HTMLElement, options?: Record<string, unknown>) => void } }).lenis;
+    if (lenis) {
+      lenis.scrollTo(element, {
+        offset: -80, // Account for navbar height
+        duration: 1.2,
+        easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+      });
+    } else {
       element.scrollIntoView({ behavior: "smooth" });
     }
     setIsOpen(false);

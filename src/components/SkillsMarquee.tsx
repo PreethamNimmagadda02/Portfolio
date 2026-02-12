@@ -37,7 +37,7 @@ const skills = [
 
 export default function SkillsMarquee() {
   return (
-    <section className="py-12 bg-black overflow-hidden relative z-10 border-y border-white/5">
+    <section id="skills-marquee" className="py-12 bg-black overflow-hidden relative z-10 border-y border-white/5">
       {/* Gradient fade edges */}
       <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
