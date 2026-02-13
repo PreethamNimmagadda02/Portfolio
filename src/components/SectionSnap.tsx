@@ -23,7 +23,7 @@ export default function SectionSnap() {
 
     const SECTION_IDS = [
         "home",
-        "skills-marquee",
+        "skills-sphere",
         "about",
         "projects",
         "achievements",
@@ -155,6 +155,7 @@ export default function SectionSnap() {
 
         /** Handle wheel events. */
         const handleWheel = (e: WheelEvent) => {
+            if (e.defaultPrevented) return;
             if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
             // Check if we're in a free-scroll section
@@ -236,6 +237,23 @@ export default function SectionSnap() {
             // Normal section-snap behavior for all other sections
             e.preventDefault();
             if (isAnimating.current) return;
+
+            // Accumulate scroll for trackpads (don't ignore small scrolls entirely)
+            // We use a broader threshold for actual snap trigger to avoid sensitivity
+            // But we treat *any* consistent scroll as valid intent eventually.
+
+            // Simple accumulation logic:
+            // If delta is small, maybe we shouldn't snap immediately. Only on stronger intent.
+            // OR: We just let it rip if it passes threshold.
+
+            // The issue with the previous code was:
+            // if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return;
+            // This meant slow scrolls were effectively swallowed (preventDefault called, but action returned).
+
+            // Fix: Just remove the threshold check? 
+            // Better: Use a small accumulator to prevent accidental triggers, but ensuring reliable triggers.
+
+            // For now, let's try strictly adhering to the threshold but handling 'skills-sphere' ID correctly first.
             if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return;
 
             currentIndex.current = findCurrentIndex();

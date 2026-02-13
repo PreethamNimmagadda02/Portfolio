@@ -154,7 +154,7 @@ export default function About() {
   };
 
   return (
-    <section id="about" className="py-24 relative overflow-hidden">
+    <section id="about" className="py-16 relative overflow-hidden">
       {/* Animated background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div

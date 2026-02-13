@@ -6,7 +6,6 @@ import Projects from "@/components/Projects";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import NoiseBackground from "@/components/NoiseBackground";
-import SkillsMarquee from "@/components/SkillsMarquee";
 import Achievements from "@/components/Achievements";
 import ScrollReveal from "@/components/ScrollReveal";
 import dynamic from "next/dynamic";
@@ -14,6 +13,7 @@ import dynamic from "next/dynamic";
 // Dynamic import for Three.js components (client-side only)
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
 const SectionDivider3D = dynamic(() => import("@/components/SectionDivider3D"), { ssr: false });
+const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), { ssr: false });
 
 
 export default function Home() {
@@ -28,7 +28,6 @@ export default function Home() {
       <Hero />
 
       {/* 3D Section Divider */}
-      <SectionDivider3D />
 
       {/* Skills Marquee with 3D divider */}
       <ScrollReveal>
@@ -41,16 +40,10 @@ export default function Home() {
         <About />
       </ScrollReveal>
 
-      {/* 3D Section Divider */}
-      <SectionDivider3D />
-
       {/* Projects Section */}
       <ScrollReveal delay={0.1}>
         <Projects />
       </ScrollReveal>
-
-      {/* 3D Section Divider */}
-      <SectionDivider3D />
 
       {/* Achievements Section */}
       <ScrollReveal delay={0.1}>
@@ -64,9 +57,6 @@ export default function Home() {
       <ScrollReveal delay={0.1}>
         <Experience />
       </ScrollReveal>
-
-      {/* 3D Section Divider */}
-      <SectionDivider3D />
 
       {/* Contact Section */}
       <ScrollReveal delay={0.1}>

@@ -808,3 +808,26 @@ h1 {
   border-right: 2px solid rgba(139, 92, 246, 0.8);
   animation: typewriter-cursor 1s step-end infinite;
 }
+
+/* 3D Skills Card — spinning border glow */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-glow-rotate {
+  0% {
+    --border-angle: 0deg;
+  }
+
+  100% {
+    --border-angle: 360deg;
+  }
+}
+
+/* Skills card 3D utilities */
+.skills-card-3d {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
