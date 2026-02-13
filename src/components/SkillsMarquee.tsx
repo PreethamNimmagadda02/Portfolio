@@ -377,9 +377,9 @@ const orbits = [
 
 
 function getCategoryOrbitIndex(category: string): number {
-  if (category === 'AI') return 2; // Pink Ring
-  if (category === 'Web' || category === 'Automation') return 1; // Cyan Ring
-  return 0; // Purple Ring (DB, DevOps, Lang, Tools)
+  if (category === 'AI') return 1; // AI Orbit (Index 1)
+  if (category === 'Web' || category === 'Automation') return 2; // Web Orbit (Index 2)
+  return 0; // Core Orbit (Index 0)
 }
 
 function getOrbitalPoints(samples: number, baseRadius: number) {
