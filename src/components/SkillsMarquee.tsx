@@ -528,7 +528,7 @@ export default function SkillsMarquee() {
           </span>
         </h2>
         <p className="text-gray-400 text-sm md:text-base max-w-lg mx-auto">
-          A living 3D visualization of my technical expertise
+          A 3D visualization of my technical expertise
         </p>
       </div>
 
