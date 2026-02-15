@@ -1,7 +1,7 @@
 "use client";
 
 import Hero from "@/components/Hero";
-import About from "@/components/About";
+import About3D from "@/components/About3D";
 import Projects from "@/components/Projects";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
@@ -37,7 +37,7 @@ export default function Home() {
 
       {/* About Section */}
       <ScrollReveal delay={0.1}>
-        <About />
+        <About3D />
       </ScrollReveal>
 
       {/* Projects Section */}
