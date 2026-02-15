@@ -447,7 +447,7 @@ function SkillsSphereScene({ isMobile }: { isMobile: boolean }) {
   const hoveredIndex = useMemo(() => skillsData.findIndex(s => s.name === hoveredSkill), [hoveredSkill]);
 
   // Reduced base radius slightly so the larger orbit scales fit in view
-  const radius = isMobile ? 1.6 : 2.2;
+  const radius = isMobile ? 1.2 : 2;
   const points = useMemo(() => getOrbitalPoints(skillsData.length, radius), [radius]);
 
 
@@ -538,7 +538,7 @@ export default function SkillsMarquee() {
           gl={{ antialias: true, alpha: true }}
           dpr={[1, 2]}
           className="w-full h-full"
-          style={{ touchAction: 'pan-y' }}
+          style={{ touchAction: isMobile ? 'none' : 'pan-y' }}
         >
           <Suspense fallback={null}>
             <group position={[0, 0, 0]}>
