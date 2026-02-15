@@ -6,7 +6,7 @@ import Projects from "@/components/Projects";
 import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import NoiseBackground from "@/components/NoiseBackground";
-import Achievements from "@/components/Achievements";
+import Achievements3D from "@/components/Achievements3D";
 import ScrollReveal from "@/components/ScrollReveal";
 import dynamic from "next/dynamic";
 
@@ -47,7 +47,7 @@ export default function Home() {
 
       {/* Achievements Section */}
       <ScrollReveal delay={0.1}>
-        <Achievements />
+        <Achievements3D />
       </ScrollReveal>
 
       {/* 3D Section Divider */}
