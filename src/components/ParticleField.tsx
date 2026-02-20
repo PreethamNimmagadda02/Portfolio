@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Points, PointMaterial, Float } from "@react-three/drei";
+import { Points, PointMaterial, Float, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -245,6 +245,9 @@ export default function ParticleField() {
           <ambientLight intensity={0.4} />
           <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
           <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
+
+          {/* Global Starfield Background */}
+          <Stars radius={100} depth={60} count={5000} factor={5} saturation={0.3} fade speed={0.4} />
 
           <EnhancedStarField mouse={mouseRef.current} scroll={scroll} isMobile={isMobile} />
           {!isMobile && (

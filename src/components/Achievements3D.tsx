@@ -1,17 +1,25 @@
 "use client";
 
-import { useRef, useState, useMemo, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshTransmissionMaterial, Text, Environment, Sparkles, Html, OrbitControls } from "@react-three/drei";
+import { useRef, useState, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+    Float,
+    Environment,
+    Sparkles,
+    Stars,
+    Html,
+    ContactShadows,
+    useCursor,
+    BakeShadows
+} from "@react-three/drei";
 import * as THREE from "three";
-import { motion, AnimatePresence } from "framer-motion";
-import { Award, Star, Trophy, Code, Zap, Flame, Crown } from "lucide-react";
+import { motion } from "framer-motion";
+import { Award, Star, Trophy, Code, Flame } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // -----------------------------------------------------------------------------
-// Data & Configuration
+// Data
 // -----------------------------------------------------------------------------
-
 const achievements = [
     {
         id: 0,
@@ -21,8 +29,7 @@ const achievements = [
         icon: Code,
         color: "#22d3ee", // cyan-400
         accent: "#06b6d4", // cyan-500
-        geometry: "dodecahedron",
-        position: [-2, 0, 0]
+        geometry: "crystal"  // tall angular crystal — code precision
     },
     {
         id: 1,
@@ -32,8 +39,7 @@ const achievements = [
         icon: Star,
         color: "#fbbf24", // amber-400
         accent: "#f59e0b", // amber-500
-        geometry: "icosahedron",
-        position: [2, 0, 0]
+        geometry: "star"  // 4-pointed star — elite status
     },
     {
         id: 2,
@@ -43,8 +49,7 @@ const achievements = [
         icon: Trophy,
         color: "#4ade80", // green-400
         accent: "#22c55e", // green-500
-        geometry: "octahedron",
-        position: [0, 2, 0]
+        geometry: "trophy"  // trophy shape — legendary status
     },
     {
         id: 3,
@@ -54,333 +59,550 @@ const achievements = [
         icon: Flame,
         color: "#f472b6", // pink-400
         accent: "#ec4899", // pink-500
-        geometry: "torus",
-        position: [0, -2, 0]
+        geometry: "flame"  // flame-like stack — relentless solving
     },
 ];
+
+// Helper to calculate positions in a circle
+const RADIUS = 4;
+const getPosition = (index: number, total: number) => {
+    const angle = (index / total) * Math.PI * 2;
+    return [Math.cos(angle) * RADIUS, 0, Math.sin(angle) * RADIUS] as [number, number, number];
+};
 
 // -----------------------------------------------------------------------------
 // 3D Components
 // -----------------------------------------------------------------------------
 
-function DynamicGeometry({ activeId }: { activeId: number | null }) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    // Default to first item if none active, or stay on last active
-    const targetId = activeId ?? 0;
-    const activeData = achievements.find(a => a.id === targetId) || achievements[0];
-
-    // Smoothly interpolate color & animation
-    useFrame((state, delta) => {
-        if (!meshRef.current) return;
-
-        // Dynamic Rotation
-        meshRef.current.rotation.x += delta * 0.4;
-        meshRef.current.rotation.y += delta * 0.5;
-    });
-
-    // Select geometry based on active ID
-    const Geometry = useMemo(() => {
-        switch (activeData.geometry) {
-            case "dodecahedron": return <dodecahedronGeometry args={[1, 0]} />;
-            case "icosahedron": return <icosahedronGeometry args={[1, 0]} />;
-            case "octahedron": return <octahedronGeometry args={[1, 0]} />;
-            case "torus": return <torusGeometry args={[0.8, 0.3, 32, 100]} />;
-            default: return <sphereGeometry args={[1, 32, 32]} />;
-        }
-    }, [activeData.geometry]);
-
-    return (
-        <group>
-            {/* Main Transmission Mesh */}
-            <Float floatIntensity={4} rotationIntensity={2} speed={3}>
-                <mesh ref={meshRef}>
-                    {Geometry}
-                    <MeshTransmissionMaterial
-                        backside
-                        backsideThickness={1}
-                        thickness={0.5}
-                        roughness={0.05} // Sharper reflections
-                        clearcoat={1}
-                        clearcoatRoughness={0.1}
-                        transmission={0.98}
-                        ior={1.4}
-                        chromaticAberration={0.4} // More color splitting
-                        anisotropy={0.5}
-                        distortion={0.6} // More distortion for liquid feel
-                        distortionScale={0.8}
-                        temporalDistortion={0.4}
-                        color={activeData.color}
-                        emissive={activeData.accent}
-                        emissiveIntensity={0.8} // Brighter
-                        toneMapped={false}
-                    />
-                </mesh>
-            </Float>
-
-            {/* Inner Wireframe Geometery (Counter-rotating) */}
-            <Float floatIntensity={2} rotationIntensity={4} speed={4}>
-                <mesh scale={0.6} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
-                    <icosahedronGeometry args={[1, 1]} />
-                    <meshBasicMaterial color={activeData.accent} wireframe transparent opacity={0.3} />
-                </mesh>
-            </Float>
-
-            {/* Glowing Core Pulse */}
-            <Float speed={5} floatIntensity={0.5}>
-                <mesh scale={0.4}>
-                    <sphereGeometry args={[1, 32, 32]} />
-                    <meshBasicMaterial color={activeData.color} transparent opacity={0.9} />
-                </mesh>
-            </Float>
-        </group>
-    );
-}
-
-function FloatingBadges({ activeId, onHover }: { activeId: number | null, onHover: (id: number | null) => void }) {
-    const groupRef = useRef<THREE.Group>(null);
+function AnimatedPlanet({ type, materialProps, isActive }: { type: string; materialProps: Record<string, any>; isActive: boolean }) {
+    const ring1Ref = useRef<THREE.Mesh>(null);
+    const ring2Ref = useRef<THREE.Mesh>(null);
+    const moon1Ref = useRef<THREE.Group>(null);
+    const moon2Ref = useRef<THREE.Group>(null);
+    const moon3Ref = useRef<THREE.Group>(null);
+    const debrisRef = useRef<THREE.Group>(null);
+    const coreRef = useRef<THREE.Mesh>(null);
+    const atmosphereRef = useRef<THREE.Mesh>(null);
+    const auroraRef = useRef<THREE.Mesh>(null);
+    const crustRef = useRef<THREE.Mesh>(null);
 
     useFrame((state) => {
-        if (!groupRef.current) return;
-        // Continuous orbit
-        groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-        // Slight bobbing
-        groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.2;
-    });
-
-    return (
-        <group ref={groupRef}>
-            {achievements.map((item, index) => {
-                const angle = (index / achievements.length) * Math.PI * 2;
-                const radius = 2.2; // Slightly larger for breathing room
-                const x = Math.cos(angle) * radius;
-                const z = Math.sin(angle) * radius;
-                const isActive = activeId === item.id;
-
-                return (
-                    <group key={item.id} position={[x, 0, z]}>
-                        <Float
-                            speed={isActive ? 10 : 4}
-                            rotationIntensity={isActive ? 2 : 0.5}
-                            floatIntensity={isActive ? 2 : 1}
-                        >
-                            <mesh
-                                onPointerOver={(e) => { e.stopPropagation(); onHover(item.id); document.body.style.cursor = 'pointer'; }}
-                                onPointerOut={() => { onHover(null); document.body.style.cursor = 'auto'; }}
-                                scale={isActive ? 1.5 : 1}
-                            >
-                                <octahedronGeometry args={[0.2, 0]} />
-                                <meshStandardMaterial
-                                    color={item.color}
-                                    emissive={item.accent}
-                                    emissiveIntensity={isActive ? 3 : 0.8}
-                                    toneMapped={false}
-                                    roughness={0.1}
-                                    metalness={1}
-                                />
-                            </mesh>
-                            {/* Halo Ring for Active */}
-                            {isActive && (
-                                <mesh rotation={[Math.PI / 2, 0, 0]}>
-                                    <ringGeometry args={[0.3, 0.35, 32]} />
-                                    <meshBasicMaterial color={item.color} transparent opacity={0.5} side={THREE.DoubleSide} />
-                                </mesh>
-                            )}
-                        </Float>
-                    </group>
-                );
-            })}
-        </group>
-    );
-}
-
-function MovingLight({ color }: { color: string }) {
-    const lightRef = useRef<THREE.PointLight>(null);
-    useFrame((state) => {
-        if (!lightRef.current) return;
         const t = state.clock.elapsedTime;
-        lightRef.current.position.x = Math.sin(t * 0.5) * 5;
-        lightRef.current.position.y = Math.cos(t * 0.3) * 5;
-        lightRef.current.position.z = Math.sin(t * 0.2) * 5 + 2;
+        // Animate ring rotations at different speeds
+        if (ring1Ref.current) ring1Ref.current.rotation.z = t * 0.35;
+        if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.2;
+
+        // Animate 3 orbiting moons at different orbits
+        if (moon1Ref.current) {
+            moon1Ref.current.position.x = Math.cos(t * 0.6) * 1.4;
+            moon1Ref.current.position.z = Math.sin(t * 0.6) * 1.4;
+            moon1Ref.current.position.y = Math.sin(t * 0.9) * 0.25;
+        }
+        if (moon2Ref.current) {
+            moon2Ref.current.position.x = Math.cos(t * 0.45 + 2.1) * 1.7;
+            moon2Ref.current.position.z = Math.sin(t * 0.45 + 2.1) * 1.0;
+            moon2Ref.current.position.y = Math.cos(t * 0.7) * 0.4;
+        }
+        if (moon3Ref.current) {
+            moon3Ref.current.position.x = Math.cos(t * 0.8 + 4.2) * 1.1;
+            moon3Ref.current.position.z = Math.sin(t * 0.8 + 4.2) * 1.1;
+            moon3Ref.current.position.y = Math.sin(t * 1.5) * 0.15;
+        }
+        // Animate orbiting debris belt
+        if (debrisRef.current) {
+            debrisRef.current.rotation.y = t * 0.4;
+            debrisRef.current.rotation.x = Math.sin(t * 0.2) * 0.08;
+        }
+        // Pulsing core glow
+        if (coreRef.current) {
+            const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
+            mat.emissiveIntensity = 1.5 + Math.sin(t * 2.5) * 0.8;
+        }
+        // Breathing atmosphere
+        if (atmosphereRef.current) {
+            const s = 1.0 + Math.sin(t * 1.2) * 0.04;
+            atmosphereRef.current.scale.set(s, s, s);
+        }
+        // Aurora rotation
+        if (auroraRef.current) {
+            auroraRef.current.rotation.y = t * 0.15;
+            auroraRef.current.rotation.x = Math.sin(t * 0.5) * 0.1;
+            const mat = auroraRef.current.material as THREE.MeshBasicMaterial;
+            mat.opacity = 0.12 + Math.sin(t * 1.8) * 0.08;
+        }
+        // Volcanic crust pulsing
+        if (crustRef.current) {
+            const mat = crustRef.current.material as THREE.MeshPhysicalMaterial;
+            mat.emissiveIntensity = 0.8 + Math.sin(t * 3) * 0.5;
+        }
     });
-    return <pointLight ref={lightRef} intensity={2} color={color} distance={10} />;
+
+    switch (type) {
+        case "crystal":
+            // ── Ringed Gas Giant with layered atmosphere & particle belt ──
+            return (
+                <group>
+                    {/* Inner atmosphere glow */}
+                    <mesh>
+                        <sphereGeometry args={[0.95, 48, 48]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={0.05} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+                    </mesh>
+                    {/* Main planet body — banded gas giant */}
+                    <mesh ref={atmosphereRef}>
+                        <sphereGeometry args={[0.85, 48, 48]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            metalness={0.6}
+                            roughness={0.4}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={isActive ? 1.5 : 0.4}
+                            clearcoat={0.8}
+                            clearcoatRoughness={0.15}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Primary ring — thick & vivid */}
+                    <mesh ref={ring1Ref} rotation={[Math.PI / 2.8, 0.15, 0]}>
+                        <torusGeometry args={[1.3, 0.07, 16, 100]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={isActive ? 3.0 : 1.2}
+                            metalness={0.9}
+                            roughness={0.1}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Secondary ring — wider, ethereal */}
+                    <mesh ref={ring2Ref} rotation={[Math.PI / 2.5, -0.1, 0.2]}>
+                        <torusGeometry args={[1.55, 0.03, 16, 100]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={isActive ? 1.5 : 0.5}
+                            transparent opacity={0.5}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Tertiary ring — outermost wisp */}
+                    <mesh rotation={[Math.PI / 2.8, 0.15, 0]}>
+                        <torusGeometry args={[1.75, 0.015, 16, 100]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={0.15} />
+                    </mesh>
+                    {/* Orbiting particle belt */}
+                    <Sparkles count={40} scale={[3, 0.3, 3]} size={3} speed={0.5} opacity={0.6} color={materialProps.color} />
+                </group>
+            );
+        case "star":
+            // ── Faceted rocky world with 3 orbiting moons & orbital trails ──
+            return (
+                <group>
+                    {/* Atmosphere haze */}
+                    <mesh>
+                        <sphereGeometry args={[0.95, 32, 32]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={0.04} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+                    </mesh>
+                    {/* Main planet — faceted rocky surface */}
+                    <mesh ref={atmosphereRef}>
+                        <icosahedronGeometry args={[0.8, 2]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            metalness={0.7}
+                            roughness={0.3}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={isActive ? 1.5 : 0.4}
+                            flatShading
+                            clearcoat={0.6}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Moon 1 — large, cratered */}
+                    <group ref={moon1Ref}>
+                        <mesh>
+                            <icosahedronGeometry args={[0.18, 1]} />
+                            <meshPhysicalMaterial
+                                color={materialProps.color}
+                                emissive={materialProps.emissive}
+                                emissiveIntensity={isActive ? 2.5 : 0.8}
+                                flatShading
+                                toneMapped={false}
+                            />
+                        </mesh>
+                    </group>
+                    {/* Moon 2 — small, glassy */}
+                    <group ref={moon2Ref}>
+                        <mesh>
+                            <sphereGeometry args={[0.1, 16, 16]} />
+                            <meshPhysicalMaterial
+                                color="#ffffff"
+                                emissive={materialProps.emissive}
+                                emissiveIntensity={isActive ? 1.5 : 0.3}
+                                transmission={0.5}
+                                thickness={0.5}
+                                toneMapped={false}
+                            />
+                        </mesh>
+                    </group>
+                    {/* Moon 3 — tiny, bright */}
+                    <group ref={moon3Ref}>
+                        <mesh>
+                            <octahedronGeometry args={[0.07, 0]} />
+                            <meshPhysicalMaterial
+                                color={materialProps.color}
+                                emissive={materialProps.emissive}
+                                emissiveIntensity={isActive ? 3 : 1}
+                                toneMapped={false}
+                            />
+                        </mesh>
+                    </group>
+                    {/* Orbital trail ring */}
+                    <mesh rotation={[Math.PI / 2.2, 0, 0]}>
+                        <torusGeometry args={[1.4, 0.008, 8, 100]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.25 : 0.08} />
+                    </mesh>
+                    <mesh rotation={[Math.PI / 1.8, 0.3, 0]}>
+                        <torusGeometry args={[1.7, 0.005, 8, 100]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.15 : 0.04} />
+                    </mesh>
+                </group>
+            );
+        case "trophy":
+            // ── Crystalline Energy World with pulsing core & aurora wisps ──
+            return (
+                <group>
+                    {/* Outer aurora wisps */}
+                    <mesh ref={auroraRef}>
+                        <icosahedronGeometry args={[1.2, 1]} />
+                        <meshBasicMaterial color={materialProps.color} wireframe transparent opacity={0.12} blending={THREE.AdditiveBlending} />
+                    </mesh>
+                    {/* Translucent crystalline shell */}
+                    <mesh ref={atmosphereRef}>
+                        <sphereGeometry args={[0.85, 48, 48]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            transmission={0.9}
+                            thickness={2.0}
+                            roughness={0.05}
+                            ior={1.8}
+                            metalness={0.1}
+                            clearcoat={1}
+                            clearcoatRoughness={0.05}
+                            envMapIntensity={1.5}
+                        />
+                    </mesh>
+                    {/* Inner energy core — bright pulsing */}
+                    <mesh ref={coreRef}>
+                        <icosahedronGeometry args={[0.45, 2]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={2}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Innermost plasma seed */}
+                    <mesh>
+                        <sphereGeometry args={[0.2, 32, 32]} />
+                        <meshBasicMaterial color="#ffffff" transparent opacity={0.6} blending={THREE.AdditiveBlending} />
+                    </mesh>
+                    {/* Energy particles orbit */}
+                    <Sparkles count={30} scale={[2, 2, 2]} size={4} speed={0.8} opacity={0.7} color={materialProps.color} />
+                </group>
+            );
+        case "flame":
+            // ── Volcanic World with magma cracks, debris belt & eruption particles ──
+            return (
+                <group>
+                    {/* Heat haze atmosphere */}
+                    <mesh>
+                        <sphereGeometry args={[1.0, 32, 32]} />
+                        <meshBasicMaterial color={materialProps.color} transparent opacity={0.06} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+                    </mesh>
+                    {/* Outer crust — dark, cracked volcanic surface */}
+                    <mesh ref={atmosphereRef}>
+                        <icosahedronGeometry args={[0.78, 3]} />
+                        <meshPhysicalMaterial
+                            color="#1a0a0a"
+                            metalness={0.9}
+                            roughness={0.6}
+                            flatShading
+                            clearcoat={0.3}
+                        />
+                    </mesh>
+                    {/* Inner lava layer — peeks through cracks */}
+                    <mesh ref={crustRef}>
+                        <icosahedronGeometry args={[0.76, 2]} />
+                        <meshPhysicalMaterial
+                            color={materialProps.color}
+                            emissive={materialProps.emissive}
+                            emissiveIntensity={1.0}
+                            metalness={0.3}
+                            roughness={0.8}
+                            flatShading
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Orbiting magma debris belt */}
+                    <group ref={debrisRef}>
+                        {Array.from({ length: 14 }).map((_, i) => {
+                            const a = (i / 14) * Math.PI * 2;
+                            const r = 1.15 + (i % 3) * 0.12;
+                            return (
+                                <mesh key={i} position={[
+                                    Math.cos(a) * r,
+                                    Math.sin(i * 3.7) * 0.2,
+                                    Math.sin(a) * r
+                                ]}>
+                                    <dodecahedronGeometry args={[0.04 + (i % 4) * 0.02, 0]} />
+                                    <meshPhysicalMaterial
+                                        color={i % 2 === 0 ? materialProps.color : "#ff6b35"}
+                                        emissive={materialProps.emissive}
+                                        emissiveIntensity={isActive ? 3 : 1}
+                                        toneMapped={false}
+                                    />
+                                </mesh>
+                            );
+                        })}
+                    </group>
+                    {/* Eruption particles */}
+                    <Sparkles count={25} scale={[2, 3, 2]} size={3} speed={1.2} opacity={0.5} color={materialProps.color} />
+                </group>
+            );
+        default: return (
+            <mesh>
+                <sphereGeometry args={[0.85, 48, 48]} />
+                <meshPhysicalMaterial {...materialProps} />
+            </mesh>
+        );
+    }
 }
 
-function Scene({ activeId, onHover, isMobile }: { activeId: number | null, onHover: (id: number | null) => void, isMobile: boolean }) {
-    const activeData = achievements.find(a => a.id === (activeId ?? 0)) || achievements[0];
+function AchievementMonolith({
+    data,
+    index,
+    total,
+    isActive,
+    isMobile,
+    onClick
+}: {
+    data: typeof achievements[0],
+    index: number,
+    total: number,
+    isActive: boolean,
+    isMobile: boolean,
+    onClick: () => void
+}) {
+    const groupRef = useRef<THREE.Group>(null);
+    const pos = getPosition(index, total);
+    const [hovered, setHovered] = useState(false);
+
+    useCursor(hovered);
+
+    useFrame((state, delta) => {
+        if (!groupRef.current) return;
+
+        // Base rotation — faster when active, with more axis variation
+        groupRef.current.rotation.y += delta * (isActive ? 0.4 : (hovered ? 0.3 : 0.15));
+        groupRef.current.rotation.x += delta * (isActive ? 0.15 : 0.05);
+
+        // Scale up if active or hovered with smoothly responsive spring
+        const targetScale = isActive ? 1.1 : (hovered ? 0.9 : 0.7);
+        groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+    });
+
+    const Icon = data.icon;
+
+    const materialProps = {
+        color: data.color,
+        metalness: 0.8,
+        roughness: 0.2,
+        emissive: data.accent,
+        emissiveIntensity: isActive ? 1.8 : (hovered ? 0.8 : 0.3),
+        transparent: true,
+        opacity: isActive ? 0.95 : 0.85,
+        envMapIntensity: 0.5,
+        clearcoat: 1,
+        clearcoatRoughness: 0.1,
+        toneMapped: false,
+    };
+
+    return (
+        <group position={pos} scale={isMobile ? 0.55 : 0.65}>
+            {/* The 3D Object */}
+            <Float floatIntensity={isActive ? 1.5 : 0.8} rotationIntensity={isActive ? 1 : 0.5} speed={isActive ? 2 : 1}>
+                <group
+                    ref={groupRef}
+                    onClick={(e) => { e.stopPropagation(); onClick(); }}
+                    onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+                    onPointerOut={() => setHovered(false)}
+                >
+                    <AnimatedPlanet type={data.geometry} materialProps={materialProps} isActive={isActive} />
+                </group>
+            </Float>
+
+            {/* Glowing Color Platform */}
+            <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <circleGeometry args={[2.0, 64]} />
+                <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.35 : 0.05} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
+            </mesh>
+            <mesh position={[0, -2.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[1.9, 2.3, 64]} />
+                <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.2 : 0.03} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
+            </mesh>
+
+            {/* Dynamic HTML HUD — positioned BELOW the monolith so it doesn't cover the shape */}
+            <Html
+                position={[0, -2.8, 0]}
+                center
+                className="pointer-events-none z-50 transition-opacity duration-300"
+                style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? 'auto' : 'none' }}
+                zIndexRange={[100, 0]} // Ensure it stays on top without depth sorting issues
+                transform={false} // Prevent matrix math jittering
+            >
+                <div className="w-72 p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
+                    style={{ boxShadow: isActive ? `0 0 30px -10px ${data.color}` : 'none' }}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-3 rounded-xl bg-black/50 border border-white/10"
+                            style={{ boxShadow: `inset 0 0 10px ${data.color}40` }}>
+                            <Icon size={24} color={data.color} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-white drop-shadow-md">{data.title}</h3>
+                            <span className="text-xs font-mono px-2 py-1 rounded bg-black/50 border"
+                                style={{ color: data.color, borderColor: `${data.color}50` }}>
+                                {data.stats}
+                            </span>
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-300 leading-relaxed font-light">
+                        {data.description}
+                    </p>
+                </div>
+            </Html>
+        </group>
+    );
+}
+
+// Camera Rig to move between monoliths smoothly
+function CameraRig({ activeIndex, isMobile }: { activeIndex: number, isMobile: boolean }) {
+    const { camera } = useThree();
+
+    useFrame((state, delta) => {
+        // Find the angle of the active monolith
+        const angle = (activeIndex / achievements.length) * Math.PI * 2;
+
+        // Position camera slightly further out and zoomed in to look at the active monolith
+        // We stand back slightly from the origin and look towards the active one
+        const cameraDistance = RADIUS + (isMobile ? 9 : 5.5);
+        const targetX = Math.cos(angle) * cameraDistance;
+        const targetZ = Math.sin(angle) * cameraDistance;
+        const targetY = 0.8;
+
+        // Move camera position smoothly
+        camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.035);
+
+        // Look at the monolith center, slightly below to include the card
+        const activePos = getPosition(activeIndex, achievements.length);
+        const lookAtVector = new THREE.Vector3(activePos[0], -0.5, activePos[2]);
+
+        // Smooth looking with matching lerp
+        const currentLookAt = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
+        currentLookAt.lerp(lookAtVector, 0.035);
+        camera.lookAt(currentLookAt);
+    });
+
+    return null;
+}
+
+function Scene({ activeIndex, onSelect, isMobile }: { activeIndex: number, onSelect: (index: number) => void, isMobile: boolean }) {
+    const activeData = achievements[activeIndex];
 
     return (
         <>
             <Environment preset="city" />
-            <ambientLight intensity={0.1} />
 
-            <MovingLight color={activeData.color} />
-            <pointLight position={[-5, 5, -5]} intensity={1} color="#ffffff" />
+            {/* Ambient and point lights */}
+            <ambientLight intensity={0.2} />
+            <pointLight position={[0, 5, 0]} intensity={1.5} color="#ffffff" distance={20} />
 
-            <group position={isMobile ? [0, 1, 0] : [2.5, 0, 0]}>
-                <DynamicGeometry activeId={activeId} />
-                <FloatingBadges activeId={activeId} onHover={onHover} />
+            <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
+
+            {/* Render all monoliths */}
+            <group position={[0, 0.3, 0]}>
+                {achievements.map((item, i) => (
+                    <AchievementMonolith
+                        key={item.id}
+                        data={item}
+                        index={i}
+                        total={achievements.length}
+                        isActive={activeIndex === i}
+                        isMobile={isMobile}
+                        onClick={() => onSelect(i)}
+                    />
+                ))}
             </group>
 
-            <Sparkles
-                count={80}
-                scale={20}
-                size={6}
-                speed={0.4}
-                opacity={0.5}
-                color={activeData.color}
-            />
+            {/* Central energy source */}
+            <Float floatIntensity={2} speed={2}>
+                <mesh position={[0, 0, 0]}>
+                    <icosahedronGeometry args={[0.3, 1]} />
+                    <meshBasicMaterial color={activeData.accent} wireframe transparent opacity={0.3} />
+                </mesh>
+            </Float>
+
+            {/* Bake shadows to improve performance */}
+            <BakeShadows />
+
+            {/* Environment details */}
+            <Sparkles count={80} scale={25} size={8} speed={0.3} opacity={0.4} color={activeData.color} />
+            <ContactShadows frames={1} position={[0, -2.5, 0]} opacity={0.4} scale={20} blur={2} far={10} color="#111111" />
         </>
     );
 }
 
 // -----------------------------------------------------------------------------
-// UI Component
+// UI Component wrapper
 // -----------------------------------------------------------------------------
 
-function AchievementCard({ item, isActive, onHover }: { item: typeof achievements[0], isActive: boolean, onHover: (id: number | null) => void }) {
-    const Icon = item.icon;
-
-    return (
-        <motion.div
-            layout
-            onMouseEnter={() => onHover(item.id)}
-            onMouseLeave={() => onHover(null)}
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className={`
-        relative p-6 rounded-2xl cursor-pointer transition-all duration-500 overflow-hidden group
-        ${isActive ? 'scale-105' : 'hover:scale-105'}
-      `}
-            style={{
-                background: "rgba(0,0,0,0.4)",
-                boxShadow: isActive ? `0 0 30px -5px ${item.color}30` : "none"
-            }}
-        >
-            {/* Animated Gradient Border */}
-            <div className={`absolute inset-0 p-[1px] rounded-2xl bg-gradient-to-br from-white/10 to-transparent ${isActive ? 'from-white/30 to-white/5' : ''}`}>
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-xl rounded-2xl h-full w-full" />
-            </div>
-
-            {/* Active Glow Background */}
-            <div
-                className={`absolute inset-0 opacity-0 transition-opacity duration-500 ${isActive ? 'opacity-20' : 'group-hover:opacity-10'}`}
-                style={{ background: `linear-gradient(45deg, ${item.color}, transparent)` }}
-            />
-
-            {/* Content */}
-            <div className="relative z-10 flex items-start gap-5">
-                <div className="relative">
-                    <div
-                        className={`p-4 rounded-xl transition-all duration-500 ${isActive ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 text-gray-400 group-hover:bg-white/10 group-hover:text-white'}`}
-                        style={{
-                            boxShadow: isActive ? `0 0 20px ${item.color}60` : undefined,
-                            backgroundColor: isActive ? item.color : undefined
-                        }}
-                    >
-                        <Icon size={28} className={isActive ? "text-black" : ""} />
-                    </div>
-                </div>
-
-                <div className="flex-1 space-y-2">
-                    <div className="flex justify-between items-start">
-                        <h3 className={`font-bold text-xl transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
-                            {item.title}
-                        </h3>
-                        <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full border transition-colors duration-300 ${isActive ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/5 text-gray-500 group-hover:text-gray-400'}`}
-                            style={{ borderColor: isActive ? item.color : undefined, color: isActive ? item.color : undefined }}
-                        >
-                            {item.stats}
-                        </span>
-                    </div>
-                    <p className="text-sm text-gray-500 leading-relaxed group-hover:text-gray-300 transition-colors">
-                        {item.description}
-                    </p>
-                </div>
-            </div>
-
-            {/* Interactive Shine */}
-            <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-200%] transition-transform duration-1000 ${isActive ? 'translate-x-[200%]' : 'group-hover:translate-x-[200%]'}`} />
-        </motion.div>
-    );
-}
-
 export default function Achievements3D() {
-    const [activeId, setActiveId] = useState<number | null>(null);
+    const [activeIndex, setActiveIndex] = useState(0);
     const isMobile = useIsMobile();
-    const sectionRef = useRef<HTMLElement>(null);
 
-    // If mobile, checking if we want a different layout, but for now consistent 3D + List is good
-    // Mobile might need the canvas behind the text or above.
+    // Simple auto-rotate if not interacting, maybe optional
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         setActiveIndex(prev => (prev + 1) % achievements.length);
+    //     }, 8000);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     return (
-        <section ref={sectionRef} id="achievements" className="relative min-h-[800px] py-24 bg-black overflow-hidden flex items-center">
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-
-                {/* Header */}
-                <motion.div
-                    className="text-center mb-16 lg:mb-0 lg:absolute lg:top-0 lg:left-0 lg:w-1/2 lg:h-full lg:flex lg:flex-col lg:justify-center lg:items-start lg:pl-8 lg:text-left z-20 pointer-events-none"
-                    initial={{ opacity: 0, y: 20 }}
+        <section id="achievements" className="relative h-screen overflow-hidden flex items-center justify-center">
+            {/* Header Overlay - absolute so it floats above canvas */}
+            <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
+                <motion.h2
+                    initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
+                    className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
                 >
-                    {/* Background Text Faded */}
-
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight drop-shadow-2xl">
-                        My <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
-                    </h2>
-                    <p className="text-gray-400 text-lg max-w-md mb-8 pointer-events-auto">
-                        Consistently pushing boundaries in algorithmic efficiency and competitive programming. Ranked among the top developers globally.
-                    </p>
-
-                    {/* List for Desktop (Left Side) */}
-                    <div className="hidden lg:flex flex-col gap-4 w-full max-w-lg pointer-events-auto">
-                        {achievements.map((item) => (
-                            <AchievementCard
-                                key={item.id}
-                                item={item}
-                                isActive={activeId === item.id}
-                                onHover={setActiveId}
-                            />
-                        ))}
-                    </div>
-                </motion.div>
-
-                {/* Mobile View List (Below header) */}
-                <div className="lg:hidden grid grid-cols-1 gap-4 relative z-20 pointer-events-auto">
-                    {achievements.map((item) => (
-                        <AchievementCard
-                            key={item.id}
-                            item={item}
-                            isActive={activeId === item.id}
-                            onHover={setActiveId}
-                        />
-                    ))}
-                </div>
-
+                    My <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
+                </motion.h2>
+                <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
+                    Navigate the gallery. Click a monolith to focus.
+                </p>
             </div>
 
-            {/* 3D Scene Container - Fixed / Absolute Position */}
-            <div className="absolute inset-0 w-full h-full z-0">
-                <Canvas camera={{ position: [0, 0, 8], fov: 45 }} className="cursor-grab active:cursor-grabbing">
-                    <Suspense fallback={null}>
-                        <Scene activeId={activeId} onHover={setActiveId} isMobile={isMobile} />
-                        <OrbitControls
-                            enableZoom={false}
-                            enablePan={false}
-                            autoRotate={!activeId}
-                            autoRotateSpeed={0.5}
-                            minPolarAngle={Math.PI / 4}
-                            maxPolarAngle={Math.PI / 1.5}
-                        />
-                    </Suspense>
+
+
+            {/* Canvas takes up entire section */}
+            <div className="absolute inset-0 w-full h-full z-0 cursor-crosshair">
+                <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
+                    <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
                 </Canvas>
-                {/* Vignette for Text Readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none lg:w-2/3" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none h-32 bottom-0" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-transparent pointer-events-none h-32 top-0" />
+
+                {/* Vignette */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
             </div>
         </section>
     );

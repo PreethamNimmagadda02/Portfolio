@@ -135,7 +135,7 @@ export default function SectionSnap() {
             if (lenis) {
                 lenis.scrollTo(Math.max(0, targetY), {
                     duration: ANIMATION_DURATION_MS / 1000,
-                    easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+                    easing: (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                     lock: true,
                     force: true,
                     onComplete: () => {

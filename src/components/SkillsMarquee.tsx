@@ -516,7 +516,7 @@ export default function SkillsMarquee() {
   return (
     <section id="skills-sphere" className="py-24 relative w-full h-[850px] overflow-hidden flex flex-col items-center justify-center">
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-black pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
 
       {/* Section Header - Floating Top */}
       <div className="absolute top-12 left-0 w-full z-10 pointer-events-none text-center px-4">

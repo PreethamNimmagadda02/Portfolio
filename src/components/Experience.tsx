@@ -1,374 +1,736 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import React from "react";
-import { Briefcase, Calendar, Users, Award, Code, Trophy, Star, Zap } from "lucide-react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+  Float,
+  Environment,
+  Sparkles,
+  Stars,
+  Html,
+  ContactShadows,
+  useCursor,
+  BakeShadows
+} from "@react-three/drei";
+import * as THREE from "three";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Briefcase,
+  Calendar,
+  Award,
+  Trophy,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+} from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
+// -----------------------------------------------------------------------------
+// Data
+// -----------------------------------------------------------------------------
 type ExperienceType = "work" | "leadership" | "community" | "achievement" | "organization";
 
-interface Experience {
+interface ExperienceData {
+  id: number;
   role: string;
   company: string;
   period: string;
-  description: React.ReactNode;
+  description: string;
   type: ExperienceType;
   skills: string[];
-  highlight?: string;
+  highlight: string;
+  color: string;
+  accent: string;
+  geometry: string;
 }
 
-const experiences: Experience[] = [
+const experiences: ExperienceData[] = [
   {
+    id: 0,
     role: "Generative AI Intern",
     company: "Introspect Labs",
     period: "Jan 2026 - Present",
-    description: (
-      <>
-        Built a Multimodal & Multilingual AI Companion powered by <span className="text-purple-400 font-semibold">VideoRAG</span> that processes <span className="text-blue-400 font-semibold">100+ hours</span> of video with <span className="text-green-400 font-semibold">95% accuracy</span>. Designed its <span className="text-pink-400 font-semibold">Empathic Core</span> to drive real-time adaptive responses, boosting retention by <span className="text-yellow-400 font-semibold">40%</span>.
-      </>
-    ),
+    description:
+      "Built a Multimodal & Multilingual AI Companion powered by VideoRAG that processes 100+ hours of video with 95% accuracy. Designed its Empathic Core for real-time adaptive responses, boosting retention by 40%.",
     type: "work",
     skills: ["VideoRAG", "Vision-Language Models", "Empathic AI"],
-    highlight: "Architected an AI Companion"
+    highlight: "Architected an AI Companion",
+    color: "#3b82f6",
+    accent: "#06b6d4",
+    geometry: "crystal",
   },
   {
+    id: 1,
     role: "Campus Ambassador",
     company: "Perplexity",
     period: "Sept 2025 - Nov 2025",
-    description: (
-      <>
-        Spearheaded <span className="text-cyan-400 font-semibold">market expansion strategies</span> for Perplexity. Orchestrated adoption campaigns & built strategic partnerships to drive <span className="text-blue-400 font-semibold">user acquisition</span>.
-      </>
-    ),
+    description:
+      "Spearheaded market expansion strategies for Perplexity. Orchestrated adoption campaigns & built strategic partnerships to drive user acquisition.",
     type: "community",
     skills: ["Growth Hacking", "Strategic Partnerships", "Brand Strategy"],
-    highlight: "Generated 20+ Strategic Leads"
+    highlight: "20+ Strategic Leads",
+    color: "#22c55e",
+    accent: "#10b981",
+    geometry: "prism",
   },
   {
+    id: 2,
     role: "Software Developer Intern",
     company: "METAVERTEX",
     period: "June 2025 – July 2025",
-    description: (
-      <>
-        Architected <span className="text-blue-400 font-semibold">Autonomous AI Agents</span> reducing system resource load by <span className="text-green-400 font-semibold">20%</span>. Engineered performance optimizations that boosted SEO visibility by <span className="text-green-400 font-semibold">10%</span>.
-      </>
-    ),
+    description:
+      "Architected Autonomous AI Agents reducing system resource load by 20%. Engineered performance optimizations that boosted SEO visibility by 10%.",
     type: "work",
     skills: ["AI Architecture", "System Optimization", "Scalable Tech"],
-    highlight: "20% Efficiency Gain"
+    highlight: "20% Efficiency Gain",
+    color: "#8b5cf6",
+    accent: "#a78bfa",
+    geometry: "helix",
   },
   {
+    id: 3,
     role: "Hostel Prefect",
     company: "Hostel Executive Committee",
     period: "Sept 2024 - Sept 2025",
-    description: (
-      <>
-        Managed operations for <span className="text-pink-400 font-semibold">1,800+ residents</span>. Implemented conflict resolution protocols reducing disputes by <span className="text-green-400 font-semibold">30%</span> and boosted community engagement by <span className="text-green-400 font-semibold">40%</span>.
-      </>
-    ),
+    description:
+      "Managed operations for 1,800+ residents. Implemented conflict resolution protocols reducing disputes by 30% and boosted community engagement by 40%.",
     type: "organization",
     skills: ["Operations Management", "Conflict Resolution", "Community Building"],
-    highlight: "LEAD 1800+ Residents"
+    highlight: "Lead 1800+ Residents",
+    color: "#ec4899",
+    accent: "#f472b6",
+    geometry: "shield",
   },
   {
+    id: 4,
     role: "Student Senator",
     company: "Students' Gymkhana, IIT (ISM)",
     period: "March 2024 - March 2025",
-    description: (
-      <>
-        Elected representative for <span className="text-purple-400 font-semibold">1,500+ peers</span>. Facilitated policy changes and infrastructure improvements, enhancing student satisfaction and <span className="text-green-400 font-semibold">campus life quality</span>.
-      </>
-    ),
+    description:
+      "Elected representative for 1,500+ peers. Facilitated policy changes and infrastructure improvements, enhancing student satisfaction and campus life quality.",
     type: "achievement",
     skills: ["Strategic Leadership", "Policy Advocacy", "Governance"],
-    highlight: "Elected Representative"
-  }
+    highlight: "Elected Representative",
+    color: "#f59e0b",
+    accent: "#f97316",
+    geometry: "crown",
+  },
 ];
 
-const typeIcons = {
+const typeIcons: Record<ExperienceType, any> = {
   work: Briefcase,
-  leadership: Users,
+  leadership: Briefcase,
   community: Award,
   achievement: Trophy,
   organization: Star,
 };
 
-const typeColors = {
-  work: "from-blue-500 to-cyan-500",
-  leadership: "from-purple-500 to-pink-500",
-  community: "from-green-500 to-emerald-500",
-  achievement: "from-amber-500 to-orange-500",
-  organization: "from-purple-500 to-pink-500",
-};
+// Circle layout
+const RADIUS = 5;
+function getPosition(index: number, total: number): [number, number, number] {
+  const angle = (index / total) * Math.PI * 2;
+  return [Math.cos(angle) * RADIUS, 0, Math.sin(angle) * RADIUS];
+}
 
-function ExperienceCard({ exp, index, gradient, TypeIcon }: { exp: Experience; index: number; gradient: string; TypeIcon: any }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+// -----------------------------------------------------------------------------
+// 3D Geometries — unique themed shape per experience
+// -----------------------------------------------------------------------------
+function AnimatedPlanet({
+  type,
+  materialProps,
+  isActive,
+}: {
+  type: string;
+  materialProps: Record<string, any>;
+  isActive: boolean;
+}) {
+  const ringRef = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
+  const moonRef = useRef<THREE.Group>(null);
+  const debrisRef = useRef<THREE.Group>(null);
+  const atmosphereRef = useRef<THREE.Mesh>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
 
-  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
-  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    // Animate rings
+    if (ringRef.current) ringRef.current.rotation.z = t * 0.35;
+    if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.2;
+    // Animate orbiting moons
+    if (moonRef.current) {
+      moonRef.current.position.x = Math.cos(t * 0.6) * 1.1;
+      moonRef.current.position.z = Math.sin(t * 0.6) * 1.1;
+      moonRef.current.position.y = Math.sin(t * 0.9) * 0.25;
+    }
+    // Debris belt rotation
+    if (debrisRef.current) {
+      debrisRef.current.rotation.y = t * 0.4;
+    }
+    // Pulsing atmosphere
+    if (atmosphereRef.current) {
+      const s = 1.0 + Math.sin(t * 1.5) * 0.03;
+      atmosphereRef.current.scale.set(s, s, s);
+    }
+    // Pulsing core
+    if (coreRef.current) {
+      const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
+      mat.emissiveIntensity = (isActive ? 2.0 : 1.0) + Math.sin(t * 2.5) * 0.6;
+    }
+  });
 
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]);
-
-  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top, width, height } = currentTarget.getBoundingClientRect();
-    x.set((clientX - left) / width - 0.5);
-    y.set((clientY - top) / height - 0.5);
+  const mat = <meshPhysicalMaterial {...materialProps} />;
+  switch (type) {
+    case "crystal":
+      // Gas giant \u2014 spinning rings (Blue/Cyan)
+      return (
+        <group>
+          <mesh ref={atmosphereRef}>
+            <sphereGeometry args={[0.75, 32, 32]} />
+            {mat}
+          </mesh>
+          <mesh ref={ringRef} rotation={[Math.PI / 4, 0, 0]}>
+            <torusGeometry args={[1.1, 0.06, 16, 64]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1} toneMapped={false} />
+          </mesh>
+          <mesh ref={ring2Ref} rotation={[Math.PI / 4, 0, 0]} scale={0.9}>
+            <torusGeometry args={[1.3, 0.02, 16, 64]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.35} transparent />
+          </mesh>
+        </group>
+      );
+    case "prism":
+      // Habitable/Forest world with cloud layer (Green)
+      return (
+        <group>
+          <mesh ref={atmosphereRef}>
+            <sphereGeometry args={[0.7, 32, 32]} />
+            {mat}
+          </mesh>
+          {/* Cloud layer */}
+          <mesh ref={coreRef}>
+            <icosahedronGeometry args={[0.76, 4]} />
+            <meshPhysicalMaterial {...materialProps} wireframe opacity={(materialProps.opacity || 0.9) * 0.35} emissive={materialProps.emissive} emissiveIntensity={0.5} />
+          </mesh>
+        </group>
+      );
+    case "helix":
+      // Pulsar/Nebula world with spinning orbital rings (Purple)
+      return (
+        <group>
+          <mesh ref={coreRef}>
+            <sphereGeometry args={[0.5, 32, 32]} />
+            <meshPhysicalMaterial color={materialProps.color} emissive={materialProps.emissive} emissiveIntensity={2} toneMapped={false} />
+          </mesh>
+          <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.9, 0.05, 16, 64]} />
+            <meshPhysicalMaterial {...materialProps} />
+          </mesh>
+          <mesh ref={ring2Ref} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
+            <torusGeometry args={[0.7, 0.03, 16, 64]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.6} transparent />
+          </mesh>
+          <mesh rotation={[Math.PI / 4, -Math.PI / 3, 0]}>
+            <torusGeometry args={[0.85, 0.02, 16, 64]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.35} transparent />
+          </mesh>
+        </group>
+      );
+    case "shield":
+      // Crystal/Ice planet with pulsing atmosphere (Pink)
+      return (
+        <group>
+          <mesh>
+            <icosahedronGeometry args={[0.75, 1]} />
+            <meshPhysicalMaterial {...materialProps} flatShading />
+          </mesh>
+          {/* Pulsing atmosphere shell */}
+          <mesh ref={atmosphereRef} scale={1.15}>
+            <icosahedronGeometry args={[0.75, 1]} />
+            <meshPhysicalMaterial {...materialProps} wireframe opacity={0.28} transparent />
+          </mesh>
+        </group>
+      );
+    case "crown":
+      // Sun/Lava planet with orbiting moons (Orange)
+      return (
+        <group>
+          <mesh ref={coreRef}>
+            <sphereGeometry args={[0.65, 32, 32]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={1.5} toneMapped={false} />
+          </mesh>
+          <group ref={debrisRef}>
+            {[0, 1, 2].map((i) => {
+              const a = (i / 3) * Math.PI * 2;
+              return (
+                <mesh key={i} position={[Math.cos(a) * 1.1, Math.sin(i) * 0.3, Math.sin(a) * 1.1]}>
+                  <sphereGeometry args={[0.12, 16, 16]} />
+                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} />
+                </mesh>
+              );
+            })}
+          </group>
+        </group>
+      );
+    default:
+      return (
+        <mesh>
+          <sphereGeometry args={[0.75, 32, 32]} />
+          {mat}
+        </mesh>
+      );
   }
+}
 
-  function onMouseLeave() {
-    x.set(0);
-    y.set(0);
-  }
+// -----------------------------------------------------------------------------
+// Experience 3D Card — floating geometry + HTML card
+// -----------------------------------------------------------------------------
+function ExperienceCard3D({
+  data,
+  index,
+  total,
+  isActive,
+  isMobile,
+  onClick,
+}: {
+  data: ExperienceData;
+  index: number;
+  total: number;
+  isActive: boolean;
+  isMobile: boolean;
+  onClick: () => void;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const pos = getPosition(index, total);
+  const [hovered, setHovered] = useState(false);
+
+  useCursor(hovered);
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+
+    // Gentle continuous rotation - faster when active/hovered
+    groupRef.current.rotation.y += delta * (isActive ? 0.35 : (hovered ? 0.25 : 0.12));
+    groupRef.current.rotation.x += delta * (isActive ? 0.12 : 0.04);
+
+    // Scale — active is bigger, hovered is medium, spring-like
+    const targetScale = isActive ? 1.15 : hovered ? 0.95 : 0.72;
+    groupRef.current.scale.lerp(
+      new THREE.Vector3(targetScale, targetScale, targetScale),
+      0.06
+    );
+  });
+
+  const Icon = typeIcons[data.type];
+
+  const materialProps = {
+    color: data.color,
+    metalness: 0.85,
+    roughness: 0.15,
+    emissive: data.accent,
+    emissiveIntensity: isActive ? 2.0 : hovered ? 0.9 : 0.3,
+    transparent: true,
+    opacity: isActive ? 0.95 : 0.8,
+    envMapIntensity: 1.5,
+    clearcoat: 1,
+    clearcoatRoughness: 0.1,
+    toneMapped: false,
+  };
 
   return (
-    <motion.div
-      className="relative [perspective:1500px] group"
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-    >
-      {/* Animated gradient border */}
-      <motion.div
-        className={`absolute -inset-[1px] bg-gradient-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
-        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-        style={{ backgroundSize: "200% 200%" }}
-      />
-
-      <motion.div
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden"
+    <group position={pos} scale={isMobile ? 0.5 : 0.6}>
+      {/* Floating 3D geometry */}
+      <Float
+        floatIntensity={isActive ? 2 : 0.8}
+        rotationIntensity={isActive ? 1.2 : 0.5}
+        speed={isActive ? 2.5 : 1}
       >
-        {/* Hover gradient */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-3 relative" style={{ transform: "translateZ(30px)" }}>
-          <div className="flex items-center gap-2">
-            <motion.div
-              className={`p-1.5 rounded-lg bg-gradient-to-br ${gradient}`}
-              animate={{ y: [0, -3, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <TypeIcon size={14} className="text-white" />
-            </motion.div>
-            <span className="font-medium text-gray-300">{exp.company}</span>
-          </div>
-          {exp.highlight && (
-            <span className="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
-              {exp.highlight}
-            </span>
-          )}
-        </div>
-
-        <h3 className="text-xl font-bold text-white mb-2 relative" style={{ transform: "translateZ(20px)" }}>{exp.role}</h3>
-
-        <div className="flex items-center gap-2 text-gray-500 text-sm mb-4 relative" style={{ transform: "translateZ(15px)" }}>
-          <Calendar size={14} />
-          <span>{exp.period}</span>
-        </div>
-
-        <p className="text-gray-200 font-[var(--font-inter)] leading-relaxed mb-4 relative" style={{ transform: "translateZ(10px)" }}>
-          {exp.description}
-        </p>
-
-        {/* Skills with wave entrance */}
-        <motion.div
-          className="flex flex-wrap gap-2 relative"
-          style={{ transform: "translateZ(20px)" }}
+        <group
+          ref={groupRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHovered(true);
+          }}
+          onPointerOut={() => setHovered(false)}
         >
-          {exp.skills.map((skill, i) => (
-            <motion.span
-              key={skill}
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{
-                delay: i * 0.1,
-                type: "spring",
-                stiffness: 200,
-                damping: 15
+          <AnimatedPlanet type={data.geometry} materialProps={materialProps} isActive={isActive} />
+        </group>
+      </Float>
+
+      {/* Glowing Color Platform */}
+      <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[2.0, 64]} />
+        <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.35 : 0.05} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh position={[0, -2.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1.9, 2.3, 64]} />
+        <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.2 : 0.03} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
+      </mesh>
+
+      {/* Energy beam from base */}
+      {isActive && (
+        <mesh position={[0, -1, 0]}>
+          <cylinderGeometry args={[0.02, 0.15, 2, 8]} />
+          <meshBasicMaterial
+            color={data.color}
+            transparent
+            opacity={0.25}
+            toneMapped={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+
+      {/* HTML Card — info overlay below the geometry */}
+      <Html
+        position={[0, -3, 0]}
+        center
+        className="pointer-events-none z-50"
+        style={{
+          opacity: isActive ? 1 : 0,
+          pointerEvents: isActive ? "auto" : "none",
+          transition: "opacity 0.4s ease",
+        }}
+        zIndexRange={[100, 0]}
+        transform={false}
+      >
+        <div
+          className="w-80 p-5 rounded-2xl backdrop-blur-xl border border-white/10"
+          style={{
+            background: `linear-gradient(135deg, rgba(0,0,0,0.75), rgba(0,0,0,0.6))`,
+            boxShadow: isActive
+              ? `0 0 40px -10px ${data.color}, inset 0 1px 0 rgba(255,255,255,0.1)`
+              : "none",
+          }}
+        >
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div
+                className="p-2.5 rounded-xl border border-white/10"
+                style={{
+                  background: `linear-gradient(135deg, ${data.color}30, ${data.accent}20)`,
+                  boxShadow: `inset 0 0 12px ${data.color}30`,
+                }}
+              >
+                <Icon size={20} color={data.color} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white leading-tight">
+                  {data.company}
+                </h3>
+                <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
+                  <Calendar size={11} />
+                  <span>{data.period}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Role */}
+          <h4
+            className="text-xl font-black mb-2"
+            style={{ color: data.color }}
+          >
+            {data.role}
+          </h4>
+
+          {/* Highlight badge */}
+          <div className="mb-3">
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
+              style={{
+                color: data.color,
+                borderColor: `${data.color}40`,
+                backgroundColor: `${data.color}10`,
+                boxShadow: `0 0 12px ${data.color}15`,
               }}
-              whileHover={{
-                scale: 1.1,
-                y: -2,
-                boxShadow: "0 4px 12px rgba(139, 92, 246, 0.25)",
-              }}
-              className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 hover:bg-white/10 hover:text-white hover:border-purple-500/30 transition-colors cursor-default"
             >
-              {skill}
-            </motion.span>
-          ))}
-        </motion.div>
-      </motion.div>
-    </motion.div>
+              <Zap size={12} />
+              {data.highlight}
+            </span>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-gray-300 leading-relaxed mb-4">
+            {data.description}
+          </p>
+
+          {/* Skills */}
+          <div className="flex flex-wrap gap-1.5">
+            {data.skills.map((skill) => (
+              <span
+                key={skill}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium border"
+                style={{
+                  color: data.accent,
+                  borderColor: `${data.accent}25`,
+                  backgroundColor: `${data.accent}08`,
+                }}
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+
+          {/* Bottom gradient line */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl"
+            style={{
+              background: `linear-gradient(90deg, transparent, ${data.color}, transparent)`,
+            }}
+          />
+        </div>
+      </Html>
+    </group>
   );
 }
 
-export default function Experience() {
-  const [lineHeight, setLineHeight] = React.useState(0);
-  const firstDotRef = React.useRef<HTMLDivElement>(null);
-  const lastDotRef = React.useRef<HTMLDivElement>(null);
+// -----------------------------------------------------------------------------
+// Camera Rig — smooth transitions between cards
+// -----------------------------------------------------------------------------
+function CameraRig({
+  activeIndex,
+  isMobile,
+}: {
+  activeIndex: number;
+  isMobile: boolean;
+}) {
+  const { camera } = useThree();
 
-  React.useEffect(() => {
-    const calculateHeight = () => {
-      if (firstDotRef.current && lastDotRef.current) {
-        const first = firstDotRef.current.getBoundingClientRect();
-        const last = lastDotRef.current.getBoundingClientRect();
-        const distance = last.top - first.top;
-        setLineHeight(distance);
-      }
-    };
+  useFrame(() => {
+    const angle = (activeIndex / experiences.length) * Math.PI * 2;
+    const cameraDistance = RADIUS + (isMobile ? 10 : 7);
+    const targetX = Math.cos(angle) * cameraDistance;
+    const targetZ = Math.sin(angle) * cameraDistance;
+    const targetY = 1.5;
 
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
+    camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.035);
 
-    const observer = new ResizeObserver(calculateHeight);
-    if (firstDotRef.current?.parentElement?.parentElement) {
-      observer.observe(firstDotRef.current.parentElement.parentElement);
-    }
+    // Look at the active card — slightly below center to frame the HUD card
+    const activePos = getPosition(activeIndex, experiences.length);
+    const lookAtTarget = new THREE.Vector3(activePos[0], -0.8, activePos[2]);
 
-    return () => {
-      window.removeEventListener('resize', calculateHeight);
-      observer.disconnect();
-    };
-  }, []);
+    const currentLookAt = new THREE.Vector3(0, 0, -1)
+      .applyQuaternion(camera.quaternion)
+      .add(camera.position);
+    currentLookAt.lerp(lookAtTarget, 0.035);
+    camera.lookAt(currentLookAt);
+  });
+
+  return null;
+}
+
+// -----------------------------------------------------------------------------
+// Full 3D Scene
+// -----------------------------------------------------------------------------
+function Scene({
+  activeIndex,
+  onSelect,
+  isMobile,
+}: {
+  activeIndex: number;
+  onSelect: (index: number) => void;
+  isMobile: boolean;
+}) {
+  const activeData = experiences[activeIndex];
 
   return (
-    <section id="experience" className="py-20 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <>
+      <Environment preset="city" />
+      <ambientLight intensity={0.25} />
+      <pointLight
+        position={[0, 5, 0]}
+        intensity={1.5}
+        color="#ffffff"
+        distance={20}
+      />
+      <pointLight
+        position={[-5, -2, 5]}
+        intensity={0.6}
+        color="#ffffff"
+        distance={18}
+      />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
+      <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
+
+      {/* All experience cards in a circle */}
+      <group position={[0, 0.5, 0]}>
+        {experiences.map((exp, i) => (
+          <ExperienceCard3D
+            key={exp.id}
+            data={exp}
+            index={i}
+            total={experiences.length}
+            isActive={activeIndex === i}
+            isMobile={isMobile}
+            onClick={() => onSelect(i)}
+          />
+        ))}
+      </group>
+
+      {/* Central energy core */}
+      <Float floatIntensity={2} speed={2}>
+        <mesh position={[0, 0, 0]}>
+          <icosahedronGeometry args={[0.25, 1]} />
+          <meshBasicMaterial
+            color={activeData.accent}
+            wireframe
+            transparent
+            opacity={0.3}
+          />
+        </mesh>
+      </Float>
+
+      {/* Scene atmosphere */}
+      <BakeShadows />
+      <Sparkles
+        count={60}
+        scale={25}
+        size={5}
+        speed={0.12}
+        opacity={0.25}
+        color={activeData.color}
+      />
+      <ContactShadows
+        frames={1}
+        position={[0, -2.5, 0]}
+        opacity={0.4}
+        scale={20}
+        blur={2}
+        far={10}
+        color="#111111"
+      />
+    </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Main Component
+// -----------------------------------------------------------------------------
+export default function Experience() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const isMobile = useIsMobile();
+  const sectionRef = useRef<HTMLElement>(null);
+  const touchStartX = useRef(0);
+
+  const navigate = useCallback(
+    (newIndex: number) => {
+      if (newIndex < 0 || newIndex >= experiences.length) return;
+      setActiveIndex(newIndex);
+    },
+    []
+  );
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const inView =
+        rect.top < window.innerHeight * 0.5 &&
+        rect.bottom > window.innerHeight * 0.5;
+      if (!inView) return;
+
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate((activeIndex + 1) % experiences.length);
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate((activeIndex - 1 + experiences.length) % experiences.length);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeIndex, navigate]);
+
+  // Swipe handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const delta = e.changedTouches[0].clientX - touchStartX.current;
+      if (Math.abs(delta) > 50) {
+        if (delta < 0) navigate((activeIndex + 1) % experiences.length);
+        else navigate((activeIndex - 1 + experiences.length) % experiences.length);
+      }
+    },
+    [activeIndex, navigate]
+  );
+
+  const activeData = experiences[activeIndex];
+
+  return (
+    <section
+      ref={sectionRef}
+      id="experience"
+      className="relative h-screen overflow-hidden flex items-center justify-center"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Header — floats above canvas */}
+      <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
+        <motion.h2
+          initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ amount: 0.3 }}
-          transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
-          className="text-center mb-16"
+          viewport={{ once: true }}
+          className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
         >
-          <motion.h2
-            className="text-3xl md:text-5xl font-black text-white mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            Experiences &{" "}
-            <motion.span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
-              style={{
-                background: "linear-gradient(90deg, #c084fc 0%, #60a5fa 50%, #c084fc 100%)",
-                backgroundSize: "200% 100%",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            >
-              Ventures
-            </motion.span>
-          </motion.h2>
-          <motion.p
-            className="text-gray-400 max-w-lg mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            Building expertise through diverse roles and continuous learning
-          </motion.p>
-        </motion.div>
+          Experiences &{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-blue-400 to-cyan-400">
+            Ventures
+          </span>
+        </motion.h2>
+        <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
+          Navigate the gallery. Click a structure to focus.
+        </p>
+      </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Central glowing line - Dynamic Height */}
-          <div
-            className="absolute left-4 md:left-1/2 top-6 md:-translate-x-1/2 w-px overflow-hidden"
-            style={{ height: lineHeight + 10 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-500 via-blue-500 to-purple-500 opacity-30" />
-            <motion.div
-              className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-purple-500 to-transparent"
-              animate={{ top: ["0%", "100%", "0%"] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
+      {/* Navigation arrows */}
+      <button
+        onClick={() =>
+          navigate((activeIndex - 1 + experiences.length) % experiences.length)
+        }
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+      >
+        <ChevronLeft size={22} />
+      </button>
+      <button
+        onClick={() => navigate((activeIndex + 1) % experiences.length)}
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+      >
+        <ChevronRight size={22} />
+      </button>
 
-          <motion.div
-            className="space-y-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ amount: 0.1 }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.2, delayChildren: 0.1 }
-              }
-            }}
-          >
-            {experiences.map((exp, index) => {
-              const TypeIcon = typeIcons[exp.type];
-              const gradient = typeColors[exp.type];
 
-              return (
-                <motion.div
-                  key={index}
-                  variants={{
-                    hidden: { opacity: 0, y: 50, scale: 0.9 },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      scale: 1,
-                      transition: { type: "spring" as const, stiffness: 50, damping: 15 }
-                    }
-                  }}
-                  className="relative pl-12 md:pl-0"
-                >
-                  {/* Timeline Dot with pulsing glow */}
-                  <motion.div
-                    ref={index === 0 ? firstDotRef : index === experiences.length - 1 ? lastDotRef : null}
-                    className={`absolute left-2 md:left-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-br ${gradient} md:-translate-x-1/2 ring-4 ring-black shadow-lg z-10`}
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ scale: 1.5 }}
-                    transition={{ type: "spring", stiffness: 200 }}
-                  >
-                    {/* Pulsing glow ring */}
-                    <motion.div
-                      className={`absolute inset-0 rounded-full bg-gradient-to-br ${gradient}`}
-                      animate={{
-                        scale: [1, 1.8, 1],
-                        opacity: [0.6, 0, 0.6],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: index * 0.3,
-                      }}
-                    />
-                  </motion.div>
 
-                  <div className={`md:flex items-start gap-8 ${index % 2 === 0 ? "md:flex-row-reverse" : ""}`}>
-                    <div className="hidden md:block flex-1" />
+      {/* 3D Canvas — full section */}
+      <div className="absolute inset-0 w-full h-full z-0 cursor-crosshair">
+        <Canvas
+          camera={{
+            position: isMobile ? [0, 2, 16] : [0, 2, 12],
+            fov: isMobile ? 55 : 45,
+          }}
+          gl={{ antialias: true, alpha: true }}
+          dpr={[1, 1.5]}
+          performance={{ min: 0.5 }}
+        >
+          <Scene
+            activeIndex={activeIndex}
+            onSelect={setActiveIndex}
+            isMobile={isMobile}
+          />
+        </Canvas>
 
-                    <div className="flex-1">
-                      <ExperienceCard exp={exp} index={index} gradient={gradient} TypeIcon={TypeIcon} />
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
       </div>
     </section>
   );
 }
-

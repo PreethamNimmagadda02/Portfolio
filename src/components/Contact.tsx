@@ -14,13 +14,13 @@ const contactColors = {
 };
 
 // Toast notification component
-function Toast({ 
-  message, 
-  type, 
-  onClose 
-}: { 
-  message: string; 
-  type: "success" | "error"; 
+function Toast({
+  message,
+  type,
+  onClose
+}: {
+  message: string;
+  type: "success" | "error";
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -33,11 +33,10 @@ function Toast({
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.9 }}
-      className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl ${
-        type === "success" 
-          ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300" 
+      className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl ${type === "success"
+          ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
           : "bg-red-500/20 border-red-500/30 text-red-300"
-      }`}
+        }`}
     >
       <motion.div
         initial={{ scale: 0 }}
@@ -51,7 +50,7 @@ function Toast({
         )}
       </motion.div>
       <span className="font-medium">{message}</span>
-      <button 
+      <button
         onClick={onClose}
         className="ml-2 text-white/50 hover:text-white transition-colors"
       >
@@ -91,18 +90,17 @@ function FloatingInput({
     <div className="relative">
       {/* Animated glow effect */}
       <motion.div
-        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${
-          error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
-        } opacity-0 blur-sm`}
+        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
+          } opacity-0 blur-sm`}
         animate={{ opacity: isFocused ? 0.5 : 0 }}
         transition={{ duration: 0.3 }}
       />
-      
+
       <div className="relative">
         {/* Icon */}
         <motion.div
           className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-          animate={{ 
+          animate={{
             color: isFocused ? "#a855f7" : error ? "#ef4444" : "#6b7280",
             scale: isFocused ? 1.1 : 1
           }}
@@ -114,9 +112,8 @@ function FloatingInput({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${
-            error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
-          }`}
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
+            }`}
           animate={{
             top: isActive ? "8px" : "50%",
             y: isActive ? 0 : "-50%",
@@ -137,11 +134,10 @@ function FloatingInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           required={required}
-          className={`w-full pl-11 pr-4 pt-6 pb-2 rounded-xl bg-white/5 border text-white transition-all duration-300 ${
-            error 
-              ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
+          className={`w-full pl-11 pr-4 pt-6 pb-2 rounded-xl bg-white/5 border text-white transition-all duration-300 ${error
+              ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500"
               : "border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-          } focus:outline-none`}
+            } focus:outline-none`}
         />
 
         {/* Validation indicator */}
@@ -220,18 +216,17 @@ function FloatingTextarea({
     <div className="relative">
       {/* Animated glow effect */}
       <motion.div
-        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${
-          error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
-        } opacity-0 blur-sm`}
+        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
+          } opacity-0 blur-sm`}
         animate={{ opacity: isFocused ? 0.5 : 0 }}
         transition={{ duration: 0.3 }}
       />
-      
+
       <div className="relative">
         {/* Icon */}
         <motion.div
           className="absolute left-4 top-4 pointer-events-none"
-          animate={{ 
+          animate={{
             color: isFocused ? "#a855f7" : error ? "#ef4444" : "#6b7280",
             scale: isFocused ? 1.1 : 1
           }}
@@ -243,9 +238,8 @@ function FloatingTextarea({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${
-            error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
-          }`}
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
+            }`}
           animate={{
             top: isActive ? "8px" : "16px",
             fontSize: isActive ? "11px" : "14px",
@@ -266,11 +260,10 @@ function FloatingTextarea({
           required={required}
           maxLength={maxLength}
           rows={rows}
-          className={`w-full pl-11 pr-4 pt-6 pb-10 rounded-xl bg-white/5 border text-white transition-all duration-300 resize-none ${
-            error 
-              ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500" 
+          className={`w-full pl-11 pr-4 pt-6 pb-10 rounded-xl bg-white/5 border text-white transition-all duration-300 resize-none ${error
+              ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500"
               : "border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-          } focus:outline-none`}
+            } focus:outline-none`}
         />
 
         {/* Character counter */}
@@ -278,17 +271,15 @@ function FloatingTextarea({
           {/* Progress bar */}
           <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
             <motion.div
-              className={`h-full rounded-full ${
-                charPercentage > 90 ? "bg-red-500" : charPercentage > 70 ? "bg-yellow-500" : "bg-purple-500"
-              }`}
+              className={`h-full rounded-full ${charPercentage > 90 ? "bg-red-500" : charPercentage > 70 ? "bg-yellow-500" : "bg-purple-500"
+                }`}
               initial={{ width: 0 }}
               animate={{ width: `${charPercentage}%` }}
               transition={{ duration: 0.2 }}
             />
           </div>
-          <span className={`text-xs font-mono ${
-            charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-500"
-          }`}>
+          <span className={`text-xs font-mono ${charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-500"
+            }`}>
             {charCount}/{maxLength}
           </span>
         </div>
@@ -311,16 +302,16 @@ function FloatingTextarea({
   );
 }
 
-function ContactCard({ 
-  icon: Icon, 
-  label, 
-  value, 
-  href, 
-  gradient 
-}: { 
-  icon: any, 
-  label: string, 
-  value: string, 
+function ContactCard({
+  icon: Icon,
+  label,
+  value,
+  href,
+  gradient
+}: {
+  icon: any,
+  label: string,
+  value: string,
   href?: string,
   gradient: string
 }) {
@@ -365,7 +356,7 @@ function ContactCard({
         className="relative flex items-center gap-4 p-5 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all"
       >
         {/* Floating Icon */}
-        <motion.div 
+        <motion.div
           className={`p-3 rounded-full bg-gradient-to-br ${gradient} shadow-lg`}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -415,7 +406,7 @@ export default function Contact() {
   // Real-time validation
   useEffect(() => {
     const newErrors: typeof errors = {};
-    
+
     if (touched.name && formState.name.length === 0) {
       newErrors.name = "Name is required";
     } else if (touched.name && formState.name.length < 2) {
@@ -439,7 +430,7 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched
     setTouched({ name: true, email: true, message: true });
 
@@ -503,10 +494,10 @@ export default function Contact() {
       {/* Toast notifications */}
       <AnimatePresence>
         {toast && (
-          <Toast 
-            message={toast.message} 
-            type={toast.type} 
-            onClose={() => setToast(null)} 
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
           />
         )}
       </AnimatePresence>
@@ -523,7 +514,7 @@ export default function Contact() {
           transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
           className="text-center mb-16"
         >
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4"
@@ -536,7 +527,7 @@ export default function Contact() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Contact Info */}
-          <motion.div 
+          <motion.div
             className="space-y-6"
             initial="hidden"
             whileInView="visible"
@@ -655,7 +646,7 @@ export default function Contact() {
                     animate={{ x: ["0%", "200%"] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
                   />
-                  
+
                   <AnimatePresence mode="wait">
                     {isSubmitting ? (
                       <motion.div

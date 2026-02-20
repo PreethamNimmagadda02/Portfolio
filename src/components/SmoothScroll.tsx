@@ -7,21 +7,22 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const lenisRef = useRef<Lenis | null>(null);
 
     useEffect(() => {
-        // Premium smooth scrolling configuration
-        // Note: duration and lerp conflict in Lenis — using duration only for predictable animation
         const lenis = new Lenis({
-            duration: 1.2, // Smooth but responsive scroll feel
+            duration: 1.4,
             easing: (t) => {
-                // Exponential ease-out: constant-feel scroll with a soft stop
-                return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+                // Custom branded ease curve: fast initial response with a luxurious, soft deceleration
+                // Combines cubic-bezier feel with exponential tail for "buttery" finish
+                return t < 0.5
+                    ? 4 * t * t * t
+                    : 1 - Math.pow(-2 * t + 2, 3) / 2;
             },
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,
-            wheelMultiplier: 0.85, // Responsive but controlled scrolling
-            touchMultiplier: 1.2, // Refined touch sensitivity
+            wheelMultiplier: 0.8,
+            touchMultiplier: 1.5,
             infinite: false,
-            syncTouch: true, // Sync touch events for consistent mobile experience
+            syncTouch: true,
         });
 
         lenisRef.current = lenis;

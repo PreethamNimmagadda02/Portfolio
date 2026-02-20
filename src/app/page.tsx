@@ -30,36 +30,32 @@ export default function Home() {
       {/* 3D Section Divider */}
 
       {/* Skills Marquee with 3D divider */}
-      <ScrollReveal>
+      <ScrollReveal direction="up">
         <SkillsMarquee />
       </ScrollReveal>
 
-
       {/* About Section */}
-      <ScrollReveal delay={0.1}>
+      <ScrollReveal delay={0.05} direction="left">
         <About3D />
       </ScrollReveal>
 
       {/* Projects Section */}
-      <ScrollReveal delay={0.1}>
+      <ScrollReveal delay={0.05} direction="right">
         <Projects />
       </ScrollReveal>
 
       {/* Achievements Section */}
-      <ScrollReveal delay={0.1}>
+      <ScrollReveal delay={0.05} direction="up">
         <Achievements3D />
       </ScrollReveal>
 
-      {/* 3D Section Divider */}
-      <SectionDivider3D />
-
       {/* Experience Section */}
-      <ScrollReveal delay={0.1}>
+      <ScrollReveal delay={0.05} direction="left">
         <Experience />
       </ScrollReveal>
 
       {/* Contact Section */}
-      <ScrollReveal delay={0.1}>
+      <ScrollReveal delay={0.05} direction="right">
         <Contact />
       </ScrollReveal>
     </main>

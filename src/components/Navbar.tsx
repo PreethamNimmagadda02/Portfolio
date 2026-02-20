@@ -32,8 +32,10 @@ export default function Navbar() {
           let bestSection = "home";
           let bestOverlap = 0;
 
-          for (const link of navLinks) {
-            const sectionId = link.href.slice(1);
+          // Include contact in detection so Hire Me highlights when in view
+          const allSections = [...navLinks.map(l => l.href.slice(1)), "contact"];
+
+          for (const sectionId of allSections) {
             const el = document.getElementById(sectionId);
             if (!el) continue;
 
@@ -133,7 +135,7 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/5">
           {navLinks.map((link) => {
-            const isActive = activeSection === link.href.slice(1);
+            const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
             return (
               <a
                 key={link.name}
@@ -165,11 +167,19 @@ export default function Navbar() {
           whileTap={{ scale: 0.95 }}
           className="hidden md:block relative group"
         >
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-75 blur transition-opacity duration-300" />
+          <div className={cn(
+            "absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur transition-opacity duration-300",
+            activeSection === "contact" ? "opacity-75" : "opacity-0 group-hover:opacity-75"
+          )} />
           <a
             href="#contact"
             onClick={(e) => scrollToSection(e, "#contact")}
-            className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all shadow-lg shadow-purple-500/25"
+            className={cn(
+              "relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all",
+              activeSection === "contact"
+                ? "shadow-xl shadow-purple-500/40 ring-2 ring-purple-400/50"
+                : "shadow-lg shadow-purple-500/25"
+            )}
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
@@ -202,7 +212,7 @@ export default function Navbar() {
           >
             <div className="flex flex-col space-y-2">
               {navLinks.map((link, i) => {
-                const isActive = activeSection === link.href.slice(1);
+                const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
                 return (
                   <motion.div
                     key={link.name}

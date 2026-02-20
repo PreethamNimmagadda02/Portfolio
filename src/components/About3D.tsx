@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshTransmissionMaterial, Html, OrbitControls, Stars, Environment, Sparkles as SparklesDrei, Text } from "@react-three/drei";
+import { Float, MeshTransmissionMaterial, Html, OrbitControls, Environment, Sparkles as SparklesDrei, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useState, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -111,12 +111,6 @@ function TechBackdrop() {
             />
 
             {/* Geometric Accents */}
-            <Float speed={2} rotationIntensity={1} floatIntensity={1}>
-                <mesh position={[2, 3, 2]} rotation={[0.5, 0.5, 0]}>
-                    <torusGeometry args={[1, 0.05, 16, 100]} />
-                    <meshBasicMaterial color="#60a5fa" wireframe transparent opacity={0.15} />
-                </mesh>
-            </Float>
             <Float speed={2.5} rotationIntensity={1.5} floatIntensity={1}>
                 <mesh position={[-2, -3, 0]} rotation={[0.5, 0, 0.5]}>
                     <octahedronGeometry args={[1.5, 0]} />
@@ -182,8 +176,8 @@ function CentralCore() {
     );
 }
 
-function FloatingDebris() {
-    const count = 50;
+function FloatingDebris({ isMobile }: { isMobile: boolean }) {
+    const count = isMobile ? 25 : 50;
     const meshRef = useRef<THREE.InstancedMesh>(null);
 
     useFrame((state) => {
@@ -319,7 +313,7 @@ function OrbitingNode({ feature, index, totalCount, onHover, isActive }: { featu
     );
 }
 
-function Scene({ onHover, activeId }: { onHover: (id: number | null) => void, activeId: number | null }) {
+function Scene({ onHover, activeId, isMobile }: { onHover: (id: number | null) => void, activeId: number | null, isMobile: boolean }) {
     return (
         <>
             <Environment preset="city" />
@@ -331,10 +325,10 @@ function Scene({ onHover, activeId }: { onHover: (id: number | null) => void, ac
             <TechBackdrop />
 
             {/* RIGHT SIDE: Main Core and Logic */}
-            <group position={[5, 0, 0]}> {/* Shifted Right */}
+            <group position={isMobile ? [0, -3.5, 0] : [5, 0, 0]}> {/* Centered on mobile, shifted right on desktop */}
                 <CentralCore />
                 <Connections count={features.length} />
-                <FloatingDebris />
+                <FloatingDebris isMobile={isMobile} />
                 {features.map((feature, index) => (
                     <OrbitingNode
                         key={feature.id}
@@ -347,7 +341,6 @@ function Scene({ onHover, activeId }: { onHover: (id: number | null) => void, ac
                 ))}
             </group>
 
-            <Stars radius={50} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
             <SparklesDrei count={100} scale={5} size={2} speed={0.4} opacity={0.5} color="#a855f7" />
         </>
     );
@@ -372,13 +365,13 @@ export default function About3D() {
     const ActiveIcon = activeFeature.icon;
 
     return (
-        <section id="about" className="relative h-screen min-h-[800px] w-full bg-black overflow-hidden flex items-center">
+        <section id="about" className="relative h-screen min-h-[800px] w-full overflow-hidden flex items-center">
 
             {/* 3D Scene Background - Covers Entire Section */}
             <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: [0, 0, 14], fov: 35 }} className="cursor-move">
+                <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} className="cursor-move">
                     <Suspense fallback={null}>
-                        <Scene onHover={handleHover} activeId={activeId} />
+                        <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
                         <OrbitControls
                             enableZoom={false}
                             enablePan={false}
@@ -391,7 +384,7 @@ export default function About3D() {
                 </Canvas>
 
                 {/* Vignette Overlay */}
-                <div className="absolute inset-0 pointer-events-none bg-gradient-radial from-transparent via-black/20 to-black/80" />
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90" />
             </div>
 
             {/* Content Container - Glassmorphic Overlay */}
