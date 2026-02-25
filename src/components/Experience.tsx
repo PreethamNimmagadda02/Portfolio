@@ -10,7 +10,8 @@ import {
   Html,
   ContactShadows,
   useCursor,
-  BakeShadows
+  BakeShadows,
+  MeshTransmissionMaterial
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
@@ -147,6 +148,7 @@ function AnimatedPlanet({
 }) {
   const ringRef = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
+  const ring3Ref = useRef<THREE.Mesh>(null);
   const moonRef = useRef<THREE.Group>(null);
   const debrisRef = useRef<THREE.Group>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
@@ -157,125 +159,220 @@ function AnimatedPlanet({
     // Animate rings
     if (ringRef.current) ringRef.current.rotation.z = t * 0.35;
     if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.2;
+    if (ring3Ref.current) ring3Ref.current.rotation.y = t * 0.5;
+
     // Animate orbiting moons
     if (moonRef.current) {
       moonRef.current.position.x = Math.cos(t * 0.6) * 1.1;
       moonRef.current.position.z = Math.sin(t * 0.6) * 1.1;
       moonRef.current.position.y = Math.sin(t * 0.9) * 0.25;
     }
-    // Debris belt rotation
+
+    // Debris/Moon belt rotation
     if (debrisRef.current) {
       debrisRef.current.rotation.y = t * 0.4;
+      debrisRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
     }
-    // Pulsing atmosphere
+
+    // Pulsing outer atmosphere/shield
     if (atmosphereRef.current) {
-      const s = 1.0 + Math.sin(t * 1.5) * 0.03;
+      const s = 1.0 + Math.sin(t * 1.5) * 0.02; // Slower, more subtle pulse
       atmosphereRef.current.scale.set(s, s, s);
+      atmosphereRef.current.rotation.y = t * 0.1;
+      atmosphereRef.current.rotation.x = t * 0.05;
     }
-    // Pulsing core
+
+    // Core pulsing and rotation
     if (coreRef.current) {
+      coreRef.current.rotation.y = -t * 0.15;
       const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
-      mat.emissiveIntensity = (isActive ? 2.0 : 1.0) + Math.sin(t * 2.5) * 0.6;
+      if (mat.emissiveIntensity !== undefined) {
+        mat.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2.5) * 0.4;
+      }
     }
   });
 
+  // Base material (non-glass)
   const mat = <meshPhysicalMaterial {...materialProps} />;
+
+  // Premium glass material for outer shells
+  const glassMaterial = (
+    <MeshTransmissionMaterial
+      {...materialProps}
+      transmission={0.9}
+      thickness={0.5}
+      roughness={0.1}
+      ior={1.5}
+      chromaticAberration={0.05}
+      resolution={256}
+      backside={true}
+      color={materialProps.color}
+      emissive={materialProps.emissive}
+      emissiveIntensity={isActive ? 0.5 : 0.2}
+    />
+  );
+
   switch (type) {
     case "crystal":
-      // Gas giant \u2014 spinning rings (Blue/Cyan)
+      // Gas giant — Solid core + Refractive Outer shell + 3 layered Rings (Blue/Cyan)
       return (
         <group>
+          {/* Inner dense core */}
+          <mesh ref={coreRef}>
+            <sphereGeometry args={[0.6, 64, 64]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} />
+          </mesh>
+          {/* Refractive outer gas envelope */}
           <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.75, 32, 32]} />
-            {mat}
+            <sphereGeometry args={[0.78, 64, 64]} />
+            {glassMaterial}
           </mesh>
-          <mesh ref={ringRef} rotation={[Math.PI / 4, 0, 0]}>
-            <torusGeometry args={[1.1, 0.06, 16, 64]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1} toneMapped={false} />
+          {/* Inner fast ring */}
+          <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
+            <torusGeometry args={[1.0, 0.04, 32, 100]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 3 : 1.5} toneMapped={false} />
           </mesh>
-          <mesh ref={ring2Ref} rotation={[Math.PI / 4, 0, 0]} scale={0.9}>
-            <torusGeometry args={[1.3, 0.02, 16, 64]} />
-            <meshPhysicalMaterial {...materialProps} opacity={0.35} transparent />
+          {/* Middle wide translucent ring */}
+          <mesh ref={ring2Ref} rotation={[Math.PI / 3, 0, 0]} scale={0.95}>
+            <torusGeometry args={[1.3, 0.08, 32, 100]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.25} transparent />
+          </mesh>
+          {/* Outer thin dark ring */}
+          <mesh ref={ring3Ref} rotation={[Math.PI / 3, 0, 0]} scale={1.1}>
+            <torusGeometry args={[1.4, 0.01, 16, 100]} />
+            <meshPhysicalMaterial color={materialProps.color} opacity={0.6} transparent />
           </mesh>
         </group>
       );
+
     case "prism":
-      // Habitable/Forest world with cloud layer (Green)
+      // Habitable/Tech world - Solid core + Wireframe Geo Shell (Green)
       return (
         <group>
-          <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.7, 32, 32]} />
+          {/* Solid core */}
+          <mesh>
+            <sphereGeometry args={[0.65, 64, 64]} />
             {mat}
           </mesh>
-          {/* Cloud layer */}
-          <mesh ref={coreRef}>
-            <icosahedronGeometry args={[0.76, 4]} />
-            <meshPhysicalMaterial {...materialProps} wireframe opacity={(materialProps.opacity || 0.9) * 0.35} emissive={materialProps.emissive} emissiveIntensity={0.5} />
+          {/* Tech/Geodesic outer shell contra-rotating */}
+          <mesh ref={atmosphereRef}>
+            <icosahedronGeometry args={[0.72, 3]} />
+            <meshPhysicalMaterial
+              {...materialProps}
+              wireframe
+              opacity={0.4}
+              transparent
+              emissive={materialProps.emissive}
+              emissiveIntensity={isActive ? 1.5 : 0.5}
+            />
           </mesh>
         </group>
       );
+
     case "helix":
-      // Pulsar/Nebula world with spinning orbital rings (Purple)
+      // Pulsar - Sharp core + 3 complex intersecting rings (Purple)
       return (
         <group>
+          {/* Sharp crystalline core */}
           <mesh ref={coreRef}>
-            <sphereGeometry args={[0.5, 32, 32]} />
-            <meshPhysicalMaterial color={materialProps.color} emissive={materialProps.emissive} emissiveIntensity={2} toneMapped={false} />
+            <dodecahedronGeometry args={[0.5, 0]} />
+            <meshPhysicalMaterial
+              color={materialProps.color}
+              emissive={materialProps.emissive}
+              emissiveIntensity={isActive ? 3 : 1.5}
+              toneMapped={false}
+              flatShading
+            />
           </mesh>
+          {/* Ring 1 - Vertical */}
           <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.9, 0.05, 16, 64]} />
+            <torusGeometry args={[0.9, 0.04, 32, 100]} />
             <meshPhysicalMaterial {...materialProps} />
           </mesh>
+          {/* Ring 2 - Angled */}
           <mesh ref={ring2Ref} rotation={[Math.PI / 3, Math.PI / 4, 0]}>
-            <torusGeometry args={[0.7, 0.03, 16, 64]} />
+            <torusGeometry args={[0.8, 0.02, 32, 100]} />
             <meshPhysicalMaterial {...materialProps} opacity={0.6} transparent />
           </mesh>
-          <mesh rotation={[Math.PI / 4, -Math.PI / 3, 0]}>
-            <torusGeometry args={[0.85, 0.02, 16, 64]} />
-            <meshPhysicalMaterial {...materialProps} opacity={0.35} transparent />
+          {/* Ring 3 - Counter Angled */}
+          <mesh ref={ring3Ref} rotation={[Math.PI / 4, -Math.PI / 3, 0]}>
+            <torusGeometry args={[1.0, 0.01, 16, 100]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.4} transparent />
           </mesh>
         </group>
       );
+
     case "shield":
-      // Crystal/Ice planet with pulsing atmosphere (Pink)
+      // Crystal/Ice - Sharp inner octahedron + Refractive smooth bubble (Pink)
       return (
         <group>
-          <mesh>
-            <icosahedronGeometry args={[0.75, 1]} />
-            <meshPhysicalMaterial {...materialProps} flatShading />
+          {/* Inner diamond/crystal */}
+          <mesh ref={coreRef}>
+            <octahedronGeometry args={[0.55, 0]} />
+            <meshPhysicalMaterial
+              {...materialProps}
+              flatShading
+              emissiveIntensity={isActive ? 2 : 1}
+              opacity={0.9}
+            />
           </mesh>
-          {/* Pulsing atmosphere shell */}
-          <mesh ref={atmosphereRef} scale={1.15}>
-            <icosahedronGeometry args={[0.75, 1]} />
-            <meshPhysicalMaterial {...materialProps} wireframe opacity={0.28} transparent />
+          {/* Perfect glass protective sphere */}
+          <mesh ref={atmosphereRef} scale={1.0}>
+            <sphereGeometry args={[0.75, 64, 64]} />
+            {glassMaterial}
           </mesh>
         </group>
       );
+
     case "crown":
-      // Sun/Lava planet with orbiting moons (Orange)
+      // Star/Lava planet - Emissive core + Corona wireframe + Orbiting moons (Orange)
       return (
         <group>
+          {/* Emissive Star Core */}
           <mesh ref={coreRef}>
-            <sphereGeometry args={[0.65, 32, 32]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={1.5} toneMapped={false} />
+            <sphereGeometry args={[0.6, 64, 64]} />
+            <meshPhysicalMaterial
+              {...materialProps}
+              emissiveIntensity={isActive ? 2.5 : 1.5}
+              toneMapped={false}
+              opacity={1}
+            />
           </mesh>
+          {/* Corona/Energy Shell */}
+          <mesh ref={atmosphereRef}>
+            <icosahedronGeometry args={[0.68, 2]} />
+            <meshPhysicalMaterial
+              {...materialProps}
+              wireframe
+              opacity={0.2}
+              transparent
+              emissive={materialProps.emissive}
+              emissiveIntensity={1}
+            />
+          </mesh>
+          {/* Orbiting Moon Belt */}
           <group ref={debrisRef}>
-            {[0, 1, 2].map((i) => {
+            {[
+              { r: 1.1, s: 0.12, y: 0.2, speed: 1 },
+              { r: 1.3, s: 0.08, y: -0.15, speed: 1.2 },
+              { r: 0.95, s: 0.05, y: 0.3, speed: 0.8 }
+            ].map((moon, i) => {
               const a = (i / 3) * Math.PI * 2;
               return (
-                <mesh key={i} position={[Math.cos(a) * 1.1, Math.sin(i) * 0.3, Math.sin(a) * 1.1]}>
-                  <sphereGeometry args={[0.12, 16, 16]} />
-                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} />
+                <mesh key={i} position={[Math.cos(a) * moon.r, moon.y, Math.sin(a) * moon.r]}>
+                  <sphereGeometry args={[moon.s, 32, 32]} />
+                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} toneMapped={false} />
                 </mesh>
               );
             })}
           </group>
         </group>
       );
+
     default:
       return (
         <mesh>
-          <sphereGeometry args={[0.75, 32, 32]} />
+          <sphereGeometry args={[0.75, 64, 64]} />
           {mat}
         </mesh>
       );
@@ -314,7 +411,7 @@ function ExperienceCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.12 : 0.04);
 
     // Scale — active is bigger, hovered is medium, spring-like
-    const targetScale = isActive ? 0.85 : hovered ? 0.65 : 0.5;
+    const targetScale = isActive ? 1.15 : hovered ? 0.9 : 0.65;
     groupRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
       0.06
@@ -513,7 +610,7 @@ function CameraRig({
 
     // Look at the active card — slightly below center to frame the HUD card
     const activePos = getPosition(activeIndex, experiences.length);
-    const lookAtTarget = new THREE.Vector3(activePos[0], -0.8, activePos[2]);
+    const lookAtTarget = new THREE.Vector3(activePos[0], -1.2, activePos[2]);
 
     const currentLookAt = new THREE.Vector3(0, 0, -1)
       .applyQuaternion(camera.quaternion)
@@ -559,7 +656,7 @@ function Scene({
       <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
 
       {/* All experience cards in a circle */}
-      <group position={[0, 0.5, 0]}>
+      <group position={[0, -0.4, 0]}>
         {experiences.map((exp, i) => (
           <ExperienceCard3D
             key={exp.id}
@@ -675,7 +772,7 @@ export default function Experience() {
       onTouchEnd={handleTouchEnd}
     >
       {/* Header — floats above canvas */}
-      <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
+      <div className="absolute top-8 left-0 w-full text-center z-20 pointer-events-none">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -688,7 +785,7 @@ export default function Experience() {
           </span>
         </motion.h2>
         <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-          Navigate the gallery. Click a structure to focus.
+          Navigate the gallery. Click on a planet to focus.
         </p>
       </div>
 

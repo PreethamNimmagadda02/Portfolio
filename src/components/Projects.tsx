@@ -11,6 +11,7 @@ import {
   ContactShadows,
   useCursor,
   BakeShadows,
+  MeshTransmissionMaterial
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
@@ -143,12 +144,17 @@ function AnimatedPlanet({
       orbitRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
     }
     if (atmosphereRef.current) {
-      const s = 1.0 + Math.sin(t * 1.5) * 0.03;
+      const s = 1.0 + Math.sin(t * 1.5) * 0.02; // Subtle pulse
       atmosphereRef.current.scale.set(s, s, s);
+      atmosphereRef.current.rotation.y = t * 0.1;
+      atmosphereRef.current.rotation.x = t * 0.05;
     }
     if (coreRef.current) {
+      coreRef.current.rotation.y = -t * 0.15;
       const m = coreRef.current.material as THREE.MeshPhysicalMaterial;
-      m.emissiveIntensity = (isActive ? 2.0 : 1.0) + Math.sin(t * 2.5) * 0.6;
+      if (m.emissiveIntensity !== undefined) {
+        m.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2.5) * 0.4;
+      }
     }
     if (shellRef.current) {
       shellRef.current.rotation.y = t * 0.2;
@@ -160,29 +166,57 @@ function AnimatedPlanet({
   });
 
   const mat = <meshPhysicalMaterial {...materialProps} />;
+
+  // Premium glass material for outer shells
+  const glassMaterial = (
+    <MeshTransmissionMaterial
+      {...materialProps}
+      transmission={0.9}
+      thickness={0.5}
+      roughness={0.1}
+      ior={1.5}
+      chromaticAberration={0.05}
+      resolution={256}
+      backside={true}
+      color={materialProps.color}
+      emissive={materialProps.emissive}
+      emissiveIntensity={isActive ? 0.5 : 0.2}
+    />
+  );
+
   switch (type) {
     case "nexus":
+      // College Central (Purple) - Solid glowing core + glass shell + tech rings
       return (
         <group>
+          {/* Inner dense core */}
+          <mesh ref={coreRef}>
+            <sphereGeometry args={[0.55, 64, 64]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} />
+          </mesh>
+          {/* Refractive outer shell */}
           <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.7, 32, 32]} />
-            {mat}
+            <sphereGeometry args={[0.7, 64, 64]} />
+            {glassMaterial}
           </mesh>
+          {/* Outer tech ring */}
           <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
-            <torusGeometry args={[1.0, 0.015, 16, 64]} />
-            <meshPhysicalMaterial {...materialProps} opacity={0.4} transparent />
+            <torusGeometry args={[1.0, 0.015, 32, 100]} />
+            <meshPhysicalMaterial {...materialProps} opacity={0.6} transparent />
           </mesh>
+          {/* Inner contra-rotating ring */}
           <mesh ref={ring2Ref} rotation={[-Math.PI / 3, 0, 0]}>
-            <torusGeometry args={[1.1, 0.015, 16, 64]} />
+            <torusGeometry args={[1.1, 0.015, 32, 100]} />
             <meshPhysicalMaterial {...materialProps} opacity={0.4} transparent />
           </mesh>
+          {/* Orbiting data nodes */}
           <group ref={orbitRef}>
             {[0, 1, 2, 3].map((i) => {
               const a = (i / 4) * Math.PI * 2;
               return (
                 <mesh key={i} position={[Math.cos(a) * 1.05, Math.sin(a) * 0.4, Math.sin(a) * 1.05]} scale={0.12}>
-                  <sphereGeometry args={[1, 16, 16]} />
-                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={(materialProps.emissiveIntensity || 0.5) * 2} toneMapped={false} />
+                  <sphereGeometry args={[1, 32, 32]} />
+                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={(isActive ? 2 : 1)} toneMapped={false} />
                 </mesh>
               );
             })}
@@ -191,12 +225,15 @@ function AnimatedPlanet({
       );
 
     case "flow":
+      // FestFlow (Blue/Cyan) - Glass bubble + smooth intersecting thick flow rings
       return (
         <group>
+          {/* Central refractive bubble */}
           <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.65, 32, 32]} />
-            {mat}
+            <sphereGeometry args={[0.55, 64, 64]} />
+            {glassMaterial}
           </mesh>
+          {/* Flow rings */}
           {[0, 1, 2].map((i) => (
             <mesh
               key={i}
@@ -204,30 +241,42 @@ function AnimatedPlanet({
               rotation={[Math.PI / 2 + i * 0.4, i * 0.6, i * 0.3]}
               scale={1 + i * 0.15}
             >
-              <torusGeometry args={[0.75, 0.08, 16, 64]} />
-              <meshPhysicalMaterial {...materialProps} opacity={(materialProps.opacity || 0.9) * (0.6 - i * 0.15)} transparent transmission={0.5} thickness={0.5} />
+              <torusGeometry args={[0.75, 0.08, 32, 100]} />
+              <MeshTransmissionMaterial
+                {...materialProps}
+                transmission={0.8}
+                thickness={0.8}
+                roughness={0.1}
+                ior={1.4}
+                opacity={(materialProps.opacity || 0.9) * (0.6 - i * 0.15)}
+                transparent
+              />
             </mesh>
           ))}
         </group>
       );
 
     case "matrix":
+      // AI Trading (Green) - Sharp inner octahedron + pulsing wireframe shell + data cubes
       return (
         <group>
+          {/* Sharp AI core */}
           <mesh ref={coreRef}>
-            <sphereGeometry args={[0.6, 32, 32]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={1.5} toneMapped={false} />
+            <octahedronGeometry args={[0.55, 0]} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1.5} toneMapped={false} flatShading />
           </mesh>
+          {/* Tech wireframe shield */}
           <mesh ref={shellRef} scale={1.2}>
-            <sphereGeometry args={[0.6, 16, 16]} />
-            <meshPhysicalMaterial {...materialProps} wireframe opacity={(materialProps.opacity || 0.9) * 0.8} transparent />
+            <sphereGeometry args={[0.6, 32, 32]} />
+            <meshPhysicalMaterial {...materialProps} wireframe opacity={isActive ? 0.4 : 0.2} transparent emissive={materialProps.emissive} emissiveIntensity={1} />
           </mesh>
+          {/* Data block debris */}
           <group ref={debrisRef}>
             {[0, 1, 2, 3, 4].map((i) => {
               const a = (i / 5) * Math.PI * 2;
               return (
                 <mesh key={i} position={[Math.cos(a) * 0.95, (i % 2 === 0 ? 0.3 : -0.3), Math.sin(a) * 0.95]}>
-                  <boxGeometry args={[0.08, 0.08, 0.08]} />
+                  <boxGeometry args={[0.1, 0.1, 0.1]} />
                   <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1} toneMapped={false} />
                 </mesh>
               );
@@ -239,7 +288,7 @@ function AnimatedPlanet({
     default:
       return (
         <mesh>
-          <sphereGeometry args={[0.75, 32, 32]} />
+          <sphereGeometry args={[0.75, 64, 64]} />
           {mat}
         </mesh>
       );
@@ -279,7 +328,7 @@ function ProjectCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.1 : 0.03);
 
     // Scale lerp with spring-like feel
-    const targetScale = isActive ? 0.9 : hovered ? 0.75 : 0.55;
+    const targetScale = isActive ? 1.15 : hovered ? 0.95 : 0.7;
     groupRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
       0.06
@@ -506,7 +555,7 @@ function CameraRig({
     );
 
     const activePos = getPosition(activeIndex, projects.length);
-    const lookAt = new THREE.Vector3(activePos[0], -0.8, activePos[2]);
+    const lookAt = new THREE.Vector3(activePos[0], -1.3, activePos[2]);
 
     const currLook = new THREE.Vector3(0, 0, -1)
       .applyQuaternion(camera.quaternion)
@@ -551,7 +600,7 @@ function Scene({
 
       <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
 
-      <group position={[0, 0.5, 0]}>
+      <group position={[0, -0.4, 0]}>
         {projects.map((proj, i) => (
           <ProjectCard3D
             key={proj.id}
@@ -666,7 +715,7 @@ export default function Projects() {
       onTouchEnd={handleTouchEnd}
     >
       {/* Header */}
-      <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
+      <div className="absolute top-8 left-0 w-full text-center z-20 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -688,7 +737,7 @@ export default function Projects() {
           </span>
         </motion.h2>
         <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-          Navigate the gallery. Click a structure to focus.
+          Navigate the gallery. Click on a planet to focus.
         </p>
       </div>
 

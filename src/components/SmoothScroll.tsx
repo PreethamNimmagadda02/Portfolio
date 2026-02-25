@@ -8,11 +8,12 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     useEffect(() => {
         const lenis = new Lenis({
-            lerp: 0.1, // Gives a very smooth, natural feel
-            duration: 1.2,
+            lerp: 0.06, // Heavier, more buttery feel (was 0.1)
+            duration: 1.5, // Extended momentum (was 1.2)
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,
+            syncTouch: true, // Matches touch momentum to desktop feel
             wheelMultiplier: 1,
             touchMultiplier: 2,
             infinite: false,

@@ -589,7 +589,7 @@ export default function Achievements3D() {
                     My <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
                 </motion.h2>
                 <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-                    Navigate the gallery. Click a monolith to focus.
+                    Navigate the gallery. Click on a planet to focus.
                 </p>
             </div>
 

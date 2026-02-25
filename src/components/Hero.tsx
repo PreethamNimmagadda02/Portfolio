@@ -226,9 +226,9 @@ export default function Hero() {
   });
 
   // Parallax values
-  const yLeft = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const yCenter = useTransform(scrollYProgress, [0, 1], [0, 50]);
+  const yLeft = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const yRight = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const yCenter = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   // Derived transforms for background effects - outside render cycle
