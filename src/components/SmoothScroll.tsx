@@ -8,21 +8,14 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.4,
-            easing: (t) => {
-                // Custom branded ease curve: fast initial response with a luxurious, soft deceleration
-                // Combines cubic-bezier feel with exponential tail for "buttery" finish
-                return t < 0.5
-                    ? 4 * t * t * t
-                    : 1 - Math.pow(-2 * t + 2, 3) / 2;
-            },
+            lerp: 0.1, // Gives a very smooth, natural feel
+            duration: 1.2,
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,
-            wheelMultiplier: 0.8,
-            touchMultiplier: 1.5,
+            wheelMultiplier: 1,
+            touchMultiplier: 2,
             infinite: false,
-            syncTouch: true,
         });
 
         lenisRef.current = lenis;
@@ -39,6 +32,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
         return () => {
             lenis.destroy();
+            if ((window as unknown as { lenis: Lenis }).lenis === lenis) {
+                delete (window as unknown as { lenis?: Lenis }).lenis;
+            }
         };
     }, []);
 

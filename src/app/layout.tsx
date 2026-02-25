@@ -115,8 +115,6 @@ const jsonLd = {
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
-import SectionSnap from "@/components/SectionSnap";
-
 // ... existing imports ...
 
 export default function RootLayout({
@@ -137,7 +135,6 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
       >
         <SmoothScroll>
-          <SectionSnap />
           <PageProgress />
           <Navbar />
           <main className="min-h-screen">
