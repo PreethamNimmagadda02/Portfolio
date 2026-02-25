@@ -18,46 +18,48 @@ const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), { ssr:
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-black text-white selection:bg-primary selection:text-black">
+    <main className="relative min-h-screen bg-black text-white selection:bg-primary selection:text-black overflow-x-hidden">
       {/* 3D Background layers */}
       <ParticleField />
 
       <NoiseBackground />
 
-      {/* Hero Section */}
-      <Hero />
+      <div className="flex flex-col gap-24 md:gap-40">
+        {/* Hero Section */}
+        <Hero />
 
-      {/* 3D Section Divider */}
+        {/* 3D Section Divider */}
 
-      {/* Skills Marquee with 3D divider */}
-      <ScrollReveal direction="up">
-        <SkillsMarquee />
-      </ScrollReveal>
+        {/* Skills Marquee with 3D divider */}
+        <ScrollReveal direction="up">
+          <SkillsMarquee />
+        </ScrollReveal>
 
-      {/* About Section */}
-      <ScrollReveal delay={0.05} direction="left">
-        <About3D />
-      </ScrollReveal>
+        {/* About Section */}
+        <ScrollReveal delay={0.05} direction="left">
+          <About3D />
+        </ScrollReveal>
 
-      {/* Projects Section */}
-      <ScrollReveal delay={0.05} direction="right">
-        <Projects />
-      </ScrollReveal>
+        {/* Projects Section */}
+        <ScrollReveal delay={0.05} direction="right">
+          <Projects />
+        </ScrollReveal>
 
-      {/* Achievements Section */}
-      <ScrollReveal delay={0.05} direction="up">
-        <Achievements3D />
-      </ScrollReveal>
+        {/* Achievements Section */}
+        <ScrollReveal delay={0.05} direction="up">
+          <Achievements3D />
+        </ScrollReveal>
 
-      {/* Experience Section */}
-      <ScrollReveal delay={0.05} direction="left">
-        <Experience />
-      </ScrollReveal>
+        {/* Experience Section */}
+        <ScrollReveal delay={0.05} direction="left">
+          <Experience />
+        </ScrollReveal>
 
-      {/* Contact Section */}
-      <ScrollReveal delay={0.05} direction="right">
-        <Contact />
-      </ScrollReveal>
+        {/* Contact Section */}
+        <ScrollReveal delay={0.05} direction="right">
+          <Contact />
+        </ScrollReveal>
+      </div>
     </main>
   );
 }
