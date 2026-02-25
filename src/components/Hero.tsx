@@ -154,7 +154,7 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
       transition={{ delay: delay + 0.5, duration: 0.5, type: "spring" }}
       className="text-center"
     >
-      <div className={`text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
+      <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
         {displayValue}{suffix}
       </div>
       <div className="text-sm text-gray-200 mt-1 font-medium font-[var(--font-inter)]">{label}</div>
@@ -264,7 +264,7 @@ export default function Hero() {
             style={{ y: isMobile ? 0 : yLeft, opacity }}
             className="flex flex-col flex-1 w-full items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
-            <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-3 sm:gap-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+            <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
                 word="GENERATIVE"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
@@ -308,7 +308,7 @@ export default function Hero() {
             style={{ y: isMobile ? 0 : yRight, opacity }}
             className="flex flex-col flex-1 w-full items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mt-2 lg:mt-0">
               <AnimatedWord
                 word="SPECIALIST"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
@@ -330,7 +330,7 @@ export default function Hero() {
 
         {/* Stats Row */}
         <motion.div
-          className="flex justify-center gap-8 md:gap-16 mt-12"
+          className="flex flex-wrap justify-center gap-6 md:gap-16 mt-12 px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}

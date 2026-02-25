@@ -14,7 +14,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";
-import { Award, Star, Trophy, Code, Flame } from "lucide-react";
+import { Award, Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // -----------------------------------------------------------------------------
@@ -427,7 +427,7 @@ function AchievementMonolith({
     };
 
     return (
-        <group position={pos} scale={isMobile ? 0.55 : 0.65}>
+        <group position={pos} scale={isMobile ? 0.45 : 0.65}>
             {/* The 3D Object */}
             <Float floatIntensity={isActive ? 1.5 : 0.8} rotationIntensity={isActive ? 1 : 0.5} speed={isActive ? 2 : 1}>
                 <group
@@ -459,7 +459,7 @@ function AchievementMonolith({
                 zIndexRange={[100, 0]} // Ensure it stays on top without depth sorting issues
                 transform={false} // Prevent matrix math jittering
             >
-                <div className="w-72 p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
+                <div className="w-[280px] sm:w-[320px] md:w-72 p-4 md:p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
                     style={{ boxShadow: isActive ? `0 0 30px -10px ${data.color}` : 'none' }}>
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-3 rounded-xl bg-black/50 border border-white/10"
@@ -467,7 +467,7 @@ function AchievementMonolith({
                             <Icon size={24} color={data.color} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-white drop-shadow-md">{data.title}</h3>
+                            <h3 className="text-lg md:text-xl font-bold text-white drop-shadow-md">{data.title}</h3>
                             <span className="text-xs font-mono px-2 py-1 rounded bg-black/50 border"
                                 style={{ color: data.color, borderColor: `${data.color}50` }}>
                                 {data.stats}
@@ -584,7 +584,7 @@ export default function Achievements3D() {
                     initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
+                    className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
                 >
                     My <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
                 </motion.h2>
@@ -593,6 +593,19 @@ export default function Achievements3D() {
                 </p>
             </div>
 
+            {/* Navigation arrows (Mobile & Desktop) */}
+            <button
+                onClick={() => setActiveIndex((activeIndex - 1 + achievements.length) % achievements.length)}
+                className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+            >
+                <ChevronLeft size={isMobile ? 18 : 22} />
+            </button>
+            <button
+                onClick={() => setActiveIndex((activeIndex + 1) % achievements.length)}
+                className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+            >
+                <ChevronRight size={isMobile ? 18 : 22} />
+            </button>
 
 
             {/* Canvas takes up entire section */}

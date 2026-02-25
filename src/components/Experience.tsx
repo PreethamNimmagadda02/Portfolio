@@ -435,7 +435,7 @@ function ExperienceCard3D({
   };
 
   return (
-    <group position={pos} scale={isMobile ? 0.5 : 0.6}>
+    <group position={pos} scale={isMobile ? 0.45 : 0.6}>
       {/* Floating 3D geometry */}
       <Float
         floatIntensity={isActive ? 2 : 0.8}
@@ -496,7 +496,7 @@ function ExperienceCard3D({
         transform={false}
       >
         <div
-          className="w-80 p-5 rounded-2xl backdrop-blur-xl border border-white/10"
+          className="w-[280px] sm:w-[320px] md:w-80 p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10"
           style={{
             background: `linear-gradient(135deg, rgba(0,0,0,0.75), rgba(0,0,0,0.6))`,
             boxShadow: isActive
@@ -517,7 +517,7 @@ function ExperienceCard3D({
                 <Icon size={20} color={data.color} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white leading-tight">
+                <h3 className="text-base md:text-lg font-bold text-white leading-tight">
                   {data.company}
                 </h3>
                 <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
@@ -530,7 +530,7 @@ function ExperienceCard3D({
 
           {/* Role */}
           <h4
-            className="text-xl font-black mb-2"
+            className="text-lg md:text-xl font-black mb-2"
             style={{ color: data.color }}
           >
             {data.role}
@@ -794,15 +794,15 @@ export default function Experience() {
         onClick={() =>
           navigate((activeIndex - 1 + experiences.length) % experiences.length)
         }
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+        className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={isMobile ? 18 : 22} />
       </button>
       <button
         onClick={() => navigate((activeIndex + 1) % experiences.length)}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+        className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={isMobile ? 18 : 22} />
       </button>
 
 

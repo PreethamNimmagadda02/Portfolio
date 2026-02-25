@@ -352,7 +352,7 @@ function ProjectCard3D({
   };
 
   return (
-    <group position={pos} scale={isMobile ? 0.5 : 0.65}>
+    <group position={pos} scale={isMobile ? 0.45 : 0.65}>
       {/* Floating 3D geometry */}
       <Float
         floatIntensity={isActive ? 2.2 : 0.8}
@@ -413,7 +413,7 @@ function ProjectCard3D({
         transform={false}
       >
         <div
-          className="w-[340px] p-5 rounded-2xl backdrop-blur-xl border border-white/10 relative overflow-hidden"
+          className="w-[280px] sm:w-[320px] md:w-[340px] p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10 relative overflow-hidden"
           style={{
             background: `linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.65))`,
             boxShadow: isActive
@@ -434,7 +434,7 @@ function ProjectCard3D({
                 <Icon size={20} color={data.color} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-white leading-tight">
+                <h3 className="text-lg md:text-xl font-black text-white leading-tight">
                   {data.title}
                 </h3>
                 <span
@@ -729,7 +729,7 @@ export default function Projects() {
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
+          className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
         >
           Signature{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400">
@@ -741,18 +741,18 @@ export default function Projects() {
         </p>
       </div>
 
-      {/* Nav arrows */}
+      {/* Nav arrows - Positioned lower on mobile to dodge central planet */}
       <button
         onClick={() => navigate(activeIndex - 1)}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+        className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={isMobile ? 18 : 22} />
       </button>
       <button
         onClick={() => navigate(activeIndex + 1)}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
+        className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={isMobile ? 18 : 22} />
       </button>
 
 

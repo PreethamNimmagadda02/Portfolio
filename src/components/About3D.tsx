@@ -5,7 +5,7 @@ import { Float, MeshTransmissionMaterial, Html, OrbitControls, Environment, Spar
 import * as THREE from "three";
 import { useRef, useState, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target } from "lucide-react";
+import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Feature data matching original About.tsx EXACTLY
@@ -325,7 +325,7 @@ function Scene({ onHover, activeId, isMobile }: { onHover: (id: number | null) =
             <TechBackdrop />
 
             {/* RIGHT SIDE: Main Core and Logic */}
-            <group position={isMobile ? [0, -3.5, 0] : [5, 0, 0]}> {/* Centered on mobile, shifted right on desktop */}
+            <group position={isMobile ? [0, 3, 0] : [5, 0, 0]}> {/* Centered on mobile and shifted up, shifted right on desktop */}
                 <CentralCore />
                 <Connections count={features.length} />
                 <FloatingDebris isMobile={isMobile} />
@@ -361,27 +361,41 @@ export default function About3D() {
         if (id !== null) setDisplayId(id);
     };
 
+    const handlePrev = () => {
+        const newId = (displayId - 1 + features.length) % features.length;
+        setDisplayId(newId);
+        setActiveId(newId);
+    };
+
+    const handleNext = () => {
+        const newId = (displayId + 1) % features.length;
+        setDisplayId(newId);
+        setActiveId(newId);
+    };
+
     const activeFeature = features.find(f => f.id === displayId) || features[0];
     const ActiveIcon = activeFeature.icon;
 
     return (
-        <section id="about" className="relative h-screen min-h-[800px] w-full overflow-hidden flex items-center">
+        <section id="about" className="relative min-h-[800px] md:min-h-screen w-full overflow-hidden flex flex-col justify-center py-20 md:py-0">
 
             {/* 3D Scene Background - Covers Entire Section */}
             <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} className="cursor-move">
-                    <Suspense fallback={null}>
-                        <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
-                        <OrbitControls
-                            enableZoom={false}
-                            enablePan={false}
-                            autoRotate={activeId === null}
-                            autoRotateSpeed={0.5}
-                            minPolarAngle={Math.PI / 4}
-                            maxPolarAngle={Math.PI / 1.5}
-                        />
-                    </Suspense>
-                </Canvas>
+                {!isMobile && (
+                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} className="cursor-move">
+                        <Suspense fallback={null}>
+                            <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
+                            <OrbitControls
+                                enableZoom={false}
+                                enablePan={false}
+                                autoRotate={activeId === null}
+                                autoRotateSpeed={0.5}
+                                minPolarAngle={Math.PI / 4}
+                                maxPolarAngle={Math.PI / 1.5}
+                            />
+                        </Suspense>
+                    </Canvas>
+                )}
 
                 {/* Vignette Overlay */}
                 <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90" />
@@ -405,16 +419,16 @@ export default function About3D() {
                                 <span>Who I Am</span>
                             </div>
 
-                            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 lg:mb-6 leading-tight">
                                 About <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Me</span>
                             </h2>
 
                             <div className="space-y-6 mb-8 text-gray-300 font-[var(--font-inter)]">
-                                <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                                <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">
                                     AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
                                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
                                 </h3>
-                                <p className="text-lg leading-relaxed">
+                                <p className="text-base md:text-lg leading-relaxed">
                                     Building <span className="text-white font-bold">autonomous AI agents</span> that solve complex problems. Engineered systems with <span className="text-yellow-300 font-bold">20% efficiency gains</span>, pushing the boundaries of what&apos;s possible with AI.
                                 </p>
                             </div>
@@ -432,11 +446,21 @@ export default function About3D() {
                                     <div className="p-3 rounded-xl bg-white/5 shrink-0">
                                         <ActiveIcon size={24} style={{ color: activeFeature.color }} />
                                     </div>
-                                    <div>
+                                    <div className="flex-1">
                                         <h3 className="text-xl font-bold text-white mb-2">{activeFeature.title}</h3>
                                         <div className="text-gray-300 text-sm leading-relaxed">
                                             {activeFeature.description}
                                         </div>
+                                    </div>
+
+                                    {/* Mobile/Tablet Card Navigation */}
+                                    <div className="flex flex-col gap-1 shrink-0 lg:hidden">
+                                        <button onClick={handlePrev} className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+                                            <ChevronLeft size={16} />
+                                        </button>
+                                        <button onClick={handleNext} className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+                                            <ChevronRight size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -457,7 +481,7 @@ export default function About3D() {
                     </div>
 
                     {/* RIGHT COLUMN: Empty Div (Scene is behind) */}
-                    <div className="order-1 lg:order-2 h-[600px] lg:h-[800px] w-full pointer-events-none" />
+                    <div className="hidden lg:block order-1 lg:order-2 h-[300px] md:h-[400px] lg:h-[800px] w-full pointer-events-none" />
 
                 </div>
             </div>
