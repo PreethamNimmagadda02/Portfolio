@@ -90,12 +90,12 @@ function TechBackdrop() {
     });
 
     return (
-        <group ref={groupRef} position={[-6, 0, -5]}> {/* Positioned behind left text */}
+        <group ref={groupRef} position={[-8, 0, -10]}> {/* Positioned behind left text, pushed back */}
             {/* Wireframe Icosahedron */}
             <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-                <mesh scale={[8, 8, 8]}>
+                <mesh scale={[5, 5, 5]}>
                     <icosahedronGeometry args={[1, 1]} />
-                    <meshBasicMaterial color="#3b0764" wireframe transparent opacity={0.1} />
+                    <meshBasicMaterial color="#3b0764" wireframe transparent opacity={0.05} />
                 </mesh>
             </Float>
 
@@ -141,8 +141,8 @@ function CentralCore() {
     return (
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
             <mesh ref={meshRef}>
-                {/* Reduced size as requested */}
-                <icosahedronGeometry args={[1.0, 0]} />
+                {/* Reduced size further to prevent layout overlap */}
+                <icosahedronGeometry args={[0.7, 0]} />
                 <MeshTransmissionMaterial
                     backside
                     backsideThickness={5}

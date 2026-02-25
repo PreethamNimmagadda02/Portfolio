@@ -193,7 +193,7 @@ function SkillNode({
     if (meshRef.current) {
       const tempVec = new THREE.Vector3();
       meshRef.current.getWorldPosition(tempVec);
-      setIsFront(tempVec.z > -1.0);
+      setIsFront(tempVec.z > 0.1);
     }
   });
 
@@ -228,7 +228,7 @@ function SkillNode({
         style={{ pointerEvents: "none", display: isFront ? "block" : "none" }}
       >
         <div
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border backdrop-blur-md transition-all duration-300 pointer-events-none select-none`}
+          className={`flex items-center gap-1.5 px-2 py-1 bg-black/40 rounded border backdrop-blur-md transition-all duration-300 pointer-events-none select-none`}
           style={{
             backgroundColor: `rgba(10, 10, 20, ${isHovered ? 0.9 : 0.6})`,
             borderColor: isHovered ? color : "rgba(255,255,255,0.15)",
@@ -236,7 +236,7 @@ function SkillNode({
           }}
         >
           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }} />
-          <span className="text-xs font-medium text-gray-200 whitespace-nowrap" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+          <span className="text-[10px] font-medium text-gray-200 whitespace-nowrap tracking-wide">
             {item.name}
           </span>
         </div>

@@ -406,7 +406,7 @@ function AchievementMonolith({
         groupRef.current.rotation.x += delta * (isActive ? 0.15 : 0.05);
 
         // Scale up if active or hovered with smoothly responsive spring
-        const targetScale = isActive ? 1.1 : (hovered ? 0.9 : 0.7);
+        const targetScale = isActive ? 0.85 : (hovered ? 0.7 : 0.5);
         groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
     });
 
@@ -452,7 +452,7 @@ function AchievementMonolith({
 
             {/* Dynamic HTML HUD — positioned BELOW the monolith so it doesn't cover the shape */}
             <Html
-                position={[0, -2.8, 0]}
+                position={[0, -3.8, 0]}
                 center
                 className="pointer-events-none z-50 transition-opacity duration-300"
                 style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? 'auto' : 'none' }}

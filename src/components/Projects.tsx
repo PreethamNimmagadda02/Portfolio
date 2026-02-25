@@ -279,7 +279,7 @@ function ProjectCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.1 : 0.03);
 
     // Scale lerp with spring-like feel
-    const targetScale = isActive ? 1.2 : hovered ? 1.0 : 0.72;
+    const targetScale = isActive ? 0.9 : hovered ? 0.75 : 0.55;
     groupRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
       0.06
@@ -352,7 +352,7 @@ function ProjectCard3D({
 
       {/* HTML HUD card */}
       <Html
-        position={[0, -3.2, 0]}
+        position={[0, -4.0, 0]}
         center
         className="pointer-events-none z-50"
         style={{

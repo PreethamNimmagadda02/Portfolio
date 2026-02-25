@@ -314,7 +314,7 @@ function ExperienceCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.12 : 0.04);
 
     // Scale — active is bigger, hovered is medium, spring-like
-    const targetScale = isActive ? 1.15 : hovered ? 0.95 : 0.72;
+    const targetScale = isActive ? 0.85 : hovered ? 0.65 : 0.5;
     groupRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
       0.06
@@ -387,7 +387,7 @@ function ExperienceCard3D({
 
       {/* HTML Card — info overlay below the geometry */}
       <Html
-        position={[0, -3, 0]}
+        position={[0, -3.8, 0]}
         center
         className="pointer-events-none z-50"
         style={{
