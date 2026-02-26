@@ -794,7 +794,7 @@ export default function Projects() {
 
 
       {/* 3D Canvas */}
-      <div className="absolute inset-0 w-full h-full z-0 cursor-crosshair">
+      <div className="absolute inset-0 w-full h-full z-0 cursor-default">
         <Canvas
           camera={{
             position: isMobile ? [0, 2, 16] : [0, 2, 12],

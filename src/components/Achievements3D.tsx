@@ -9,8 +9,8 @@ import {
     Stars,
     Html,
     ContactShadows,
-    useCursor,
-    BakeShadows
+    BakeShadows,
+    useCursor
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";
@@ -609,7 +609,7 @@ export default function Achievements3D() {
 
 
             {/* Canvas takes up entire section */}
-            <div className="absolute inset-0 w-full h-full z-0 cursor-crosshair">
+            <div className="absolute inset-0 w-full h-full z-0 cursor-default">
                 <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
                     <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
                 </Canvas>

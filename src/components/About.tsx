@@ -273,7 +273,7 @@ export default function About() {
                     stiffness: 100
                   }}
                   whileHover={{ scale: 1.1, y: -8 }}
-                  className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 transition-all cursor-pointer relative overflow-hidden"
+                  className="group text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 transition-all relative overflow-hidden"
                 >
                   {/* Glow effect on hover */}
                   <motion.div

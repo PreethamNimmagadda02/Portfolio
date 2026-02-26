@@ -9,9 +9,9 @@ import {
   Stars,
   Html,
   ContactShadows,
-  useCursor,
   BakeShadows,
-  MeshTransmissionMaterial
+  MeshTransmissionMaterial,
+  useCursor
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
@@ -402,6 +402,7 @@ function ExperienceCard3D({
   const [hovered, setHovered] = useState(false);
 
   useCursor(hovered);
+
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -808,7 +809,7 @@ export default function Experience() {
 
 
       {/* 3D Canvas — full section */}
-      <div className="absolute inset-0 w-full h-full z-0 cursor-crosshair">
+      <div className="absolute inset-0 w-full h-full z-0 cursor-default">
         <Canvas
           camera={{
             position: isMobile ? [0, 2, 16] : [0, 2, 12],

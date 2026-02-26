@@ -52,7 +52,7 @@ export default function AvatarFlipCard() {
 
   return (
     <div
-      className="relative w-64 h-80 cursor-pointer [perspective:1000px]"
+      className="relative w-64 h-80 [perspective:1000px]"
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
     >
