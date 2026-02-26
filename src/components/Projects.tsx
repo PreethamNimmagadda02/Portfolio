@@ -25,6 +25,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Bot,
+  Code,
 } from "lucide-react";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,6 +107,40 @@ const projects: ProjectData[] = [
     color: "#22c55e",
     accent: "#10b981",
     geometry: "matrix",
+  },
+  {
+    id: 3,
+    title: "Agentic VS Code",
+    description:
+      "A custom-compiled VS Code distribution with deeply embedded agentic AI capabilities. Empowers developers with seamless natural-language-to-code execution and autonomous project workflows.",
+    tags: ["Electron", "TypeScript", "Agentic AI", "LLMs"],
+    links: {
+      demo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
+      repo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
+    },
+    status: "Complete",
+    featured: true,
+    icon: Code,
+    color: "#f43f5e",
+    accent: "#e11d48",
+    geometry: "nexus",
+  },
+  {
+    id: 4,
+    title: "Slack AI Data Bot",
+    description:
+      "A generative AI Slack assistant translating plain English into actionable PostgreSQL insights. Features auto-generated charts, 1-click CSV exports, and intelligent query caching.",
+    tags: ["Node.js", "LangChain", "OpenAI", "PostgreSQL", "Slack API", "Natural Language Processing"],
+    links: {
+      demo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
+      repo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
+    },
+    status: "Complete",
+    featured: true,
+    icon: Bot,
+    color: "#eab308",
+    accent: "#f59e0b",
+    geometry: "flow",
   },
 ];
 

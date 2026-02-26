@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence, Variants } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, Variants, useSpring } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo } from "react";
@@ -222,14 +222,22 @@ export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end start"], // Hero starts at the top, so "start start" is appropriate
+  });
+
+  // Re-enable physics spring on the normalized progress
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
   });
 
   // Parallax values
-  const yLeft = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const yCenter = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Reset parallax values to map the normalized [0, 1] spring progress
+  const yLeft = useTransform(smoothProgress, [0, 1], [0, 200]);
+  const yRight = useTransform(smoothProgress, [0, 1], [0, -200]);
+  const yCenter = useTransform(smoothProgress, [0, 1], [0, 80]);
+  const opacity = useTransform(smoothProgress, [0, 0.5], [1, 0]);
 
   // Derived transforms for background effects - outside render cycle
 
