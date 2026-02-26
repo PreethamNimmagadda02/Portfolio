@@ -412,10 +412,10 @@ function ExperienceCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.12 : 0.04);
 
     // Scale — active is bigger, hovered is medium, spring-like
-    const targetScale = isActive ? 1.15 : hovered ? 0.9 : 0.65;
+    const targetScale = isActive ? 1.05 : (hovered ? 0.85 : 0.65);
     groupRef.current.scale.lerp(
       new THREE.Vector3(targetScale, targetScale, targetScale),
-      0.06
+      0.08
     );
   });
 
@@ -436,12 +436,12 @@ function ExperienceCard3D({
   };
 
   return (
-    <group position={pos} scale={isMobile ? 0.45 : 0.6}>
+    <group position={pos} scale={isMobile ? 0.6 : 0.85}>
       {/* Floating 3D geometry */}
       <Float
-        floatIntensity={isActive ? 2 : 0.8}
-        rotationIntensity={isActive ? 1.2 : 0.5}
-        speed={isActive ? 2.5 : 1}
+        floatIntensity={isActive ? 1.5 : 0.8}
+        rotationIntensity={isActive ? 1 : 0.5}
+        speed={isActive ? 2 : 1}
       >
         <group
           ref={groupRef}
@@ -602,16 +602,16 @@ function CameraRig({
 
   useFrame(() => {
     const angle = (activeIndex / experiences.length) * Math.PI * 2;
-    const cameraDistance = RADIUS + (isMobile ? 10 : 7);
+    const cameraDistance = RADIUS + (isMobile ? 12 : 9);
     const targetX = Math.cos(angle) * cameraDistance;
     const targetZ = Math.sin(angle) * cameraDistance;
-    const targetY = 1.5;
+    const targetY = 1.0;
 
     camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.035);
 
     // Look at the active card — slightly below center to frame the HUD card
     const activePos = getPosition(activeIndex, experiences.length);
-    const lookAtTarget = new THREE.Vector3(activePos[0], -1.2, activePos[2]);
+    const lookAtTarget = new THREE.Vector3(activePos[0], -2.0, activePos[2]);
 
     const currentLookAt = new THREE.Vector3(0, 0, -1)
       .applyQuaternion(camera.quaternion)
