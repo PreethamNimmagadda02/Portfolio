@@ -499,7 +499,7 @@ function ExperienceCard3D({
     groupRef.current.rotation.x += delta * (isActive ? 0.1 : 0.035);
 
     // Scale — equalized with Achievements section
-    const targetScale = isActive ? 0.85 : (hovered ? 0.7 : 0.5);
+    const targetScale = isActive ? 1.15 : (hovered ? 0.95 : 0.7);
     const currentScale = groupRef.current.scale.x;
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.06);
     groupRef.current.scale.setScalar(newScale);
@@ -571,7 +571,7 @@ function ExperienceCard3D({
 
       {/* HTML Card — info overlay below the geometry */}
       <Html
-        position={[0, -2.5, 0]}
+        position={[0, -4.0, 0]}
         center
         className="pointer-events-none z-50"
         style={{
@@ -694,20 +694,20 @@ function CameraRig({
 
   useFrame(() => {
     const angle = (activeIndex / experiences.length) * Math.PI * 2;
-    const cameraDistance = RADIUS + (isMobile ? 9 : 5.5);
+    const cameraDistance = RADIUS + (isMobile ? 9 : 7);
     _targetPos.set(
       Math.cos(angle) * cameraDistance,
-      0.5,
+      1.5,
       Math.sin(angle) * cameraDistance
     );
-    camera.position.lerp(_targetPos, 0.045);
+    camera.position.lerp(_targetPos, 0.035);
 
     // Look at the active card — center on planet+card combo
     const activePos = getPosition(activeIndex, experiences.length);
-    _lookAtTarget.set(activePos[0], -1.5, activePos[2]);
+    _lookAtTarget.set(activePos[0], -1.3, activePos[2]);
 
     _forward.set(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
-    _currentLookAt.copy(_forward).lerp(_lookAtTarget, 0.045);
+    _currentLookAt.copy(_forward).lerp(_lookAtTarget, 0.035);
     camera.lookAt(_currentLookAt);
   });
 
@@ -863,13 +863,13 @@ export default function Experience() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header — floats above canvas */}
+      {/* Header */}
       <div className="absolute top-8 left-0 w-full text-center z-20 pointer-events-none">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
+          className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
         >
           Experiences &{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-blue-400 to-cyan-400">
