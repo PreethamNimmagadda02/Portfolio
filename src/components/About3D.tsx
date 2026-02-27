@@ -124,24 +124,30 @@ function TechBackdrop() {
 function CentralCore() {
     const meshRef = useRef<THREE.Mesh>(null);
     const glowRef = useRef<THREE.Mesh>(null);
+    const ringRef = useRef<THREE.Mesh>(null);
 
     useFrame((state) => {
         if (!meshRef.current || !glowRef.current) return;
         const t = state.clock.elapsedTime;
 
         // Rotate core
-        meshRef.current.rotation.y += 0.005;
+        meshRef.current.rotation.y += 0.004;
         meshRef.current.rotation.z += 0.002;
 
-        // Pulse glow
-        const scale = 0.6 + Math.sin(t * 2) * 0.05;
+        // Pulse glow — subtler, smoother
+        const scale = 0.6 + Math.sin(t * 1.8) * 0.04;
         glowRef.current.scale.set(scale, scale, scale);
+
+        // Orbiting energy ring
+        if (ringRef.current) {
+            ringRef.current.rotation.z = t * 0.4;
+            ringRef.current.rotation.x = Math.sin(t * 0.3) * 0.15;
+        }
     });
 
     return (
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
             <mesh ref={meshRef}>
-                {/* Reduced size further to prevent layout overlap */}
                 <icosahedronGeometry args={[0.7, 0]} />
                 <MeshTransmissionMaterial
                     backside
@@ -172,6 +178,13 @@ function CentralCore() {
                     toneMapped={false}
                 />
             </mesh>
+            {/* Orbiting energy ring */}
+            <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
+                <torusGeometry args={[1.0, 0.02, 16, 64]} />
+                <meshBasicMaterial color="#a855f7" transparent opacity={0.25} />
+            </mesh>
+            {/* Core particle emission */}
+            <SparklesDrei count={30} scale={[2, 2, 2]} size={2} speed={0.5} opacity={0.4} color="#c084fc" />
         </Float>
     );
 }
@@ -222,8 +235,7 @@ function Connections({ count, radius = 3.2 }: { count: number, radius?: number }
 
         for (let i = 0; i < count; i++) {
             const startAngle = (i / count) * Math.PI * 2;
-            const angle = t * 0.4 + startAngle;
-            // Core position (0,0,0) - relative to parent group
+            const angle = t * 0.35 + startAngle;
             const x = Math.cos(angle) * radius;
             const z = -Math.sin(angle) * radius;
 
@@ -235,6 +247,10 @@ function Connections({ count, radius = 3.2 }: { count: number, radius?: number }
             positions[i * 6 + 5] = z;
         }
         lineRef.current.geometry.attributes.position.needsUpdate = true;
+
+        // Animate opacity for data-flow effect
+        const mat = lineRef.current.material as THREE.LineBasicMaterial;
+        mat.opacity = 0.12 + Math.sin(t * 1.5) * 0.05;
     });
 
     return (
@@ -259,10 +275,10 @@ function OrbitingNode({ feature, index, totalCount, onHover, isActive }: { featu
 
     useFrame((state) => {
         if (!orbitRef.current) return;
-        orbitRef.current.rotation.y = state.clock.elapsedTime * 0.4 + startAngle;
+        orbitRef.current.rotation.y = state.clock.elapsedTime * 0.35 + startAngle;
         if (meshRef.current) {
-            meshRef.current.rotation.y += 0.01;
-            meshRef.current.rotation.x += 0.01;
+            meshRef.current.rotation.y += 0.008;
+            meshRef.current.rotation.x += 0.008;
         }
     });
 
@@ -294,6 +310,11 @@ function OrbitingNode({ feature, index, totalCount, onHover, isActive }: { featu
                                 roughness={0.2}
                                 metalness={0.8}
                             />
+                        </mesh>
+                        {/* Glow halo around node */}
+                        <mesh scale={isActive ? 2.0 : 1.5}>
+                            <sphereGeometry args={[0.4, 32, 32]} />
+                            <meshBasicMaterial color={feature.color} transparent opacity={isActive ? 0.15 : 0.05} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
                         </mesh>
                         {isActive && (
                             <mesh scale={1.8}>

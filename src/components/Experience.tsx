@@ -153,42 +153,58 @@ function AnimatedPlanet({
   const debrisRef = useRef<THREE.Group>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const coreRef = useRef<THREE.Mesh>(null);
+  const jetRef = useRef<THREE.Mesh>(null);
+  const jet2Ref = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     // Animate rings
-    if (ringRef.current) ringRef.current.rotation.z = t * 0.35;
-    if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.2;
-    if (ring3Ref.current) ring3Ref.current.rotation.y = t * 0.5;
+    if (ringRef.current) ringRef.current.rotation.z = t * 0.3;
+    if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.18;
+    if (ring3Ref.current) ring3Ref.current.rotation.y = t * 0.4;
 
     // Animate orbiting moons
     if (moonRef.current) {
-      moonRef.current.position.x = Math.cos(t * 0.6) * 1.1;
-      moonRef.current.position.z = Math.sin(t * 0.6) * 1.1;
-      moonRef.current.position.y = Math.sin(t * 0.9) * 0.25;
+      moonRef.current.position.x = Math.cos(t * 0.55) * 1.1;
+      moonRef.current.position.z = Math.sin(t * 0.55) * 1.1;
+      moonRef.current.position.y = Math.sin(t * 0.8) * 0.25;
     }
 
     // Debris/Moon belt rotation
     if (debrisRef.current) {
-      debrisRef.current.rotation.y = t * 0.4;
-      debrisRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
+      debrisRef.current.rotation.y = t * 0.35;
+      debrisRef.current.rotation.x = Math.sin(t * 0.15) * 0.08;
     }
 
     // Pulsing outer atmosphere/shield
     if (atmosphereRef.current) {
-      const s = 1.0 + Math.sin(t * 1.5) * 0.02; // Slower, more subtle pulse
+      const s = 1.0 + Math.sin(t * 1.2) * 0.02;
       atmosphereRef.current.scale.set(s, s, s);
-      atmosphereRef.current.rotation.y = t * 0.1;
-      atmosphereRef.current.rotation.x = t * 0.05;
+      atmosphereRef.current.rotation.y = t * 0.08;
+      atmosphereRef.current.rotation.x = t * 0.04;
     }
 
     // Core pulsing and rotation
     if (coreRef.current) {
-      coreRef.current.rotation.y = -t * 0.15;
+      coreRef.current.rotation.y = -t * 0.12;
       const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
       if (mat.emissiveIntensity !== undefined) {
-        mat.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2.5) * 0.4;
+        mat.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2) * 0.35;
       }
+    }
+
+    // Energy jet pulsing (helix/pulsar)
+    if (jetRef.current) {
+      const mat = jetRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = (isActive ? 0.3 : 0.1) + Math.sin(t * 3) * 0.1;
+      const s = 1.0 + Math.sin(t * 2.5) * 0.12;
+      jetRef.current.scale.set(1, s, 1);
+    }
+    if (jet2Ref.current) {
+      const mat = jet2Ref.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = (isActive ? 0.3 : 0.1) + Math.sin(t * 3 + 1) * 0.1;
+      const s = 1.0 + Math.sin(t * 2.5 + 1) * 0.12;
+      jet2Ref.current.scale.set(1, s, 1);
     }
   });
 
@@ -214,9 +230,14 @@ function AnimatedPlanet({
 
   switch (type) {
     case "crystal":
-      // Gas giant — Solid core + Refractive Outer shell + 3 layered Rings (Blue/Cyan)
+      // Gas giant — Solid core + Refractive Outer shell + 3 layered Rings + dust band
       return (
         <group>
+          {/* Outer atmospheric halo */}
+          <mesh>
+            <sphereGeometry args={[0.9, 48, 48]} />
+            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.05 : 0.02} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+          </mesh>
           {/* Inner dense core */}
           <mesh ref={coreRef}>
             <sphereGeometry args={[0.6, 64, 64]} />
@@ -239,14 +260,16 @@ function AnimatedPlanet({
           </mesh>
           {/* Outer thin dark ring */}
           <mesh ref={ring3Ref} rotation={[Math.PI / 3, 0, 0]} scale={1.1}>
-            <torusGeometry args={[1.4, 0.01, 16, 100]} />
-            <meshPhysicalMaterial color={materialProps.color} opacity={0.6} transparent />
+            <torusGeometry args={[1.4, 0.015, 16, 100]} />
+            <meshPhysicalMaterial color={materialProps.color} opacity={0.5} transparent />
           </mesh>
+          {/* Particle dust band around rings */}
+          <Sparkles count={30} scale={[3, 0.15, 3]} size={2} speed={0.3} opacity={0.4} color={materialProps.color} />
         </group>
       );
 
     case "prism":
-      // Habitable/Tech world - Solid core + Wireframe Geo Shell (Green)
+      // Habitable/Tech world - Solid core + Wireframe Geo Shell + pulsing data nodes
       return (
         <group>
           {/* Solid core */}
@@ -266,11 +289,37 @@ function AnimatedPlanet({
               emissiveIntensity={isActive ? 1.5 : 0.5}
             />
           </mesh>
+          {/* Pulsing data nodes on surface */}
+          {[0, 1, 2, 3, 4, 5].map((i) => {
+            const phi = Math.acos(-1 + (2 * i) / 6);
+            const theta = Math.sqrt(6 * Math.PI) * phi;
+            const r = 0.72;
+            return (
+              <mesh key={i} position={[
+                r * Math.cos(theta) * Math.sin(phi),
+                r * Math.cos(phi),
+                r * Math.sin(theta) * Math.sin(phi)
+              ]}>
+                <sphereGeometry args={[0.04, 12, 12]} />
+                <meshBasicMaterial
+                  color={materialProps.color}
+                  transparent
+                  opacity={isActive ? 0.8 : 0.3}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+            );
+          })}
+          {/* Atmospheric glow */}
+          <mesh>
+            <sphereGeometry args={[0.82, 32, 32]} />
+            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.04 : 0.02} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+          </mesh>
         </group>
       );
 
     case "helix":
-      // Pulsar - Sharp core + 3 complex intersecting rings (Purple)
+      // Pulsar - Sharp core + 3 complex intersecting rings + energy jets
       return (
         <group>
           {/* Sharp crystalline core */}
@@ -299,11 +348,35 @@ function AnimatedPlanet({
             <torusGeometry args={[1.0, 0.01, 16, 100]} />
             <meshPhysicalMaterial {...materialProps} opacity={0.4} transparent />
           </mesh>
+          {/* Energy jet beam — top */}
+          <mesh ref={jetRef} position={[0, 0.7, 0]}>
+            <cylinderGeometry args={[0.02, 0.08, 0.6, 8]} />
+            <meshBasicMaterial
+              color={materialProps.color}
+              transparent
+              opacity={0.2}
+              toneMapped={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+          {/* Energy jet beam — bottom */}
+          <mesh ref={jet2Ref} position={[0, -0.7, 0]} rotation={[Math.PI, 0, 0]}>
+            <cylinderGeometry args={[0.02, 0.08, 0.6, 8]} />
+            <meshBasicMaterial
+              color={materialProps.color}
+              transparent
+              opacity={0.2}
+              toneMapped={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+          {/* Axial particles */}
+          <Sparkles count={15} scale={[0.3, 2, 0.3]} size={2} speed={0.8} opacity={0.4} color={materialProps.color} />
         </group>
       );
 
     case "shield":
-      // Crystal/Ice - Sharp inner octahedron + Refractive smooth bubble (Pink)
+      // Crystal/Ice - Sharp inner octahedron + Refractive smooth bubble + refraction shimmer
       return (
         <group>
           {/* Inner diamond/crystal */}
@@ -321,13 +394,25 @@ function AnimatedPlanet({
             <sphereGeometry args={[0.75, 64, 64]} />
             {glassMaterial}
           </mesh>
+          {/* Outer shimmer halo */}
+          <mesh>
+            <sphereGeometry args={[0.85, 32, 32]} />
+            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.06 : 0.02} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+          </mesh>
+          {/* Internal refraction sparkles */}
+          <Sparkles count={12} scale={[1, 1, 1]} size={2} speed={0.4} opacity={0.3} color="#ffffff" />
         </group>
       );
 
     case "crown":
-      // Star/Lava planet - Emissive core + Corona wireframe + Orbiting moons (Orange)
+      // Star/Lava planet - Emissive core + Corona wireframe + Orbiting moons + corona flares
       return (
         <group>
+          {/* Corona flare halo */}
+          <mesh>
+            <sphereGeometry args={[0.85, 32, 32]} />
+            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.08 : 0.03} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+          </mesh>
           {/* Emissive Star Core */}
           <mesh ref={coreRef}>
             <sphereGeometry args={[0.6, 64, 64]} />
@@ -366,6 +451,8 @@ function AnimatedPlanet({
               );
             })}
           </group>
+          {/* Corona flare particles */}
+          <Sparkles count={20} scale={[2, 2, 2]} size={3} speed={0.5} opacity={0.4} color={materialProps.color} />
         </group>
       );
 
@@ -408,15 +495,14 @@ function ExperienceCard3D({
     if (!groupRef.current) return;
 
     // Gentle continuous rotation - faster when active/hovered
-    groupRef.current.rotation.y += delta * (isActive ? 0.35 : (hovered ? 0.25 : 0.12));
-    groupRef.current.rotation.x += delta * (isActive ? 0.12 : 0.04);
+    groupRef.current.rotation.y += delta * (isActive ? 0.3 : (hovered ? 0.22 : 0.1));
+    groupRef.current.rotation.x += delta * (isActive ? 0.1 : 0.035);
 
-    // Scale — active is bigger, hovered is medium, spring-like
-    const targetScale = isActive ? 1.05 : (hovered ? 0.85 : 0.65);
-    groupRef.current.scale.lerp(
-      new THREE.Vector3(targetScale, targetScale, targetScale),
-      0.08
-    );
+    // Scale — equalized with Achievements section
+    const targetScale = isActive ? 0.85 : (hovered ? 0.7 : 0.5);
+    const currentScale = groupRef.current.scale.x;
+    const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.06);
+    groupRef.current.scale.setScalar(newScale);
   });
 
   const Icon = typeIcons[data.type];
@@ -436,7 +522,7 @@ function ExperienceCard3D({
   };
 
   return (
-    <group position={pos} scale={isMobile ? 0.6 : 0.85}>
+    <group position={pos} scale={isMobile ? 0.45 : 0.65}>
       {/* Floating 3D geometry */}
       <Float
         floatIntensity={isActive ? 1.5 : 0.8}
@@ -460,18 +546,18 @@ function ExperienceCard3D({
       </Float>
 
       {/* Glowing Color Platform */}
-      <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[2.0, 64]} />
         <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.35 : 0.05} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
       </mesh>
-      <mesh position={[0, -2.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -1.51, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.9, 2.3, 64]} />
         <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.2 : 0.03} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
       </mesh>
 
       {/* Energy beam from base */}
       {isActive && (
-        <mesh position={[0, -1, 0]}>
+        <mesh position={[0, -0.5, 0]}>
           <cylinderGeometry args={[0.02, 0.15, 2, 8]} />
           <meshBasicMaterial
             color={data.color}
@@ -485,7 +571,7 @@ function ExperienceCard3D({
 
       {/* HTML Card — info overlay below the geometry */}
       <Html
-        position={[0, -3.8, 0]}
+        position={[0, -2.5, 0]}
         center
         className="pointer-events-none z-50"
         style={{
@@ -600,24 +686,29 @@ function CameraRig({
 }) {
   const { camera } = useThree();
 
+  // Reusable vectors to avoid per-frame allocations
+  const _targetPos = useMemo(() => new THREE.Vector3(), []);
+  const _lookAtTarget = useMemo(() => new THREE.Vector3(), []);
+  const _currentLookAt = useMemo(() => new THREE.Vector3(), []);
+  const _forward = useMemo(() => new THREE.Vector3(), []);
+
   useFrame(() => {
     const angle = (activeIndex / experiences.length) * Math.PI * 2;
-    const cameraDistance = RADIUS + (isMobile ? 12 : 9);
-    const targetX = Math.cos(angle) * cameraDistance;
-    const targetZ = Math.sin(angle) * cameraDistance;
-    const targetY = 1.0;
+    const cameraDistance = RADIUS + (isMobile ? 9 : 5.5);
+    _targetPos.set(
+      Math.cos(angle) * cameraDistance,
+      0.5,
+      Math.sin(angle) * cameraDistance
+    );
+    camera.position.lerp(_targetPos, 0.045);
 
-    camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.035);
-
-    // Look at the active card — slightly below center to frame the HUD card
+    // Look at the active card — center on planet+card combo
     const activePos = getPosition(activeIndex, experiences.length);
-    const lookAtTarget = new THREE.Vector3(activePos[0], -2.0, activePos[2]);
+    _lookAtTarget.set(activePos[0], -1.5, activePos[2]);
 
-    const currentLookAt = new THREE.Vector3(0, 0, -1)
-      .applyQuaternion(camera.quaternion)
-      .add(camera.position);
-    currentLookAt.lerp(lookAtTarget, 0.035);
-    camera.lookAt(currentLookAt);
+    _forward.set(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
+    _currentLookAt.copy(_forward).lerp(_lookAtTarget, 0.045);
+    camera.lookAt(_currentLookAt);
   });
 
   return null;
