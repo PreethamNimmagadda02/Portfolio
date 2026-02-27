@@ -2,30 +2,30 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useRef, useMemo, Suspense, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Hook for mouse position (normalized -1 to 1)
-function useMousePosition() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+// Ref-based mouse position — no React re-renders
+function useMouseRef() {
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMouse({
+      mouseRef.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1,
-      });
+      };
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  return mouse;
+  return mouseRef;
 }
 
 // Interactive flowing particles that react to mouse
-function ReactiveParticles({ mouse, count = 800 }: { mouse: { x: number; y: number }; count?: number }) {
+function ReactiveParticles({ mouseRef, count = 500 }: { mouseRef: React.RefObject<{ x: number; y: number }>; count?: number }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const { positions, velocities, originalPositions } = useMemo(() => {
@@ -58,6 +58,7 @@ function ReactiveParticles({ mouse, count = 800 }: { mouse: { x: number; y: numb
     if (!pointsRef.current) return;
     const positionAttribute = pointsRef.current.geometry.attributes.position;
     const time = state.clock.elapsedTime;
+    const mouse = mouseRef.current;
 
     const mouseX = mouse.x * 5;
     const mouseY = mouse.y * 5;
@@ -124,7 +125,7 @@ function ReactiveParticles({ mouse, count = 800 }: { mouse: { x: number; y: numb
 }
 
 // Magnetic field lines that bend toward mouse
-function MagneticLines({ mouse }: { mouse: { x: number; y: number } }) {
+function MagneticLines({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   const linesRef = useRef<THREE.Group>(null);
   const lineCount = 8;
   const pointsPerLine = 50;
@@ -165,6 +166,7 @@ function MagneticLines({ mouse }: { mouse: { x: number; y: number } }) {
   useFrame((state) => {
     if (!linesRef.current) return;
     const time = state.clock.elapsedTime;
+    const mouse = mouseRef.current;
     const mouseX = mouse.x * 5;
     const mouseY = mouse.y * 5;
 
@@ -212,12 +214,13 @@ function MagneticLines({ mouse }: { mouse: { x: number; y: number } }) {
 }
 
 // Morphing gradient sphere that follows mouse
-function MouseFollower({ mouse }: { mouse: { x: number; y: number } }) {
+function MouseFollower({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const targetPos = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state) => {
     if (!meshRef.current) return;
+    const mouse = mouseRef.current;
 
     targetPos.set(mouse.x * 3, mouse.y * 3, -2);
     meshRef.current.position.lerp(targetPos, 0.05);
@@ -246,7 +249,7 @@ function MouseFollower({ mouse }: { mouse: { x: number; y: number } }) {
 }
 
 // Particle trails from mouse
-function MouseTrails({ mouse }: { mouse: { x: number; y: number } }) {
+function MouseTrails({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   const trailRef = useRef<THREE.Points>(null);
   const trailCount = 50;
   const positionsRef = useRef<Float32Array>(new Float32Array(trailCount * 3));
@@ -255,6 +258,7 @@ function MouseTrails({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame(() => {
     if (!trailRef.current) return;
+    const mouse = mouseRef.current;
 
     const positions = positionsRef.current;
     const opacities = opacitiesRef.current;
@@ -296,23 +300,23 @@ function MouseTrails({ mouse }: { mouse: { x: number; y: number } }) {
 }
 
 // Scene content
-function MouseReactiveSceneContent({ mouse }: { mouse: { x: number; y: number } }) {
+function MouseReactiveSceneContent({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   return (
     <>
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
       <pointLight position={[-10, -10, 10]} intensity={0.3} color="#ec4899" />
 
-      <ReactiveParticles mouse={mouse} count={600} />
-      <MagneticLines mouse={mouse} />
-      <MouseFollower mouse={mouse} />
-      <MouseTrails mouse={mouse} />
+      <ReactiveParticles mouseRef={mouseRef} count={500} />
+      <MagneticLines mouseRef={mouseRef} />
+      <MouseFollower mouseRef={mouseRef} />
+      <MouseTrails mouseRef={mouseRef} />
     </>
   );
 }
 
 export default function MouseReactiveBackground() {
-  const mouse = useMousePosition();
+  const mouseRef = useMouseRef();
   const isMobile = useIsMobile();
 
   if (isMobile) return null;
@@ -321,11 +325,12 @@ export default function MouseReactiveBackground() {
     <div className="fixed inset-0 z-0 pointer-events-none opacity-50">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
-          <MouseReactiveSceneContent mouse={mouse} />
+          <MouseReactiveSceneContent mouseRef={mouseRef} />
         </Suspense>
       </Canvas>
     </div>

@@ -8,8 +8,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     useEffect(() => {
         const lenis = new Lenis({
-            lerp: 0.07, // Slightly more responsive while staying smooth
-            duration: 1.4, // Balanced momentum — less overshoot
+            lerp: 0.1, // Snappier response while staying smooth
+            duration: 1.2, // Less momentum overshoot
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,

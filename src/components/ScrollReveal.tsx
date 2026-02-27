@@ -39,7 +39,6 @@ export default function ScrollReveal({
     const initial = {
         opacity: 0,
         scale: 0.98,
-        filter: "blur(6px)",
         ...directions[direction],
     };
 
@@ -50,7 +49,6 @@ export default function ScrollReveal({
         rotateX: 0,
         rotateY: 0,
         scale: 1,
-        filter: "blur(0px)",
     };
 
     return (

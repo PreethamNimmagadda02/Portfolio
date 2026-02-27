@@ -2,49 +2,38 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useRef, useMemo, Suspense, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Hook for mouse position
-function useMousePosition() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const targetMouse = useRef({ x: 0, y: 0 });
+// Ref-based mouse position — no React re-renders
+function useMouseRef() {
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const targetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      targetMouse.current = {
+      targetRef.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1,
       };
     };
 
-    // Smooth lerp update
-    const interval = setInterval(() => {
-      setMouse(prev => ({
-        x: prev.x + (targetMouse.current.x - prev.x) * 0.08,
-        y: prev.y + (targetMouse.current.y - prev.y) * 0.08,
-      }));
-    }, 16);
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      clearInterval(interval);
-    };
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  return mouse;
+  return { mouseRef, targetRef };
 }
 
 // Premium unified wave mesh with cursor interaction
-function PremiumWaveSurface({ mouse }: { mouse: { x: number; y: number } }) {
+function PremiumWaveSurface({ mouseRef, targetRef }: { mouseRef: React.RefObject<{ x: number; y: number }>; targetRef: React.RefObject<{ x: number; y: number }> }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   // Create initial positions for a large uniform grid
   const { originalPositions } = useMemo(() => {
     const positions: number[] = [];
     const size = 200;
-    const segments = 150;
+    const segments = 100; // Reduced from 150
     const step = size / segments;
 
     for (let i = 0; i <= segments; i++) {
@@ -61,13 +50,18 @@ function PremiumWaveSurface({ mouse }: { mouse: { x: number; y: number } }) {
 
   useFrame((state) => {
     if (!meshRef.current) return;
+
+    // Smooth lerp inside the render loop instead of via React state
+    mouseRef.current.x += (targetRef.current.x - mouseRef.current.x) * 0.08;
+    mouseRef.current.y += (targetRef.current.y - mouseRef.current.y) * 0.08;
+
     const geometry = meshRef.current.geometry as THREE.PlaneGeometry;
     const positionAttribute = geometry.attributes.position;
     const time = state.clock.elapsedTime;
 
     // Convert mouse to world-ish coordinates
-    const mouseWorldX = mouse.x * 50;
-    const mouseWorldZ = mouse.y * 30;
+    const mouseWorldX = mouseRef.current.x * 50;
+    const mouseWorldZ = mouseRef.current.y * 30;
 
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = originalPositions[i * 3];
@@ -101,7 +95,7 @@ function PremiumWaveSurface({ mouse }: { mouse: { x: number; y: number } }) {
       rotation={[-Math.PI / 2.2, 0, 0]}
       position={[0, -4, -10]}
     >
-      <planeGeometry args={[200, 100, 150, 150]} />
+      <planeGeometry args={[200, 100, 100, 100]} />
       <meshStandardMaterial
         color="#8b5cf6"
         wireframe
@@ -114,7 +108,7 @@ function PremiumWaveSurface({ mouse }: { mouse: { x: number; y: number } }) {
 }
 
 // Secondary subtle wave layer with cursor interaction
-function SecondaryWaveLayer({ mouse }: { mouse: { x: number; y: number } }) {
+function SecondaryWaveLayer({ mouseRef }: { mouseRef: React.RefObject<{ x: number; y: number }> }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
@@ -123,8 +117,8 @@ function SecondaryWaveLayer({ mouse }: { mouse: { x: number; y: number } }) {
     const positionAttribute = geometry.attributes.position;
     const time = state.clock.elapsedTime;
 
-    const mouseWorldX = mouse.x * 60;
-    const mouseWorldZ = mouse.y * 40;
+    const mouseWorldX = mouseRef.current.x * 60;
+    const mouseWorldZ = mouseRef.current.y * 40;
 
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = positionAttribute.getX(i);
@@ -152,7 +146,7 @@ function SecondaryWaveLayer({ mouse }: { mouse: { x: number; y: number } }) {
       rotation={[-Math.PI / 2.3, 0, 0]}
       position={[0, -6, -15]}
     >
-      <planeGeometry args={[220, 120, 100, 100]} />
+      <planeGeometry args={[220, 120, 60, 60]} />
       <meshStandardMaterial
         color="#06b6d4"
         wireframe
@@ -165,7 +159,7 @@ function SecondaryWaveLayer({ mouse }: { mouse: { x: number; y: number } }) {
 }
 
 // Scene content with mouse passed down
-function WaveSceneContent({ mouse }: { mouse: { x: number; y: number } }) {
+function WaveSceneContent({ mouseRef, targetRef }: { mouseRef: React.RefObject<{ x: number; y: number }>; targetRef: React.RefObject<{ x: number; y: number }> }) {
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -173,15 +167,15 @@ function WaveSceneContent({ mouse }: { mouse: { x: number; y: number } }) {
       <pointLight position={[-10, 5, -10]} intensity={0.4} color="#06b6d4" />
       <pointLight position={[0, 5, 5]} intensity={0.3} color="#ec4899" />
 
-      <PremiumWaveSurface mouse={mouse} />
-      <SecondaryWaveLayer mouse={mouse} />
+      <PremiumWaveSurface mouseRef={mouseRef} targetRef={targetRef} />
+      <SecondaryWaveLayer mouseRef={mouseRef} />
     </>
   );
 }
 
 export default function WaveBackground() {
   const isMobile = useIsMobile();
-  const mouse = useMousePosition();
+  const { mouseRef, targetRef } = useMouseRef();
 
   if (isMobile) return null;
 
@@ -189,11 +183,12 @@ export default function WaveBackground() {
     <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 5, 15], fov: 55 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
-          <WaveSceneContent mouse={mouse} />
+          <WaveSceneContent mouseRef={mouseRef} targetRef={targetRef} />
         </Suspense>
       </Canvas>
     </div>

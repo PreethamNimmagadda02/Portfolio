@@ -839,3 +839,12 @@ h1 {
   transform-style: preserve-3d;
   backface-visibility: hidden;
 }
+
+/* ── GPU compositing hints for fixed overlays ── */
+/* Promotes fixed full-screen layers (3D canvases, backgrounds) to their own
+   GPU compositor layers so scroll and animation changes don't repaint the page */
+.fixed.inset-0 {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

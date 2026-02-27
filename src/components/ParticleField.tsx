@@ -25,30 +25,26 @@ function useMousePosition() {
   return mouseRef;
 }
 
-// Hook for scroll position with smoothing
-function useScrollPosition() {
-  const [scroll, setScroll] = useState(0);
-  const targetScrollRef = useRef(0);
+// Ref-based scroll position — no React re-renders
+function useScrollRef() {
+  const scrollRef = useRef(0);
+  const targetRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      targetScrollRef.current = isNaN(scrollPercent) ? 0 : scrollPercent;
+      targetRef.current = isNaN(scrollPercent) ? 0 : scrollPercent;
     };
 
-    // Smooth interpolation loop
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
     let animationId: number;
     const smoothScroll = () => {
-      setScroll(prev => {
-        const diff = targetScrollRef.current - prev;
-        // Smooth interpolation - prevents jarring jumps when using "scroll to top"
-        return prev + diff * 0.08;
-      });
+      const diff = targetRef.current - scrollRef.current;
+      scrollRef.current += diff * 0.08;
       animationId = requestAnimationFrame(smoothScroll);
     };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Initialize
     animationId = requestAnimationFrame(smoothScroll);
 
     return () => {
@@ -57,13 +53,13 @@ function useScrollPosition() {
     };
   }, []);
 
-  return scroll;
+  return scrollRef;
 }
 
 // Enhanced star field with scroll parallax and mouse interaction
-function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y: number }; scroll: number; isMobile: boolean }) {
+function EnhancedStarField({ mouseRef, scrollRef, isMobile }: { mouseRef: React.RefObject<{ x: number; y: number }>; scrollRef: React.RefObject<number>; isMobile: boolean }) {
   const ref = useRef<THREE.Points>(null);
-  const particlesCount = isMobile ? 400 : 2000;
+  const particlesCount = isMobile ? 250 : 1200;
 
   const { positions, originalPositions, sizes, colors } = useMemo(() => {
     const positions = new Float32Array(particlesCount * 3);
@@ -99,10 +95,12 @@ function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y:
     return { positions, originalPositions, sizes, colors };
   }, []);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!ref.current) return;
     const positionAttribute = ref.current.geometry.attributes.position;
     const time = state.clock.elapsedTime;
+    const scroll = scrollRef.current ?? 0;
+    const mouse = mouseRef.current ?? { x: 0, y: 0 };
 
     // Rotate based on time and scroll
     ref.current.rotation.x = -scroll * 0.5 + time * 0.02;
@@ -164,17 +162,17 @@ function EnhancedStarField({ mouse, scroll, isMobile }: { mouse: { x: number; y:
   );
 }
 
-
-
-
-
 // Connection lines between nearby particles (constellation effect)
+// Pre-allocates buffer to avoid GC thrashing
 function ConstellationLines() {
   const linesRef = useRef<THREE.LineSegments>(null);
   const particleCount = 30;
   const connectionDistance = 2;
+  // Max possible connections: particleCount*(particleCount-1)/2 = 435, each needs 6 floats (2 vertices × 3)
+  const maxConnections = (particleCount * (particleCount - 1)) / 2;
+  const maxFloats = maxConnections * 6;
 
-  const positions = useMemo(() => {
+  const { positions, lineBuffer } = useMemo(() => {
     const particlePositions: THREE.Vector3[] = [];
     for (let i = 0; i < particleCount; i++) {
       particlePositions.push(new THREE.Vector3(
@@ -183,13 +181,25 @@ function ConstellationLines() {
         (Math.random() - 0.5) * 5 - 2
       ));
     }
-    return particlePositions;
+    // Pre-allocate the buffer
+    const lineBuffer = new Float32Array(maxFloats);
+    return { positions: particlePositions, lineBuffer };
   }, []);
+
+  // Create the geometry once with the pre-allocated buffer
+  const geometry = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    const attr = new THREE.BufferAttribute(lineBuffer, 3);
+    attr.setUsage(THREE.DynamicDrawUsage);
+    geom.setAttribute("position", attr);
+    geom.setDrawRange(0, 0);
+    return geom;
+  }, [lineBuffer]);
 
   useFrame((state) => {
     if (!linesRef.current) return;
     const time = state.clock.elapsedTime;
-    const linePositions: number[] = [];
+    let vertexCount = 0;
 
     // Update particle positions with movement
     positions.forEach((pos, i) => {
@@ -197,48 +207,46 @@ function ConstellationLines() {
       pos.x += Math.cos(time * 0.3 + i * 0.5) * 0.001;
     });
 
-    // Find connections
+    // Find connections and write into pre-allocated buffer
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
         const dist = positions[i].distanceTo(positions[j]);
         if (dist < connectionDistance) {
-          linePositions.push(
-            positions[i].x, positions[i].y, positions[i].z,
-            positions[j].x, positions[j].y, positions[j].z
-          );
+          const offset = vertexCount * 3;
+          lineBuffer[offset] = positions[i].x;
+          lineBuffer[offset + 1] = positions[i].y;
+          lineBuffer[offset + 2] = positions[i].z;
+          lineBuffer[offset + 3] = positions[j].x;
+          lineBuffer[offset + 4] = positions[j].y;
+          lineBuffer[offset + 5] = positions[j].z;
+          vertexCount += 2;
         }
       }
     }
 
-    const geometry = linesRef.current.geometry;
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(linePositions, 3)
-    );
+    const posAttr = linesRef.current.geometry.attributes.position as THREE.BufferAttribute;
+    posAttr.needsUpdate = true;
+    linesRef.current.geometry.setDrawRange(0, vertexCount);
   });
 
   return (
-    <lineSegments ref={linesRef}>
-      <bufferGeometry />
+    <lineSegments ref={linesRef} geometry={geometry}>
       <lineBasicMaterial color="#8b5cf6" transparent opacity={0.15} />
     </lineSegments>
   );
 }
 
-
-
-
-
 export default function ParticleField() {
   const mouseRef = useMousePosition();
-  const scroll = useScrollPosition();
+  const scrollRef = useScrollRef();
   const isMobile = useIsMobile();
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
@@ -247,9 +255,9 @@ export default function ParticleField() {
           <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
 
           {/* Global Starfield Background */}
-          <Stars radius={100} depth={60} count={5000} factor={5} saturation={0.3} fade speed={0.4} />
+          <Stars radius={100} depth={60} count={3000} factor={5} saturation={0.3} fade speed={0.4} />
 
-          <EnhancedStarField mouse={mouseRef.current} scroll={scroll} isMobile={isMobile} />
+          <EnhancedStarField mouseRef={mouseRef} scrollRef={scrollRef} isMobile={isMobile} />
           {!isMobile && (
             <>
               <ConstellationLines />

@@ -221,7 +221,8 @@ export default function SectionDivider3D() {
       <div className="absolute inset-0">
         <Canvas
           camera={{ position: [0, 0, 6], fov: 60 }}
-          gl={{ antialias: true, alpha: true }}
+          gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+          dpr={[1, 1.5]}
           style={{ background: "transparent" }}
         >
           <Suspense fallback={null}>
@@ -250,7 +251,8 @@ export function FloatingOrbs3D() {
     <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
       <Canvas
         camera={{ position: [0, 0, 8], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
