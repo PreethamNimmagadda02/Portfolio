@@ -251,7 +251,9 @@ export default function Navbar() {
             <div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent"
               style={{
-                animation: scrolled ? "navShimmer 2s ease-in-out" : "none",
+                animationName: scrolled ? "navShimmer" : "none",
+                animationDuration: "2s",
+                animationTimingFunction: "ease-in-out",
                 animationFillMode: "forwards",
               }}
             />
