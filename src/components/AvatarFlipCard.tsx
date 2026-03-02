@@ -119,13 +119,16 @@ export default function AvatarFlipCard() {
           className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border-2 border-purple-500/30 shadow-2xl"
           style={{ backfaceVisibility: "hidden" }}
         >
-          <Image
-            src="/ai-headshot.jpeg"
-            alt="Avatar Front"
-            fill
-            className="object-cover"
-            priority
-          />
+          <picture className="absolute inset-0 w-full h-full">
+            <source srcSet="/ai-headshot-sm.webp 1x, /ai-headshot.webp 2x" type="image/webp" />
+            <img
+              src="/ai-headshot.jpeg"
+              alt="Avatar Front"
+              className="object-cover w-full h-full"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </picture>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
