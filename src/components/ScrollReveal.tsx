@@ -18,9 +18,9 @@ export default function ScrollReveal({
     className = "",
     delay = 0,
     direction = "up",
-    duration = 0.7,
+    duration = 0.6,
     once = true,
-    amount = 0.15,
+    amount = 0.1,
 }: ScrollRevealProps) {
     const ref = useRef<HTMLDivElement>(null);
     const isInView = useInView(ref, {
@@ -28,40 +28,25 @@ export default function ScrollReveal({
         amount,
     });
 
-    const directions = {
-        up: { y: 40, x: 0, rotateX: 5, rotateY: 0 },
-        down: { y: -40, x: 0, rotateX: -5, rotateY: 0 },
-        left: { x: 40, y: 0, rotateY: -5, rotateX: 0 },
-        right: { x: -40, y: 0, rotateY: 5, rotateX: 0 },
-        none: { x: 0, y: 0, rotateX: 0, rotateY: 0 },
-    };
-
-    const initial = {
-        opacity: 0,
-        scale: 0.98,
-        ...directions[direction],
-    };
-
-    const animate = {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        rotateX: 0,
-        rotateY: 0,
-        scale: 1,
+    // Subtle directional hint — small enough to not cause layout shifts
+    const dirOffset = {
+        up: { y: 16 },
+        down: { y: -16 },
+        left: { x: 16 },
+        right: { x: -16 },
+        none: {},
     };
 
     return (
         <motion.div
             ref={ref}
-            initial={initial}
-            animate={isInView ? animate : initial}
+            initial={{ opacity: 0, ...dirOffset[direction] }}
+            animate={isInView ? { opacity: 1, x: 0, y: 0 } : undefined}
             transition={{
-                duration: duration + 0.1,
+                duration,
                 delay,
-                ease: [0.16, 1, 0.3, 1], // Smoother, more refined ease-out curve
+                ease: [0.22, 1, 0.36, 1],
             }}
-            style={{ perspective: 1200 }} // Enable 3D perspective
             className={className}
         >
             {children}

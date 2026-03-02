@@ -3,6 +3,10 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ThemeProvider } from "@/components/ThemeToggle";
+import PageLoader from "@/components/PageLoader";
+import ScrollProgress from "@/components/ScrollProgress";
+import KonamiEasterEgg from "@/components/KonamiEasterEgg";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -133,13 +137,18 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
       >
-        <SmoothScroll>
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Footer />
-        </SmoothScroll>
+        <ThemeProvider>
+          <PageLoader />
+          <ScrollProgress />
+          <KonamiEasterEgg />
+          <SmoothScroll>
+            <Navbar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </SmoothScroll>
+        </ThemeProvider>
       </body>
     </html>
   );

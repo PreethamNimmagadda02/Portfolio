@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -340,6 +341,11 @@ export default function Navbar() {
               })}
             </div>
 
+            {/* Theme Toggle */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
+
             {/* CTA Button */}
             <motion.div
               whileHover={{ scale: 1.06, rotateY: -6 }}
@@ -427,7 +433,16 @@ export default function Navbar() {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 }}
+                  transition={{ delay: 0.22 }}
+                  className="flex justify-center py-2"
+                >
+                  <ThemeToggle />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.28 }}
                   className="pt-2"
                 >
                   <a

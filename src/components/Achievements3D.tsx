@@ -460,7 +460,23 @@ function AchievementMonolith({
                 transform={false} // Prevent matrix math jittering
             >
                 <div className="w-[280px] sm:w-[320px] md:w-72 p-4 md:p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
-                    style={{ boxShadow: isActive ? `0 0 30px -10px ${data.color}` : 'none' }}>
+                    style={{
+                        boxShadow: isActive ? `0 0 30px -10px ${data.color}` : 'none',
+                        transformStyle: 'preserve-3d',
+                        transition: 'transform 0.15s ease-out',
+                    }}
+                    onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = (e.clientX - rect.left) / rect.width;
+                        const y = (e.clientY - rect.top) / rect.height;
+                        const rotateX = (0.5 - y) * 12;
+                        const rotateY = (x - 0.5) * 12;
+                        e.currentTarget.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+                    }}
+                >
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-3 rounded-xl bg-black/50 border border-white/10"
                             style={{ boxShadow: `inset 0 0 10px ${data.color}40` }}>

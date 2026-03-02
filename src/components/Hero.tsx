@@ -1,11 +1,89 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence, Variants, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, Variants, useSpring, useInView } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
+
+// Roles to cycle through in the typing rotator
+const ROLES = [
+  "AI Engineer",
+  "Full Stack Developer",
+  "Open Source Builder",
+  "Competitive Programmer",
+  "Agent Systems Architect",
+  "Relentless Innovator",
+  "Perpetual Learner",
+];
+
+// Typing role rotator component
+function RoleRotator() {
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentRole = ROLES[roleIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      if (displayed.length < currentRole.length) {
+        timeout = setTimeout(() => {
+          setDisplayed(currentRole.slice(0, displayed.length + 1));
+        }, 80);
+      } else {
+        // Pause at full text
+        timeout = setTimeout(() => setIsDeleting(true), 2000);
+      }
+    } else {
+      if (displayed.length > 0) {
+        timeout = setTimeout(() => {
+          setDisplayed(displayed.slice(0, -1));
+        }, 40);
+      } else {
+        setIsDeleting(false);
+        setRoleIndex((prev) => (prev + 1) % ROLES.length);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayed, isDeleting, roleIndex]);
+
+  return (
+    <span className="inline-flex items-center">
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
+        {displayed}
+      </span>
+      <motion.span
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+        className="inline-block w-[3px] h-[1.1em] bg-purple-400 ml-0.5 rounded-full"
+      />
+    </span>
+  );
+}
+
+// Currently Building widget
+function CurrentlyBuilding() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.8, duration: 0.6 }}
+      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
+    >
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+      </span>
+      <span className="text-xs text-gray-400 font-medium">
+        Building: <span className="text-white font-semibold">Introspect Labs</span>
+      </span>
+    </motion.div>
+  );
+}
 
 // Animated gradient text component
 function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -114,44 +192,54 @@ function ScrollIndicator({ opacity }: { opacity: any }) {
 // Stats counter with count-up animation
 function AnimatedStat({ value, label, delay, gradient }: { value: string; label: React.ReactNode; delay: number; gradient: string }) {
   const [displayValue, setDisplayValue] = useState("0");
-  const numericPart = value.match(/[\d.]+/)?.[0] || "0";
-  const suffix = value.replace(/[\d.]+/, "");
+  const [started, setStarted] = useState(false);
+  // Strip commas for parsing, keep suffix like "+"
+  const rawNumeric = value.replace(/,/g, "").match(/[\d.]+/)?.[0] || "0";
+  const suffix = value.replace(/,/g, "").replace(/[\d.]+/, "");
+  const hasComma = value.includes(",");
+
+  // Start counting as soon as the page loader finishes
+  useEffect(() => {
+    const onDone = () => setStarted(true);
+    window.addEventListener("loader-done", onDone);
+    return () => window.removeEventListener("loader-done", onDone);
+  }, []);
 
   useEffect(() => {
-    const target = parseFloat(numericPart);
+    if (!started) return;
+
+    const target = parseFloat(rawNumeric);
     const duration = 2000;
-    const startTime = Date.now();
-    const delayMs = delay * 1000;
+    const start = Date.now();
 
-    // Only start animation after mount
-    const timer = setTimeout(() => {
-      let animationFrameId: number;
-      const animate = () => {
-        const elapsed = Date.now() - startTime - delayMs;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    let animationFrameId: number;
+    const animate = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
 
-        const current = Math.floor(target * eased);
-        setDisplayValue(current.toString());
+      const current = Math.floor(target * eased);
+      // Format with commas if the original value had them
+      const formatted = hasComma ? current.toLocaleString() : current.toString();
+      setDisplayValue(formatted);
 
-        if (progress < 1) {
-          animationFrameId = requestAnimationFrame(animate);
-        } else {
-          setDisplayValue(numericPart);
-        }
-      };
-      animate();
-      return () => cancelAnimationFrame(animationFrameId);
-    }, delayMs);
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        const final = hasComma ? parseFloat(rawNumeric).toLocaleString() : rawNumeric;
+        setDisplayValue(final);
+      }
+    };
+    animate();
 
-    return () => clearTimeout(timer);
-  }, [numericPart, delay]);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [started, rawNumeric, hasComma]);
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: delay + 0.5, duration: 0.5, type: "spring" }}
+      animate={started ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.5, type: "spring" }}
       className="text-center"
     >
       <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
@@ -190,17 +278,24 @@ const letterVariants: Variants = {
   },
 };
 
-// AnimatedWord component
+// AnimatedWord component — waits for loader to finish before revealing
 function AnimatedWord({ word, className, isOutline = false, reverse = false }: { word: string; className?: string; isOutline?: boolean; reverse?: boolean }) {
   const isGradient = className?.includes("bg-clip-text");
   const letters = reverse ? word.split("").reverse() : word.split("");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const onDone = () => setReady(true);
+    window.addEventListener("loader-done", onDone);
+    return () => window.removeEventListener("loader-done", onDone);
+  }, []);
 
   return (
     <motion.span
       className={`inline-flex px-1 [perspective:1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
       variants={containerVariants}
       initial="hidden"
-      animate="visible"
+      animate={ready ? "visible" : "hidden"}
     >
       {letters.map((letter, i) => (
         <motion.span
@@ -244,13 +339,19 @@ export default function Hero() {
   // Hydration fix & Mobile detection
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [loaderDone, setLoaderDone] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const onLoaderDone = () => setLoaderDone(true);
+    window.addEventListener("loader-done", onLoaderDone);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("loader-done", onLoaderDone);
+    };
   }, []);
 
   return (
@@ -293,7 +394,7 @@ export default function Hero() {
             <motion.div
               className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 lg:mb-12 whitespace-nowrap"
               initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
               transition={{ delay: 0.2 }}
             >
               <FloatingBadge delay={0.3}>
@@ -303,7 +404,7 @@ export default function Hero() {
 
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
+              animate={loaderDone ? { scale: 1, rotate: 0 } : undefined}
               transition={{ duration: 0.8, type: "spring" }}
               className="scale-[0.65] sm:scale-90 md:scale-100"
             >
@@ -325,7 +426,7 @@ export default function Hero() {
             <motion.div
               className="mt-8 max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
@@ -367,15 +468,22 @@ export default function Hero() {
           )}
         </motion.div>
 
-        {/* CTA Buttons - Centered below */}
+        {/* Role Rotator */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="flex justify-center gap-6 mt-10"
+          className="flex justify-center mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4 }}
         >
-
+          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300 font-[var(--font-inter)]">
+            Roles: <RoleRotator />
+          </div>
         </motion.div>
+
+        {/* Currently Building Widget */}
+        <div className="flex justify-center mt-5">
+          {mounted && <CurrentlyBuilding />}
+        </div>
       </div>
 
       {/* Scroll Indicator */}

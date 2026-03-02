@@ -848,3 +848,181 @@ h1 {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* ── Haptic-Style Tap Feedback (#17) ── */
+@media (pointer: coarse) {
+
+  button,
+  a,
+  [role="button"],
+  .tap-feedback {
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s ease-out;
+  }
+
+  button:active,
+  a:active,
+  [role="button"]:active,
+  .tap-feedback:active {
+    transform: scale(0.95);
+  }
+}
+
+/* ── Nebula Theme (#4) ── */
+/* Override Tailwind's purple palette + all hardcoded purple rgba() values */
+[data-theme="nebula"] {
+  --background: 270 30% 5%;
+  --foreground: 280 20% 96%;
+  --card: 270 25% 8%;
+  --card-foreground: 280 20% 96%;
+  --primary: 330 80% 60%;
+  --primary-foreground: 270 30% 5%;
+  --secondary: 300 20% 18%;
+  --secondary-foreground: 280 20% 96%;
+  --muted: 300 20% 18%;
+  --muted-foreground: 310 10% 65%;
+  --accent: 330 40% 18%;
+  --accent-foreground: 280 20% 96%;
+  --border: 300 20% 18%;
+  --ring: 330 80% 60%;
+
+  /* Override Tailwind's purple color palette to rose/pink */
+  --color-purple-300: #f9a8d4;
+  --color-purple-400: #f472b6;
+  --color-purple-500: #ec4899;
+  --color-purple-600: #db2777;
+  --color-purple-700: #be185d;
+  --color-purple-800: #9d174d;
+  --color-purple-900: #831843;
+}
+
+/* Nebula — override hardcoded purple glow/shadow rgba values */
+[data-theme="nebula"] h1 {
+  text-shadow: 0 0 80px rgba(236, 72, 153, 0.35) !important;
+}
+
+[data-theme="nebula"] ::-webkit-scrollbar-thumb {
+  background: rgba(236, 72, 153, 0.3) !important;
+}
+
+[data-theme="nebula"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(236, 72, 153, 0.5) !important;
+}
+
+[data-theme="nebula"] * {
+  scrollbar-color: rgba(236, 72, 153, 0.3) rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="nebula"] .glow {
+  text-shadow:
+    0 0 20px rgba(236, 72, 153, 0.6),
+    0 0 40px rgba(236, 72, 153, 0.4),
+    0 0 60px rgba(236, 72, 153, 0.2) !important;
+}
+
+/* Override the purple glows used in box-shadows, pulse animations */
+[data-theme="nebula"] .animate-pulse-glow {
+  animation: nebula-pulse-glow 2s ease-in-out infinite !important;
+}
+
+@keyframes nebula-pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.5), 0 0 60px rgba(236, 72, 153, 0.2);
+  }
+}
+
+[data-theme="nebula"] .number-glow {
+  animation: nebula-number-pulse 2s ease-in-out infinite !important;
+}
+
+@keyframes nebula-number-pulse {
+
+  0%,
+  100% {
+    text-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+  }
+
+  50% {
+    text-shadow: 0 0 40px rgba(236, 72, 153, 0.8), 0 0 60px rgba(236, 72, 153, 0.4);
+  }
+}
+
+/* Override card hover purple shadows to pink */
+[data-theme="nebula"] .card-hover:hover {
+  box-shadow:
+    0 16px 32px -12px rgba(236, 72, 153, 0.25),
+    0 0 16px rgba(236, 72, 153, 0.08) !important;
+}
+
+[data-theme="nebula"] .hover-lift:hover {
+  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.3) !important;
+}
+
+/* Override icon glow */
+[data-theme="nebula"] .icon-float {
+  animation: nebula-icon-glow 3s ease-in-out infinite !important;
+}
+
+@keyframes nebula-icon-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(236, 72, 153, 0.5), 0 0 60px rgba(236, 72, 153, 0.2);
+  }
+}
+
+/* Override the neon pulse for nebula theme */
+[data-theme="nebula"] .animate-neon-pulse {
+  animation: nebula-neon-pulse 2s ease-in-out infinite !important;
+}
+
+@keyframes nebula-neon-pulse {
+
+  0%,
+  100% {
+    text-shadow:
+      0 0 5px rgba(236, 72, 153, 0.8),
+      0 0 10px rgba(236, 72, 153, 0.6),
+      0 0 20px rgba(236, 72, 153, 0.4),
+      0 0 40px rgba(236, 72, 153, 0.2);
+  }
+
+  50% {
+    text-shadow:
+      0 0 10px rgba(236, 72, 153, 1),
+      0 0 20px rgba(236, 72, 153, 0.8),
+      0 0 40px rgba(236, 72, 153, 0.6),
+      0 0 80px rgba(236, 72, 153, 0.4);
+  }
+}
+
+/* Override breathing glow */
+[data-theme="nebula"] .animate-breathe-glow {
+  animation: nebula-breathe-glow 3s ease-in-out infinite !important;
+}
+
+@keyframes nebula-breathe-glow {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(236, 72, 153, 0.3),
+      inset 0 0 20px rgba(236, 72, 153, 0.1);
+  }
+
+  50% {
+    box-shadow:
+      0 0 40px rgba(236, 72, 153, 0.5),
+      inset 0 0 40px rgba(236, 72, 153, 0.2);
+  }
+}

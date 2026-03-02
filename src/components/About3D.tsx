@@ -3,8 +3,8 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshTransmissionMaterial, Html, OrbitControls, Environment, Sparkles as SparklesDrei, Text } from "@react-three/drei";
 import * as THREE from "three";
-import { useRef, useState, Suspense, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useRef, useState, Suspense, useMemo, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -73,6 +73,43 @@ const stats = [
     { value: "20%", label: "Memory Reduction", color: "text-yellow-400", icon: Zap },
     { value: "350+", label: "Participants Led", color: "text-emerald-400", icon: Target }
 ];
+
+// Animated counter that counts up when scrolled into view
+function AnimatedCounter({ value, color }: { value: string; color: string }) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const isInView = useInView(ref, { once: true, amount: 0.5 });
+    const [displayValue, setDisplayValue] = useState("0");
+
+    const numericPart = value.match(/[\d.]+/)?.[0] || "0";
+    const suffix = value.replace(/[\d.]+/, "");
+
+    useEffect(() => {
+        if (!isInView) return;
+
+        const target = parseFloat(numericPart);
+        const duration = 1500;
+        const startTime = Date.now();
+
+        let frameId: number;
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(target * eased);
+            setDisplayValue(current.toString());
+
+            if (progress < 1) {
+                frameId = requestAnimationFrame(animate);
+            } else {
+                setDisplayValue(numericPart);
+            }
+        };
+        frameId = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(frameId);
+    }, [isInView, numericPart]);
+
+    return <span ref={ref}>{displayValue}{suffix}</span>;
+}
 
 // -----------------------------------------------------------------------------
 // 3D Components
@@ -493,7 +530,9 @@ export default function About3D() {
                                         <div className="mb-2 flex justify-center text-gray-400 group-hover:text-white transition-colors">
                                             <stat.icon size={20} />
                                         </div>
-                                        <h4 className="text-2xl font-bold text-white mb-1">{stat.value}</h4>
+                                        <h4 className="text-2xl font-bold text-white mb-1">
+                                            <AnimatedCounter value={stat.value} color={stat.color} />
+                                        </h4>
                                         <p className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${stat.color}`}>{stat.label}</p>
                                     </div>
                                 ))}
