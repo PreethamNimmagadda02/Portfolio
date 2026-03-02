@@ -62,16 +62,11 @@ export default function KonamiEasterEgg() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                     className="fixed inset-0 z-[99998] pointer-events-none overflow-hidden"
                 >
-                    {/* Deep dark backdrop */}
-                    <motion.div
-                        className="absolute inset-0 bg-[#030014]"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: [0, 1, 1, 0] }}
-                        transition={{ duration: 4.5, times: [0, 0.08, 0.85, 1] }}
-                    />
+                    {/* Deep dark backdrop — stays solid, outer exit handles fade */}
+                    <div className="absolute inset-0 bg-[#030014]" />
 
                     {/* Radial glow behind center */}
                     <motion.div
@@ -81,7 +76,7 @@ export default function KonamiEasterEgg() {
                         }}
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: [0, 1, 1, 0], scale: [0.5, 1.2, 1.2, 1.5] }}
-                        transition={{ duration: 4.5, times: [0, 0.15, 0.8, 1] }}
+                        transition={{ duration: 6.5, times: [0, 0.1, 0.85, 1] }}
                     />
 
                     {/* Warp star trails — burst outward from center */}
@@ -141,7 +136,7 @@ export default function KonamiEasterEgg() {
                         className="absolute inset-0 flex items-center justify-center"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: [0, 1, 1, 0] }}
-                        transition={{ duration: 4, times: [0, 0.15, 0.75, 1] }}
+                        transition={{ duration: 6, times: [0, 0.1, 0.8, 1] }}
                     >
                         <div className="flex flex-col items-center gap-6">
                             {/* Glowing PN */}
