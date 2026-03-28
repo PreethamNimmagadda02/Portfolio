@@ -49,9 +49,23 @@ interface ExperienceData {
 const experiences: ExperienceData[] = [
   {
     id: 0,
+    role: "Machine Learning Intern",
+    company: "Matters.AI",
+    period: "Mar 2026 - Present",
+    description:
+      "Forging an autonomous AI copilot that hunts data threats and exposures in real time—and remediates them before damage is done. Transforming DSPM from passive monitoring into a self-healing, AI-native defense layer.",
+    type: "work",
+    skills: ["Autonomous AI", "DSPM", "ML Engineering", "Data Security"],
+    highlight: "Autonomous AI Copilot",
+    color: "#ef4444",
+    accent: "#f87171",
+    geometry: "crystal",
+  },
+  {
+    id: 1,
     role: "Generative AI Intern",
     company: "Introspect Labs",
-    period: "Jan 2026 - Present",
+    period: "Jan 2026 - Mar 2026",
     description:
       "Built a Multimodal & Multilingual AI Companion powered by VideoRAG that processes 100+ hours of video with 95% accuracy. Designed its Empathic Core for real-time adaptive responses, boosting retention by 40%.",
     type: "work",
@@ -62,7 +76,7 @@ const experiences: ExperienceData[] = [
     geometry: "crystal",
   },
   {
-    id: 1,
+    id: 2,
     role: "Campus Ambassador",
     company: "Perplexity",
     period: "Sept 2025 - Nov 2025",
@@ -76,7 +90,7 @@ const experiences: ExperienceData[] = [
     geometry: "prism",
   },
   {
-    id: 2,
+    id: 3,
     role: "Software Developer Intern",
     company: "METAVERTEX",
     period: "June 2025 – July 2025",
@@ -90,7 +104,7 @@ const experiences: ExperienceData[] = [
     geometry: "helix",
   },
   {
-    id: 3,
+    id: 4,
     role: "Hostel Prefect",
     company: "Hostel Executive Committee",
     period: "Sept 2024 - Sept 2025",
@@ -104,7 +118,7 @@ const experiences: ExperienceData[] = [
     geometry: "shield",
   },
   {
-    id: 4,
+    id: 5,
     role: "Student Senator",
     company: "Students' Gymkhana, IIT (ISM)",
     period: "March 2024 - March 2025",
@@ -852,8 +866,6 @@ export default function Experience() {
     },
     [activeIndex, navigate]
   );
-
-  const activeData = experiences[activeIndex];
 
   return (
     <section

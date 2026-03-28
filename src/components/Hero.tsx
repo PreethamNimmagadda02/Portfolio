@@ -9,13 +9,13 @@ import MagneticButton from "./MagneticButton";
 
 // Roles to cycle through in the typing rotator
 const ROLES = [
+  "Perpetual Learner",
   "AI Engineer",
   "Full Stack Developer",
   "Open Source Builder",
   "Competitive Programmer",
   "Agent Systems Architect",
-  "Relentless Innovator",
-  "Perpetual Learner",
+  "Relentless Innovator"
 ];
 
 // Typing role rotator component
@@ -78,8 +78,8 @@ function CurrentlyBuilding() {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
       </span>
-      <span className="text-xs text-gray-400 font-medium">
-        Building: <span className="text-white font-semibold">Introspect Labs</span>
+      <span className="text-sm text-gray-400 font-medium">
+        Building: <span className="text-white font-semibold text-base">Matters.AI</span>
       </span>
     </motion.div>
   );
@@ -375,12 +375,8 @@ export default function Hero() {
           >
             <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
-                word="GENERATIVE"
+                word="REDEFINING"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
-              />
-              <AnimatedWord
-                word="AI"
-                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-purple-300 to-pink-400 drop-shadow-2xl"
               />
             </h1>
           </motion.div>
@@ -419,7 +415,7 @@ export default function Hero() {
           >
             <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mt-2 lg:mt-0">
               <AnimatedWord
-                word="SPECIALIST"
+                word="AI SECURITY"
                 className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
               />
             </h1>
@@ -430,7 +426,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
-                Synthesizing <span className="text-purple-400 font-bold">Vision, Logic & Empathy</span> to architect the senses of the Agentic Age. At <span className="text-white font-bold">Introspect Labs</span>, I pioneer <span className="text-blue-400 font-bold">VideoRAG</span> systems—weaving the <span className="text-pink-400 font-bold">Neural Fabric</span> for machines that perceive, reason and understand.
+                Forging the <span className="text-blue-400 font-bold">autonomous AI copilot</span> at <span className="text-white font-bold">Matters.AI</span> that doesn't wait for breaches—it <span className="text-purple-400 font-bold">eliminates them before they exist</span>. Turning DSPM into a living, self-healing system where every threat is detected, analysed and <span className="text-pink-400 font-bold">autonomously remediated</span> at the speed of thought.
               </p>
             </motion.div>
           </motion.div>
