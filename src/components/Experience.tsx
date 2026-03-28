@@ -53,7 +53,7 @@ const experiences: ExperienceData[] = [
     company: "Matters.AI",
     period: "Mar 2026 - Present",
     description:
-      "Forging an autonomous AI copilot that hunts data threats and exposures in real time—and remediates them before damage is done. Transforming DSPM from passive monitoring into a self-healing, AI-native defense layer.",
+      "Forging the autonomous AI copilot that hunts data threats and exposures in real time—and remediates them before damage is done. Transforming DSPM from passive monitoring into a self-healing, AI-native defense layer.",
     type: "work",
     skills: ["Autonomous AI", "DSPM", "ML Engineering", "Data Security"],
     highlight: "Autonomous AI Copilot",
