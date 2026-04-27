@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
     Float,
@@ -583,6 +583,22 @@ function Scene({ activeIndex, onSelect, isMobile }: { activeIndex: number, onSel
 export default function Achievements3D() {
     const [activeIndex, setActiveIndex] = useState(0);
     const isMobile = useIsMobile();
+    const touchStartX = useRef(0);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+    }, []);
+
+    const handleTouchEnd = useCallback(
+        (e: React.TouchEvent) => {
+            const delta = e.changedTouches[0].clientX - touchStartX.current;
+            if (Math.abs(delta) > 50) {
+                if (delta < 0) setActiveIndex((prev) => (prev + 1) % achievements.length);
+                else setActiveIndex((prev) => (prev - 1 + achievements.length) % achievements.length);
+            }
+        },
+        []
+    );
 
     // Simple auto-rotate if not interacting, maybe optional
     // useEffect(() => {
@@ -593,7 +609,10 @@ export default function Achievements3D() {
     // }, []);
 
     return (
-        <section id="achievements" className="relative h-screen overflow-hidden flex items-center justify-center">
+        <section id="achievements" className="relative h-screen overflow-hidden flex items-center justify-center"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             {/* Header Overlay - absolute so it floats above canvas */}
             <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
                 <motion.h2

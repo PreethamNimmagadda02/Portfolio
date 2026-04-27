@@ -9,26 +9,11 @@ import NoiseBackground from "@/components/NoiseBackground";
 import Achievements3D from "@/components/Achievements3D";
 import ScrollReveal from "@/components/ScrollReveal";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 
 // Dynamic import for Three.js components (client-side only)
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
 const SectionDivider3D = dynamic(() => import("@/components/SectionDivider3D"), { ssr: false });
 const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), { ssr: false });
-
-// Parallax wrapper — moves children at a different scroll rate
-function ParallaxLayer({ children, speed = 0.5, className = "" }: { children: React.ReactNode; speed?: number; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", `${speed * -30}%`]);
-
-  return (
-    <motion.div ref={ref} style={{ y }} className={className}>
-      {children}
-    </motion.div>
-  );
-}
 
 
 export default function Home() {
@@ -39,7 +24,7 @@ export default function Home() {
 
       <NoiseBackground />
 
-      <div className="relative z-10 flex flex-col gap-24 md:gap-40">
+      <div className="relative z-10 flex flex-col gap-16 md:gap-40">
         {/* Hero Section */}
         <Hero />
 

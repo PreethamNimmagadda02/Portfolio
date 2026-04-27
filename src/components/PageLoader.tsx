@@ -27,7 +27,7 @@ export default function PageLoader() {
         const timer = setTimeout(() => {
             setLoading(false);
             window.dispatchEvent(new Event("loader-done"));
-        }, 4000);
+        }, 3000);
 
         return () => clearTimeout(timer);
     }, []);

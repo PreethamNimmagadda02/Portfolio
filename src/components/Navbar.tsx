@@ -355,7 +355,7 @@ export default function Navbar() {
             >
               <div className={cn(
                 "absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur-md transition-all duration-300",
-                activeSection === "contact" ? "opacity-80 blur-lg" : "opacity-0 group-hover:opacity-80"
+                activeSection === "contact" ? "opacity-100 blur-lg scale-110" : "opacity-0 group-hover:opacity-80"
               )} />
               <a
                 href="#contact"
@@ -363,12 +363,12 @@ export default function Navbar() {
                 className={cn(
                   "relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all overflow-hidden",
                   activeSection === "contact"
-                    ? "ring-2 ring-purple-400/50"
+                    ? "ring-2 ring-purple-400/60"
                     : ""
                 )}
                 style={{
                   boxShadow: activeSection === "contact"
-                    ? "0 0 24px rgba(139,92,246,0.45), inset 0 1px 0 rgba(255,255,255,0.2)"
+                    ? "0 0 30px rgba(139,92,246,0.55), 0 0 60px rgba(139,92,246,0.15), inset 0 1px 0 rgba(255,255,255,0.2)"
                     : "0 4px 16px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
                 }}
               >
