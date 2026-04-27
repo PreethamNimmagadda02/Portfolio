@@ -53,6 +53,54 @@ const testimonials = [
     gradient: "from-indigo-500 to-blue-500",
     accent: "#6366f1",
   },
+  {
+    quote: "His real-time speech-to-speech translation system using LiveKit was mind-blowing. Sub-second latency across languages — that's production-level engineering.",
+    name: "Meera Iyer",
+    role: "NLP Engineer, Language AI Startup",
+    initials: "MI",
+    gradient: "from-teal-500 to-emerald-500",
+    accent: "#14b8a6",
+  },
+  {
+    quote: "Preetham set up our entire AWS infrastructure — EC2, GPU instances, networking — like a seasoned DevOps engineer. Truly full-stack in every sense.",
+    name: "Rohan Gupta",
+    role: "CTO, Early-Stage Startup",
+    initials: "RG",
+    gradient: "from-sky-500 to-blue-500",
+    accent: "#0ea5e9",
+  },
+  {
+    quote: "He mentored our junior dev team through complex DSA concepts with patience and clarity. A brilliant engineer who makes others better too.",
+    name: "Divya Krishnan",
+    role: "Software Engineer, Google",
+    initials: "DK",
+    gradient: "from-violet-500 to-purple-500",
+    accent: "#8b5cf6",
+  },
+  {
+    quote: "Preetham's College Central app genuinely changed campus life. The attention to UX detail and performance optimization was way beyond typical student projects.",
+    name: "Arjun Mehta",
+    role: "Product Manager, IIT (ISM)",
+    initials: "AM",
+    gradient: "from-orange-500 to-red-500",
+    accent: "#f97316",
+  },
+  {
+    quote: "At the hackathon, his team delivered a fully functional AI prototype in 24 hours. His speed of execution combined with clean architecture is unmatched.",
+    name: "Neha Srinivasan",
+    role: "Hackathon Organizer, MLH",
+    initials: "NS",
+    gradient: "from-fuchsia-500 to-pink-500",
+    accent: "#d946ef",
+  },
+  {
+    quote: "The way he integrated Sarvam AI APIs for multilingual support showed deep understanding of both API design and user-centric engineering.",
+    name: "Rajesh Sundaram",
+    role: "Senior Engineer, Sarvam AI",
+    initials: "RS",
+    gradient: "from-lime-500 to-green-500",
+    accent: "#84cc16",
+  },
 ];
 
 function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: number }) {
@@ -95,7 +143,7 @@ export default function Testimonials() {
 
   // Duplicate for infinite scroll effect
   const row1 = [...testimonials, ...testimonials];
-  const row2 = [...testimonials.slice(3), ...testimonials.slice(0, 3), ...testimonials.slice(3), ...testimonials.slice(0, 3)];
+  const row2 = [...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6)];
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-20 relative overflow-hidden">
