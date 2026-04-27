@@ -118,7 +118,7 @@ const jsonLd = {
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
-// ... existing imports ...
+import SpotlightCursor from "@/components/SpotlightCursor";
 
 export default function RootLayout({
   children,
@@ -141,6 +141,7 @@ export default function RootLayout({
           <PageLoader />
           <ScrollProgress />
           <KonamiEasterEgg />
+          <SpotlightCursor />
           <SmoothScroll>
             <Navbar />
             <main className="min-h-screen">

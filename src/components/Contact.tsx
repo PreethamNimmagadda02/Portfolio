@@ -522,7 +522,34 @@ export default function Contact() {
             Contact
           </motion.span>
           <h2 className="text-3xl md:text-5xl font-black text-white mb-4">Get in Touch</h2>
-          <p className="text-gray-400 max-w-lg mx-auto">Let's build something extraordinary together</p>
+          <p className="text-gray-400 max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
+
+          {/* Availability Status Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="inline-flex items-center gap-4 px-6 py-3 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl relative overflow-hidden"
+          >
+            {/* Top gradient line */}
+            <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+              </span>
+              <span className="text-emerald-400 text-sm font-bold">Available</span>
+            </div>
+
+            <div className="w-px h-6 bg-white/10" />
+
+            <div className="text-left">
+              <p className="text-white text-sm font-medium">Internships & Full-time Roles</p>
+              <p className="text-gray-500 text-xs">Usually responds within 24 hours</p>
+            </div>
+          </motion.div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">

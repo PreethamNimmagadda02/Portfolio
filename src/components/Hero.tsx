@@ -476,9 +476,35 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* Currently Building Widget */}
-        <div className="flex justify-center mt-5">
+        {/* Currently Building Widget + Available Badge */}
+        <div className="flex flex-wrap justify-center items-center gap-3 mt-5">
           {mounted && <CurrentlyBuilding />}
+          {mounted && (
+            <motion.a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                const el = document.getElementById("contact");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.0, duration: 0.6 }}
+              className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
+            >
+              {/* Animated gradient border */}
+              <span className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
+              <span className="absolute inset-[1px] rounded-full bg-black/90 backdrop-blur-sm" />
+
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+              </span>
+              <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
+                Open to <span className="text-white font-semibold">Opportunities</span>
+              </span>
+            </motion.a>
+          )}
         </div>
       </div>
 

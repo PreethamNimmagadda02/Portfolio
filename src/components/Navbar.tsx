@@ -8,11 +8,13 @@ import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { name: "Home", href: "#home" },
-  { name: "Skills", href: "#skills-sphere" },
   { name: "About", href: "#about" },
-  { name: "Projects", href: "#projects" },
-  { name: "Achievements", href: "#achievements" },
   { name: "Experience", href: "#experience" },
+  { name: "Skills", href: "#skills-sphere" },
+  { name: "Projects", href: "#projects" },
+  { name: "Activity", href: "#github-stats" },
+  { name: "Achievements", href: "#achievements" },
+  { name: "Testimonials", href: "#testimonials" },
 ];
 
 /* ─── Floating Particle ─── */
@@ -194,7 +196,7 @@ export default function Navbar() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50"
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50"
         ref={navRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
@@ -307,7 +309,7 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     onClick={(e) => scrollToSection(e, link.href)}
-                    className="relative px-4 py-1.5 text-sm font-medium group/link"
+                    className="relative px-3 py-1.5 text-sm font-medium group/link"
                   >
                     {isActive && (
                       <motion.div

@@ -8,6 +8,9 @@ import Contact from "@/components/Contact";
 import NoiseBackground from "@/components/NoiseBackground";
 import Achievements3D from "@/components/Achievements3D";
 import ScrollReveal from "@/components/ScrollReveal";
+import GitHubStats from "@/components/GitHubStats";
+import Testimonials from "@/components/Testimonials";
+import SectionDivider from "@/components/SectionDivider";
 import dynamic from "next/dynamic";
 
 // Dynamic import for Three.js components (client-side only)
@@ -28,30 +31,54 @@ export default function Home() {
         {/* Hero Section */}
         <Hero />
 
-        {/* Skills Marquee with 3D divider */}
-        <ScrollReveal direction="none">
-          <SkillsMarquee />
-        </ScrollReveal>
-
         {/* About Section */}
         <ScrollReveal direction="none">
           <About3D />
         </ScrollReveal>
+
+        <SectionDivider variant="glow" colorFrom="rgba(139, 92, 246, 0.3)" colorTo="rgba(59, 130, 246, 0.2)" />
+
+        {/* Experience Section */}
+        <ScrollReveal direction="none">
+          <Experience />
+        </ScrollReveal>
+
+        <SectionDivider variant="mesh" colorFrom="rgba(59, 130, 246, 0.15)" colorTo="rgba(168, 85, 247, 0.1)" />
+
+        {/* Skills Marquee */}
+        <ScrollReveal direction="none">
+          <SkillsMarquee />
+        </ScrollReveal>
+
+        <SectionDivider variant="glow" colorFrom="rgba(168, 85, 247, 0.2)" colorTo="rgba(236, 72, 153, 0.2)" flip />
 
         {/* Projects Section */}
         <ScrollReveal direction="none">
           <Projects />
         </ScrollReveal>
 
+        <SectionDivider variant="mesh" colorFrom="rgba(236, 72, 153, 0.15)" colorTo="rgba(6, 182, 212, 0.1)" />
+
+        {/* Coding Activity Section */}
+        <ScrollReveal direction="none">
+          <GitHubStats />
+        </ScrollReveal>
+
+        <SectionDivider variant="glow" colorFrom="rgba(6, 182, 212, 0.2)" colorTo="rgba(251, 191, 36, 0.2)" flip />
+
         {/* Achievements Section */}
         <ScrollReveal direction="none">
           <Achievements3D />
         </ScrollReveal>
 
-        {/* Experience Section */}
+        <SectionDivider variant="mesh" colorFrom="rgba(251, 191, 36, 0.15)" colorTo="rgba(139, 92, 246, 0.1)" flip />
+
+        {/* Testimonials Section */}
         <ScrollReveal direction="none">
-          <Experience />
+          <Testimonials />
         </ScrollReveal>
+
+        <SectionDivider variant="glow" colorFrom="rgba(139, 92, 246, 0.2)" colorTo="rgba(59, 130, 246, 0.15)" />
 
         {/* Contact Section */}
         <ScrollReveal direction="none">
@@ -61,4 +88,3 @@ export default function Home() {
     </main>
   );
 }
-
