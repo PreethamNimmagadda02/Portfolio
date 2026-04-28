@@ -12,6 +12,7 @@ const ROLES = [
   "Perpetual Learner",
   "AI Engineer",
   "Full Stack Developer",
+  "AI Security Visionary",
   "Open Source Builder",
   "Competitive Programmer",
   "Agent Systems Architect",

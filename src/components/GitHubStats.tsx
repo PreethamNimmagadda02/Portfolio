@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
-import { Github, GitCommit, Flame, Code2, Star, GitBranch, Loader2, AlertCircle, Activity, Zap } from "lucide-react";
+import { Github, GitCommit, Flame, Code2, Star, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
@@ -175,10 +175,10 @@ function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
 /* ─── Cell colors for heatmap ─── */
 const cellColors = [
   "rgba(255,255,255,0.04)",
-  "rgba(139, 92, 246, 0.3)",
-  "rgba(139, 92, 246, 0.55)",
-  "rgba(168, 85, 247, 0.85)",
-  "rgba(192, 132, 252, 1)",
+  "rgba(139, 92, 246, 0.4)",
+  "rgba(168, 85, 247, 0.7)",
+  "rgba(192, 132, 252, 0.9)",
+  "rgba(216, 180, 254, 1)",
 ];
 
 /* ─── Animated counter ─── */
@@ -230,21 +230,21 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
     rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
     rangeStart.setHours(0, 0, 0, 0);
 
-    // Build date→level map
-    const dateMap = new Map<string, number>();
+    // Build date→data map
+    const dateMap = new Map<string, { level: number; count: number }>();
     for (const d of data) {
-      dateMap.set(d.date, d.level);
+      dateMap.set(d.date, { level: d.level, count: d.count });
     }
 
-    const weeks: number[][] = [];
-    let currentWeek: number[] = [];
+    const weeks: { level: number; count: number; date: string }[][] = [];
+    let currentWeek: { level: number; count: number; date: string }[] = [];
 
     // Fill in all days from rangeStart to today
     const iter = new Date(rangeStart);
     while (iter <= today) {
       const dateStr = iter.toISOString().split("T")[0];
-      const level = dateMap.get(dateStr) ?? 0;
-      currentWeek.push(level);
+      const dayData = dateMap.get(dateStr) ?? { level: 0, count: 0 };
+      currentWeek.push({ ...dayData, date: dateStr });
 
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
@@ -303,7 +303,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             return (
               <span
                 key={m.label}
-                className="text-[10px] text-gray-500 font-mono absolute transform -translate-x-1/2"
+                className="text-[10px] text-gray-500 font-medium absolute transform -translate-x-1/2"
                 style={{ left: `${leftPercent}%` }}
               >
                 {m.label}
@@ -317,7 +317,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
               <span
                 key={i}
-                className="text-[9px] text-gray-600 font-mono flex items-center h-[11px]"
+                className="text-[9px] text-gray-600 font-medium flex items-center h-[11px]"
               >
                 {d}
               </span>
@@ -328,8 +328,8 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             {heatmapGrid.map((week, wk) => (
               <div key={wk} className="flex flex-col justify-between gap-1 flex-1">
                 {Array.from({ length: 7 }).map((_, dy) => {
-                  const level = dy < week.length ? week[dy] : -1;
-                  if (level === -1) {
+                  const day = dy < week.length ? week[dy] : null;
+                  if (!day) {
                     return <div key={dy} className="w-full aspect-square" />;
                   }
                   return (
@@ -338,12 +338,13 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
                       initial={{ opacity: 0, scale: 0 }}
                       animate={isInView ? { opacity: 1, scale: 1 } : {}}
                       transition={{
-                        delay: wk * 0.01 + dy * 0.005,
+                        delay: wk * 0.005 + dy * 0.005,
                         duration: 0.2,
                       }}
-                      className="w-full aspect-square rounded-[2px]"
+                      title={`${day.count} contributions on ${day.date}`}
+                      className="w-full aspect-square rounded-[3px] hover:ring-2 hover:ring-white/50 transition-all cursor-crosshair z-10 hover:z-20 hover:scale-125"
                       style={{
-                        backgroundColor: cellColors[Math.min(level, 4)],
+                        backgroundColor: cellColors[Math.min(day.level, 4)],
                       }}
                     />
                   );
@@ -353,16 +354,16 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
           </div>
         </div>
         {/* Legend */}
-        <div className="flex items-center justify-end gap-1 mt-2">
-          <span className="text-[10px] text-gray-500 mr-1">Less</span>
-          {cellColors.slice(0, 4).map((c, i) => (
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <span className="text-[10px] text-gray-500 font-medium mr-1">Less</span>
+          {cellColors.slice(0, 5).map((c, i) => (
             <div
               key={i}
-              className="w-[11px] h-[11px] rounded-[2px]"
+              className="w-3 h-3 rounded-[3px]"
               style={{ backgroundColor: c }}
             />
           ))}
-          <span className="text-[10px] text-gray-500 ml-1">More</span>
+          <span className="text-[10px] text-gray-500 font-medium ml-1">More</span>
         </div>
       </div>
     </div>
@@ -554,26 +555,43 @@ export default function GitHubStats() {
           )}
 
           {/* Toggle Button */}
-          <div className="flex justify-center mt-6 relative z-20">
-            <div className="bg-zinc-900/80 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center">
-              <button
-                onClick={() => setActiveTab('github')}
-                className={`px-5 py-2 rounded-full flex items-center gap-2 text-sm font-semibold transition-all ${activeTab === 'github' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
-              >
-                <Github size={16} /> GitHub
-              </button>
-              <button
-                onClick={() => setActiveTab('competitive')}
-                className={`px-5 py-2 rounded-full flex items-center gap-2 text-sm font-semibold transition-all ${activeTab === 'competitive' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}
-              >
-                <Code2 size={16} /> Competitive
-              </button>
+          <div className="flex justify-center mt-8 relative z-20">
+            <div className="bg-black/50 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center relative shadow-xl">
+              {(["github", "competitive"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`relative px-6 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all z-10 ${
+                    activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {activeTab === tab && (
+                    <motion.div
+                      layoutId="active-tab-indicator"
+                      className="absolute inset-0 bg-white/10 rounded-full z-[-1] border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    />
+                  )}
+                  {tab === "github" ? (
+                    <><Github size={16} /> GitHub</>
+                  ) : (
+                    <><Code2 size={16} /> Competitive</>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
         </motion.div>
 
+        <AnimatePresence mode="wait">
         {activeTab === "github" && (
-          <>
+          <motion.div
+            key="github-tab"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
             {/* Stat Cards */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -589,9 +607,7 @@ export default function GitHubStats() {
                   <motion.div
                     key={stat.label}
                     initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={
-                      isInView ? { opacity: 1, y: 0, scale: 1 } : {}
-                    }
+                    animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
                     transition={{
                       delay: 0.15 + i * 0.1,
                       duration: 0.5,
@@ -599,23 +615,18 @@ export default function GitHubStats() {
                     }}
                     className="relative group"
                   >
-                    <div
-                      className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500`}
-                    />
-                    <div className="relative p-4 md:p-5 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all text-center">
-                      <stat.icon
-                        size={22}
-                        className="mx-auto mb-2 text-gray-400 group-hover:text-white transition-colors"
-                      />
-                      <div
-                        className={`text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient}`}
-                      >
-                        <AnimatedCounter
-                          value={stat.value}
-                          suffix={stat.suffix}
+                    <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
+                    <div className="relative p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
+                      <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
+                        <stat.icon
+                          size={24}
+                          className="text-gray-400 group-hover:text-white transition-colors"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1 font-medium uppercase tracking-wider">
+                      <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient} drop-shadow-sm`}>
+                        <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
                         {stat.label}
                       </p>
                     </div>
@@ -638,9 +649,15 @@ export default function GitHubStats() {
                       <Code2 size={18} className="text-purple-400" />
                       Contribution Graph
                     </h3>
-                    <span className="text-sm text-gray-500 font-mono">
-                      Last 1 year
-                    </span>
+                    <a
+                      href={`https://github.com/${GITHUB_USERNAME}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
+                    >
+                      <span className="hidden sm:inline">View on GitHub</span>
+                      <ExternalLink size={14} />
+                    </a>
                   </div>
                   <div className="flex-grow flex items-center justify-center">
                     {loading ? (
@@ -670,67 +687,75 @@ export default function GitHubStats() {
               >
                 <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
                 <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
-                  <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                     <Code2 size={18} className="text-blue-400" />
                     Top Languages
                   </h3>
                   <div className="flex-grow flex flex-col justify-center">
                     {loading ? (
-                      <div className="space-y-3 w-full">
-                        <div className="h-3 rounded-full bg-white/5 animate-pulse" />
-                        <div className="flex gap-4">
-                          {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-white/10 animate-pulse" />
-                              <div className="w-16 h-3 rounded bg-white/10 animate-pulse" />
-                            </div>
-                          ))}
-                        </div>
+                      <div className="space-y-4 w-full">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="space-y-1.5">
+                            <div className="w-20 h-3 rounded bg-white/10 animate-pulse" />
+                            <div className="h-2.5 rounded-full bg-white/5 animate-pulse" />
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <>
-                        <div className="flex h-3 rounded-full overflow-hidden mb-6 bg-white/5 w-full">
-                          {languages.map((lang, i) => (
-                            <motion.div
-                              key={lang.name}
-                              initial={{ width: 0 }}
-                              animate={
-                                isInView ? { width: `${lang.percentage}%` } : {}
-                              }
-                              transition={{ delay: 0.6 + i * 0.1, duration: 0.8 }}
-                              className="h-full first:rounded-l-full last:rounded-r-full"
-                              style={{ backgroundColor: lang.color }}
-                            />
-                          ))}
-                        </div>
-                        <div className="flex flex-wrap gap-4 w-full">
-                          {languages.map((lang) => (
-                            <div key={lang.name} className="flex items-center gap-2">
-                              <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: lang.color }}
-                              />
-                              <span className="text-sm text-gray-300 font-medium">
-                                {lang.name}
-                              </span>
-                              <span className="text-xs text-gray-500 font-mono">
+                      <div className="space-y-4 w-full">
+                        {languages.map((lang, i) => (
+                          <motion.div
+                            key={lang.name}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={isInView ? { opacity: 1, x: 0 } : {}}
+                            transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
+                          >
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-2.5 h-2.5 rounded-full shadow-sm"
+                                  style={{ backgroundColor: lang.color }}
+                                />
+                                <span className="text-sm text-gray-300 font-semibold">
+                                  {lang.name}
+                                </span>
+                              </div>
+                              <span className="text-xs text-gray-500 font-bold tabular-nums">
                                 {lang.percentage}%
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      </>
+                            <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={isInView ? { width: `${lang.percentage}%` } : {}}
+                                transition={{ delay: 0.6 + i * 0.1, duration: 1, type: "spring", damping: 20 }}
+                                className="h-full rounded-full"
+                                style={{ backgroundColor: lang.color }}
+                              />
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
               </motion.div>
             </div>
-          </>
+          </motion.div>
         )}
 
         {activeTab === "competitive" && (
-          <CodingProfiles isEmbedded={true} />
+          <motion.div
+            key="competitive-tab"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
+            <CodingProfiles isEmbedded={true} />
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </section>
   );

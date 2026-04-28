@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Quote, MessageCircle } from "lucide-react";
+import { Quote, MessageCircle, Star, Users } from "lucide-react";
 
 const testimonials = [
   {
@@ -106,33 +106,50 @@ const testimonials = [
 function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: number }) {
   return (
     <div
-      className="flex-shrink-0 w-[340px] md:w-[400px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-300 group relative overflow-hidden mx-3"
-      style={{ boxShadow: `0 0 30px -15px ${t.accent}30` }}
+      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all duration-500 group relative overflow-hidden mx-3"
+      style={{ boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)` }}
     >
-      {/* Accent top line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)` }} />
+      {/* Accent gradient top line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)` }}
+      />
 
-      {/* Quote icon */}
-      <Quote size={28} className="text-white/10 mb-3" />
+      {/* Quote icon with accent glow */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2 rounded-lg bg-white/[0.03]">
+          <Quote size={20} style={{ color: t.accent }} className="opacity-60" />
+        </div>
+        <div className="flex gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={12} className="fill-yellow-500/80 text-yellow-500/80" />
+          ))}
+        </div>
+      </div>
 
       {/* Quote text */}
-      <p className="text-gray-300 text-sm leading-relaxed mb-5 font-[var(--font-inter)]">
+      <p className="text-gray-300 text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em]">
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
+      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+        <div
+          className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10`}
+        >
           {t.initials}
         </div>
         <div>
-          <p className="text-white font-semibold text-sm">{t.name}</p>
-          <p className="text-gray-500 text-xs">{t.role}</p>
+          <p className="text-white font-semibold text-sm tracking-tight">{t.name}</p>
+          <p className="text-gray-500 text-xs mt-0.5">{t.role}</p>
         </div>
       </div>
 
       {/* Hover glow */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${t.accent}08, transparent 70%)` }} />
+      <div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.accent}10, transparent 60%)` }}
+      />
     </div>
   );
 }
@@ -141,12 +158,12 @@ export default function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
 
-  // Duplicate for infinite scroll effect
-  const row1 = [...testimonials, ...testimonials];
-  const row2 = [...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6)];
+  // Quadruple for seamless infinite scroll with centered start
+  const row1 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
+  const row2 = [...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6)];
 
   return (
-    <section ref={sectionRef} id="testimonials" className="py-20 relative overflow-hidden">
+    <section ref={sectionRef} id="testimonials" className="py-24 relative overflow-hidden">
       <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-gradient-to-r from-purple-500/5 via-transparent to-blue-500/5 blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -154,7 +171,7 @@ export default function Testimonials() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
           <motion.span
             initial={{ opacity: 0, scale: 0.8 }}
@@ -164,18 +181,18 @@ export default function Testimonials() {
             <MessageCircle size={16} />
             <span>Testimonials</span>
           </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-3">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
             What People{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Say</span>
           </h2>
-          <p className="text-gray-400 max-w-lg mx-auto">Words from collaborators, mentors, and peers.</p>
+          <p className="text-gray-400 max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
         </motion.div>
       </div>
 
       {/* Marquee Row 1 — scrolls left */}
-      <div className="relative mb-4">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+      <div className="relative mb-5">
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
         <div className="flex animate-marquee-left hover:[animation-play-state:paused]">
           {row1.map((t, i) => (
             <TestimonialCard key={`r1-${i}`} t={t} index={i} />
@@ -185,14 +202,14 @@ export default function Testimonials() {
 
       {/* Marquee Row 2 — scrolls right (hidden on mobile) */}
       <div className="relative hidden md:block">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
         <div className="flex animate-marquee-right hover:[animation-play-state:paused]">
           {row2.map((t, i) => (
             <TestimonialCard key={`r2-${i}`} t={t} index={i} />
           ))}
         </div>
       </div>
-    </section>
+    </section >
   );
 }
