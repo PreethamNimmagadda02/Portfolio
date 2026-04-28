@@ -68,20 +68,23 @@ function RoleRotator() {
 // Currently Building widget
 function CurrentlyBuilding() {
   return (
-    <motion.div
+    <motion.a
+      href="https://www.matters.ai/"
+      target="_blank"
+      rel="noopener noreferrer"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1.8, duration: 0.6 }}
-      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
+      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-pointer group"
     >
       <span className="relative flex h-2.5 w-2.5">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
       </span>
-      <span className="text-sm text-gray-400 font-medium">
-        Building: <span className="text-white font-semibold text-base">Matters.AI</span>
+      <span className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+        Building: <span className="text-white font-semibold text-base group-hover:text-blue-400 transition-colors">Matters.AI</span>
       </span>
-    </motion.div>
+    </motion.a>
   );
 }
 
