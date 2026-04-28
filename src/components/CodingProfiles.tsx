@@ -104,6 +104,37 @@ const getCodeChefStars = (rating: number) => {
   return "7★";
 };
 
+/* ─── Animated counter (same as GitHubStats) ─── */
+function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 2000;
+    const start = Date.now();
+    let frameId: number;
+    const animate = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.floor(value * eased));
+      if (progress < 1) frameId = requestAnimationFrame(animate);
+      else setDisplayValue(value);
+    };
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isInView, value]);
+
+  return (
+    <span ref={ref}>
+      {displayValue.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
 /* ─── Skeleton ─── */
 function ProfileSkeleton() {
   return (
@@ -294,7 +325,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
                       <span className="text-sm text-gray-500 mb-1">Solved</span>
                       <span className="text-2xl font-black text-white">
-                        {profile.totalQuestionStats?.totalQuestionCounts || 0}
+                        <AnimatedCounter value={profile.totalQuestionStats?.totalQuestionCounts || 0} />
                       </span>
                     </div>
                     <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
@@ -303,10 +334,12 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                       </span>
                       <span className={`text-2xl font-black ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
                         {profile.platform === "hackerrank" && topBadge
-                          ? `${topBadge.stars}★`
+                          ? <><AnimatedCounter value={topBadge.stars || 0} />★</>
                           : profile.platform === "tuf"
-                            ? ((profile.dailyActivityStatsResponse?.maxStreak || 0) + 43 || '0')
-                            : (profile.userStats?.currentRating || 'N/A')}
+                            ? <AnimatedCounter value={(profile.dailyActivityStatsResponse?.maxStreak || 0) + 43} />
+                            : profile.userStats?.currentRating
+                              ? <AnimatedCounter value={profile.userStats.currentRating} />
+                              : 'N/A'}
                       </span>
                     </div>
                   </div>
@@ -317,7 +350,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.userStats?.maxRating && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Max Rating</span>
-                        <span className="font-mono text-gray-300">{profile.userStats.maxRating}</span>
+                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.userStats.maxRating} /></span>
                       </div>
                     )}
 
@@ -325,7 +358,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {["codeforces", "codechef"].includes(profile.platform) && profile.contestActivityStats?.contestActivityList && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Contests Attended</span>
-                        <span className="font-mono text-gray-300">{profile.contestActivityStats.contestActivityList.length}</span>
+                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.contestActivityStats.contestActivityList.length} /></span>
                       </div>
                     )}
 
@@ -334,7 +367,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Medium Problems</span>
                         <span className="font-mono text-gray-300">
-                          <span className="text-yellow-400" title="Medium">{profile.totalQuestionStats.mediumQuestionCounts || 0}</span>
+                          <span className="text-yellow-400" title="Medium"><AnimatedCounter value={profile.totalQuestionStats.mediumQuestionCounts || 0} /></span>
                         </span>
                       </div>
                     )}
@@ -343,7 +376,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.platform === "hackerrank" && profile.badgeStats?.badgeList && profile.badgeStats.badgeList.length > 0 && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Awards</span>
-                        <span className="font-mono text-gray-300">{profile.badgeStats.badgeList.length}</span>
+                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.badgeStats.badgeList.length} /></span>
                       </div>
                     )}
 
@@ -351,7 +384,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.platform === "hackerrank" && profile.certificateStats?.certificates && profile.certificateStats.certificates.length > 0 && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Certifications</span>
-                        <span className="font-mono text-gray-300">{profile.certificateStats.certificates.length}</span>
+                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.certificateStats.certificates.length} /></span>
                       </div>
                     )}
 
@@ -359,7 +392,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.platform === "tuf" && profile.dailyActivityStatsResponse?.submissionCalendar && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Active Days</span>
-                        <span className="font-mono text-gray-300">{Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length}</span>
+                        <span className="font-mono text-gray-300"><AnimatedCounter value={Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length} /></span>
                       </div>
                     )}
 
@@ -367,7 +400,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Hard Problems</span>
-                        <span className="font-mono text-gray-300 text-red-400">{profile.totalQuestionStats.hardQuestionCounts}</span>
+                        <span className="font-mono text-gray-300 text-red-400"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
                       </div>
                     )}
                   </div>
