@@ -37,6 +37,7 @@ interface ContributionsResponse {
 }
 
 interface GitHubRepo {
+  name: string;
   language: string | null;
   stargazers_count: number;
   fork: boolean;
@@ -46,7 +47,7 @@ interface GitHubRepo {
 interface StatsData {
   totalContributions: number;
   repoCount: number;
-  highestDay: number;
+  latestRepo: string;
   activeDays: number;
 }
 
@@ -421,12 +422,12 @@ export default function GitHubStats() {
       setContributions(filtered);
 
       const activeDays = filtered.filter((c) => c.count > 0).length;
-      const highestDay = Math.max(0, ...filtered.map((c) => c.count));
+      const latestRepo = repos.length > 0 ? repos[0].name : "N/A";
 
       setStats({
         totalContributions,
         repoCount: profile.public_repos,
-        highestDay,
+        latestRepo,
         activeDays,
       });
 
@@ -449,7 +450,7 @@ export default function GitHubStats() {
       setStats({
         totalContributions: 1257,
         repoCount: 12,
-        highestDay: 42,
+        latestRepo: "portfolio",
         activeDays: 245,
       });
       setLanguages([
@@ -469,27 +470,19 @@ export default function GitHubStats() {
 
   const statCards = useMemo(() => {
     if (!stats) return [];
-    const cards = [
+    
+    const repoLink = stats.latestRepo && stats.latestRepo !== "portfolio" 
+        ? `https://github.com/${GITHUB_USERNAME}/${stats.latestRepo}`
+        : `https://github.com/${GITHUB_USERNAME}`;
+
+    return [
       {
         label: "Contributions",
         value: stats.totalContributions,
         icon: GitCommit,
         gradient: "from-purple-400 to-pink-400",
         suffix: "",
-      },
-      {
-        label: "Best Day",
-        value: stats.highestDay,
-        icon: Zap,
-        gradient: "from-blue-400 to-cyan-400",
-        suffix: "",
-      },
-      {
-        label: "Repositories",
-        value: stats.repoCount,
-        icon: GitBranch,
-        gradient: "from-orange-400 to-red-400",
-        suffix: "",
+        href: `https://github.com/${GITHUB_USERNAME}`,
       },
       {
         label: "Active Days",
@@ -497,9 +490,26 @@ export default function GitHubStats() {
         icon: Flame,
         gradient: "from-yellow-400 to-amber-400",
         suffix: "",
+        href: `https://github.com/${GITHUB_USERNAME}`,
+      },
+      {
+        label: "Repositories",
+        value: stats.repoCount,
+        icon: GitBranch,
+        gradient: "from-orange-400 to-red-400",
+        suffix: "",
+        href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
+      },
+      {
+        label: "Current Repo",
+        value: stats.latestRepo,
+        isText: true,
+        icon: Zap,
+        gradient: "from-blue-400 to-cyan-400",
+        suffix: "",
+        href: repoLink,
       },
     ];
-    return cards.sort((a, b) => b.value - a.value);
   }, [stats]);
 
   return (
@@ -561,9 +571,8 @@ export default function GitHubStats() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all z-10 ${
-                    activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
-                  }`}
+                  className={`relative px-6 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
+                    }`}
                 >
                   {activeTab === tab && (
                     <motion.div
@@ -584,177 +593,189 @@ export default function GitHubStats() {
         </motion.div>
 
         <AnimatePresence mode="wait">
-        {activeTab === "github" && (
-          <motion.div
-            key="github-tab"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-          >
-            {/* Stat Cards */}
+          {activeTab === "github" && (
             <motion.div
+              key="github-tab"
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
             >
-              {loading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                  <StatSkeleton key={i} />
-                ))
-                : statCards.map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                    transition={{
-                      delay: 0.15 + i * 0.1,
-                      duration: 0.5,
-                      type: "spring",
-                    }}
-                    className="relative group"
-                  >
-                    <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                    <div className="relative p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
-                      <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
-                        <stat.icon
-                          size={24}
-                          className="text-gray-400 group-hover:text-white transition-colors"
-                        />
-                      </div>
-                      <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient} drop-shadow-sm`}>
-                        <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-            </motion.div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Contribution Heatmap */}
+              {/* Stat Cards */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="lg:col-span-2 relative group flex flex-col"
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
               >
-                <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
-                <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <Code2 size={18} className="text-purple-400" />
-                      Contribution Graph
-                    </h3>
-                    <a
-                      href={`https://github.com/${GITHUB_USERNAME}`}
+                {loading
+                  ? Array.from({ length: 4 }).map((_, i) => (
+                    <StatSkeleton key={i} />
+                  ))
+                  : statCards.map((stat, i) => (
+                    <motion.a
+                      href={stat.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+                      transition={{
+                        delay: 0.15 + i * 0.1,
+                        duration: 0.5,
+                        type: "spring",
+                      }}
+                      className="relative group block cursor-pointer"
                     >
-                      <span className="hidden sm:inline">View on GitHub</span>
-                      <ExternalLink size={14} />
-                    </a>
-                  </div>
-                  <div className="flex-grow flex items-center justify-center">
-                    {loading ? (
-                      <div className="flex items-center justify-center h-32 w-full">
-                        <Loader2
-                          size={24}
-                          className="animate-spin text-purple-400"
-                        />
+                      <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
+                      <div className="relative p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
+                        <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
+                          <stat.icon
+                            size={24}
+                            className="text-gray-400 group-hover:text-white transition-colors"
+                          />
+                        </div>
+                        <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient} drop-shadow-sm`}>
+                          {stat.isText ? (
+                            <span
+                              className="block truncate max-w-[120px] text-2xl md:text-3xl mx-auto"
+                              title={String(stat.value)}
+                            >
+                              {stat.value}
+                            </span>
+                          ) : (
+                            <AnimatedCounter value={Number(stat.value)} suffix={stat.suffix} />
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
+                          {stat.label}
+                        </p>
                       </div>
-                    ) : contributions.length > 0 ? (
-                      <ContributionHeatmap data={contributions} />
-                    ) : (
-                      <div className="flex items-center justify-center h-32 text-gray-500 text-sm w-full">
-                        No contribution data available
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    </motion.a>
+                  ))}
               </motion.div>
 
-              {/* Languages */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.45 }}
-                className="relative group flex flex-col"
-              >
-                <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
-                <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
-                  <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                    <Code2 size={18} className="text-blue-400" />
-                    Top Languages
-                  </h3>
-                  <div className="flex-grow flex flex-col justify-center">
-                    {loading ? (
-                      <div className="space-y-4 w-full">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="space-y-1.5">
-                            <div className="w-20 h-3 rounded bg-white/10 animate-pulse" />
-                            <div className="h-2.5 rounded-full bg-white/5 animate-pulse" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-4 w-full">
-                        {languages.map((lang, i) => (
-                          <motion.div
-                            key={lang.name}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={isInView ? { opacity: 1, x: 0 } : {}}
-                            transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-2.5 h-2.5 rounded-full shadow-sm"
-                                  style={{ backgroundColor: lang.color }}
-                                />
-                                <span className="text-sm text-gray-300 font-semibold">
-                                  {lang.name}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Contribution Heatmap */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="lg:col-span-2 relative group flex flex-col"
+                >
+                  <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
+                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Code2 size={18} className="text-purple-400" />
+                        Contribution Graph
+                      </h3>
+                      <a
+                        href={`https://github.com/${GITHUB_USERNAME}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
+                      >
+                        <span className="hidden sm:inline">View on GitHub</span>
+                        <ExternalLink size={14} />
+                      </a>
+                    </div>
+                    <div className="flex-grow flex items-center justify-center">
+                      {loading ? (
+                        <div className="flex items-center justify-center h-32 w-full">
+                          <Loader2
+                            size={24}
+                            className="animate-spin text-purple-400"
+                          />
+                        </div>
+                      ) : contributions.length > 0 ? (
+                        <ContributionHeatmap data={contributions} />
+                      ) : (
+                        <div className="flex items-center justify-center h-32 text-gray-500 text-sm w-full">
+                          No contribution data available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Languages */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.45 }}
+                  className="relative group flex flex-col"
+                >
+                  <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
+                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
+                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                      <Code2 size={18} className="text-blue-400" />
+                      Top Languages
+                    </h3>
+                    <div className="flex-grow flex flex-col justify-center">
+                      {loading ? (
+                        <div className="space-y-4 w-full">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="space-y-1.5">
+                              <div className="w-20 h-3 rounded bg-white/10 animate-pulse" />
+                              <div className="h-2.5 rounded-full bg-white/5 animate-pulse" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-4 w-full">
+                          {languages.map((lang, i) => (
+                            <motion.div
+                              key={lang.name}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={isInView ? { opacity: 1, x: 0 } : {}}
+                              transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-2.5 h-2.5 rounded-full shadow-sm"
+                                    style={{ backgroundColor: lang.color }}
+                                  />
+                                  <span className="text-sm text-gray-300 font-semibold">
+                                    {lang.name}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-gray-500 font-bold tabular-nums">
+                                  {lang.percentage}%
                                 </span>
                               </div>
-                              <span className="text-xs text-gray-500 font-bold tabular-nums">
-                                {lang.percentage}%
-                              </span>
-                            </div>
-                            <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={isInView ? { width: `${lang.percentage}%` } : {}}
-                                transition={{ delay: 0.6 + i * 0.1, duration: 1, type: "spring", damping: 20 }}
-                                className="h-full rounded-full"
-                                style={{ backgroundColor: lang.color }}
-                              />
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
+                              <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={isInView ? { width: `${lang.percentage}%` } : {}}
+                                  transition={{ delay: 0.6 + i * 0.1, duration: 1, type: "spring", damping: 20 }}
+                                  className="h-full rounded-full"
+                                  style={{ backgroundColor: lang.color }}
+                                />
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
 
-        {activeTab === "competitive" && (
-          <motion.div
-            key="competitive-tab"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-          >
-            <CodingProfiles isEmbedded={true} />
-          </motion.div>
-        )}
+          {activeTab === "competitive" && (
+            <motion.div
+              key="competitive-tab"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <CodingProfiles isEmbedded={true} />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </section>
