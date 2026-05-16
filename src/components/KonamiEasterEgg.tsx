@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Secret: type "PN" anywhere on the page
@@ -9,59 +9,50 @@ const KONAMI_CODE = ["KeyP", "KeyN"];
 // Matrix rain characters (mix of latin, katakana, digits)
 const MATRIX_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソ0123456789@#$%&*";
 
-// Pre-generate particle data
-function useParticles(count: number) {
-    return useMemo(() =>
-        Array.from({ length: count }, (_, i) => {
-            const angle = (i / count) * Math.PI * 2;
-            const r = 0.6 + Math.random() * 0.4;
-            return {
-                id: i,
-                angle,
-                dx: Math.cos(angle) * r,
-                dy: Math.sin(angle) * r,
-                size: 1 + Math.random() * 2.5,
-                speed: 0.6 + Math.random() * 1.2,
-                delay: Math.random() * 0.4,
-                color: ["#a855f7", "#6366f1", "#ec4899", "#3b82f6", "#ffffff"][i % 5],
-            };
-        }),
-        [count]
-    );
+// Pre-generate particle data — lazy initializer runs client-only, never during SSR
+function makeParticles(count: number) {
+    return Array.from({ length: count }, (_, i) => {
+        const angle = (i / count) * Math.PI * 2;
+        const r = 0.6 + Math.random() * 0.4;
+        return {
+            id: i,
+            angle,
+            dx: Math.cos(angle) * r,
+            dy: Math.sin(angle) * r,
+            size: 1 + Math.random() * 2.5,
+            speed: 0.6 + Math.random() * 1.2,
+            delay: Math.random() * 0.4,
+            color: ["#a855f7", "#6366f1", "#ec4899", "#3b82f6", "#ffffff"][i % 5],
+        };
+    });
 }
 
 // Pre-generate matrix rain column data
-function useMatrixColumns(count: number) {
-    return useMemo(() =>
-        Array.from({ length: count }, (_, i) => ({
-            id: i,
-            x: (i / count) * 100,
-            speed: 2 + Math.random() * 4,
-            delay: Math.random() * 2,
-            chars: Array.from({ length: 8 + Math.floor(Math.random() * 12) }, () =>
-                MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
-            ),
-            fontSize: 10 + Math.random() * 6,
-            opacity: 0.15 + Math.random() * 0.35,
-        })),
-        [count]
-    );
+function makeMatrixColumns(count: number) {
+    return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: (i / count) * 100,
+        speed: 2 + Math.random() * 4,
+        delay: Math.random() * 2,
+        chars: Array.from({ length: 8 + Math.floor(Math.random() * 12) }, () =>
+            MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
+        ),
+        fontSize: 10 + Math.random() * 6,
+        opacity: 0.15 + Math.random() * 0.35,
+    }));
 }
 
 // Pre-generate orbital particles
-function useOrbitals(count: number) {
-    return useMemo(() =>
-        Array.from({ length: count }, (_, i) => ({
-            id: i,
-            offset: (i / count) * 360,
-            radiusX: 55 + Math.random() * 15,
-            radiusY: 55 + Math.random() * 15,
-            size: 2 + Math.random() * 2,
-            duration: 2 + Math.random() * 1.5,
-            color: ["#a855f7", "#ec4899", "#6366f1", "#3b82f6", "#c084fc"][i % 5],
-        })),
-        [count]
-    );
+function makeOrbitals(count: number) {
+    return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        offset: (i / count) * 360,
+        radiusX: 55 + Math.random() * 15,
+        radiusY: 55 + Math.random() * 15,
+        size: 2 + Math.random() * 2,
+        duration: 2 + Math.random() * 1.5,
+        color: ["#a855f7", "#ec4899", "#6366f1", "#3b82f6", "#c084fc"][i % 5],
+    }));
 }
 
 // Matrix rain column component
@@ -217,9 +208,9 @@ export default function KonamiEasterEgg() {
     const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const autoCloseRef = useRef<NodeJS.Timeout | null>(null);
 
-    const particles = useParticles(100);
-    const matrixColumns = useMatrixColumns(40);
-    const orbitals = useOrbitals(8);
+    const [particles] = useState(() => makeParticles(100));
+    const [matrixColumns] = useState(() => makeMatrixColumns(40));
+    const [orbitals] = useState(() => makeOrbitals(8));
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {

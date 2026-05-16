@@ -10,7 +10,7 @@ import {
     Html,
     ContactShadows,
     BakeShadows,
-    useCursor
+    useCursor,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";

@@ -12,18 +12,21 @@ import GitHubStats from "@/components/GitHubStats";
 import Testimonials from "@/components/Testimonials";
 import SectionDivider from "@/components/SectionDivider";
 import dynamic from "next/dynamic";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
-// Dynamic import for Three.js components (client-side only)
+// Dynamic import for Three.js background components (client-side only).
+// Next.js dynamic() with ssr: false ensures these don't run during prerender
+// and are split into their own chunks via webpack vendor splitting.
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
-const SectionDivider3D = dynamic(() => import("@/components/SectionDivider3D"), { ssr: false });
 const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), { ssr: false });
 
-
 export default function Home() {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <main className="relative min-h-screen bg-black text-white selection:bg-primary selection:text-black overflow-x-hidden">
-      {/* 3D Background — already renders as fixed layer internally */}
-      <ParticleField />
+      {/* 3D Background — already renders as fixed layer internally. Skip if user prefers reduced motion. */}
+      {!prefersReducedMotion && <ParticleField />}
 
       <NoiseBackground />
 

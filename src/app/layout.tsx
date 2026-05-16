@@ -119,6 +119,7 @@ const jsonLd = {
 
 import SmoothScroll from "@/components/SmoothScroll";
 import SpotlightCursor from "@/components/SpotlightCursor";
+import PerformanceProvider from "@/components/PerformanceProvider";
 
 export default function RootLayout({
   children,
@@ -137,19 +138,21 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
       >
-        <ThemeProvider>
-          <PageLoader />
-          <ScrollProgress />
-          <KonamiEasterEgg />
-          <SpotlightCursor />
-          <SmoothScroll>
-            <Navbar />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-          </SmoothScroll>
-        </ThemeProvider>
+        <PerformanceProvider>
+          <ThemeProvider>
+            <PageLoader />
+            <ScrollProgress />
+            <KonamiEasterEgg />
+            <SpotlightCursor />
+            <SmoothScroll>
+              <Navbar />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </SmoothScroll>
+          </ThemeProvider>
+        </PerformanceProvider>
       </body>
     </html>
   );

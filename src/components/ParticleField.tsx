@@ -1,10 +1,25 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Points, PointMaterial, Float, Stars } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+// --- Performance: Visibility-based GPU culling ---
+function useVisibleCanvas() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const handle = () => {
+      setVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", handle);
+    return () => document.removeEventListener("visibilitychange", handle);
+  }, []);
+
+  return visible;
+}
 
 // Hook for mouse position — uses a ref to avoid React re-renders on every move
 function useMousePosition() {
@@ -61,10 +76,9 @@ function EnhancedStarField({ mouseRef, scrollRef, isMobile }: { mouseRef: React.
   const ref = useRef<THREE.Points>(null);
   const particlesCount = isMobile ? 250 : 1200;
 
-  const { positions, originalPositions, sizes, colors } = useMemo(() => {
+  const { positions, originalPositions, colors } = useMemo(() => {
     const positions = new Float32Array(particlesCount * 3);
     const originalPositions = new Float32Array(particlesCount * 3);
-    const sizes = new Float32Array(particlesCount);
     const colors = new Float32Array(particlesCount * 3);
 
     for (let i = 0; i < particlesCount; i++) {
@@ -80,8 +94,6 @@ function EnhancedStarField({ mouseRef, scrollRef, isMobile }: { mouseRef: React.
       originalPositions[i * 3 + 1] = y;
       originalPositions[i * 3 + 2] = z;
 
-      sizes[i] = Math.random() * 0.02 + 0.005;
-
       // Random purple/blue/pink colors
       const colorChoice = Math.random();
       if (colorChoice < 0.33) {
@@ -92,7 +104,7 @@ function EnhancedStarField({ mouseRef, scrollRef, isMobile }: { mouseRef: React.
         colors[i * 3] = 0.93; colors[i * 3 + 1] = 0.35; colors[i * 3 + 2] = 0.6; // Pink
       }
     }
-    return { positions, originalPositions, sizes, colors };
+    return { positions, originalPositions, colors };
   }, []);
 
   useFrame((state) => {
@@ -240,14 +252,18 @@ export default function ParticleField() {
   const mouseRef = useMousePosition();
   const scrollRef = useScrollRef();
   const isMobile = useIsMobile();
+  const visible = useVisibleCanvas();
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 60 }}
         gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-        dpr={[1, 1.5]}
+        dpr={[1, isMobile ? 1 : 1.5]}
         style={{ background: "transparent" }}
+        // Pause the render loop when tab is hidden to save GPU cycles,
+        // but keep the Canvas mounted to avoid WebGL context loss.
+        frameloop={visible ? "always" : "never"}
       >
         <Suspense fallback={null}>
           <ambientLight intensity={0.4} />
@@ -255,7 +271,7 @@ export default function ParticleField() {
           <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
 
           {/* Global Starfield Background */}
-          <Stars radius={100} depth={60} count={3000} factor={5} saturation={0.3} fade speed={0.4} />
+          <Stars radius={100} depth={60} count={isMobile ? 1500 : 3000} factor={5} saturation={0.3} fade speed={0.4} />
 
           <EnhancedStarField mouseRef={mouseRef} scrollRef={scrollRef} isMobile={isMobile} />
           {!isMobile && (

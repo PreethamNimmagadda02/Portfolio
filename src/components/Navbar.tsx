@@ -18,19 +18,43 @@ const navLinks = [
 ];
 
 /* ─── Floating Particle ─── */
+interface NavParticleStyle {
+  width: string;
+  height: string;
+  left: string;
+  top: string;
+  animation: string;
+}
+
+function makeNavParticleStyle(index: number): NavParticleStyle {
+  const duration = (3 + Math.random() * 3).toFixed(3);
+  const delay = (Math.random() * 2).toFixed(3);
+  return {
+    width: `${(2 + Math.random() * 2).toFixed(2)}px`,
+    height: `${(2 + Math.random() * 2).toFixed(2)}px`,
+    left: `${(10 + Math.random() * 80).toFixed(4)}%`,
+    top: `${(20 + Math.random() * 60).toFixed(4)}%`,
+    // Embed delay inside the shorthand so there's no competing animationDelay prop
+    animation: `navFloat${index % 4} ${duration}s ease-in-out ${delay}s infinite`,
+  };
+}
+
 function NavParticle({ index }: { index: number }) {
+  // Lazy initializer: only runs once on the client, never during SSR.
+  // Prevents Math.random() hydration mismatch between server and client.
+  const [s] = useState<NavParticleStyle>(() => makeNavParticleStyle(index));
+
   const style: React.CSSProperties = {
     position: "absolute",
-    width: `${2 + Math.random() * 2}px`,
-    height: `${2 + Math.random() * 2}px`,
+    width: s.width,
+    height: s.height,
     borderRadius: "50%",
     background: index % 2 === 0
       ? "rgba(139, 92, 246, 0.6)"
       : "rgba(59, 130, 246, 0.5)",
-    left: `${10 + Math.random() * 80}%`,
-    top: `${20 + Math.random() * 60}%`,
-    animation: `navFloat${index % 4} ${3 + Math.random() * 3}s ease-in-out infinite`,
-    animationDelay: `${Math.random() * 2}s`,
+    left: s.left,
+    top: s.top,
+    animation: s.animation,
     pointerEvents: "none",
     filter: "blur(0.5px)",
     zIndex: 0,

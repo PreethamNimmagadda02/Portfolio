@@ -1,9 +1,11 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence, Variants, useSpring, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, Variants, useSpring } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+
+// Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
 

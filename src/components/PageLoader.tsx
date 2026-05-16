@@ -1,27 +1,36 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Pre-generate star positions to avoid recalculating on every render
-function useStars(count: number) {
-    return useMemo(() =>
-        Array.from({ length: count }, (_, i) => ({
-            id: i,
-            size: Math.random() * 2 + 0.5,
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            delay: Math.random() * 2,
-            duration: 2 + Math.random() * 2,
-            color: i % 4 === 0 ? "#a855f7" : i % 4 === 1 ? "#6366f1" : i % 4 === 2 ? "#818cf8" : "#ffffff",
-        })),
-        [count]
-    );
+interface Star {
+    id: number;
+    size: number;
+    x: number;
+    y: number;
+    delay: number;
+    duration: number;
+    color: string;
+}
+
+function makeStars(count: number): Star[] {
+    return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        size: Math.random() * 2 + 0.5,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        delay: Math.random() * 2,
+        duration: 2 + Math.random() * 2,
+        color: i % 4 === 0 ? "#a855f7" : i % 4 === 1 ? "#6366f1" : i % 4 === 2 ? "#818cf8" : "#ffffff",
+    }));
 }
 
 export default function PageLoader() {
     const [loading, setLoading] = useState(true);
-    const stars = useStars(60);
+    // Lazy initializer: only called on the client, never during SSR.
+    // This ensures Math.random() values are consistent between SSR (none)
+    // and the first client render (initialized here).
+    const [stars] = useState<Star[]>(() => makeStars(60));
 
     useEffect(() => {
         const timer = setTimeout(() => {
