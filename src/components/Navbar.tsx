@@ -9,7 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 const navLinks = [
   { name: "Home", href: "#home" },
   { name: "About", href: "#about" },
-  { name: "Experience", href: "#experience" },
+  { name: "Experiences", href: "#experience" },
   { name: "Skills", href: "#skills-sphere" },
   { name: "Projects", href: "#projects" },
   { name: "Activity", href: "#github-stats" },
