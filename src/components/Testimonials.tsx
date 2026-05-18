@@ -133,16 +133,13 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
     <motion.div
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      whileHover={{ scale: 1.05, zIndex: 20 }}
+      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
       style={{
         rotateX,
         rotateY,
-        perspective: 1000,
-      }}
-      whileHover={{ scale: 1.05, zIndex: 20 }}
-      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
-      style={{ 
         boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
-        perspective: 1000 
+        perspective: 1000,
       }}
     >
       {/* Spotlight effect */}
@@ -151,7 +148,8 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
         style={{
           background: useTransform(
             [mouseX, mouseY],
-            ([x, y]) => {
+            (values) => {
+              const [x, y] = values as number[];
               const px = (x + 0.5) * 100;
               const py = (y + 0.5) * 100;
               return `radial-gradient(circle at ${px}% ${py}%, ${t.accent}15, transparent 70%)`;
