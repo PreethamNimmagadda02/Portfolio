@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Quote, MessageCircle, Star, Users } from "lucide-react";
 
@@ -104,11 +104,62 @@ const testimonials = [
 ];
 
 function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: number }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(
+    useTransform(mouseY, [-0.5, 0.5], [10, -10]),
+    { stiffness: 150, damping: 20 }
+  );
+  const rotateY = useSpring(
+    useTransform(mouseX, [-0.5, 0.5], [-10, 10]),
+    { stiffness: 150, damping: 20 }
+  );
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0);
+    mouseY.set(0);
+  }
+
   return (
-    <div
-      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all duration-500 group relative overflow-hidden mx-3"
-      style={{ boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)` }}
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        perspective: 1000,
+      }}
+      whileHover={{ scale: 1.05, zIndex: 20 }}
+      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
+      style={{ 
+        boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
+        perspective: 1000 
+      }}
     >
+      {/* Spotlight effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: useTransform(
+            [mouseX, mouseY],
+            ([x, y]) => {
+              const px = (x + 0.5) * 100;
+              const py = (y + 0.5) * 100;
+              return `radial-gradient(circle at ${px}% ${py}%, ${t.accent}15, transparent 70%)`;
+            }
+          ),
+        }}
+      />
+
       {/* Accent gradient top line */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity duration-500"
@@ -116,8 +167,8 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
       />
 
       {/* Quote icon with accent glow */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-2 rounded-lg bg-white/[0.03]">
+      <div className="flex items-center justify-between mb-4 relative z-10">
+        <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
           <Quote size={20} style={{ color: t.accent }} className="opacity-60" />
         </div>
         <div className="flex gap-0.5">
@@ -128,14 +179,14 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
       </div>
 
       {/* Quote text */}
-      <p className="text-gray-300 text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em]">
+      <p className="text-gray-300 text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10">
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06] relative z-10">
         <div
-          className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10`}
+          className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-500`}
         >
           {t.initials}
         </div>
@@ -144,13 +195,7 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
           <p className="text-gray-500 text-xs mt-0.5">{t.role}</p>
         </div>
       </div>
-
-      {/* Hover glow */}
-      <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-        style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.accent}10, transparent 60%)` }}
-      />
-    </div>
+    </motion.div>
   );
 }
 
