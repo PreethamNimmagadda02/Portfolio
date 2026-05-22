@@ -501,7 +501,7 @@ export default function GitHubStats() {
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
       },
       {
-        label: "Last Commit",
+        label: "Latest Commit",
         value: stats.latestRepo,
         isText: true,
         icon: Zap,
