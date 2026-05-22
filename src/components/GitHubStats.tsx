@@ -501,7 +501,7 @@ export default function GitHubStats() {
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
       },
       {
-        label: "Current Repo",
+        label: "Last Commit",
         value: stats.latestRepo,
         isText: true,
         icon: Zap,
@@ -637,10 +637,10 @@ export default function GitHubStats() {
                         </div>
                         <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient} drop-shadow-sm`}>
                           {stat.isText ? (
-                            <span
-                              className="block truncate max-w-[120px] text-2xl md:text-3xl mx-auto"
-                              title={String(stat.value)}
-                            >
+                               <span
+                                 className="block text-2xl md:text-3xl mx-auto text-center break-words"
+                                 title={String(stat.value)}
+                               >
                               {stat.value}
                             </span>
                           ) : (
