@@ -547,7 +547,7 @@ export default function Contact() {
 
             <div className="text-left">
               <p className="text-white text-sm font-medium">Internships & Full-time Roles</p>
-              <p className="text-gray-500 text-xs">Usually responds within 24 hours</p>
+              <p className="text-gray-500 text-xs">Response within 24 hours</p>
             </div>
           </motion.div>
         </motion.div>
@@ -568,7 +568,7 @@ export default function Contact() {
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 50 } } }}
             >
               <h3 className="text-3xl font-bold text-white mb-4">
-                Let's build something <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">extraordinary</span>.
+                Let's build something <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">extraordinary</span>
               </h3>
               <p className="text-gray-300 text-lg leading-relaxed mb-8">
                 Got a groundbreaking idea? Looking for a driven developer? I'm always excited to collaborate on projects that push boundaries.

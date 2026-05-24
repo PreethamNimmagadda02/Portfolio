@@ -47,7 +47,7 @@ export default function Footer() {
               <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
             </Link>
             <p className="text-gray-500 text-xs md:text-sm mt-1 md:mt-2">
-              Building the future, one product at a time.
+              Building the future, one innovation at a time.
             </p>
           </motion.div>
 
