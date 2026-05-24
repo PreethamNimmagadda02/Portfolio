@@ -138,27 +138,6 @@ export default function AvatarFlipCard() {
           <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-purple-400/60 rounded-bl" />
           <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-purple-400/60 rounded-br" />
 
-          {/* Name and hint */}
-          <div className="absolute bottom-4 left-4 right-4 text-white">
-            <motion.p
-              className="font-bold text-lg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              Preetham
-            </motion.p>
-            <p className="text-sm text-gray-300 flex items-center gap-1">
-              <motion.span
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                →
-              </motion.span>
-              Hover to hack
-            </p>
-          </div>
-
           {/* Status indicator */}
           <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-green-500/30">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
