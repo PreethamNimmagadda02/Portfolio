@@ -4,6 +4,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Github, GitCommit, Flame, Code2, Star, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
 
@@ -217,15 +218,18 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isMobile = useIsMobile();
+  // 12 months of weekly columns is ~1px per cell at 320px wide.
+  // Mobile shows the last 6 months so cells stay visible and tappable.
+  const monthsBack = isMobile ? 6 : 12;
 
-  // Build a ~26-week grid from data, showing last 6 months up to today
+  // Build a weekly grid from data up to today
   const heatmapGrid = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 6 months ago
     const rangeStart = new Date(today);
-    rangeStart.setMonth(rangeStart.getMonth() - 12);
+    rangeStart.setMonth(rangeStart.getMonth() - monthsBack);
     // Align to start of that week (Sunday)
     const dayOfWeek = rangeStart.getDay();
     rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
@@ -259,13 +263,13 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
     }
 
     return weeks;
-  }, [data]);
+  }, [data, monthsBack]);
 
-  // Compute month labels for the 6-month window
+  // Compute month labels for the window
   const monthLabels = useMemo(() => {
     const today = new Date();
     const rangeStart = new Date(today);
-    rangeStart.setMonth(rangeStart.getMonth() - 12);
+    rangeStart.setMonth(rangeStart.getMonth() - monthsBack);
     // Align to start of week (Sunday)
     const dayOfWeek = rangeStart.getDay();
     rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
@@ -290,31 +294,31 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
       weekIndex++;
     }
     return months;
-  }, []);
+  }, [monthsBack]);
 
   return (
     <div ref={ref} className="w-full pb-2">
       <div className="w-full flex flex-col">
-        {/* Month labels */}
-        <div className="flex mb-1 ml-8 relative w-full" style={{ height: 16 }}>
-          {monthLabels.map((m) => {
-            // weekIndex goes from 0 to ~52.
-            // We can place it at a percentage of the width.
-            const leftPercent = (m.weekIndex / heatmapGrid.length) * 100;
-            return (
-              <span
-                key={m.label}
-                className="text-[10px] text-gray-500 font-medium absolute transform -translate-x-1/2"
-                style={{ left: `${leftPercent}%` }}
-              >
-                {m.label}
-              </span>
-            );
-          })}
+        {/* Month labels — sparser on mobile to avoid collisions */}
+        <div className="flex mb-1 ml-0 sm:ml-8 relative w-full" style={{ height: 16 }}>
+          {monthLabels
+            .filter((_, i) => !isMobile || i % 2 === 0)
+            .map((m, i) => {
+              const leftPercent = (m.weekIndex / heatmapGrid.length) * 100;
+              return (
+                <span
+                  key={`${m.label}-${i}`}
+                  className="text-[10px] text-gray-500 font-medium absolute transform -translate-x-1/2"
+                  style={{ left: `${leftPercent}%` }}
+                >
+                  {m.label}
+                </span>
+              );
+            })}
         </div>
         <div className="flex w-full justify-between">
-          {/* Day labels */}
-          <div className="flex flex-col justify-between mr-2 py-[2px]">
+          {/* Day labels — hidden on mobile (unreadable at 9px, steals width) */}
+          <div className="hidden sm:flex flex-col justify-between mr-2 py-[2px]">
             {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
               <span
                 key={i}
@@ -325,9 +329,9 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             ))}
           </div>
           {/* Weeks */}
-          <div className="flex flex-1 justify-between gap-1">
+          <div className="flex flex-1 justify-between gap-[2px] sm:gap-1">
             {heatmapGrid.map((week, wk) => (
-              <div key={wk} className="flex flex-col justify-between gap-1 flex-1">
+              <div key={wk} className="flex flex-col justify-between gap-[2px] sm:gap-1 flex-1">
                 {Array.from({ length: 7 }).map((_, dy) => {
                   const day = dy < week.length ? week[dy] : null;
                   if (!day) {
@@ -518,8 +522,8 @@ export default function GitHubStats() {
       id="github-stats"
       className="py-20 relative overflow-hidden"
     >
-      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/4 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-purple-500/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-1/3 right-1/4 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-blue-500/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
@@ -571,7 +575,7 @@ export default function GitHubStats() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
+                  className={`relative px-4 sm:px-6 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
                     }`}
                 >
                   {activeTab === tab && (
@@ -606,7 +610,7 @@ export default function GitHubStats() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8"
               >
                 {loading
                   ? Array.from({ length: 4 }).map((_, i) => (
@@ -628,7 +632,7 @@ export default function GitHubStats() {
                       className="relative group block cursor-pointer"
                     >
                       <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                      <div className="relative p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
+                      <div className="relative p-4 sm:p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
                         <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
                           <stat.icon
                             size={24}
@@ -664,7 +668,7 @@ export default function GitHubStats() {
                   className="lg:col-span-2 relative group flex flex-col"
                 >
                   <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
+                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-bold text-white flex items-center gap-2">
                         <Code2 size={18} className="text-purple-400" />
@@ -674,9 +678,10 @@ export default function GitHubStats() {
                         href={`https://github.com/${GITHUB_USERNAME}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
                       >
                         <span className="hidden sm:inline">View on GitHub</span>
+                        <span className="sm:hidden">GitHub</span>
                         <ExternalLink size={14} />
                       </a>
                     </div>

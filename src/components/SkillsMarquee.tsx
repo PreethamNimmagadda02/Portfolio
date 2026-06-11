@@ -794,13 +794,15 @@ function SkillsSphereScene({
 
   return (
     <group ref={groupRef}>
-      <SphereParticles count={150} />
+      <SphereParticles count={isMobile ? 60 : 150} />
       <OrbitalRings radius={radius} />
-      <ConstellationWeb
-        points={points}
-        focusPointIndex={hoveredSkill ? hoveredIndex : null}
-        hoveredIndex={hoveredIndex}
-      />
+      {!isMobile && (
+        <ConstellationWeb
+          points={points}
+          focusPointIndex={hoveredSkill ? hoveredIndex : null}
+          hoveredIndex={hoveredIndex}
+        />
+      )}
       <TechNucleus />
       <EnhancedCoreSphere isMobile={isMobile} />
       <GlobalGrid radius={isMobile ? 0.75 : 0.95} />
@@ -930,13 +932,14 @@ export default function SkillsMarquee() {
     return counts;
   }, []);
 
-  if (!mounted) return <div className="h-[700px] w-full bg-black/5" />;
+  // Placeholder height matches the rendered section to avoid hydration layout shift
+  if (!mounted) return <div className="h-[760px] md:h-[1000px] w-full bg-black/5" />;
 
   return (
     <section
       id="skills-sphere"
-      className="py-24 relative w-full overflow-hidden flex flex-col items-center justify-center"
-      style={{ minHeight: isMobile ? "900px" : "1000px" }}
+      className="py-16 md:py-24 relative w-full overflow-hidden flex flex-col items-center justify-center"
+      style={{ minHeight: isMobile ? "760px" : "1000px" }}
     >
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
@@ -986,13 +989,15 @@ export default function SkillsMarquee() {
       </motion.div>
 
       {/* 3D Canvas */}
-      <div className="relative z-0 w-full" style={{ height: isMobile ? "550px" : "650px" }}>
+      <div className="relative z-0 w-full" style={{ height: isMobile ? "480px" : "650px" }}>
         <Canvas
           camera={{ position: [0, 0, 9], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 2]}
+          gl={{ antialias: !isMobile, alpha: true }}
+          dpr={isMobile ? [1, 1.5] : [1, 2]}
           className="w-full h-full"
-          style={{ touchAction: isMobile ? "none" : "pan-y" }}
+          // pan-y everywhere: vertical swipes scroll the page natively,
+          // horizontal drags still rotate the sphere. Never trap page scroll.
+          style={{ touchAction: "pan-y" }}
         >
           <Suspense fallback={null}>
             <group position={[0, 0, 0]}>
@@ -1030,12 +1035,12 @@ export default function SkillsMarquee() {
         initial={{ opacity: 0, y: 20 }}
         animate={statsInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="relative z-10 mt-6 flex items-center justify-center gap-6 md:gap-12 px-6 py-5 mx-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl"
+        className="relative z-10 mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-12 px-4 sm:px-6 py-4 sm:py-5 mx-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl"
       >
         <AnimatedCounter end={skillsData.length} label="Total Skills" suffix="+" />
-        <div className="w-px h-10 bg-white/10" />
+        <div className="w-px h-10 bg-white/10 hidden sm:block" />
         <AnimatedCounter end={categories.length} label="Categories" />
-        <div className="w-px h-10 bg-white/10" />
+        <div className="w-px h-10 bg-white/10 hidden sm:block" />
         <div className="flex flex-col items-center gap-2">
           <div className="flex gap-1.5">
             {categories.slice(0, 5).map((cat) => (

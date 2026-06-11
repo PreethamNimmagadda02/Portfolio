@@ -1027,6 +1027,16 @@ h1 {
   }
 }
 
+/* Hide scrollbar while keeping scrollability (mobile carousels) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Testimonials marquee animations */
 @keyframes marquee-left {
   0% {

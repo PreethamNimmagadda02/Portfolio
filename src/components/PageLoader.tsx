@@ -132,13 +132,13 @@ export default function PageLoader() {
 
                         {/* Name */}
                         <motion.div
-                            className="text-center mb-8"
+                            className="text-center mb-8 px-4"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                         >
                             <p
-                                className="text-sm sm:text-base font-semibold tracking-[0.3em] uppercase bg-gradient-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
+                                className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-gradient-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
                                 style={{
                                     textShadow: "0 0 30px rgba(139,92,246,0.3)",
                                     fontFamily: "var(--font-space-grotesk)",
@@ -146,13 +146,6 @@ export default function PageLoader() {
                             >
                                 Preetham Nimmagadda
                             </p>
-                            <motion.p
-                                className="text-[10px] text-gray-600 tracking-[0.25em] uppercase mt-2"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.5 }}
-                                transition={{ delay: 1.2, duration: 0.6 }}
-                            >
-                            </motion.p>
                         </motion.div>
 
                         {/* Minimal loading bar */}

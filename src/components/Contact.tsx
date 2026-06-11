@@ -33,7 +33,7 @@ function Toast({
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.9 }}
-      className={`fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl ${type === "success"
+      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-8 sm:right-8 sm:max-w-md z-50 flex items-center gap-3 px-4 sm:px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl ${type === "success"
           ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
           : "bg-red-500/20 border-red-500/30 text-red-300"
         }`}
@@ -49,10 +49,11 @@ function Toast({
           <AlertCircle className="w-6 h-6" />
         )}
       </motion.div>
-      <span className="font-medium">{message}</span>
+      <span className="font-medium flex-1 min-w-0 break-words">{message}</span>
       <button
         onClick={onClose}
-        className="ml-2 text-white/50 hover:text-white transition-colors"
+        aria-label="Dismiss notification"
+        className="shrink-0 flex items-center justify-center w-9 h-9 -m-1 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors text-xl leading-none"
       >
         ×
       </button>
@@ -503,8 +504,8 @@ export default function Contact() {
       </AnimatePresence>
 
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-purple-500/10 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-blue-500/10 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
@@ -530,7 +531,7 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.3 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-4 px-6 py-3 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl relative overflow-hidden"
+            className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl relative overflow-hidden"
           >
             {/* Top gradient line */}
             <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
@@ -543,7 +544,7 @@ export default function Contact() {
               <span className="text-emerald-400 text-sm font-bold">Available</span>
             </div>
 
-            <div className="w-px h-6 bg-white/10" />
+            <div className="w-px h-6 bg-white/10 hidden sm:block" />
 
             <div className="text-left">
               <p className="text-white text-sm font-medium">Internships & Full-time Roles</p>
@@ -567,7 +568,7 @@ export default function Contact() {
             <motion.div
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 50 } } }}
             >
-              <h3 className="text-3xl font-bold text-white mb-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                 Let's build something <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">extraordinary</span>
               </h3>
               <p className="text-gray-300 text-lg leading-relaxed mb-8">
@@ -605,7 +606,7 @@ export default function Contact() {
             <form
               ref={formRef}
               onSubmit={handleSubmit}
-              className="relative bg-zinc-900/90 backdrop-blur-xl p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300"
+              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300"
             >
               {/* Form progress indicator */}
               <div className="mb-6">

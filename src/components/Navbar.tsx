@@ -232,8 +232,8 @@ export default function Navbar() {
           className={cn(
             "relative rounded-full transition-all duration-700 overflow-hidden will-change-transform",
             scrolled
-              ? "px-4 py-2 bg-black/90 backdrop-blur-2xl border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
-              : "px-6 py-3 bg-black/30 backdrop-blur-md border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+              ? "px-3 sm:px-4 py-2 bg-black/90 backdrop-blur-2xl border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
+              : "px-4 sm:px-6 py-3 bg-black/30 backdrop-blur-md border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
           )}
         >
           {/* Cursor-following spotlight glow */}
@@ -314,11 +314,11 @@ export default function Navbar() {
                 </div>
               </motion.div>
               <div className="flex flex-col">
-                <span className="relative text-lg font-bold tracking-tight leading-none">
+                <span className="relative text-base sm:text-lg font-bold tracking-tight leading-none whitespace-nowrap">
                   <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
                   <span className="absolute inset-0 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
                 </span>
-                <span className="text-[11px] text-purple-400/80 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
+                <span className="text-[9px] sm:text-[11px] text-purple-400/80 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
                   AI & Full Stack Engineer
                 </span>
               </div>

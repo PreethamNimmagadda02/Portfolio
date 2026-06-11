@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useRef } from "react";
-import { Quote, MessageCircle, Star, Users } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
+import { Quote, MessageCircle, Star } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const testimonials = [
   {
@@ -103,7 +104,7 @@ const testimonials = [
   },
 ];
 
-function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: number }) {
+function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mobile?: boolean }) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -131,13 +132,17 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
 
   return (
     <motion.div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ scale: 1.05, zIndex: 20 }}
-      className="flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
+      onMouseMove={mobile ? undefined : handleMouseMove}
+      onMouseLeave={mobile ? undefined : handleMouseLeave}
+      whileHover={mobile ? undefined : { scale: 1.05, zIndex: 20 }}
+      className={
+        mobile
+          ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] group relative overflow-hidden"
+          : "flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
+      }
       style={{
-        rotateX,
-        rotateY,
+        rotateX: mobile ? 0 : rotateX,
+        rotateY: mobile ? 0 : rotateY,
         boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
         perspective: 1000,
       }}
@@ -177,7 +182,7 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
       </div>
 
       {/* Quote text */}
-      <p className="text-gray-300 text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10">
+      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10">
         &ldquo;{t.quote}&rdquo;
       </p>
 
@@ -197,11 +202,69 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
   );
 }
 
+// Mobile: native swipeable snap carousel — user reads at their own pace
+function MobileCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const maxScroll = track.scrollWidth - track.clientWidth;
+    if (maxScroll <= 0) return;
+    const progress = track.scrollLeft / maxScroll;
+    setActiveIndex(Math.round(progress * (testimonials.length - 1)));
+  }, []);
+
+  return (
+    <div className="relative">
+      {/* Swipe track */}
+      <div
+        ref={trackRef}
+        onScroll={handleScroll}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-[7.5vw] pb-2 items-stretch"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {testimonials.map((t, i) => (
+          <div
+            key={`m-${i}`}
+            className="snap-center shrink-0 w-[85vw] max-w-[360px] flex"
+          >
+            <TestimonialCard t={t} mobile />
+          </div>
+        ))}
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex justify-center items-center gap-1.5 mt-5">
+        {testimonials.map((t, i) => (
+          <div
+            key={`dot-${i}`}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: activeIndex === i ? 18 : 6,
+              height: 6,
+              backgroundColor:
+                activeIndex === i ? t.accent : "rgba(255,255,255,0.15)",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Swipe hint */}
+      <p className="text-center text-[11px] text-gray-600 tracking-widest uppercase mt-3">
+        Swipe to explore
+      </p>
+    </div>
+  );
+}
+
 export default function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  const isMobile = useIsMobile();
 
-  // Quadruple for seamless infinite scroll with centered start
+  // Quadruple for seamless infinite marquee (-50% translate = two full copies)
   const row1 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
   const row2 = [...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6)];
 
@@ -232,27 +295,34 @@ export default function Testimonials() {
         </motion.div>
       </div>
 
-      {/* Marquee Row 1 — scrolls left */}
-      <div className="relative mb-5">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="flex animate-marquee-left hover:[animation-play-state:paused]">
-          {row1.map((t, i) => (
-            <TestimonialCard key={`r1-${i}`} t={t} index={i} />
-          ))}
-        </div>
-      </div>
+      {isMobile ? (
+        /* Mobile — swipeable snap carousel, user-controlled */
+        <MobileCarousel />
+      ) : (
+        <>
+          {/* Marquee Row 1 — scrolls left */}
+          <div className="relative mb-5">
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:[animation:none]">
+              {row1.map((t, i) => (
+                <TestimonialCard key={`r1-${i}`} t={t} />
+              ))}
+            </div>
+          </div>
 
-      {/* Marquee Row 2 — scrolls right (hidden on mobile) */}
-      <div className="relative hidden md:block">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="flex animate-marquee-right hover:[animation-play-state:paused]">
-          {row2.map((t, i) => (
-            <TestimonialCard key={`r2-${i}`} t={t} index={i} />
-          ))}
-        </div>
-      </div>
+          {/* Marquee Row 2 — scrolls right */}
+          <div className="relative">
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:[animation:none]">
+              {row2.map((t, i) => (
+                <TestimonialCard key={`r2-${i}`} t={t} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </section >
   );
 }
