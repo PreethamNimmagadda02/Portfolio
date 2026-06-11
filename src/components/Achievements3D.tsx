@@ -13,6 +13,7 @@ import {
     useCursor,
 } from "@react-three/drei";
 import * as THREE from "three";
+import SceneEffects from "./three/SceneEffects";
 import { motion } from "framer-motion";
 import { Award, Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -423,6 +424,11 @@ function AchievementMonolith({
         envMapIntensity: 0.5,
         clearcoat: 1,
         clearcoatRoughness: 0.1,
+        iridescence: 0.9,
+        iridescenceIOR: 1.6,
+        iridescenceThicknessRange: [100, 400] as [number, number],
+        sheen: 0.5,
+        sheenColor: data.accent,
         toneMapped: false,
     };
 
@@ -503,28 +509,37 @@ function AchievementMonolith({
 function CameraRig({ activeIndex, isMobile }: { activeIndex: number, isMobile: boolean }) {
     const { camera } = useThree();
 
+    // Reusable vectors — avoid per-frame allocations
+    const _targetPos = useRef(new THREE.Vector3()).current;
+    const _lookAtVector = useRef(new THREE.Vector3()).current;
+    const _currentLookAt = useRef(new THREE.Vector3()).current;
+
     useFrame((state, delta) => {
+        // Frame-rate independent damping — consistent at any refresh rate
+        const k = 1 - Math.exp(-2.4 * delta);
+
         // Find the angle of the active monolith
         const angle = (activeIndex / achievements.length) * Math.PI * 2;
 
-        // Position camera slightly further out and zoomed in to look at the active monolith
-        // We stand back slightly from the origin and look towards the active one
         const cameraDistance = RADIUS + (isMobile ? 9 : 5.5);
-        const targetX = Math.cos(angle) * cameraDistance;
-        const targetZ = Math.sin(angle) * cameraDistance;
-        const targetY = 0.8;
+        const breathe = Math.sin(state.clock.elapsedTime * 0.4) * 0.12;
+        _targetPos.set(
+            Math.cos(angle) * cameraDistance,
+            0.8 + breathe,
+            Math.sin(angle) * cameraDistance
+        );
 
         // Move camera position smoothly
-        camera.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.035);
+        camera.position.lerp(_targetPos, k);
 
         // Look at the monolith center, slightly below to include the card
         const activePos = getPosition(activeIndex, achievements.length);
-        const lookAtVector = new THREE.Vector3(activePos[0], -0.5, activePos[2]);
+        _lookAtVector.set(activePos[0], -0.5, activePos[2]);
 
-        // Smooth looking with matching lerp
-        const currentLookAt = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
-        currentLookAt.lerp(lookAtVector, 0.035);
-        camera.lookAt(currentLookAt);
+        // Smooth looking with matching damping
+        _currentLookAt.set(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
+        _currentLookAt.lerp(_lookAtVector, k);
+        camera.lookAt(_currentLookAt);
     });
 
     return null;
@@ -537,9 +552,14 @@ function Scene({ activeIndex, onSelect, isMobile }: { activeIndex: number, onSel
         <>
             <Environment preset="city" />
 
+            {/* Depth fog — distant monoliths melt into the void */}
+            <fog attach="fog" args={["#05010d", 9, 24]} />
+
             {/* Ambient and point lights */}
             <ambientLight intensity={0.2} />
             <pointLight position={[0, 5, 0]} intensity={1.5} color="#ffffff" distance={20} />
+            {/* Accent rim light tinted by the active achievement */}
+            <pointLight position={[5, 2, -5]} intensity={1.2} color={activeData.color} distance={16} />
 
             <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
 
@@ -572,6 +592,8 @@ function Scene({ activeIndex, onSelect, isMobile }: { activeIndex: number, onSel
             {/* Environment details */}
             <Sparkles count={80} scale={25} size={8} speed={0.3} opacity={0.4} color={activeData.color} />
             <ContactShadows frames={1} position={[0, -2.5, 0]} opacity={0.4} scale={20} blur={2} far={10} color="#111111" />
+
+            <SceneEffects bloomIntensity={0.85} />
         </>
     );
 }

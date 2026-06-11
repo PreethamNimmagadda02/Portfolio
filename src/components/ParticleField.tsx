@@ -1,255 +1,366 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Stars } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useRef, useMemo, Suspense, useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// --- Performance: Visibility-based GPU culling ---
+// -----------------------------------------------------------------------------
+// Performance helpers — refs only, zero React re-renders
+// -----------------------------------------------------------------------------
 function useVisibleCanvas() {
   const [visible, setVisible] = useState(true);
-
   useEffect(() => {
-    const handle = () => {
-      setVisible(document.visibilityState === "visible");
-    };
+    const handle = () => setVisible(document.visibilityState === "visible");
     document.addEventListener("visibilitychange", handle);
     return () => document.removeEventListener("visibilitychange", handle);
   }, []);
-
   return visible;
 }
 
-// Hook for mouse position — uses a ref to avoid React re-renders on every move
-function useMousePosition() {
+function useMouseRef() {
   const mouseRef = useRef({ x: 0, y: 0 });
-
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current = {
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1,
-      };
+    const onMove = (e: MouseEvent) => {
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
-
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
-
   return mouseRef;
 }
 
-// Ref-based scroll position — no React re-renders
 function useScrollRef() {
   const scrollRef = useRef(0);
-  const targetRef = useRef(0);
-
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      targetRef.current = isNaN(scrollPercent) ? 0 : scrollPercent;
+    const onScroll = () => {
+      const p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      scrollRef.current = isNaN(p) ? 0 : p;
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    let animationId: number;
-    const smoothScroll = () => {
-      const diff = targetRef.current - scrollRef.current;
-      scrollRef.current += diff * 0.08;
-      animationId = requestAnimationFrame(smoothScroll);
-    };
-    animationId = requestAnimationFrame(smoothScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(animationId);
-    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
   return scrollRef;
 }
 
-// Enhanced star field with scroll parallax and mouse interaction
-function EnhancedStarField({ mouseRef, scrollRef, isMobile }: { mouseRef: React.RefObject<{ x: number; y: number }>; scrollRef: React.RefObject<number>; isMobile: boolean }) {
-  const ref = useRef<THREE.Points>(null);
-  const particlesCount = isMobile ? 250 : 1200;
+// -----------------------------------------------------------------------------
+// Aurora Nebula — single fullscreen-ish plane with FBM noise shader.
+// One draw call, fully GPU. Replaces dozens of CSS gradient layers.
+// -----------------------------------------------------------------------------
+const nebulaVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
 
-  const { positions, originalPositions, colors } = useMemo(() => {
-    const positions = new Float32Array(particlesCount * 3);
-    const originalPositions = new Float32Array(particlesCount * 3);
-    const colors = new Float32Array(particlesCount * 3);
+const nebulaFragment = /* glsl */ `
+  uniform float uTime;
+  uniform float uScroll;
+  uniform vec2 uMouse;
+  varying vec2 vUv;
 
-    for (let i = 0; i < particlesCount; i++) {
-      const x = (Math.random() - 0.5) * 15;
-      const y = (Math.random() - 0.5) * 15;
-      const z = (Math.random() - 0.5) * 10;
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      originalPositions[i * 3] = x;
-      originalPositions[i * 3 + 1] = y;
-      originalPositions[i * 3 + 2] = z;
-
-      // Random purple/blue/pink colors
-      const colorChoice = Math.random();
-      if (colorChoice < 0.33) {
-        colors[i * 3] = 0.55; colors[i * 3 + 1] = 0.36; colors[i * 3 + 2] = 0.96; // Purple
-      } else if (colorChoice < 0.66) {
-        colors[i * 3] = 0.39; colors[i * 3 + 1] = 0.4; colors[i * 3 + 2] = 0.95; // Blue
-      } else {
-        colors[i * 3] = 0.93; colors[i * 3 + 1] = 0.35; colors[i * 3 + 2] = 0.6; // Pink
-      }
+  // Hash + value noise + fbm
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+  }
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+  }
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 5; i++) {
+      v += a * noise(p);
+      p = p * 2.0 + vec2(13.7, 7.3);
+      a *= 0.5;
     }
-    return { positions, originalPositions, colors };
-  }, []);
+    return v;
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float t = uTime * 0.025;
+
+    // Domain-warped fbm for organic gas clouds
+    vec2 drift = vec2(t * 0.6, -t * 0.3) + uMouse * 0.03 + vec2(0.0, uScroll * 0.35);
+    vec2 q = vec2(fbm(uv * 2.2 + drift), fbm(uv * 2.2 + vec2(5.2, 1.3) - drift));
+    float f = fbm(uv * 2.6 + q * 1.6);
+
+    // Color palette — deep space purples, blues, magenta
+    vec3 deep   = vec3(0.012, 0.004, 0.035);
+    vec3 purple = vec3(0.28, 0.10, 0.55);
+    vec3 blue   = vec3(0.07, 0.20, 0.55);
+    vec3 pink   = vec3(0.62, 0.14, 0.42);
+
+    vec3 col = deep;
+    col = mix(col, purple, smoothstep(0.35, 0.85, f) * 0.55);
+    col = mix(col, blue,   smoothstep(0.45, 0.95, q.x) * 0.40);
+    col = mix(col, pink,   smoothstep(0.55, 1.00, q.y * f) * 0.45);
+
+    // Soft radial falloff so edges melt into black
+    float d = distance(uv, vec2(0.5 + uMouse.x * 0.02, 0.45 - uMouse.y * 0.02));
+    col *= smoothstep(0.95, 0.25, d);
+
+    // Subtle breathing
+    col *= 0.85 + 0.15 * sin(uTime * 0.18);
+
+    gl_FragColor = vec4(col, 1.0) * 0.85;
+  }
+`;
+
+function AuroraNebula({
+  mouseRef,
+  scrollRef,
+}: {
+  mouseRef: React.RefObject<{ x: number; y: number }>;
+  scrollRef: React.RefObject<number>;
+}) {
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+  const { viewport } = useThree();
+
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uScroll: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+    }),
+    []
+  );
 
   useFrame((state) => {
-    if (!ref.current) return;
-    const positionAttribute = ref.current.geometry.attributes.position;
-    const time = state.clock.elapsedTime;
-    const scroll = scrollRef.current ?? 0;
-    const mouse = mouseRef.current ?? { x: 0, y: 0 };
-
-    // Rotate based on time and scroll
-    ref.current.rotation.x = -scroll * 0.5 + time * 0.02;
-    ref.current.rotation.y = time * 0.03;
-
-    // Update particle positions based on mouse
-    const mx = mouse.x * 3;
-    const my = mouse.y * 3;
-    for (let i = 0; i < particlesCount; i++) {
-      const ox = originalPositions[i * 3];
-      const oy = originalPositions[i * 3 + 1];
-
-      // Mouse repulsion — squared distance avoids sqrt
-      const dx = ox - mx;
-      const dy = oy - my;
-      const distSq = dx * dx + dy * dy;
-
-      let newX = ox;
-      let newY = oy;
-
-      if (distSq < 4) { // equivalent to dist < 2
-        const dist = Math.sqrt(distSq);
-        const force = (2 - dist) / 2;
-        newX = ox + dx * force * 0.3;
-        newY = oy + dy * force * 0.3;
-      }
-
-      // Add wave motion
-      newY += Math.sin(time * 0.5 + ox * 0.5) * 0.1;
-
-      positionAttribute.setXYZ(i, newX, newY, originalPositions[i * 3 + 2]);
-    }
-    positionAttribute.needsUpdate = true;
+    if (!matRef.current) return;
+    const u = matRef.current.uniforms;
+    u.uTime.value = state.clock.elapsedTime;
+    // Smooth-damp mouse + scroll for buttery motion
+    u.uMouse.value.x += (mouseRef.current.x - u.uMouse.value.x) * 0.04;
+    u.uMouse.value.y += (mouseRef.current.y - u.uMouse.value.y) * 0.04;
+    u.uScroll.value += ((scrollRef.current ?? 0) - u.uScroll.value) * 0.04;
   });
 
   return (
-    <group rotation={[0, 0, Math.PI / 4]}>
-      <points ref={ref}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[positions, 3]}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            args={[colors, 3]}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          transparent
-          vertexColors
-          size={0.015}
-          sizeAttenuation={true}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </points>
-    </group>
+    <mesh position={[0, 0, -8]} scale={[viewport.width * 3.2, viewport.height * 3.2, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={nebulaVertex}
+        fragmentShader={nebulaFragment}
+        uniforms={uniforms}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
   );
 }
 
-// Connection lines between nearby particles (constellation effect)
-// Pre-allocates buffer to avoid GC thrashing
-function ConstellationLines() {
-  const linesRef = useRef<THREE.LineSegments>(null);
-  const particleCount = 30;
-  const connectionDistance = 2;
-  // Max possible connections: particleCount*(particleCount-1)/2 = 435, each needs 6 floats (2 vertices × 3)
-  const maxConnections = (particleCount * (particleCount - 1)) / 2;
-  const maxFloats = maxConnections * 6;
+// -----------------------------------------------------------------------------
+// GPU Starfield — all motion (drift, twinkle, mouse parallax) computed in the
+// vertex/fragment shaders. Zero per-frame CPU work, zero attribute uploads.
+// -----------------------------------------------------------------------------
+const starsVertex = /* glsl */ `
+  uniform float uTime;
+  uniform vec2 uMouse;
+  uniform float uScroll;
+  attribute float aSize;
+  attribute float aPhase;
+  attribute vec3 aColor;
+  varying vec3 vColor;
+  varying float vTwinkle;
 
-  const { positions, lineBuffer } = useMemo(() => {
-    const particlePositions: THREE.Vector3[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particlePositions.push(new THREE.Vector3(
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 5 - 2
-      ));
+  void main() {
+    vColor = aColor;
+
+    vec3 pos = position;
+
+    // Gentle wave drift
+    pos.y += sin(uTime * 0.4 + aPhase * 6.2831) * 0.18;
+    pos.x += cos(uTime * 0.25 + aPhase * 6.2831) * 0.12;
+
+    // Depth-based parallax: nearer stars (larger z) shift more with mouse + scroll
+    float depth = (pos.z + 6.0) / 12.0; // 0..1
+    pos.x += uMouse.x * depth * 1.1;
+    pos.y += uMouse.y * depth * 0.7 + uScroll * depth * 4.0;
+
+    // Twinkle
+    vTwinkle = 0.55 + 0.45 * sin(uTime * (1.2 + aPhase * 2.0) + aPhase * 40.0);
+
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = aSize * vTwinkle * (160.0 / -mv.z);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const starsFragment = /* glsl */ `
+  varying vec3 vColor;
+  varying float vTwinkle;
+
+  void main() {
+    // Soft round sprite with bright core
+    vec2 c = gl_PointCoord - 0.5;
+    float d = length(c);
+    float alpha = smoothstep(0.5, 0.05, d);
+    float core = smoothstep(0.18, 0.0, d) * 0.9;
+    vec3 col = vColor * (0.7 + core) * vTwinkle;
+    gl_FragColor = vec4(col, alpha * vTwinkle);
+  }
+`;
+
+const STAR_PALETTE = [
+  new THREE.Color("#a78bfa"), // purple
+  new THREE.Color("#818cf8"), // indigo
+  new THREE.Color("#f472b6"), // pink
+  new THREE.Color("#67e8f9"), // cyan
+  new THREE.Color("#ffffff"), // white
+];
+
+function GPUStars({
+  mouseRef,
+  scrollRef,
+  count,
+}: {
+  mouseRef: React.RefObject<{ x: number; y: number }>;
+  scrollRef: React.RefObject<number>;
+  count: number;
+}) {
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+
+  const { positions, sizes, phases, colors } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+    const phases = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 24;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12 - 1;
+      sizes[i] = 0.4 + Math.pow(Math.random(), 2.5) * 1.6;
+      phases[i] = Math.random();
+      const c = STAR_PALETTE[Math.floor(Math.random() * STAR_PALETTE.length)];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
     }
-    // Pre-allocate the buffer
-    const lineBuffer = new Float32Array(maxFloats);
-    return { positions: particlePositions, lineBuffer };
-  }, []);
+    return { positions, sizes, phases, colors };
+  }, [count]);
 
-  // Create the geometry once with the pre-allocated buffer
-  const geometry = useMemo(() => {
-    const geom = new THREE.BufferGeometry();
-    const attr = new THREE.BufferAttribute(lineBuffer, 3);
-    attr.setUsage(THREE.DynamicDrawUsage);
-    geom.setAttribute("position", attr);
-    geom.setDrawRange(0, 0);
-    return geom;
-  }, [lineBuffer]);
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uScroll: { value: 0 },
+    }),
+    []
+  );
 
   useFrame((state) => {
-    if (!linesRef.current) return;
-    const time = state.clock.elapsedTime;
-    let vertexCount = 0;
-
-    // Update particle positions with movement
-    positions.forEach((pos, i) => {
-      pos.y += Math.sin(time * 0.5 + i) * 0.002;
-      pos.x += Math.cos(time * 0.3 + i * 0.5) * 0.001;
-    });
-
-    // Find connections and write into pre-allocated buffer
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
-        const dist = positions[i].distanceTo(positions[j]);
-        if (dist < connectionDistance) {
-          const offset = vertexCount * 3;
-          lineBuffer[offset] = positions[i].x;
-          lineBuffer[offset + 1] = positions[i].y;
-          lineBuffer[offset + 2] = positions[i].z;
-          lineBuffer[offset + 3] = positions[j].x;
-          lineBuffer[offset + 4] = positions[j].y;
-          lineBuffer[offset + 5] = positions[j].z;
-          vertexCount += 2;
-        }
-      }
-    }
-
-    const posAttr = linesRef.current.geometry.attributes.position as THREE.BufferAttribute;
-    posAttr.needsUpdate = true;
-    linesRef.current.geometry.setDrawRange(0, vertexCount);
+    if (!matRef.current) return;
+    const u = matRef.current.uniforms;
+    u.uTime.value = state.clock.elapsedTime;
+    u.uMouse.value.x += (mouseRef.current.x - u.uMouse.value.x) * 0.05;
+    u.uMouse.value.y += (mouseRef.current.y - u.uMouse.value.y) * 0.05;
+    u.uScroll.value += ((scrollRef.current ?? 0) - u.uScroll.value) * 0.05;
   });
 
   return (
-    <lineSegments ref={linesRef} geometry={geometry}>
-      <lineBasicMaterial color="#8b5cf6" transparent opacity={0.15} />
-    </lineSegments>
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-aSize" args={[sizes, 1]} />
+        <bufferAttribute attach="attributes-aPhase" args={[phases, 1]} />
+        <bufferAttribute attach="attributes-aColor" args={[colors, 3]} />
+      </bufferGeometry>
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={starsVertex}
+        fragmentShader={starsFragment}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
   );
 }
 
+// -----------------------------------------------------------------------------
+// Shooting stars — occasional meteor streaks for life and depth
+// -----------------------------------------------------------------------------
+function ShootingStar({ seed }: { seed: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const state = useRef({
+    active: false,
+    nextLaunch: 2 + seed * 7,
+    progress: 0,
+    start: new THREE.Vector3(),
+    dir: new THREE.Vector3(),
+  });
+
+  useFrame((s, delta) => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const st = state.current;
+    const t = s.clock.elapsedTime;
+
+    if (!st.active) {
+      mesh.visible = false;
+      if (t > st.nextLaunch) {
+        st.active = true;
+        st.progress = 0;
+        st.start.set(
+          (Math.random() - 0.3) * 18,
+          4 + Math.random() * 4,
+          -4 - Math.random() * 3
+        );
+        const angle = Math.PI * (1.1 + Math.random() * 0.25);
+        st.dir.set(Math.cos(angle), Math.sin(angle), 0).normalize();
+        mesh.position.copy(st.start);
+        mesh.rotation.z = Math.atan2(st.dir.y, st.dir.x);
+      }
+      return;
+    }
+
+    st.progress += delta * 0.9;
+    const dist = st.progress * 16;
+    mesh.position.copy(st.start).addScaledVector(st.dir, dist);
+    mesh.visible = true;
+
+    const mat = mesh.material as THREE.MeshBasicMaterial;
+    // Fade in fast, fade out slow
+    mat.opacity = Math.min(st.progress * 8, 1) * Math.max(1 - st.progress, 0) * 0.8;
+
+    if (st.progress >= 1) {
+      st.active = false;
+      st.nextLaunch = t + 4 + Math.random() * 10;
+    }
+  });
+
+  return (
+    <mesh ref={ref} visible={false}>
+      <planeGeometry args={[2.4, 0.025]} />
+      <meshBasicMaterial
+        color="#cdb4ff"
+        transparent
+        opacity={0}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Main export
+// -----------------------------------------------------------------------------
 export default function ParticleField() {
-  const mouseRef = useMousePosition();
+  const mouseRef = useMouseRef();
   const scrollRef = useScrollRef();
   const isMobile = useIsMobile();
   const visible = useVisibleCanvas();
@@ -257,26 +368,20 @@ export default function ParticleField() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 60 }}
+        camera={{ position: [0, 0, 6], fov: 60 }}
         gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
         dpr={[1, isMobile ? 1 : 1.5]}
         style={{ background: "transparent" }}
-        // Pause the render loop when tab is hidden to save GPU cycles,
-        // but keep the Canvas mounted to avoid WebGL context loss.
         frameloop={visible ? "always" : "never"}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.4} />
-          <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
-          <pointLight position={[-10, -10, 5]} intensity={0.3} color="#ec4899" />
-
-          {/* Global Starfield Background */}
-          <Stars radius={100} depth={60} count={isMobile ? 1500 : 3000} factor={5} saturation={0.3} fade speed={0.4} />
-
-          <EnhancedStarField mouseRef={mouseRef} scrollRef={scrollRef} isMobile={isMobile} />
+          <AuroraNebula mouseRef={mouseRef} scrollRef={scrollRef} />
+          <GPUStars mouseRef={mouseRef} scrollRef={scrollRef} count={isMobile ? 500 : 1800} />
           {!isMobile && (
             <>
-              <ConstellationLines />
+              <ShootingStar seed={0.1} />
+              <ShootingStar seed={0.5} />
+              <ShootingStar seed={0.9} />
             </>
           )}
         </Suspense>

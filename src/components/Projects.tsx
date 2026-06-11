@@ -14,6 +14,7 @@ import {
   MeshTransmissionMaterial
 } from "@react-three/drei";
 import * as THREE from "three";
+import SceneEffects from "./three/SceneEffects";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ExternalLink,
@@ -384,6 +385,11 @@ function ProjectCard3D({
     envMapIntensity: 1.8,
     clearcoat: 1,
     clearcoatRoughness: 0.08,
+    iridescence: 0.9,
+    iridescenceIOR: 1.6,
+    iridescenceThicknessRange: [100, 400] as [number, number],
+    sheen: 0.5,
+    sheenColor: data.accent,
     toneMapped: false,
   };
 
@@ -579,25 +585,31 @@ function CameraRig({
 }) {
   const { camera } = useThree();
 
-  useFrame(() => {
+  // Reusable vectors — avoid per-frame allocations (GC pressure causes hitches)
+  const _targetPos = useMemo(() => new THREE.Vector3(), []);
+  const _lookAt = useMemo(() => new THREE.Vector3(), []);
+  const _currLook = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame((state, delta) => {
+    // Frame-rate independent damping — consistent feel at any refresh rate
+    const k = 1 - Math.exp(-2.4 * delta);
+
     const angle = (activeIndex / projects.length) * Math.PI * 2;
     const dist = RADIUS + (isMobile ? 10 : 7);
-    const targetX = Math.cos(angle) * dist;
-    const targetZ = Math.sin(angle) * dist;
+    const breathe = Math.sin(state.clock.elapsedTime * 0.4) * 0.15;
+    _targetPos.set(Math.cos(angle) * dist, 1.5 + breathe, Math.sin(angle) * dist);
 
-    camera.position.lerp(
-      new THREE.Vector3(targetX, 1.5, targetZ),
-      0.035
-    );
+    camera.position.lerp(_targetPos, k);
 
     const activePos = getPosition(activeIndex, projects.length);
-    const lookAt = new THREE.Vector3(activePos[0], -1.3, activePos[2]);
+    _lookAt.set(activePos[0], -1.3, activePos[2]);
 
-    const currLook = new THREE.Vector3(0, 0, -1)
+    _currLook
+      .set(0, 0, -1)
       .applyQuaternion(camera.quaternion)
       .add(camera.position);
-    currLook.lerp(lookAt, 0.035);
-    camera.lookAt(currLook);
+    _currLook.lerp(_lookAt, k);
+    camera.lookAt(_currLook);
   });
 
   return null;
@@ -620,6 +632,8 @@ function Scene({
   return (
     <>
       <Environment preset="city" />
+      {/* Depth fog — distant planets melt into the void */}
+      <fog attach="fog" args={["#05010d", 10, 28]} />
       <ambientLight intensity={0.25} />
       <pointLight
         position={[0, 5, 0]}
@@ -632,6 +646,13 @@ function Scene({
         intensity={0.5}
         color="#ffffff"
         distance={18}
+      />
+      {/* Accent rim light tinted by the active project */}
+      <pointLight
+        position={[5, 2, -5]}
+        intensity={1.2}
+        color={active.color}
+        distance={16}
       />
 
       <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
@@ -681,6 +702,8 @@ function Scene({
         far={10}
         color="#111111"
       />
+
+      <SceneEffects bloomIntensity={0.85} />
     </>
   );
 }

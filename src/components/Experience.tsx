@@ -14,6 +14,7 @@ import {
   useCursor
 } from "@react-three/drei";
 import * as THREE from "three";
+import SceneEffects from "./three/SceneEffects";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase,
@@ -532,6 +533,11 @@ function ExperienceCard3D({
     envMapIntensity: 1.5,
     clearcoat: 1,
     clearcoatRoughness: 0.1,
+    iridescence: 0.9,
+    iridescenceIOR: 1.6,
+    iridescenceThicknessRange: [100, 400] as [number, number],
+    sheen: 0.5,
+    sheenColor: data.accent,
     toneMapped: false,
   };
 
@@ -706,22 +712,27 @@ function CameraRig({
   const _currentLookAt = useMemo(() => new THREE.Vector3(), []);
   const _forward = useMemo(() => new THREE.Vector3(), []);
 
-  useFrame(() => {
+  useFrame((state, delta) => {
+    // Frame-rate independent exponential damping — identical feel at 60/120/144hz
+    const k = 1 - Math.exp(-2.4 * delta);
+
     const angle = (activeIndex / experiences.length) * Math.PI * 2;
     const cameraDistance = RADIUS + (isMobile ? 9 : 7);
+    // Subtle cinematic breathing on the camera height
+    const breathe = Math.sin(state.clock.elapsedTime * 0.4) * 0.15;
     _targetPos.set(
       Math.cos(angle) * cameraDistance,
-      1.5,
+      1.5 + breathe,
       Math.sin(angle) * cameraDistance
     );
-    camera.position.lerp(_targetPos, 0.035);
+    camera.position.lerp(_targetPos, k);
 
     // Look at the active card — center on planet+card combo
     const activePos = getPosition(activeIndex, experiences.length);
     _lookAtTarget.set(activePos[0], -1.3, activePos[2]);
 
     _forward.set(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
-    _currentLookAt.copy(_forward).lerp(_lookAtTarget, 0.035);
+    _currentLookAt.copy(_forward).lerp(_lookAtTarget, k);
     camera.lookAt(_currentLookAt);
   });
 
@@ -745,6 +756,8 @@ function Scene({
   return (
     <>
       <Environment preset="city" />
+      {/* Depth fog — melts distant planets into the void for cinematic depth */}
+      <fog attach="fog" args={["#05010d", 10, 26]} />
       <ambientLight intensity={0.25} />
       <pointLight
         position={[0, 5, 0]}
@@ -757,6 +770,13 @@ function Scene({
         intensity={0.6}
         color="#ffffff"
         distance={18}
+      />
+      {/* Accent rim light tinted by the active card */}
+      <pointLight
+        position={[5, 2, -5]}
+        intensity={1.2}
+        color={activeData.color}
+        distance={16}
       />
 
       <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
@@ -808,6 +828,8 @@ function Scene({
         far={10}
         color="#111111"
       />
+
+      <SceneEffects bloomIntensity={0.85} />
     </>
   );
 }

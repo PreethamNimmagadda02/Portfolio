@@ -3,6 +3,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshTransmissionMaterial, Html, OrbitControls, Environment, Sparkles as SparklesDrei, Text } from "@react-three/drei";
 import * as THREE from "three";
+import SceneEffects from "./three/SceneEffects";
 import { useRef, useState, Suspense, useMemo, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
@@ -340,12 +341,18 @@ function OrbitingNode({ feature, index, totalCount, onHover, isActive }: { featu
                     >
                         <mesh scale={isActive ? 1.4 : 1}>
                             {renderGeometry()}
-                            <meshStandardMaterial
+                            <meshPhysicalMaterial
                                 color={feature.color}
                                 emissive={feature.color}
                                 emissiveIntensity={isActive ? 2 : 0.5}
                                 roughness={0.2}
                                 metalness={0.8}
+                                clearcoat={1}
+                                clearcoatRoughness={0.1}
+                                iridescence={0.9}
+                                iridescenceIOR={1.6}
+                                sheen={0.5}
+                                toneMapped={false}
                             />
                         </mesh>
                         {/* Glow halo around node */}
@@ -375,9 +382,11 @@ function Scene({ onHover, activeId, isMobile }: { onHover: (id: number | null) =
     return (
         <>
             <Environment preset="city" />
+            <fog attach="fog" args={["#05010d", 12, 32]} />
             <ambientLight intensity={0.2} />
             <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
             <pointLight position={[-10, -10, -10]} intensity={0.5} color="#a855f7" />
+            <pointLight position={[8, -4, 6]} intensity={0.8} color="#ec4899" distance={20} />
 
             {/* LEFT SIDE: Dynamic Background Elements */}
             <TechBackdrop />
@@ -400,6 +409,8 @@ function Scene({ onHover, activeId, isMobile }: { onHover: (id: number | null) =
             </group>
 
             <SparklesDrei count={100} scale={5} size={2} speed={0.4} opacity={0.5} color="#a855f7" />
+
+            <SceneEffects bloomIntensity={0.7} />
         </>
     );
 }
