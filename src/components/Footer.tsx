@@ -71,8 +71,8 @@ export default function Footer() {
 
       <div className="relative bg-black/30 backdrop-blur-md">
         {/* Background glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[260px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[200px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90vw] max-w-[700px] h-[260px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[60vw] max-w-[400px] h-[200px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
 
         {/* Giant watermark name */}
         <div

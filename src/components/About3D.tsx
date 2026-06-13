@@ -510,7 +510,7 @@ export default function About3D() {
                                 transition={{ duration: 0.3 }}
                                 className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg relative overflow-hidden group mb-8"
                             >
-                                <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${activeFeature.color.replace('text-', '')}`} style={{ backgroundColor: activeFeature.color }} />
+                                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: activeFeature.color }} />
                                 <div className="flex items-start gap-4">
                                     <div className="p-3 rounded-xl bg-white/5 shrink-0">
                                         <ActiveIcon size={24} style={{ color: activeFeature.color }} />
@@ -535,13 +535,13 @@ export default function About3D() {
                             </motion.div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-2 sm:gap-4">
                                 {stats.map((stat, i) => (
-                                    <div key={i} className="text-center p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
+                                    <div key={i} className="min-w-0 text-center p-2 sm:p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
                                         <div className="mb-2 flex justify-center text-gray-400 group-hover:text-white transition-colors">
                                             <stat.icon size={20} />
                                         </div>
-                                        <h4 className="text-2xl font-bold text-white mb-1">
+                                        <h4 className="text-xl sm:text-2xl font-bold text-white mb-1">
                                             <AnimatedCounter value={stat.value} color={stat.color} />
                                         </h4>
                                         <p className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${stat.color}`}>{stat.label}</p>

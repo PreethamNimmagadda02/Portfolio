@@ -769,7 +769,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative h-screen overflow-hidden flex items-center justify-center"
+      className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

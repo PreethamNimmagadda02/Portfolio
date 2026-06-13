@@ -408,7 +408,6 @@ export default function Hero() {
               initial={{ scale: 0, rotate: -180 }}
               animate={loaderDone ? { scale: 1, rotate: 0 } : undefined}
               transition={{ duration: 0.8, type: "spring" }}
-              className="scale-[0.65] sm:scale-90 md:scale-100"
             >
               <AvatarFlipCard />
             </motion.div>

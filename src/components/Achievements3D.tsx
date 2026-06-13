@@ -631,12 +631,12 @@ export default function Achievements3D() {
     // }, []);
 
     return (
-        <section id="achievements" className="relative h-screen overflow-hidden flex items-center justify-center"
+        <section id="achievements" className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >
             {/* Header Overlay - absolute so it floats above canvas */}
-            <div className="absolute top-12 left-0 w-full text-center z-20 pointer-events-none">
+            <div className="absolute top-8 left-0 w-full text-center z-20 pointer-events-none">
                 <motion.h2
                     initial={{ opacity: 0, y: -20 }}
                     whileInView={{ opacity: 1, y: 0 }}
