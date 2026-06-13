@@ -27,6 +27,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useInViewport } from "@/hooks/use-in-viewport";
 
 // -----------------------------------------------------------------------------
 // Data
@@ -840,7 +841,7 @@ function Scene({
 export default function Experience() {
   const [activeIndex, setActiveIndex] = useState(0);
   const isMobile = useIsMobile();
-  const sectionRef = useRef<HTMLElement>(null);
+  const [sectionRef, inViewport] = useInViewport<HTMLElement>();
   const touchStartX = useRef(0);
 
   const navigate = useCallback(
@@ -920,12 +921,14 @@ export default function Experience() {
         onClick={() =>
           navigate((activeIndex - 1 + experiences.length) % experiences.length)
         }
+        aria-label="Previous experience"
         className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
         <ChevronLeft size={isMobile ? 18 : 22} />
       </button>
       <button
         onClick={() => navigate((activeIndex + 1) % experiences.length)}
+        aria-label="Next experience"
         className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
       >
         <ChevronRight size={isMobile ? 18 : 22} />
@@ -942,6 +945,7 @@ export default function Experience() {
           }}
           gl={{ antialias: true, alpha: true }}
           dpr={[1, 1.5]}
+          frameloop={inViewport ? "always" : "never"}
           performance={{ min: 0.5 }}
         >
           <Scene

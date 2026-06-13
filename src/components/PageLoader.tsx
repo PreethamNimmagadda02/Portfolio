@@ -33,12 +33,39 @@ export default function PageLoader() {
     const [stars] = useState<Star[]>(() => makeStars(60));
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        // Gate the loader on actual page readiness rather than a fixed delay.
+        // - MIN_SHOWN keeps the intro from flashing on fast loads.
+        // - MAX_WAIT guarantees content is never blocked indefinitely.
+        const MIN_SHOWN = 600;
+        const MAX_WAIT = 3500;
+        const start = performance.now();
+        let done = false;
+
+        const finish = () => {
+            if (done) return;
+            done = true;
             setLoading(false);
             window.dispatchEvent(new Event("loader-done"));
-        }, 3000);
+        };
 
-        return () => clearTimeout(timer);
+        const dismiss = () => {
+            const elapsed = performance.now() - start;
+            const remaining = Math.max(0, MIN_SHOWN - elapsed);
+            setTimeout(finish, remaining);
+        };
+
+        const maxTimer = setTimeout(finish, MAX_WAIT);
+
+        if (document.readyState === "complete") {
+            dismiss();
+        } else {
+            window.addEventListener("load", dismiss, { once: true });
+        }
+
+        return () => {
+            clearTimeout(maxTimer);
+            window.removeEventListener("load", dismiss);
+        };
     }, []);
 
     return (

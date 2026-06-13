@@ -80,10 +80,10 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
     apple: "/favicon.png",
   },
-  verification: {
-    google: "your-google-verification-code", // Replace with actual code when you have one
-  },
 };
+
+// Runs before paint to apply the saved theme, preventing a flash (FOUC)
+const themeInitScript = `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='nebula'||t==='deep-space'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
 // JSON-LD Structured Data for SEO
 const jsonLd = {
@@ -120,6 +120,7 @@ const jsonLd = {
 import SmoothScroll from "@/components/SmoothScroll";
 import SpotlightCursor from "@/components/SpotlightCursor";
 import PerformanceProvider from "@/components/PerformanceProvider";
+import { MotionConfig } from "framer-motion";
 
 export default function RootLayout({
   children,
@@ -130,29 +131,37 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <script
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body
         suppressHydrationWarning
-        className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground selection:bg-primary selection:text-black`}
+        className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground`}
       >
-        <PerformanceProvider>
-          <ThemeProvider>
-            <PageLoader />
-            <ScrollProgress />
-            <KonamiEasterEgg />
-            <SpotlightCursor />
-            <SmoothScroll>
-              <Navbar />
-              <main className="min-h-screen">
-                {children}
-              </main>
-              <Footer />
-            </SmoothScroll>
-          </ThemeProvider>
-        </PerformanceProvider>
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <MotionConfig reducedMotion="user">
+          <PerformanceProvider>
+            <ThemeProvider>
+              <PageLoader />
+              <ScrollProgress />
+              <KonamiEasterEgg />
+              <SpotlightCursor />
+              <SmoothScroll>
+                <Navbar />
+                <main id="main-content" className="min-h-screen">
+                  {children}
+                </main>
+                <Footer />
+              </SmoothScroll>
+            </ThemeProvider>
+          </PerformanceProvider>
+        </MotionConfig>
       </body>
     </html>
   );

@@ -575,6 +575,8 @@ export default function GitHubStats() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
+                  aria-pressed={activeTab === tab}
+                  aria-label={tab === "github" ? "Show GitHub stats" : "Show competitive programming stats"}
                   className={`relative px-4 sm:px-6 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
                     }`}
                 >
@@ -678,7 +680,7 @@ export default function GitHubStats() {
                         href={`https://github.com/${GITHUB_USERNAME}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-500 hover:text-purple-400 transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-400 hover:text-purple-400 transition-colors font-medium"
                       >
                         <span className="hidden sm:inline">View on GitHub</span>
                         <span className="sm:hidden">GitHub</span>
@@ -696,7 +698,7 @@ export default function GitHubStats() {
                       ) : contributions.length > 0 ? (
                         <ContributionHeatmap data={contributions} />
                       ) : (
-                        <div className="flex items-center justify-center h-32 text-gray-500 text-sm w-full">
+                        <div className="flex items-center justify-center h-32 text-gray-400 text-sm w-full">
                           No contribution data available
                         </div>
                       )}

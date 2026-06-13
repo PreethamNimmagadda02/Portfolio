@@ -195,7 +195,7 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
         </div>
         <div>
           <p className="text-white font-semibold text-sm tracking-tight">{t.name}</p>
-          <p className="text-gray-500 text-xs mt-0.5">{t.role}</p>
+          <p className="text-gray-400 text-xs mt-0.5">{t.role}</p>
         </div>
       </div>
     </motion.div>

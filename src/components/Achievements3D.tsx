@@ -17,6 +17,7 @@ import SceneEffects from "./three/SceneEffects";
 import { motion } from "framer-motion";
 import { Award, Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useInViewport } from "@/hooks/use-in-viewport";
 
 // -----------------------------------------------------------------------------
 // Data
@@ -605,6 +606,7 @@ function Scene({ activeIndex, onSelect, isMobile }: { activeIndex: number, onSel
 export default function Achievements3D() {
     const [activeIndex, setActiveIndex] = useState(0);
     const isMobile = useIsMobile();
+    const [sectionRef, inViewport] = useInViewport<HTMLElement>();
     const touchStartX = useRef(0);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -631,7 +633,7 @@ export default function Achievements3D() {
     // }, []);
 
     return (
-        <section id="achievements" className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
+        <section ref={sectionRef} id="achievements" className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >
@@ -653,12 +655,14 @@ export default function Achievements3D() {
             {/* Navigation arrows (Mobile & Desktop) */}
             <button
                 onClick={() => setActiveIndex((activeIndex - 1 + achievements.length) % achievements.length)}
+                aria-label="Previous achievement"
                 className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
             >
                 <ChevronLeft size={isMobile ? 18 : 22} />
             </button>
             <button
                 onClick={() => setActiveIndex((activeIndex + 1) % achievements.length)}
+                aria-label="Next achievement"
                 className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
             >
                 <ChevronRight size={isMobile ? 18 : 22} />
@@ -667,7 +671,7 @@ export default function Achievements3D() {
 
             {/* Canvas takes up entire section */}
             <div className="absolute inset-0 w-full h-full z-0 cursor-default">
-                <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
+                <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} performance={{ min: 0.5 }}>
                     <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
                 </Canvas>
 

@@ -30,6 +30,8 @@ function Toast({
 
   return (
     <motion.div
+      role="status"
+      aria-live="polite"
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -113,7 +115,7 @@ function FloatingInput({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-400"
             }`}
           animate={{
             top: isActive ? "8px" : "50%",
@@ -135,6 +137,8 @@ function FloatingInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           required={required}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-error` : undefined}
           className={`w-full pl-11 pr-4 pt-6 pb-2 rounded-xl bg-white/5 border text-white transition-all duration-300 ${error
               ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500"
               : "border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
@@ -170,6 +174,8 @@ function FloatingInput({
       <AnimatePresence>
         {error && (
           <motion.p
+            id={`${id}-error`}
+            role="alert"
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
@@ -239,7 +245,7 @@ function FloatingTextarea({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-500"
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-400"
             }`}
           animate={{
             top: isActive ? "8px" : "16px",
@@ -261,6 +267,8 @@ function FloatingTextarea({
           required={required}
           maxLength={maxLength}
           rows={rows}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-error` : undefined}
           className={`w-full pl-11 pr-4 pt-6 pb-10 rounded-xl bg-white/5 border text-white transition-all duration-300 resize-none ${error
               ? "border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500"
               : "border-white/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
@@ -290,6 +298,8 @@ function FloatingTextarea({
       <AnimatePresence>
         {error && (
           <motion.p
+            id={`${id}-error`}
+            role="alert"
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
@@ -548,7 +558,7 @@ export default function Contact() {
 
             <div className="text-left">
               <p className="text-white text-sm font-medium">Internships & Full-time Roles</p>
-              <p className="text-gray-500 text-xs">Response within 24 hours</p>
+              <p className="text-gray-400 text-xs">Response within 24 hours</p>
             </div>
           </motion.div>
         </motion.div>

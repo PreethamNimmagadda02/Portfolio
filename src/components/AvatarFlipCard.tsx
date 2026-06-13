@@ -52,9 +52,22 @@ export default function AvatarFlipCard() {
 
   return (
     <div
-      className="relative w-44 h-56 sm:w-56 sm:h-72 md:w-64 md:h-80 [perspective:1000px]"
+      className="relative w-44 h-56 sm:w-56 sm:h-72 md:w-64 md:h-80 [perspective:1000px] rounded-2xl cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-pressed={isFlipped}
+      aria-label={isFlipped ? "Identity card — show photo" : "Photo of Preetham Nimmagadda — show identity card"}
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
+      onFocus={() => setIsFlipped(true)}
+      onBlur={() => setIsFlipped(false)}
+      onClick={() => setIsFlipped((prev) => !prev)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setIsFlipped((prev) => !prev);
+        }
+      }}
     >
       {/* Outer pulsing glow ring - CSS animation for compositor thread - Desktop Only */}
       <div
@@ -123,7 +136,7 @@ export default function AvatarFlipCard() {
             <source srcSet="/ai-headshot-sm.webp 1x, /ai-headshot.webp 2x" type="image/webp" />
             <img
               src="/ai-headshot.jpeg"
-              alt="Avatar Front"
+              alt="Portrait of Preetham Nimmagadda, AI Engineer and Full Stack Developer"
               className="object-cover w-full h-full"
               loading="eager"
               fetchPriority="high"
@@ -226,8 +239,8 @@ export default function AvatarFlipCard() {
               <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-purple-500/30" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-purple-500/30" />
 
-              <div className="h-6 flex items-end justify-between opacity-40 gap-[3px]">
-                {particles.slice(0, 28).map((p, i) => (
+              <div className="h-6 flex items-end justify-between opacity-40 gap-[3px]" aria-hidden>
+                {Array.from({ length: 28 }).map((_, i) => (
                   <div
                     key={i}
                     className="bg-purple-300 rounded-full"

@@ -125,7 +125,7 @@ export default function Footer() {
               transition={{ delay: 0.1, duration: 0.6, type: "spring" as const, stiffness: 100 }}
               className="md:col-span-3 text-center md:text-left"
             >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">
                 Navigate
               </h3>
               <nav className="grid grid-cols-3 md:grid-cols-1 gap-x-2 gap-y-2.5 justify-items-center md:justify-items-start">
@@ -150,7 +150,7 @@ export default function Footer() {
               transition={{ delay: 0.2, duration: 0.6, type: "spring" as const, stiffness: 100 }}
               className="md:col-span-4 flex flex-col items-center md:items-end gap-4"
             >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 md:self-end">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 md:self-end">
                 Connect
               </h3>
               <div className="flex items-center gap-3 md:gap-4">
@@ -192,7 +192,7 @@ export default function Footer() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <p className="text-gray-500 text-[11px] md:text-sm text-center md:text-left">
+            <p className="text-gray-400 text-[11px] md:text-sm text-center md:text-left">
               © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
             </p>
 
@@ -200,7 +200,7 @@ export default function Footer() {
               onClick={scrollToTop}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.9 }}
-              className="group flex items-center gap-2 text-[11px] md:text-sm text-gray-500 hover:text-purple-400 transition-colors"
+              className="group flex items-center gap-2 text-[11px] md:text-sm text-gray-400 hover:text-purple-400 transition-colors"
             >
               <span>Back to Top</span>
               <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(139,92,246,0.25)] transition-all">

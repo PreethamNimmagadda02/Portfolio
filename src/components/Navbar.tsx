@@ -413,6 +413,9 @@ export default function Navbar() {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isOpen}
+                aria-controls="mobile-menu"
                 className="p-2 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:text-white"
               >
                 {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -425,6 +428,7 @@ export default function Navbar() {
         <AnimatePresence>
           {isOpen && (
             <motion.div
+              id="mobile-menu"
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}

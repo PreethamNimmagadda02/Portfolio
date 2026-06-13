@@ -72,6 +72,51 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* ── Visible keyboard focus indicator (a11y) ──
+     Only shows for keyboard nav, never on mouse click. */
+  :focus-visible {
+    outline: 2px solid rgba(167, 139, 250, 0.9);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  [data-theme="nebula"] :focus-visible {
+    outline-color: rgba(244, 114, 182, 0.9);
+  }
+
+  /* Remove default outline only when a visible focus ring is shown */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* ── Text selection color (brand) ── */
+  ::selection {
+    background: rgba(139, 92, 246, 0.35);
+    color: #ffffff;
+  }
+
+  [data-theme="nebula"] ::selection {
+    background: rgba(236, 72, 153, 0.35);
+  }
+
+  /* ── Skip-to-content link (a11y) ── */
+  .skip-link {
+    position: fixed;
+    top: -100px;
+    left: 1rem;
+    z-index: 200;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    background: rgba(139, 92, 246, 0.95);
+    color: #fff;
+    font-weight: 600;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 1rem;
+  }
+
   /* Premium scrollbar styling */
   ::-webkit-scrollbar {
     width: 6px;
@@ -96,6 +141,21 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: rgba(139, 92, 246, 0.3) rgba(255, 255, 255, 0.03);
+  }
+}
+
+/* ── Global reduced-motion kill-switch (a11y) ──
+   Honors prefers-reduced-motion for every CSS animation/transition.
+   Framer Motion is handled separately via <MotionConfig reducedMotion="user">. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

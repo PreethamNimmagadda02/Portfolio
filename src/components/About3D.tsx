@@ -8,6 +8,7 @@ import { useRef, useState, Suspense, useMemo, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useInViewport } from "@/hooks/use-in-viewport";
 
 // Feature data matching original About.tsx EXACTLY
 const features = [
@@ -422,6 +423,7 @@ function Scene({ onHover, activeId, isMobile }: { onHover: (id: number | null) =
 export default function About3D() {
     const [activeId, setActiveId] = useState<number | null>(null);
     const isMobile = useIsMobile();
+    const [sectionRef, inViewport] = useInViewport<HTMLElement>();
 
     // Hover logic
     const [displayId, setDisplayId] = useState<number>(0);
@@ -446,12 +448,12 @@ export default function About3D() {
     const ActiveIcon = activeFeature.icon;
 
     return (
-        <section id="about" className="relative min-h-[800px] md:min-h-screen w-full overflow-hidden flex flex-col justify-center py-20 md:py-0">
+        <section ref={sectionRef} id="about" className="relative min-h-[800px] md:min-h-screen w-full overflow-hidden flex flex-col justify-center py-20 md:py-0">
 
             {/* 3D Scene Background - Covers Entire Section */}
             <div className="absolute inset-0 z-0">
                 {!isMobile && (
-                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} className="cursor-move">
+                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} frameloop={inViewport ? "always" : "never"} className="cursor-move">
                         <Suspense fallback={null}>
                             <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
                             <OrbitControls
@@ -524,10 +526,10 @@ export default function About3D() {
 
                                     {/* Mobile/Tablet Card Navigation */}
                                     <div className="flex flex-col gap-1 shrink-0 lg:hidden">
-                                        <button onClick={handlePrev} className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+                                        <button onClick={handlePrev} aria-label="Previous highlight" className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
                                             <ChevronLeft size={16} />
                                         </button>
-                                        <button onClick={handleNext} className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+                                        <button onClick={handleNext} aria-label="Next highlight" className="p-1.5 rounded-full border border-white/10 bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
                                             <ChevronRight size={16} />
                                         </button>
                                     </div>
