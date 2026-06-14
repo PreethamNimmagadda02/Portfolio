@@ -6,7 +6,6 @@ import * as THREE from "three";
 import { useMemo, useRef, useState, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport } from "@/hooks/use-in-viewport";
 
 // Skills data with categories for color coding
 const skillsData = [
@@ -899,7 +898,6 @@ function CategoryChip({
 
 export default function SkillsMarquee() {
   const isMobile = useIsMobile();
-  const [sectionRef, inViewport] = useInViewport<HTMLElement>();
   const [mounted, setMounted] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
   const statsRef = useRef<HTMLDivElement>(null);
@@ -939,7 +937,6 @@ export default function SkillsMarquee() {
 
   return (
     <section
-      ref={sectionRef}
       id="skills-sphere"
       className="py-16 md:py-24 relative w-full overflow-hidden flex flex-col items-center justify-center"
       style={{ minHeight: isMobile ? "760px" : "1000px" }}
@@ -954,7 +951,7 @@ export default function SkillsMarquee() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2"
+          className="text-4xl md:text-5xl font-black text-white tracking-tight mb-2"
         >
           Technical{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
@@ -997,7 +994,6 @@ export default function SkillsMarquee() {
           camera={{ position: [0, 0, 9], fov: 45 }}
           gl={{ antialias: !isMobile, alpha: true }}
           dpr={isMobile ? [1, 1.5] : [1, 2]}
-          frameloop={inViewport ? "always" : "never"}
           className="w-full h-full"
           // pan-y everywhere: vertical swipes scroll the page natively,
           // horizontal drags still rotate the sphere. Never trap page scroll.
