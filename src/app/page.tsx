@@ -10,7 +10,7 @@ import Achievements3D from "@/components/Achievements3D";
 import ScrollReveal from "@/components/ScrollReveal";
 import GitHubStats from "@/components/GitHubStats";
 import Testimonials from "@/components/Testimonials";
-import SectionDivider from "@/components/SectionDivider";
+import SectionDivider3D from "@/components/SectionDivider3D";
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
@@ -39,49 +39,49 @@ export default function Home() {
           <About3D />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(139, 92, 246, 0.3)" colorTo="rgba(59, 130, 246, 0.2)" />
+        <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
 
         {/* Experience Section */}
         <ScrollReveal direction="none">
           <Experience />
         </ScrollReveal>
 
-        <SectionDivider variant="mesh" colorFrom="rgba(59, 130, 246, 0.15)" colorTo="rgba(168, 85, 247, 0.1)" />
+        <SectionDivider3D from="#3b82f6" to="#a855f7" accent="#6366f1" />
 
         {/* Skills Marquee */}
         <ScrollReveal direction="none">
           <SkillsMarquee />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(168, 85, 247, 0.2)" colorTo="rgba(236, 72, 153, 0.2)" flip />
+        <SectionDivider3D from="#a855f7" to="#ec4899" accent="#d946ef" flip />
 
         {/* Projects Section */}
         <ScrollReveal direction="none">
           <Projects />
         </ScrollReveal>
 
-        <SectionDivider variant="mesh" colorFrom="rgba(236, 72, 153, 0.15)" colorTo="rgba(6, 182, 212, 0.1)" />
+        <SectionDivider3D from="#ec4899" to="#06b6d4" accent="#f472b6" />
 
         {/* Coding Activity Section */}
         <ScrollReveal direction="none">
           <GitHubStats />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(6, 182, 212, 0.2)" colorTo="rgba(251, 191, 36, 0.2)" flip />
+        <SectionDivider3D from="#06b6d4" to="#fbbf24" accent="#22d3ee" flip />
 
         {/* Achievements Section */}
         <ScrollReveal direction="none">
           <Achievements3D />
         </ScrollReveal>
 
-        <SectionDivider variant="mesh" colorFrom="rgba(251, 191, 36, 0.15)" colorTo="rgba(139, 92, 246, 0.1)" flip />
+        <SectionDivider3D from="#fbbf24" to="#8b5cf6" accent="#f59e0b" flip />
 
         {/* Testimonials Section */}
         <ScrollReveal direction="none">
           <Testimonials />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(139, 92, 246, 0.2)" colorTo="rgba(59, 130, 246, 0.15)" />
+        <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
 
         {/* Contact Section */}
         <ScrollReveal direction="none">

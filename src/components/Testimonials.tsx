@@ -130,6 +130,10 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
     mouseY.set(0);
   }
 
+  // Lifts an element toward the viewer for parallax depth on tilt (desktop only).
+  const depth = (z: number): React.CSSProperties =>
+    mobile ? {} : { transform: `translateZ(${z}px)`, transformStyle: "preserve-3d" };
+
   return (
     <motion.div
       onMouseMove={mobile ? undefined : handleMouseMove}
@@ -143,8 +147,9 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       style={{
         rotateX: mobile ? 0 : rotateX,
         rotateY: mobile ? 0 : rotateY,
+        transformPerspective: 1000,
+        transformStyle: "preserve-3d",
         boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
-        perspective: 1000,
       }}
     >
       {/* Spotlight effect */}
@@ -166,11 +171,11 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       {/* Accent gradient top line */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)`, ...depth(55) }}
       />
 
       {/* Quote icon with accent glow */}
-      <div className="flex items-center justify-between mb-4 relative z-10">
+      <div className="flex items-center justify-between mb-4 relative z-10" style={depth(38)}>
         <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
           <Quote size={20} style={{ color: t.accent }} className="opacity-60" />
         </div>
@@ -182,12 +187,12 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       </div>
 
       {/* Quote text */}
-      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10">
+      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10" style={depth(22)}>
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06] relative z-10">
+      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06] relative z-10" style={depth(42)}>
         <div
           className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-500`}
         >

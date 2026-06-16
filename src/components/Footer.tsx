@@ -2,9 +2,9 @@
 
 import { Github, Linkedin, Mail, ArrowUp, MapPin, Heart } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import MagneticButton from "./MagneticButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com/preethamnimmagadda", label: "GitHub", gradient: "from-gray-500 to-gray-700" },
@@ -52,6 +52,17 @@ function LocalTime() {
 }
 
 export default function Footer() {
+  const footerRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ["start end", "end end"],
+  });
+
+  // Giant watermark name tilts up & rises into view as the footer is revealed.
+  const watermarkY = useTransform(scrollYProgress, [0, 1], [70, -10]);
+  const watermarkRotateX = useTransform(scrollYProgress, [0, 1], [38, 0]);
+  const watermarkOpacity = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -62,25 +73,26 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative z-10 overflow-hidden">
+    <footer ref={footerRef} className="relative z-10 overflow-hidden">
       {/* Animated gradient hairline */}
       <div className="relative h-px w-full">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
         <div className="absolute inset-0 animate-shimmer" />
       </div>
 
-      <div className="relative bg-black/30 backdrop-blur-md">
+      <div className="relative bg-black/30 backdrop-blur-md [perspective:1000px]">
         {/* Background glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90vw] max-w-[700px] h-[260px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[60vw] max-w-[400px] h-[200px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Giant watermark name */}
-        <div
+        {/* Giant watermark name — tilts up into view in 3D */}
+        <motion.div
           aria-hidden
+          style={{ y: watermarkY, rotateX: watermarkRotateX, opacity: watermarkOpacity, transformStyle: "preserve-3d", transformOrigin: "bottom" }}
           className="absolute inset-x-0 bottom-[-1.5rem] md:bottom-[-3rem] text-center font-black tracking-tighter select-none pointer-events-none text-[18vw] md:text-[11rem] leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.045)]"
         >
           PREETHAM
-        </div>
+        </motion.div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-12 md:pt-16 pb-6 md:pb-8">
           {/* ── Top grid: brand / nav / connect ── */}

@@ -1,149 +1,50 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Text3D, Float, MeshTransmissionMaterial } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
-import { useRef, Suspense, useEffect, useState } from "react";
+import { useRef, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useInViewport } from "@/hooks/use-in-viewport";
 
-interface GlowingSphereProps {
-  position: [number, number, number];
-  color: string;
-  size?: number;
-  speed?: number;
+interface DividerColors {
+  from?: string;
+  to?: string;
+  accent?: string;
 }
 
-// Individual glowing sphere
-function GlowingSphere({ position, color, size = 0.5, speed = 1 }: GlowingSphereProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const initialY = position[1];
+const DEFAULTS: Required<DividerColors> = {
+  from: "#8b5cf6",
+  to: "#3b82f6",
+  accent: "#ec4899",
+};
 
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    // Floating animation
-    meshRef.current.position.y = initialY + Math.sin(state.clock.elapsedTime * speed) * 0.3;
-    // Pulsing scale
-    const scale = size + Math.sin(state.clock.elapsedTime * speed * 2) * 0.1;
-    meshRef.current.scale.setScalar(scale);
-  });
-
-  return (
-    <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
-      <mesh ref={meshRef} position={position}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.5}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-// Orbiting particles around section dividers
-function OrbitingParticles({ radius = 3, count = 20 }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.z = state.clock.elapsedTime * 0.2;
-  });
-
-  return (
-    <group ref={groupRef}>
-      {[...Array(count)].map((_, i) => {
-        const angle = (i / count) * Math.PI * 2;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-        return (
-          <mesh key={i} position={[x, y, 0]}>
-            <sphereGeometry args={[0.05]} />
-            <meshStandardMaterial
-              color={i % 2 === 0 ? "#8b5cf6" : "#06b6d4"}
-              emissive={i % 2 === 0 ? "#8b5cf6" : "#06b6d4"}
-              emissiveIntensity={1}
-            />
-          </mesh>
-        );
-      })}
-    </group>
-  );
-}
-
-// Energy beam connectors
-function EnergyBeams() {
-  const beamsRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (!beamsRef.current) return;
-    beamsRef.current.children.forEach((beam, i) => {
-      const mesh = beam as THREE.Mesh;
-      const material = mesh.material as THREE.MeshStandardMaterial;
-      material.opacity = 0.3 + Math.sin(state.clock.elapsedTime * 2 + i) * 0.2;
+/* ── Concentric portal rings that slowly counter-rotate ── */
+function PortalRings({ from, accent }: { from: string; accent: string }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state, delta) => {
+    if (!group.current) return;
+    group.current.rotation.z += delta * 0.15;
+    group.current.children.forEach((ring, i) => {
+      const pulse = 1 + Math.sin(state.clock.elapsedTime * 1.5 - i * 0.4) * 0.04;
+      ring.scale.setScalar(pulse);
     });
   });
 
   return (
-    <group ref={beamsRef}>
-      {[...Array(6)].map((_, i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        const length = 8;
-        return (
-          <mesh
-            key={i}
-            position={[0, 0, 0]}
-            rotation={[0, 0, angle]}
-          >
-            <cylinderGeometry args={[0.01, 0.01, length, 8]} />
-            <meshStandardMaterial
-              color="#8b5cf6"
-              transparent
-              opacity={0.3}
-              emissive="#8b5cf6"
-              emissiveIntensity={0.5}
-            />
-          </mesh>
-        );
-      })}
-    </group>
-  );
-}
-
-// Pulsing rings
-function PulsingRings() {
-  const ringsRef = useRef<(THREE.Mesh | null)[]>([]);
-
-  useFrame((state) => {
-    ringsRef.current.forEach((ring, i) => {
-      if (!ring) return;
-      const baseScale = 1 + i * 0.5;
-      const pulse = Math.sin(state.clock.elapsedTime * 2 - i * 0.3) * 0.1;
-      ring.scale.setScalar(baseScale + pulse);
-
-      const material = ring.material as THREE.MeshStandardMaterial;
-      material.opacity = 0.3 - i * 0.05 + pulse * 0.1;
-    });
-  });
-
-  return (
-    <group>
-      {[...Array(5)].map((_, i) => (
-        <mesh
-          key={i}
-          ref={(el) => { ringsRef.current[i] = el; }}
-          rotation={[Math.PI / 2, 0, 0]}
-        >
-          <torusGeometry args={[1 + i * 0.5, 0.02, 16, 100]} />
+    <group ref={group} rotation={[Math.PI / 2, 0, 0]}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} rotation={[0, 0, (i * Math.PI) / 5]}>
+          <torusGeometry args={[1.4 + i * 0.55, 0.018, 12, 120]} />
           <meshStandardMaterial
-            color="#8b5cf6"
+            color={i % 2 === 0 ? accent : from}
+            emissive={i % 2 === 0 ? accent : from}
+            emissiveIntensity={2.4}
+            toneMapped={false}
             transparent
-            opacity={0.3}
-            emissive="#8b5cf6"
-            emissiveIntensity={0.3}
+            opacity={0.7 - i * 0.12}
           />
         </mesh>
       ))}
@@ -151,121 +52,214 @@ function PulsingRings() {
   );
 }
 
-// Glass orb with refraction
-function GlassOrb({ position }: { position: [number, number, number] }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+/* ── Glowing faceted core with a wireframe shell ── */
+function CoreOrb({ from, accent }: { from: string; accent: string }) {
+  const core = useRef<THREE.Mesh>(null);
+  const shell = useRef<THREE.Mesh>(null);
 
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-    meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.2;
+  useFrame((state, delta) => {
+    if (core.current) {
+      core.current.rotation.y += delta * 0.4;
+      const s = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.08;
+      core.current.scale.setScalar(s);
+    }
+    if (shell.current) {
+      shell.current.rotation.y -= delta * 0.25;
+      shell.current.rotation.x += delta * 0.1;
+    }
   });
 
   return (
-    <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.8}>
-      <mesh ref={meshRef} position={position}>
-        <icosahedronGeometry args={[1.2, 3]} />
-        <meshPhysicalMaterial
-          color="#8b5cf6"
-          metalness={0.1}
-          roughness={0.1}
-          transmission={0.9}
-          thickness={1.5}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
+    <Float speed={1.6} rotationIntensity={0.4} floatIntensity={0.8}>
+      <group>
+        <mesh ref={core}>
+          <icosahedronGeometry args={[0.55, 1]} />
+          <meshStandardMaterial
+            color={accent}
+            emissive={accent}
+            emissiveIntensity={2.6}
+            toneMapped={false}
+            roughness={0.2}
+            metalness={0.3}
+          />
+        </mesh>
+        <mesh ref={shell} scale={1.55}>
+          <icosahedronGeometry args={[0.55, 1]} />
+          <meshBasicMaterial
+            color={from}
+            wireframe
+            transparent
+            opacity={0.35}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
     </Float>
   );
 }
 
-// Scene content
-function DividerSceneContent() {
+/* ── Ring of emissive nodes orbiting the core ── */
+function OrbitingNodes({ from, to, count = 14, radius = 3.4 }: { from: string; to: string; count?: number; radius?: number }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state, delta) => {
+    if (group.current) group.current.rotation.z -= delta * 0.25;
+  });
+  const nodes = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => {
+        const angle = (i / count) * Math.PI * 2;
+        return {
+          pos: [Math.cos(angle) * radius, Math.sin(angle) * radius, 0] as [number, number, number],
+          color: i % 2 === 0 ? from : to,
+        };
+      }),
+    [count, radius, from, to]
+  );
+
+  return (
+    <group ref={group}>
+      {nodes.map((n, i) => (
+        <mesh key={i} position={n.pos}>
+          <sphereGeometry args={[0.05, 12, 12]} />
+          <meshStandardMaterial
+            color={n.color}
+            emissive={n.color}
+            emissiveIntensity={2.5}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+/* ── Radial energy beams that pulse in opacity ── */
+function EnergyBeams({ accent }: { accent: string }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (!group.current) return;
+    group.current.children.forEach((beam, i) => {
+      const mat = (beam as THREE.Mesh).material as THREE.MeshStandardMaterial;
+      mat.opacity = 0.15 + Math.abs(Math.sin(state.clock.elapsedTime * 1.5 + i)) * 0.25;
+    });
+  });
+
+  return (
+    <group ref={group}>
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        return (
+          <mesh key={i} rotation={[0, 0, angle]}>
+            <cylinderGeometry args={[0.006, 0.006, 9, 6]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={1.8}
+              toneMapped={false}
+              transparent
+              opacity={0.2}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function DividerScene({ from, to, accent }: Required<DividerColors>) {
   return (
     <>
       <ambientLight intensity={0.4} />
-      <pointLight position={[5, 5, 5]} intensity={1} color="#8b5cf6" />
-      <pointLight position={[-5, -5, 5]} intensity={0.5} color="#ec4899" />
+      <pointLight position={[4, 3, 5]} intensity={1.2} color={accent} />
+      <pointLight position={[-4, -3, 4]} intensity={0.6} color={from} />
 
-      <PulsingRings />
-      <EnergyBeams />
-      <OrbitingParticles radius={3.5} count={24} />
-      <GlassOrb position={[0, 0, 0]} />
+      <EnergyBeams accent={accent} />
+      <PortalRings from={from} accent={accent} />
+      <OrbitingNodes from={from} to={to} />
+      <CoreOrb from={from} accent={accent} />
 
-      <GlowingSphere position={[-3, 0, -2]} color="#ec4899" size={0.3} speed={1.2} />
-      <GlowingSphere position={[3, 0, -2]} color="#06b6d4" size={0.3} speed={0.8} />
-      <GlowingSphere position={[0, 2.5, -1]} color="#22c55e" size={0.2} speed={1.5} />
+      <Sparkles count={26} scale={[10, 3, 3]} size={2} speed={0.3} color={to} opacity={0.5} />
     </>
   );
 }
 
-// Component for section dividers
-export default function SectionDivider3D() {
+/**
+ * Animated 3D divider used between page sections.
+ *
+ * Performance notes:
+ * - The WebGL `<Canvas>` is lazily mounted/unmounted via {@link useInViewport},
+ *   so at most ~1–2 divider contexts are ever alive at once.
+ * - Bloom is intentionally avoided here; emissive `toneMapped={false}` materials
+ *   already read as neon glow at a fraction of the cost.
+ * - Mobile and reduced-motion users get a lightweight CSS-only gradient line.
+ */
+export default function SectionDivider3D({
+  from = DEFAULTS.from,
+  to = DEFAULTS.to,
+  accent = DEFAULTS.accent,
+  flip = false,
+}: DividerColors & { flip?: boolean }) {
   const isMobile = useIsMobile();
+  const reduced = useReducedMotion();
+  const [ref, inView] = useInViewport<HTMLDivElement>("300px");
 
-  if (isMobile) {
+  // Lightweight, dependency-free fallback line.
+  if (isMobile || reduced) {
     return (
-      <div className="relative w-full h-32 overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+      <div className="relative w-full h-20 md:h-28 overflow-hidden flex items-center justify-center pointer-events-none">
+        <div
+          className="w-[80%] h-px"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${from}, ${accent}, ${to}, transparent)`,
+          }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-64 overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
-
-      {/* 3D Canvas */}
-      <div className="absolute inset-0">
-        <Canvas
-          camera={{ position: [0, 0, 6], fov: 60 }}
-          gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-          dpr={[1, 1.5]}
-          style={{ background: "transparent" }}
-        >
-          <Suspense fallback={null}>
-            <DividerSceneContent />
-          </Suspense>
-        </Canvas>
-      </div>
-
-      {/* Horizontal lines */}
-      <motion.div
-        className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"
-        animate={{ opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 2, repeat: Infinity }}
+    <div
+      ref={ref}
+      className={`relative w-full h-44 md:h-56 overflow-hidden pointer-events-none ${flip ? "rotate-180" : ""}`}
+    >
+      {/* Soft vertical wash so the scene melts into the page */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse 60% 80% at 50% 50%, ${accent}14, transparent 70%)`,
+        }}
       />
-    </div>
-  );
-}
 
-// Alternative floating orbs for page background
-export function FloatingOrbs3D() {
-  const isMobile = useIsMobile();
+      {inView && (
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Canvas
+            camera={{ position: [0, 0, 7], fov: 55 }}
+            gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
+            dpr={[1, 1.5]}
+            frameloop="always"
+            style={{ background: "transparent" }}
+          >
+            <Suspense fallback={null}>
+              <DividerScene from={from} to={to} accent={accent} />
+            </Suspense>
+          </Canvas>
+        </motion.div>
+      )}
 
-  if (isMobile) return null;
-
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
-      <Canvas
-        camera={{ position: [0, 0, 8], fov: 60 }}
-        gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-        dpr={[1, 1.5]}
-        style={{ background: "transparent" }}
-      >
-        <Suspense fallback={null}>
-          <ambientLight intensity={0.3} />
-          <pointLight position={[10, 10, 10]} intensity={0.5} color="#8b5cf6" />
-
-          <GlowingSphere position={[-4, 2, -3]} color="#8b5cf6" size={0.8} speed={0.6} />
-          <GlowingSphere position={[4, -2, -4]} color="#ec4899" size={0.6} speed={0.8} />
-          <GlowingSphere position={[-2, -3, -2]} color="#06b6d4" size={0.5} speed={1} />
-          <GlowingSphere position={[3, 3, -5]} color="#22c55e" size={0.4} speed={1.2} />
-          <GlowingSphere position={[0, 0, -6]} color="#f59e0b" size={0.7} speed={0.5} />
-        </Suspense>
-      </Canvas>
+      {/* Horizontal energy line overlay */}
+      <motion.div
+        className="absolute top-1/2 left-0 right-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${from}, ${accent}, ${to}, transparent)`,
+        }}
+        animate={{ opacity: [0.35, 0.7, 0.35] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+      />
     </div>
   );
 }
