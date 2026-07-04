@@ -2,7 +2,7 @@
 
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
-import { Github, GitCommit, Flame, Code2, Star, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
+import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -95,7 +95,7 @@ async function fetchRepos(): Promise<GitHubRepo[]> {
     );
     if (!res.ok) return []; // Fallback to empty array if rate limited
     return res.json();
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -105,30 +105,9 @@ async function fetchUserProfile(): Promise<{ public_repos: number }> {
     const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
     if (!res.ok) return { public_repos: 12 }; // Fallback count
     return res.json();
-  } catch (e) {
+  } catch {
     return { public_repos: 12 };
   }
-}
-
-/* ─── Streak calculator ─── */
-function calculateMaxStreak(contributions: ContributionDay[]): number {
-  let max = 0;
-  let current = 0;
-
-  // Sort contributions chronologically (oldest to newest)
-  const sorted = [...contributions].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-
-  for (const day of sorted) {
-    if (day.count > 0) {
-      current++;
-      if (current > max) max = current;
-    } else {
-      current = 0;
-    }
-  }
-  return max;
 }
 
 /* ─── Language aggregation (by repo count) ─── */
@@ -414,7 +393,6 @@ export default function GitHubStats() {
       ]);
 
       // Calculate stats
-      const currentYear = new Date().getFullYear();
       const totalContributions = Object.values(contribData.total).reduce(
         (sum, v) => sum + v,
         0
@@ -451,7 +429,7 @@ export default function GitHubStats() {
         setLanguages(aggregatedLangs);
       }
     } catch (err) {
-      console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.");
+      console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.", err);
       setError("API Rate Limit Exceeded. Showing cached snapshot.");
 
       // Fallback data

@@ -1,10 +1,10 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, Text } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useMemo, useRef, useState, useEffect, Suspense, useCallback } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
 import { markSceneWarmed } from "@/lib/utils";
@@ -875,11 +875,13 @@ function AnimatedCounter({ end, label, suffix = "" }: { end: number; label: stri
 function CategoryChip({
   category,
   color,
+  count,
   isActive,
   onClick,
 }: {
   category: string;
   color: string;
+  count: number;
   isActive: boolean;
   onClick: () => void;
 }) {
@@ -905,6 +907,12 @@ function CategoryChip({
           }}
         />
         {category}
+        <span
+          className="text-[9px] font-medium opacity-60 tabular-nums"
+          style={{ color: isActive ? "#fff" : color }}
+        >
+          {count}
+        </span>
       </span>
     </motion.button>
   );
@@ -1005,6 +1013,7 @@ export default function SkillsMarquee() {
             key={cat}
             category={cat}
             color={categoryColors[cat]}
+            count={categoryCounts[cat] || 0}
             isActive={activeCategories.has(cat)}
             onClick={() => toggleCategory(cat)}
           />

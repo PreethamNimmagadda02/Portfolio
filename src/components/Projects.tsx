@@ -6,7 +6,6 @@ import {
   Float,
   Environment,
   Sparkles,
-  Stars,
   Html,
   ContactShadows,
   useCursor,
@@ -15,7 +14,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ExternalLink,
   Github,
@@ -25,7 +24,6 @@ import {
   TrendingUp,
   ChevronLeft,
   ChevronRight,
-  Zap,
   Bot,
   Code,
 } from "lucide-react";
@@ -774,8 +772,6 @@ export default function Projects() {
     },
     [activeIndex, navigate]
   );
-
-  const activeData = projects[activeIndex];
 
   return (
     <section

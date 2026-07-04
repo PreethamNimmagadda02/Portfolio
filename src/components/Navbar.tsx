@@ -220,31 +220,6 @@ export default function Navbar() {
   };
 
   return (
-    <>
-      {/* Keyframes for floating particles */}
-      <style jsx global>{`
-        @keyframes navFloat0 {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
-          50% { transform: translate(8px, -6px) scale(1.3); opacity: 0.8; }
-        }
-        @keyframes navFloat1 {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-          50% { transform: translate(-6px, 5px) scale(1.2); opacity: 0.7; }
-        }
-        @keyframes navFloat2 {
-          0%, 100% { transform: translate(0, 0) scale(1.1); opacity: 0.5; }
-          50% { transform: translate(5px, 4px) scale(0.8); opacity: 0.9; }
-        }
-        @keyframes navFloat3 {
-          0%, 100% { transform: translate(0, 0) scale(0.9); opacity: 0.35; }
-          50% { transform: translate(-4px, -7px) scale(1.4); opacity: 0.75; }
-        }
-        @keyframes navShimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
-
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -431,8 +406,8 @@ export default function Navbar() {
                 {/* Button shimmer */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                 </span>
                 <span className="relative">Hire Me</span>
               </a>
@@ -510,7 +485,7 @@ export default function Navbar() {
                     onClick={(e) => scrollToSection(e, "#contact")}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium"
                   >
-                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     Hire Me
                   </a>
                 </motion.div>
@@ -519,6 +494,5 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </motion.nav>
-    </>
   );
 }

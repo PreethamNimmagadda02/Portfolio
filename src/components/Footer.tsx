@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, ArrowUp, MapPin, Heart } from "lucide-react";
+import { Github, Linkedin, Mail, ArrowUp, MapPin } from "lucide-react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import MagneticButton from "./MagneticButton";

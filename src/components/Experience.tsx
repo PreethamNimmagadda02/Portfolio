@@ -6,7 +6,6 @@ import {
   Float,
   Environment,
   Sparkles,
-  Stars,
   Html,
   ContactShadows,
   BakeShadows,
@@ -15,7 +14,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Briefcase,
   Calendar,

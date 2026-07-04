@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect, useMemo, useCallback } from "react";
-import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, Activity, BarChart2 } from "lucide-react";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, BarChart2 } from "lucide-react";
 
 const CODOLIO_USERNAME = "Preetham_02";
 
@@ -338,6 +338,10 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                         {profile.platform === "hackerrank" && topBadge
                           ? <><AnimatedCounter value={topBadge.stars || 0} />★</>
                           : profile.platform === "tuf"
+                            // TODO: undocumented +43 offset — appears to compensate for
+                            // TUF activity logged before this account synced with Codolio.
+                            // Verify against the platform's own profile page and either
+                            // confirm the constant or replace it with accurate source data.
                             ? <AnimatedCounter value={(profile.dailyActivityStatsResponse?.maxStreak || 0) + 43} />
                             : profile.userStats?.currentRating
                               ? <AnimatedCounter value={profile.userStats.currentRating} />

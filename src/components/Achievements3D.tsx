@@ -1,12 +1,11 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
     Float,
     Environment,
     Sparkles,
-    Stars,
     Html,
     ContactShadows,
     BakeShadows,
@@ -15,7 +14,7 @@ import {
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
 import { motion } from "framer-motion";
-import { Award, Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
 import { markSceneWarmed } from "@/lib/utils";
@@ -631,14 +630,6 @@ export default function Achievements3D() {
         },
         []
     );
-
-    // Simple auto-rotate if not interacting, maybe optional
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         setActiveIndex(prev => (prev + 1) % achievements.length);
-    //     }, 8000);
-    //     return () => clearInterval(interval);
-    // }, []);
 
     return (
         <section ref={sectionRef} id="achievements" className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"

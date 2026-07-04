@@ -1,21 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-
-const terminalLines = [
-  { type: "command", text: "$ ./init_profile.sh" },
-  { type: "success", text: "⚡ System initialized" },
-  { type: "command", text: "$ cat identity.json" },
-  { type: "output", text: '{ "name": "Preetham" }' },
-  { type: "output", text: '{ "role": "AI Engineer" }' },
-  { type: "command", text: "$ skills --list" },
-  { type: "highlight", text: "► React • Next.js • Python" },
-  { type: "highlight", text: "► LangChain • CrewAI" },
-  { type: "command", text: "$ status" },
-  { type: "success", text: "● READY FOR HIRE" },
-];
+import { motion } from "framer-motion";
+import { useState } from "react";
 
 // Floating particles around the avatar - reduced for performance
 const particles = [
@@ -27,29 +13,6 @@ const particles = [
 
 export default function AvatarFlipCard() {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [visibleLines, setVisibleLines] = useState(0);
-  const [cursorVisible, setCursorVisible] = useState(true);
-
-  // Typing animation effect
-  useEffect(() => {
-    if (isFlipped && visibleLines < terminalLines.length) {
-      const timer = setTimeout(() => {
-        setVisibleLines((prev) => prev + 1);
-      }, 300);
-      return () => clearTimeout(timer);
-    } else if (!isFlipped) {
-      setVisibleLines(0);
-    }
-  }, [isFlipped, visibleLines]);
-
-  // Blinking cursor — only ticks while the terminal (back face) is visible
-  useEffect(() => {
-    if (!isFlipped) return;
-    const cursorInterval = setInterval(() => {
-      setCursorVisible((prev) => !prev);
-    }, 530);
-    return () => clearInterval(cursorInterval);
-  }, [isFlipped]);
 
   return (
     <div
@@ -139,6 +102,10 @@ export default function AvatarFlipCard() {
               src="/ai-headshot.jpeg"
               alt="Portrait of Preetham Nimmagadda, AI Engineer and Full Stack Developer"
               className="object-cover w-full h-full"
+              // Real source dimensions (504×690) — reserves layout space
+              // before decode so this LCP image doesn't cause a CLS shift.
+              width={504}
+              height={690}
               loading="eager"
               fetchPriority="high"
             />
@@ -153,9 +120,9 @@ export default function AvatarFlipCard() {
           <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-purple-400/60 rounded-br" />
 
           {/* Status indicator */}
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-green-500/30">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[10px] text-green-400 font-medium">ACTIVE</span>
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-emerald-500/30">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] text-emerald-400 font-medium">ACTIVE</span>
           </div>
         </div>
 

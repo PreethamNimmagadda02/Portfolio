@@ -1,14 +1,12 @@
 "use client";
 
 import { motion, useScroll, useTransform, Variants, useSpring, useInView } from "framer-motion";
-import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
-import Link from "next/link";
-import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { Sparkles, ChevronDown } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
 import { smoothScrollTo } from "@/lib/utils";
 
 // Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
 import AvatarFlipCard from "./AvatarFlipCard";
-import MagneticButton from "./MagneticButton";
 
 // Loader-completion hook with safety net: resolves via the "loader-done"
 // event, the global flag (if the event already fired before mount), or a
@@ -110,24 +108,13 @@ function CurrentlyBuilding() {
       className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-pointer group"
     >
       <span className="relative flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
       </span>
       <span className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
         Building: <span className="text-white font-semibold text-base group-hover:text-blue-400 transition-colors">Matters.AI</span>
       </span>
     </motion.a>
-  );
-}
-
-// Animated gradient text component
-function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span className={`relative ${className}`}>
-      <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-white bg-[length:200%_100%] animate-gradient">
-        {children}
-      </span>
-    </span>
   );
 }
 
@@ -149,54 +136,6 @@ function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; del
       <Sparkles size={14} className="text-purple-400" />
       {children}
     </motion.div>
-  );
-}
-
-// Glitch text effect on hover
-function GlitchText({ children, className = "" }: { children: string; className?: string }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [canHover, setCanHover] = useState(false);
-
-  // Calculate animation duration: (length * stagger) + initial delay + buffer
-  // Stagger is 0.1s (from containerVariants), delayChildren is 0.1s
-  useEffect(() => {
-    const duration = (children.length * 100) + 500;
-    const timer = setTimeout(() => {
-      setCanHover(true);
-    }, duration);
-    return () => clearTimeout(timer);
-  }, [children]);
-
-  return (
-    <motion.span
-      className={`relative inline-block cursor-pointer ${className}`}
-      onMouseEnter={() => canHover && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <span className="relative z-10">
-        <AnimatedWord word={children} />
-      </span>
-      {isHovered && (
-        <>
-          <motion.span
-            className="absolute inset-0 text-cyan-400 z-0"
-            animate={{ x: [-2, 2, -2], opacity: [0.8, 0.4, 0.8] }}
-            transition={{ duration: 0.15, repeat: Infinity }}
-            style={{ clipPath: "inset(10% 0 60% 0)" }}
-          >
-            {children}
-          </motion.span>
-          <motion.span
-            className="absolute inset-0 text-red-400 z-0"
-            animate={{ x: [2, -2, 2], opacity: [0.8, 0.4, 0.8] }}
-            transition={{ duration: 0.15, repeat: Infinity, delay: 0.05 }}
-            style={{ clipPath: "inset(50% 0 20% 0)" }}
-          >
-            {children}
-          </motion.span>
-        </>
-      )}
-    </motion.span>
   );
 }
 
@@ -227,8 +166,19 @@ function ScrollIndicator({ opacity }: { opacity: any }) {
 // Stats counter with count-up animation
 function AnimatedStat({ value, label, delay, gradient }: { value: string; label: React.ReactNode; delay: number; gradient: string }) {
   const [displayValue, setDisplayValue] = useState("0");
-  // Start counting as soon as the page loader finishes (with fallback)
-  const started = useLoaderDone();
+  // Loader-done is the earliest any stat can start; `delay` (in seconds,
+  // same unit as the surrounding motion transitions) then staggers each
+  // stat's count-up relative to its siblings instead of all three firing
+  // in lockstep.
+  const loaderDone = useLoaderDone();
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    if (!loaderDone) return;
+    const timer = setTimeout(() => setStarted(true), delay * 250);
+    return () => clearTimeout(timer);
+  }, [loaderDone, delay]);
+
   // Strip commas for parsing, keep suffix like "+"
   const rawNumeric = value.replace(/,/g, "").match(/[\d.]+/)?.[0] || "0";
   const suffix = value.replace(/,/g, "").replace(/[\d.]+/, "");
@@ -468,7 +418,7 @@ export default function Hero() {
                 gradient="from-[#a855f7] via-[#ec4899] to-[#fb923c]"
               />
               <AnimatedStat
-                value="1000+"
+                value="1,000+"
                 label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
                 delay={1}
                 gradient="from-[#3b82f6] via-[#2dd4bf] to-[#4ade80]"

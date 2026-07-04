@@ -78,7 +78,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.png",
-    apple: "/favicon.png",
+    // iOS "Add to Home Screen" expects ~180px; the 32px favicon upscales
+    // blurrily. Reuse the PWA icon that's already generated at proper size.
+    apple: "/icon-192x192.png",
   },
 };
 
