@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { seededRandom, warmedSceneCount, TOTAL_WARMED_SCENES } from "@/lib/utils";
 
 interface Star {
     id: number;
@@ -14,57 +15,65 @@ interface Star {
 }
 
 function makeStars(count: number): Star[] {
+    // Seeded PRNG: identical values during prerender and hydration.
+    // (Math.random() here caused hydration mismatches — useState lazy
+    // initializers DO run on the server, contrary to the old comment.)
+    const rand = seededRandom(42);
     return Array.from({ length: count }, (_, i) => ({
         id: i,
-        size: Math.random() * 2 + 0.5,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        delay: Math.random() * 2,
-        duration: 2 + Math.random() * 2,
+        size: rand() * 2 + 0.5,
+        x: rand() * 100,
+        y: rand() * 100,
+        delay: rand() * 2,
+        duration: 2 + rand() * 2,
         color: i % 4 === 0 ? "#a855f7" : i % 4 === 1 ? "#6366f1" : i % 4 === 2 ? "#818cf8" : "#ffffff",
     }));
 }
 
 export default function PageLoader() {
     const [loading, setLoading] = useState(true);
-    // Lazy initializer: only called on the client, never during SSR.
-    // This ensures Math.random() values are consistent between SSR (none)
-    // and the first client render (initialized here).
+    // Deterministic star field — same output on server and client.
     const [stars] = useState<Star[]>(() => makeStars(60));
 
     useEffect(() => {
-        // Gate the loader on actual page readiness rather than a fixed delay.
-        // - MIN_SHOWN keeps the intro from flashing on fast loads.
-        // - MAX_WAIT guarantees content is never blocked indefinitely.
-        const MIN_SHOWN = 600;
-        const MAX_WAIT = 3500;
+        // The loader covers the background warm-up of the 3D sections and
+        // dismisses at whichever comes first:
+        //  - every scene has reported ready ("scene-warmed" events), or
+        //  - MAX_WAIT elapses (slow devices / a scene failing to mount).
+        // MIN_SHOWN keeps the branding from flashing on very fast machines.
+        const MIN_SHOWN = 1500;
+        const MAX_WAIT = 5000;
         const start = performance.now();
         let done = false;
+        let minTimer: ReturnType<typeof setTimeout> | undefined;
 
         const finish = () => {
             if (done) return;
             done = true;
             setLoading(false);
+            // Flag + event: components that mount after the event fired can
+            // still detect completion via the flag (see useLoaderDone in Hero).
+            (window as unknown as { __loaderDone?: boolean }).__loaderDone = true;
             window.dispatchEvent(new Event("loader-done"));
         };
 
         const dismiss = () => {
-            const elapsed = performance.now() - start;
-            const remaining = Math.max(0, MIN_SHOWN - elapsed);
-            setTimeout(finish, remaining);
+            const remaining = Math.max(0, MIN_SHOWN - (performance.now() - start));
+            minTimer = setTimeout(finish, remaining);
         };
 
+        const check = () => {
+            if (warmedSceneCount() >= TOTAL_WARMED_SCENES) dismiss();
+        };
+
+        window.addEventListener("scene-warmed", check);
+        check(); // scenes may already be warm (e.g. dev fast-refresh remount)
         const maxTimer = setTimeout(finish, MAX_WAIT);
 
-        if (document.readyState === "complete") {
-            dismiss();
-        } else {
-            window.addEventListener("load", dismiss, { once: true });
-        }
-
         return () => {
+            window.removeEventListener("scene-warmed", check);
             clearTimeout(maxTimer);
-            window.removeEventListener("load", dismiss);
+            if (minTimer !== undefined) clearTimeout(minTimer);
         };
     }, []);
 
@@ -175,13 +184,15 @@ export default function PageLoader() {
                             </p>
                         </motion.div>
 
-                        {/* Minimal loading bar */}
+                        {/* Minimal loading bar — fills over ~3s (the typical
+                            all-scenes-warmed time); on slower devices it
+                            holds at 100% until the 5s max dismissal */}
                         <motion.div
                             className="w-36 h-[1.5px] rounded-full overflow-hidden"
                             style={{ background: "rgba(255,255,255,0.04)" }}
                             initial={{ opacity: 0, scaleX: 0.8 }}
                             animate={{ opacity: 1, scaleX: 1 }}
-                            transition={{ delay: 0.8, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                         >
                             <motion.div
                                 className="h-full rounded-full"
@@ -190,7 +201,7 @@ export default function PageLoader() {
                                 }}
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
-                                transition={{ duration: 2.8, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                                transition={{ duration: 3, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                             />
                         </motion.div>
                     </motion.div>

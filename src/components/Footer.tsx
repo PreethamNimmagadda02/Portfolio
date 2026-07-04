@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import MagneticButton from "./MagneticButton";
 import { useState, useEffect, useRef } from "react";
+import { smoothScrollTo } from "@/lib/utils";
 
 const socialLinks = [
   { icon: Github, href: "https://github.com/preethamnimmagadda", label: "GitHub", gradient: "from-gray-500 to-gray-700" },
@@ -44,7 +45,7 @@ function LocalTime() {
   if (!time) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-gray-500 text-xs md:text-sm tabular-nums">
+    <span className="inline-flex items-center gap-1.5 text-gray-400 text-xs md:text-sm tabular-nums">
       <MapPin size={12} className="text-purple-400/70" />
       India · {time} IST
     </span>
@@ -63,13 +64,13 @@ export default function Footer() {
   const watermarkRotateX = useTransform(scrollYProgress, [0, 1], [38, 0]);
   const watermarkOpacity = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    smoothScrollTo(id);
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    smoothScrollTo(0);
   };
 
   return (
@@ -115,18 +116,16 @@ export default function Footer() {
               </p>
 
               {/* Availability badge */}
-              <button
-                onClick={() => scrollToSection("contact")}
+              <a
+                href="#contact"
+                onClick={(e) => handleNavClick(e, "contact")}
                 className="mt-5 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-400/40 hover:bg-emerald-500/10 transition-colors group cursor-pointer"
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                </span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
                 <span className="text-xs font-medium text-emerald-300/90 group-hover:text-emerald-200 transition-colors">
                   Available for opportunities
                 </span>
-              </button>
+              </a>
             </motion.div>
 
             {/* Navigate */}
@@ -142,14 +141,15 @@ export default function Footer() {
               </h3>
               <nav className="grid grid-cols-3 md:grid-cols-1 gap-x-2 gap-y-2.5 justify-items-center md:justify-items-start">
                 {navLinks.map((link) => (
-                  <button
+                  <a
                     key={link.id}
-                    onClick={() => scrollToSection(link.id)}
+                    href={`#${link.id}`}
+                    onClick={(e) => handleNavClick(e, link.id)}
                     className="group inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                   >
                     <span className="hidden md:block w-0 group-hover:w-3 h-px bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300" />
                     {link.label}
-                  </button>
+                  </a>
                 ))}
               </nav>
             </motion.div>
@@ -183,7 +183,7 @@ export default function Footer() {
                       <Link
                         href={social.href}
                         target="_blank"
-                        className="relative flex items-center justify-center w-11 h-11 md:w-13 md:h-13 rounded-full bg-zinc-900/90 border border-white/20 text-white transition-all duration-300 hover:border-white/40 hover:bg-zinc-800/90"
+                        className="relative flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-zinc-900/90 border border-white/20 text-white transition-all duration-300 hover:border-white/40 hover:bg-zinc-800/90"
                         aria-label={social.label}
                       >
                         <social.icon size={18} className="md:w-[22px] md:h-[22px]" />
@@ -204,7 +204,7 @@ export default function Footer() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <p className="text-gray-400 text-[11px] md:text-sm text-center md:text-left">
+            <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
               © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
             </p>
 
@@ -212,7 +212,7 @@ export default function Footer() {
               onClick={scrollToTop}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.9 }}
-              className="group flex items-center gap-2 text-[11px] md:text-sm text-gray-400 hover:text-purple-400 transition-colors"
+              className="group flex items-center gap-2 text-xs md:text-sm text-gray-400 hover:text-purple-400 transition-colors"
             >
               <span>Back to Top</span>
               <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(139,92,246,0.25)] transition-all">

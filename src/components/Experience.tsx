@@ -27,7 +27,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport } from "@/hooks/use-in-viewport";
+import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { markSceneWarmed } from "@/lib/utils";
 
 // -----------------------------------------------------------------------------
 // Data
@@ -205,7 +206,8 @@ function AnimatedPlanet({
       coreRef.current.rotation.y = -t * 0.12;
       const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
       if (mat.emissiveIntensity !== undefined) {
-        mat.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2) * 0.35;
+        // Capped peak so the bloom halo stays tight around the core
+        mat.emissiveIntensity = (isActive ? 1.8 : 1.2) + Math.sin(t * 2) * 0.3;
       }
     }
 
@@ -267,7 +269,7 @@ function AnimatedPlanet({
           {/* Inner fast ring */}
           <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
             <torusGeometry args={[1.0, 0.04, 32, 100]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 3 : 1.5} toneMapped={false} />
+            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1.2} toneMapped={false} />
           </mesh>
           {/* Middle wide translucent ring */}
           <mesh ref={ring2Ref} rotation={[Math.PI / 3, 0, 0]} scale={0.95}>
@@ -344,7 +346,7 @@ function AnimatedPlanet({
             <meshPhysicalMaterial
               color={materialProps.color}
               emissive={materialProps.emissive}
-              emissiveIntensity={isActive ? 3 : 1.5}
+              emissiveIntensity={isActive ? 2 : 1.2}
               toneMapped={false}
               flatShading
             />
@@ -426,15 +428,15 @@ function AnimatedPlanet({
         <group>
           {/* Corona flare halo */}
           <mesh>
-            <sphereGeometry args={[0.85, 32, 32]} />
-            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.08 : 0.03} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+            <sphereGeometry args={[0.8, 32, 32]} />
+            <meshBasicMaterial color={materialProps.color} transparent opacity={isActive ? 0.06 : 0.02} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
           </mesh>
           {/* Emissive Star Core */}
           <mesh ref={coreRef}>
             <sphereGeometry args={[0.6, 64, 64]} />
             <meshPhysicalMaterial
               {...materialProps}
-              emissiveIntensity={isActive ? 2.5 : 1.5}
+              emissiveIntensity={isActive ? 1.8 : 1.2}
               toneMapped={false}
               opacity={1}
             />
@@ -528,7 +530,7 @@ function ExperienceCard3D({
     metalness: 0.85,
     roughness: 0.15,
     emissive: data.accent,
-    emissiveIntensity: isActive ? 2.0 : hovered ? 0.9 : 0.3,
+    emissiveIntensity: isActive ? 1.5 : hovered ? 0.8 : 0.3,
     transparent: true,
     opacity: isActive ? 0.95 : 0.8,
     envMapIntensity: 1.5,
@@ -842,6 +844,14 @@ export default function Experience() {
   const [activeIndex, setActiveIndex] = useState(0);
   const isMobile = useIsMobile();
   const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+  // Lazy-once canvas gate: mounts the WebGL canvas the first time the
+  // section comes within 1500px, then keeps it alive (render loop still
+  // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
+  const nearViewport = useRefInViewport(sectionRef, "1500px", true);
+  // Background pre-warm: this is the heaviest scene (6 transmission-glass
+  // planets) — start building it early so it's ready before the user arrives.
+  const warmedUp = useWarmupTimer(2000);
+  const showCanvas = nearViewport || warmedUp;
   const touchStartX = useRef(0);
 
   const navigate = useCallback(
@@ -936,24 +946,27 @@ export default function Experience() {
 
 
 
-      {/* 3D Canvas — full section */}
+      {/* 3D Canvas — full section, mounted only when near the viewport */}
       <div className="absolute inset-0 w-full h-full z-0 cursor-default">
-        <Canvas
-          camera={{
-            position: isMobile ? [0, 2, 16] : [0, 2, 12],
-            fov: isMobile ? 55 : 45,
-          }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 1.5]}
-          frameloop={inViewport ? "always" : "never"}
-          performance={{ min: 0.5 }}
-        >
-          <Scene
-            activeIndex={activeIndex}
-            onSelect={setActiveIndex}
-            isMobile={isMobile}
-          />
-        </Canvas>
+        {showCanvas && (
+          <Canvas
+            camera={{
+              position: isMobile ? [0, 2, 16] : [0, 2, 12],
+              fov: isMobile ? 55 : 45,
+            }}
+            gl={{ antialias: true, alpha: true }}
+            dpr={[1, 1.5]}
+            frameloop={inViewport ? "always" : "never"}
+            performance={{ min: 0.5 }}
+            onCreated={() => markSceneWarmed("experience")}
+          >
+            <Scene
+              activeIndex={activeIndex}
+              onSelect={setActiveIndex}
+              isMobile={isMobile}
+            />
+          </Canvas>
+        )}
 
         {/* Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />

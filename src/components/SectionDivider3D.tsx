@@ -187,8 +187,11 @@ function DividerScene({ from, to, accent }: Required<DividerColors>) {
  * Animated 3D divider used between page sections.
  *
  * Performance notes:
- * - The WebGL `<Canvas>` is lazily mounted/unmounted via {@link useInViewport},
- *   so at most ~1–2 divider contexts are ever alive at once.
+ * - The WebGL `<Canvas>` is mounted/unmounted via {@link useInViewport} with a
+ *   generous 600px margin. Unmounting off-screen dividers is REQUIRED: keeping
+ *   all 7 contexts alive alongside the section canvases exceeded the browser's
+ *   WebGL context limit and crashed context creation elsewhere (null
+ *   getContextAttributes → "reading 'alpha'" in EffectComposer).
  * - Bloom is intentionally avoided here; emissive `toneMapped={false}` materials
  *   already read as neon glow at a fraction of the cost.
  * - Mobile and reduced-motion users get a lightweight CSS-only gradient line.
@@ -201,7 +204,7 @@ export default function SectionDivider3D({
 }: DividerColors & { flip?: boolean }) {
   const isMobile = useIsMobile();
   const reduced = useReducedMotion();
-  const [ref, inView] = useInViewport<HTMLDivElement>("300px");
+  const [ref, inView] = useInViewport<HTMLDivElement>("600px");
 
   // Lightweight, dependency-free fallback line.
   if (isMobile || reduced) {
@@ -251,14 +254,18 @@ export default function SectionDivider3D({
         </motion.div>
       )}
 
-      {/* Horizontal energy line overlay */}
+      {/* Horizontal energy line overlay — pulse only while visible */}
       <motion.div
         className="absolute top-1/2 left-0 right-0 h-px"
         style={{
           background: `linear-gradient(90deg, transparent, ${from}, ${accent}, ${to}, transparent)`,
         }}
-        animate={{ opacity: [0.35, 0.7, 0.35] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        animate={inView ? { opacity: [0.35, 0.7, 0.35] } : { opacity: 0.35 }}
+        transition={
+          inView
+            ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.3 }
+        }
       />
     </div>
   );

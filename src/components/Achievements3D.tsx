@@ -17,7 +17,8 @@ import SceneEffects from "./three/SceneEffects";
 import { motion } from "framer-motion";
 import { Award, Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport } from "@/hooks/use-in-viewport";
+import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { markSceneWarmed } from "@/lib/utils";
 
 // -----------------------------------------------------------------------------
 // Data
@@ -115,10 +116,10 @@ function AnimatedPlanet({ type, materialProps, isActive }: { type: string; mater
             debrisRef.current.rotation.y = t * 0.4;
             debrisRef.current.rotation.x = Math.sin(t * 0.2) * 0.08;
         }
-        // Pulsing core glow
+        // Pulsing core glow — capped to keep the bloom halo tight
         if (coreRef.current) {
             const mat = coreRef.current.material as THREE.MeshPhysicalMaterial;
-            mat.emissiveIntensity = 1.5 + Math.sin(t * 2.5) * 0.8;
+            mat.emissiveIntensity = 1.2 + Math.sin(t * 2.5) * 0.4;
         }
         // Breathing atmosphere
         if (atmosphereRef.current) {
@@ -169,7 +170,7 @@ function AnimatedPlanet({ type, materialProps, isActive }: { type: string; mater
                         <meshPhysicalMaterial
                             color={materialProps.color}
                             emissive={materialProps.emissive}
-                            emissiveIntensity={isActive ? 3.0 : 1.2}
+                            emissiveIntensity={isActive ? 2.0 : 1.0}
                             metalness={0.9}
                             roughness={0.1}
                             toneMapped={false}
@@ -225,7 +226,7 @@ function AnimatedPlanet({ type, materialProps, isActive }: { type: string; mater
                             <meshPhysicalMaterial
                                 color={materialProps.color}
                                 emissive={materialProps.emissive}
-                                emissiveIntensity={isActive ? 2.5 : 0.8}
+                                emissiveIntensity={isActive ? 1.8 : 0.7}
                                 flatShading
                                 toneMapped={false}
                             />
@@ -252,7 +253,7 @@ function AnimatedPlanet({ type, materialProps, isActive }: { type: string; mater
                             <meshPhysicalMaterial
                                 color={materialProps.color}
                                 emissive={materialProps.emissive}
-                                emissiveIntensity={isActive ? 3 : 1}
+                                emissiveIntensity={isActive ? 2 : 0.8}
                                 toneMapped={false}
                             />
                         </mesh>
@@ -359,7 +360,7 @@ function AnimatedPlanet({ type, materialProps, isActive }: { type: string; mater
                                     <meshPhysicalMaterial
                                         color={i % 2 === 0 ? materialProps.color : "#ff6b35"}
                                         emissive={materialProps.emissive}
-                                        emissiveIntensity={isActive ? 3 : 1}
+                                        emissiveIntensity={isActive ? 2 : 0.8}
                                         toneMapped={false}
                                     />
                                 </mesh>
@@ -419,7 +420,7 @@ function AchievementMonolith({
         metalness: 0.8,
         roughness: 0.2,
         emissive: data.accent,
-        emissiveIntensity: isActive ? 1.8 : (hovered ? 0.8 : 0.3),
+        emissiveIntensity: isActive ? 1.4 : (hovered ? 0.7 : 0.3),
         transparent: true,
         opacity: isActive ? 0.95 : 0.85,
         envMapIntensity: 0.5,
@@ -607,6 +608,13 @@ export default function Achievements3D() {
     const [activeIndex, setActiveIndex] = useState(0);
     const isMobile = useIsMobile();
     const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+    // Lazy-once canvas gate: mounts the WebGL canvas the first time the
+    // section comes within 1500px, then keeps it alive (render loop still
+    // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
+    const nearViewport = useRefInViewport(sectionRef, "1500px", true);
+    // Background pre-warm: build the scene in idle time after load.
+    const warmedUp = useWarmupTimer(4600);
+    const showCanvas = nearViewport || warmedUp;
     const touchStartX = useRef(0);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -669,11 +677,13 @@ export default function Achievements3D() {
             </button>
 
 
-            {/* Canvas takes up entire section */}
+            {/* Canvas takes up entire section — mounted only when near the viewport */}
             <div className="absolute inset-0 w-full h-full z-0 cursor-default">
-                <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} performance={{ min: 0.5 }}>
-                    <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
-                </Canvas>
+                {showCanvas && (
+                    <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} performance={{ min: 0.5 }} onCreated={() => markSceneWarmed("achievements")}>
+                        <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
+                    </Canvas>
+                )}
 
                 {/* Vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />

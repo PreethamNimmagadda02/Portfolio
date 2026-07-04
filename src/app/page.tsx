@@ -1,24 +1,58 @@
 "use client";
 
 import Hero from "@/components/Hero";
-import About3D from "@/components/About3D";
-import Projects from "@/components/Projects";
-import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import NoiseBackground from "@/components/NoiseBackground";
-import Achievements3D from "@/components/Achievements3D";
 import ScrollReveal from "@/components/ScrollReveal";
-import GitHubStats from "@/components/GitHubStats";
-import Testimonials from "@/components/Testimonials";
-import SectionDivider3D from "@/components/SectionDivider3D";
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
-// Dynamic import for Three.js background components (client-side only).
-// Next.js dynamic() with ssr: false ensures these don't run during prerender
-// and are split into their own chunks via webpack vendor splitting.
+// Dynamic imports for every Three.js/heavy below-fold section (client-only).
+// This keeps three.js, drei, and postprocessing out of the initial bundle —
+// they load as separate chunks once the page is interactive, so the hero
+// paints fast. Only Hero and Contact (real HTML content) stay eager.
+//
+// Each import gets a `loading` placeholder matching the section's real
+// height. Without them the page collapses while chunks load, which puts
+// every section "in the viewport" at once — mounting all WebGL canvases
+// simultaneously and janking the initial load.
+const SectionSkeleton = ({ className }: { className: string }) => (
+  <div className={className} aria-hidden />
+);
+
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
-const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), { ssr: false });
+const SkillsMarquee = dynamic(() => import("@/components/SkillsMarquee"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="min-h-[720px] md:min-h-[950px] w-full" />,
+});
+const About3D = dynamic(() => import("@/components/About3D"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="min-h-[800px] md:min-h-screen w-full" />,
+});
+const Projects = dynamic(() => import("@/components/Projects"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="h-[100svh] min-h-[600px] w-full" />,
+});
+const Experience = dynamic(() => import("@/components/Experience"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="h-[100svh] min-h-[600px] w-full" />,
+});
+const Achievements3D = dynamic(() => import("@/components/Achievements3D"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="h-[100svh] min-h-[600px] w-full" />,
+});
+const GitHubStats = dynamic(() => import("@/components/GitHubStats"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="min-h-[800px] w-full" />,
+});
+const Testimonials = dynamic(() => import("@/components/Testimonials"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="min-h-[700px] w-full" />,
+});
+const SectionDivider3D = dynamic(() => import("@/components/SectionDivider3D"), {
+  ssr: false,
+  loading: () => <SectionSkeleton className="h-20 md:h-56 w-full" />,
+});
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();

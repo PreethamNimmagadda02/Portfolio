@@ -157,6 +157,8 @@ function ProfileSkeleton() {
 export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const sectionRef = useRef<any>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  // Defer the Codolio API call until the section approaches the viewport
+  const shouldFetch = useInView(sectionRef, { once: true, margin: "600px" });
 
   const [profiles, setProfiles] = useState<PlatformProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -223,8 +225,8 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (shouldFetch) fetchData();
+  }, [shouldFetch, fetchData]);
 
   const innerContent = (
     <>

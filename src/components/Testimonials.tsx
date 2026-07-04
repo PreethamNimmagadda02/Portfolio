@@ -141,8 +141,11 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       whileHover={mobile ? undefined : { scale: 1.05, zIndex: 20 }}
       className={
         mobile
-          ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] group relative overflow-hidden"
-          : "flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-2xl border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
+          /* Near-solid bg instead of backdrop-blur: dozens of animating
+             backdrop filters are one of the most expensive things a
+             compositor can do — visually identical over a dark scene. */
+          ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/95 border border-white/[0.08] group relative overflow-hidden"
+          : "flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/95 border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
       }
       style={{
         rotateX: mobile ? 0 : rotateX,
@@ -267,11 +270,15 @@ function MobileCarousel() {
 export default function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  // Non-once observer: pauses the marquee animation while off-screen
+  const marqueeActive = useInView(sectionRef);
   const isMobile = useIsMobile();
 
-  // Quadruple for seamless infinite marquee (-50% translate = two full copies)
-  const row1 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
-  const row2 = [...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6), ...testimonials.slice(6), ...testimonials.slice(0, 6)];
+  // Two copies are exactly what a seamless -50% translate loop needs.
+  // (Was 4×/8× = 96 cards; 12 cards × ~444px already exceeds any viewport.)
+  const row1 = [...testimonials, ...testimonials];
+  const rotated = [...testimonials.slice(6), ...testimonials.slice(0, 6)];
+  const row2 = [...rotated, ...rotated];
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-24 relative overflow-hidden">
@@ -309,7 +316,10 @@ export default function Testimonials() {
           <div className="relative mb-5">
             <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
-            <div className="flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:[animation:none]">
+            <div
+              className="flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:[animation:none]"
+              style={{ animationPlayState: marqueeActive ? undefined : "paused" }}
+            >
               {row1.map((t, i) => (
                 <TestimonialCard key={`r1-${i}`} t={t} />
               ))}
@@ -320,7 +330,10 @@ export default function Testimonials() {
           <div className="relative">
             <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
-            <div className="flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:[animation:none]">
+            <div
+              className="flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:[animation:none]"
+              style={{ animationPlayState: marqueeActive ? undefined : "paused" }}
+            >
               {row2.map((t, i) => (
                 <TestimonialCard key={`r2-${i}`} t={t} />
               ))}

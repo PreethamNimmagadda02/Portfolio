@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, smoothScrollTo, seededRandom } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
@@ -27,21 +27,24 @@ interface NavParticleStyle {
 }
 
 function makeNavParticleStyle(index: number): NavParticleStyle {
-  const duration = (3 + Math.random() * 3).toFixed(3);
-  const delay = (Math.random() * 2).toFixed(3);
+  // Seeded per-index PRNG: identical values during prerender and hydration.
+  // (Math.random() here caused hydration mismatches — useState lazy
+  // initializers DO run on the server.)
+  const rand = seededRandom(index * 1013 + 7);
+  const duration = (3 + rand() * 3).toFixed(3);
+  const delay = (rand() * 2).toFixed(3);
   return {
-    width: `${(2 + Math.random() * 2).toFixed(2)}px`,
-    height: `${(2 + Math.random() * 2).toFixed(2)}px`,
-    left: `${(10 + Math.random() * 80).toFixed(4)}%`,
-    top: `${(20 + Math.random() * 60).toFixed(4)}%`,
+    width: `${(2 + rand() * 2).toFixed(2)}px`,
+    height: `${(2 + rand() * 2).toFixed(2)}px`,
+    left: `${(10 + rand() * 80).toFixed(4)}%`,
+    top: `${(20 + rand() * 60).toFixed(4)}%`,
     // Embed delay inside the shorthand so there's no competing animationDelay prop
     animation: `navFloat${index % 4} ${duration}s ease-in-out ${delay}s infinite`,
   };
 }
 
 function NavParticle({ index }: { index: number }) {
-  // Lazy initializer: only runs once on the client, never during SSR.
-  // Prevents Math.random() hydration mismatch between server and client.
+  // Deterministic style — same output on server and client.
   const [s] = useState<NavParticleStyle>(() => makeNavParticleStyle(index));
 
   const style: React.CSSProperties = {
@@ -75,41 +78,65 @@ export default function Navbar() {
   const tiltState = useRef({ rx: 0, ry: 0, spotX: 50, spotY: 50 });
 
   // ── Smooth tilt animation loop ──
+  // The rAF loop only runs while hovering (or decaying back to flat).
+  // Previously it ran for the entire session, writing styles every frame
+  // even when the cursor never touched the navbar.
+  const loopActive = useRef(false);
+
+  const tick = useCallback(function tickFn() {
+    if (!innerRef.current) {
+      loopActive.current = false;
+      return;
+    }
+    const ms = mouseState.current;
+    const ts = tiltState.current;
+
+    if (ms.hovering) {
+      // Lerp toward target with damping — kept subtle so click targets
+      // don't drift away from the cursor mid-interaction.
+      ts.ry += ((ms.x - 0.5) * 7 - ts.ry) * 0.08;
+      ts.rx += ((0.5 - ms.y) * 4 - ts.rx) * 0.08;
+      ts.spotX += (ms.x * 100 - ts.spotX) * 0.12;
+      ts.spotY += (ms.y * 100 - ts.spotY) * 0.12;
+    } else {
+      // Decay back to flat
+      ts.ry *= 0.92;
+      ts.rx *= 0.92;
+      ts.spotX += (50 - ts.spotX) * 0.06;
+      ts.spotY += (50 - ts.spotY) * 0.06;
+    }
+
+    innerRef.current.style.transform = `perspective(800px) rotateX(${ts.rx}deg) rotateY(${ts.ry}deg) translateZ(0)`;
+
+    // Update spotlight via CSS variable
+    innerRef.current.style.setProperty("--spot-x", `${ts.spotX}%`);
+    innerRef.current.style.setProperty("--spot-y", `${ts.spotY}%`);
+    innerRef.current.style.setProperty("--spot-opacity", ms.hovering ? "1" : "0");
+
+    // Stop once fully decayed and not hovering — zero idle cost
+    const converged =
+      !ms.hovering &&
+      Math.abs(ts.rx) < 0.01 &&
+      Math.abs(ts.ry) < 0.01 &&
+      Math.abs(ts.spotX - 50) < 0.1 &&
+      Math.abs(ts.spotY - 50) < 0.1;
+
+    if (converged) {
+      loopActive.current = false;
+      return;
+    }
+    rafRef.current = requestAnimationFrame(tickFn);
+  }, []);
+
+  const startLoop = useCallback(() => {
+    if (loopActive.current) return;
+    loopActive.current = true;
+    rafRef.current = requestAnimationFrame(tick);
+  }, [tick]);
+
   useEffect(() => {
-    let running = true;
-
-    const animate = () => {
-      if (!running || !innerRef.current) return;
-      const ms = mouseState.current;
-      const ts = tiltState.current;
-
-      if (ms.hovering) {
-        // Lerp toward target with damping
-        ts.ry += ((ms.x - 0.5) * 14 - ts.ry) * 0.08;
-        ts.rx += ((0.5 - ms.y) * 8 - ts.rx) * 0.08;
-        ts.spotX += (ms.x * 100 - ts.spotX) * 0.12;
-        ts.spotY += (ms.y * 100 - ts.spotY) * 0.12;
-      } else {
-        // Decay back to flat
-        ts.ry *= 0.92;
-        ts.rx *= 0.92;
-        ts.spotX += (50 - ts.spotX) * 0.06;
-        ts.spotY += (50 - ts.spotY) * 0.06;
-      }
-
-      innerRef.current.style.transform = `perspective(800px) rotateX(${ts.rx}deg) rotateY(${ts.ry}deg) translateZ(0)`;
-
-      // Update spotlight via CSS variable
-      innerRef.current.style.setProperty("--spot-x", `${ts.spotX}%`);
-      innerRef.current.style.setProperty("--spot-y", `${ts.spotY}%`);
-      innerRef.current.style.setProperty("--spot-opacity", ms.hovering ? "1" : "0");
-
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
     return () => {
-      running = false;
+      loopActive.current = false;
       cancelAnimationFrame(rafRef.current);
     };
   }, []);
@@ -123,70 +150,72 @@ export default function Navbar() {
 
   const handleMouseEnter = useCallback(() => {
     mouseState.current.hovering = true;
-  }, []);
+    startLoop();
+  }, [startLoop]);
 
   const handleMouseLeave = useCallback(() => {
     mouseState.current.hovering = false;
-  }, []);
+    // Loop keeps running until the decay converges, then stops itself
+    startLoop();
+  }, [startLoop]);
 
   // ── Scroll tracking ──
   useEffect(() => {
     let ticking = false;
+    let lastSectionCheck = 0;
+
+    const measureSections = () => {
+      const viewportHeight = window.innerHeight;
+      let bestSection = "home";
+      let bestOverlap = 0;
+
+      const allSections = [...navLinks.map(l => l.href.slice(1)), "contact"];
+
+      for (const sectionId of allSections) {
+        const el = document.getElementById(sectionId);
+        if (!el) continue;
+
+        const rect = el.getBoundingClientRect();
+        const visibleTop = Math.max(0, rect.top);
+        const visibleBottom = Math.min(viewportHeight, rect.bottom);
+        const overlap = Math.max(0, visibleBottom - visibleTop);
+
+        if (overlap > bestOverlap) {
+          bestOverlap = overlap;
+          bestSection = sectionId;
+        }
+      }
+
+      setActiveSection(bestSection);
+    };
 
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
+          // Cheap check every frame
           setScrolled(window.scrollY > 50);
 
-          const viewportHeight = window.innerHeight;
-          let bestSection = "home";
-          let bestOverlap = 0;
-
-          const allSections = [...navLinks.map(l => l.href.slice(1)), "contact"];
-
-          for (const sectionId of allSections) {
-            const el = document.getElementById(sectionId);
-            if (!el) continue;
-
-            const rect = el.getBoundingClientRect();
-            const visibleTop = Math.max(0, rect.top);
-            const visibleBottom = Math.min(viewportHeight, rect.bottom);
-            const overlap = Math.max(0, visibleBottom - visibleTop);
-
-            if (overlap > bestOverlap) {
-              bestOverlap = overlap;
-              bestSection = sectionId;
-            }
+          // Expensive check (9× getBoundingClientRect = forced layout)
+          // throttled to ~6/s — plenty for a section highlight.
+          const now = performance.now();
+          if (now - lastSectionCheck > 150) {
+            lastSectionCheck = now;
+            measureSections();
           }
-
-          setActiveSection(bestSection);
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const targetId = href.replace("#", "");
-    const element = document.getElementById(targetId);
-    if (!element) return;
-
-    const lenis = (window as unknown as { lenis?: { scrollTo: (target: HTMLElement, options?: Record<string, unknown>) => void } }).lenis;
-    if (lenis) {
-      lenis.scrollTo(element, {
-        offset: -80,
-        duration: 1.2,
-        easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
-      });
-    } else {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    smoothScrollTo(href);
     setIsOpen(false);
   };
 
@@ -318,14 +347,15 @@ export default function Navbar() {
                   <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
                   <span className="absolute inset-0 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
                 </span>
-                <span className="text-[9px] sm:text-[11px] text-purple-400/80 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
+                <span className="text-[10px] sm:text-xs text-purple-300/90 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
                   AI & Full Stack Engineer
                 </span>
               </div>
             </a>
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-0.5 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
+            {/* Desktop Menu — xl+ only: brand + 8 links + toggle + CTA needs
+                ~1090px, which overflows the pill on tablets/small laptops */}
+            <div className="hidden xl:flex items-center gap-0.5 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
                 return (
@@ -368,7 +398,7 @@ export default function Navbar() {
             </div>
 
             {/* Theme Toggle */}
-            <div className="hidden md:block">
+            <div className="hidden xl:block">
               <ThemeToggle />
             </div>
 
@@ -376,7 +406,7 @@ export default function Navbar() {
             <motion.div
               whileHover={{ scale: 1.06, rotateY: -6 }}
               whileTap={{ scale: 0.94 }}
-              className="hidden md:block relative group"
+              className="hidden xl:block relative group"
               style={{ transformStyle: "preserve-3d" }}
             >
               <div className={cn(
@@ -408,8 +438,8 @@ export default function Navbar() {
               </a>
             </motion.div>
 
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            {/* Mobile/tablet Menu Button */}
+            <div className="xl:hidden">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(!isOpen)}
@@ -432,7 +462,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="absolute top-16 left-0 w-full bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:hidden shadow-2xl"
+              className="absolute top-16 left-0 w-full max-h-[calc(100svh-6rem)] overflow-y-auto bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 xl:hidden shadow-2xl"
             >
               <div className="flex flex-col space-y-2">
                 {navLinks.map((link, i) => {

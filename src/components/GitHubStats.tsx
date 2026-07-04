@@ -390,6 +390,10 @@ function StatSkeleton() {
 export default function GitHubStats() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  // Defer the 4 GitHub API calls until the section approaches the viewport —
+  // previously they fired at page load, competing with critical resources
+  // and burning unauthenticated rate limit on every visit.
+  const shouldFetch = useInView(sectionRef, { once: true, margin: "600px" });
 
   const [stats, setStats] = useState<StatsData | null>(null);
   const [languages, setLanguages] = useState<LanguageData[]>([]);
@@ -469,8 +473,8 @@ export default function GitHubStats() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (shouldFetch) fetchData();
+  }, [shouldFetch, fetchData]);
 
   const statCards = useMemo(() => {
     if (!stats) return [];

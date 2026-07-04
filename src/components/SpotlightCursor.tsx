@@ -17,27 +17,43 @@ export default function SpotlightCursor() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    const onMouseMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY };
-    };
-
-    window.addEventListener("pointermove", onMouseMove);
-
-    // Smooth animation loop with spring physics
+    // Smooth animation loop with spring physics.
+    // Runs only while the spotlight is catching up to the cursor — once it
+    // converges (mouse stopped) the loop stops, so an idle page costs nothing.
     let running = true;
+    let loopActive = false;
+
     const animate = () => {
-      if (!running || !containerRef.current) return;
+      if (!running || !containerRef.current) {
+        loopActive = false;
+        return;
+      }
 
       // Spring interpolation for smooth following
-      position.current.x += (target.current.x - position.current.x) * 0.12;
-      position.current.y += (target.current.y - position.current.y) * 0.12;
+      const dx = target.current.x - position.current.x;
+      const dy = target.current.y - position.current.y;
+      position.current.x += dx * 0.12;
+      position.current.y += dy * 0.12;
 
       containerRef.current.style.setProperty("--cx", `${position.current.x}px`);
       containerRef.current.style.setProperty("--cy", `${position.current.y}px`);
 
+      if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+        loopActive = false;
+        return;
+      }
       rafId.current = requestAnimationFrame(animate);
     };
-    rafId.current = requestAnimationFrame(animate);
+
+    const onMouseMove = (e: MouseEvent) => {
+      target.current = { x: e.clientX, y: e.clientY };
+      if (!loopActive) {
+        loopActive = true;
+        rafId.current = requestAnimationFrame(animate);
+      }
+    };
+
+    window.addEventListener("pointermove", onMouseMove, { passive: true });
 
     return () => {
       running = false;

@@ -104,7 +104,7 @@ function FloatingInput({
         <motion.div
           className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
           animate={{
-            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#6b7280",
+            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#9ca3af",
             scale: isFocused ? 1.1 : 1
           }}
           transition={{ duration: 0.2 }}
@@ -234,7 +234,7 @@ function FloatingTextarea({
         <motion.div
           className="absolute left-4 top-4 pointer-events-none"
           animate={{
-            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#6b7280",
+            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#9ca3af",
             scale: isFocused ? 1.1 : 1
           }}
           transition={{ duration: 0.2 }}
@@ -287,7 +287,7 @@ function FloatingTextarea({
               transition={{ duration: 0.2 }}
             />
           </div>
-          <span className={`text-xs font-mono ${charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-500"
+          <span className={`text-xs font-mono ${charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-400"
             }`}>
             {charCount}/{maxLength}
           </span>
@@ -593,7 +593,7 @@ export default function Contact() {
               <ContactCard icon={MapPin} label="Location" value="Hyderabad, Telangana" gradient={contactColors.location.gradient} />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 30, scale: 0.9 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 50 } } }}>
-              <ContactCard icon={Phone} label="Phone" value="807-402-1047" href="tel:+918074021047" gradient={contactColors.phone.gradient} />
+              <ContactCard icon={Phone} label="Phone" value="+91 80740 21047" href="tel:+918074021047" gradient={contactColors.phone.gradient} />
             </motion.div>
           </motion.div>
 
@@ -605,23 +605,18 @@ export default function Contact() {
             transition={{ duration: 0.6, type: "spring" as const, stiffness: 50 }}
             className="relative [perspective:1500px] group"
           >
-            {/* Animated gradient border for form */}
-            <motion.div
-              className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 rounded-3xl opacity-50 group-hover:opacity-100 blur-sm transition-opacity duration-500"
-              animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-              style={{ backgroundSize: "200% 200%" }}
-            />
+            {/* Gradient border for form — static at rest, brightens on hover */}
+            <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 rounded-2xl opacity-30 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
 
             <form
               ref={formRef}
               onSubmit={handleSubmit}
-              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300"
+              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300"
             >
               {/* Form progress indicator */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-500 font-medium">Form completion</span>
+                  <span className="text-xs text-gray-400 font-medium">Form completion</span>
                   <span className="text-xs text-purple-400 font-mono">{Math.round(formCompletion)}%</span>
                 </div>
                 <div className="h-1 bg-white/10 rounded-full overflow-hidden">
@@ -673,17 +668,13 @@ export default function Contact() {
 
                 <motion.button
                   type="submit"
-                  disabled={isSubmitting || Object.keys(errors).length > 0}
+                  disabled={isSubmitting}
                   whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(168, 85, 247, 0.4)" }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold transition-all flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
                 >
-                  {/* Animated shine effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                    animate={{ x: ["0%", "200%"] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
-                  />
+                  {/* Shine sweep on hover only — no perpetual motion */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
 
                   <AnimatePresence mode="wait">
                     {isSubmitting ? (

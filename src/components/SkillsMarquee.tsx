@@ -6,6 +6,8 @@ import * as THREE from "three";
 import { useMemo, useRef, useState, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { markSceneWarmed } from "@/lib/utils";
 
 // Skills data with categories for color coding
 const skillsData = [
@@ -137,6 +139,11 @@ function useSphereRotation(groupRef: React.RefObject<THREE.Group | null>, isHove
   });
 }
 
+// Module-level scratch vectors shared across all SkillNodes —
+// avoids ~120 Vector3 allocations per frame (GC pressure = jank)
+const _worldPos = new THREE.Vector3();
+const _scaleVec = new THREE.Vector3();
+
 // Enhanced SkillNode with prominent hover card and pulsing glow
 function SkillNode({
   position,
@@ -160,24 +167,31 @@ function SkillNode({
   const fullCategoryName = categoryLabels[item.category] || item.category;
 
   const [isFront, setIsFront] = useState(true);
+  const isFrontRef = useRef(true);
 
   useFrame((state) => {
     if (!meshRef.current) return;
 
-    const tempVec = new THREE.Vector3();
-    meshRef.current.getWorldPosition(tempVec);
-    setIsFront(tempVec.z > 0.1);
+    // Reusable scratch vectors — zero allocations per frame
+    meshRef.current.getWorldPosition(_worldPos);
+
+    // Only touch React state when front/back visibility actually flips
+    const front = _worldPos.z > 0.1;
+    if (front !== isFrontRef.current) {
+      isFrontRef.current = front;
+      setIsFront(front);
+    }
 
     // Scale animation — much bigger on hover
     const targetScale = isHovered ? 2.8 : isAnyHovered && !isHovered ? 0.7 : isFiltered ? 0.4 : 1;
-    meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.12);
+    meshRef.current.scale.lerp(_scaleVec.setScalar(targetScale), 0.12);
 
     const t = state.clock.elapsedTime;
 
     // Pulsing inner glow ring on hover
     if (glowRef.current) {
       const pulseScale = isHovered ? 3.5 + Math.sin(t * 4) * 0.8 : 0;
-      glowRef.current.scale.lerp(new THREE.Vector3(pulseScale, pulseScale, pulseScale), 0.15);
+      glowRef.current.scale.lerp(_scaleVec.setScalar(pulseScale), 0.15);
       const mat = glowRef.current.material as THREE.MeshBasicMaterial;
       if (mat) {
         mat.opacity = isHovered ? 0.45 + Math.sin(t * 3) * 0.2 : 0;
@@ -187,7 +201,7 @@ function SkillNode({
     // Outer expanding glow halo
     if (outerGlowRef.current) {
       const outerScale = isHovered ? 5 + Math.sin(t * 2) * 1 : 0;
-      outerGlowRef.current.scale.lerp(new THREE.Vector3(outerScale, outerScale, outerScale), 0.1);
+      outerGlowRef.current.scale.lerp(_scaleVec.setScalar(outerScale), 0.1);
       const mat = outerGlowRef.current.material as THREE.MeshBasicMaterial;
       if (mat) {
         mat.opacity = isHovered ? 0.15 + Math.sin(t * 1.5) * 0.08 : 0;
@@ -898,12 +912,18 @@ function CategoryChip({
 
 export default function SkillsMarquee() {
   const isMobile = useIsMobile();
-  const [mounted, setMounted] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
   const statsRef = useRef<HTMLDivElement>(null);
   const statsInView = useInView(statsRef, { once: true, amount: 0.3 });
-
-  useEffect(() => setMounted(true), []);
+  // Pause the WebGL render loop entirely when the section is off-screen
+  const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+  // Lazy-once canvas gate: mounts the WebGL canvas the first time the
+  // section comes within 1500px, then keeps it alive (render loop still
+  // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
+  const nearViewport = useRefInViewport(sectionRef, "1500px", true);
+  // Background pre-warm: build the sphere in idle time after load.
+  const warmedUp = useWarmupTimer(3200);
+  const showCanvas = nearViewport || warmedUp;
 
   const toggleCategory = useCallback((cat: string) => {
     setActiveCategories((prev) => {
@@ -932,14 +952,17 @@ export default function SkillsMarquee() {
     return counts;
   }, []);
 
-  // Placeholder height matches the rendered section to avoid hydration layout shift
-  if (!mounted) return <div className="h-[760px] md:h-[1000px] w-full bg-black/5" />;
+  // No pre-mount placeholder needed: this component is loaded with
+  // `dynamic(..., { ssr: false })` (never prerendered) and `useIsMobile`
+  // resolves synchronously — and an early return here would leave the
+  // viewport observers attached to a stale/null ref, permanently blocking
+  // the canvas from mounting.
 
   return (
     <section
+      ref={sectionRef}
       id="skills-sphere"
-      className="py-16 md:py-24 relative w-full overflow-hidden flex flex-col items-center justify-center"
-      style={{ minHeight: isMobile ? "760px" : "1000px" }}
+      className="py-12 md:py-16 relative w-full overflow-hidden flex flex-col items-center justify-center"
     >
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
@@ -988,28 +1011,40 @@ export default function SkillsMarquee() {
         ))}
       </motion.div>
 
-      {/* 3D Canvas */}
-      <div className="relative z-0 w-full" style={{ height: isMobile ? "480px" : "650px" }}>
-        <Canvas
-          camera={{ position: [0, 0, 9], fov: 45 }}
-          gl={{ antialias: !isMobile, alpha: true }}
-          dpr={isMobile ? [1, 1.5] : [1, 2]}
-          className="w-full h-full"
-          // pan-y everywhere: vertical swipes scroll the page natively,
-          // horizontal drags still rotate the sphere. Never trap page scroll.
-          style={{ touchAction: "pan-y" }}
-        >
-          <Suspense fallback={null}>
-            <group position={[0, 0, 0]}>
-              <SkillsSphereScene isMobile={isMobile} activeCategories={activeCategories} />
-            </group>
-          </Suspense>
+      {/* 3D Canvas — viewport-adaptive height so the header, sphere AND the
+          stats bar below all fit within one screen on any display */}
+      <div
+        className="relative z-0 w-full"
+        style={{
+          height: isMobile
+            ? "clamp(320px, 46svh, 480px)"
+            : "clamp(380px, 52svh, 620px)",
+        }}
+      >
+        {showCanvas && (
+          <Canvas
+            camera={{ position: [0, 0, 9], fov: 45 }}
+            gl={{ antialias: !isMobile, alpha: true }}
+            dpr={[1, 1.5]}
+            frameloop={inViewport ? "always" : "never"}
+            onCreated={() => markSceneWarmed("skills")}
+            className="w-full h-full"
+            // pan-y everywhere: vertical swipes scroll the page natively,
+            // horizontal drags still rotate the sphere. Never trap page scroll.
+            style={{ touchAction: "pan-y" }}
+          >
+            <Suspense fallback={null}>
+              <group position={[0, 0, 0]}>
+                <SkillsSphereScene isMobile={isMobile} activeCategories={activeCategories} />
+              </group>
+            </Suspense>
 
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={1} color="#4c1d95" />
-          <pointLight position={[-10, 10, -10]} intensity={2} color="#ec4899" />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#06b6d4" />
-        </Canvas>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} intensity={1} color="#4c1d95" />
+            <pointLight position={[-10, 10, -10]} intensity={2} color="#ec4899" />
+            <pointLight position={[-10, -10, -10]} intensity={0.5} color="#06b6d4" />
+          </Canvas>
+        )}
 
         {/* Drag hint */}
         <motion.div
@@ -1029,13 +1064,13 @@ export default function SkillsMarquee() {
         </motion.div>
       </div>
 
-      {/* Animated Stats Bar */}
+      {/* Animated Stats Bar — always within the section's viewport */}
       <motion.div
         ref={statsRef}
         initial={{ opacity: 0, y: 20 }}
         animate={statsInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="relative z-10 mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-12 px-4 sm:px-6 py-4 sm:py-5 mx-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl"
+        className="relative z-10 mt-4 md:mt-6 flex flex-wrap items-center justify-around gap-4 sm:gap-6 w-[min(92vw,44rem)] px-4 sm:px-8 py-4 sm:py-6 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl"
       >
         <AnimatedCounter end={skillsData.length} label="Total Skills" suffix="+" />
         <div className="w-px h-10 bg-white/10 hidden sm:block" />

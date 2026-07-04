@@ -127,13 +127,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // suppressHydrationWarning on <html>: the theme init script sets data-theme
+  // before React hydrates — an expected, intentional attribute mismatch.
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        {/* suppressHydrationWarning on both scripts: browser extensions can
+            inject their own <script> tags into <head> before React hydrates,
+            shifting node matching. App code can't prevent that. */}
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <script
+          suppressHydrationWarning
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />

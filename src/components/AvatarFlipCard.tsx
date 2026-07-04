@@ -42,13 +42,14 @@ export default function AvatarFlipCard() {
     }
   }, [isFlipped, visibleLines]);
 
-  // Blinking cursor
+  // Blinking cursor — only ticks while the terminal (back face) is visible
   useEffect(() => {
+    if (!isFlipped) return;
     const cursorInterval = setInterval(() => {
       setCursorVisible((prev) => !prev);
     }, 530);
     return () => clearInterval(cursorInterval);
-  }, []);
+  }, [isFlipped]);
 
   return (
     <div
@@ -166,19 +167,22 @@ export default function AvatarFlipCard() {
             transform: "rotateY(180deg)"
           }}
         >
-          {/* Subtle Holographic Sheen */}
+          {/* Subtle Holographic Sheen — animates only while the back face shows */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-pink-500/5 to-transparent opacity-40 z-10 pointer-events-none"
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 4, repeat: Infinity }}
+            animate={isFlipped ? { opacity: [0.2, 0.4, 0.2] } : { opacity: 0.2 }}
+            transition={isFlipped ? { duration: 4, repeat: Infinity } : { duration: 0.3 }}
           />
 
-          {/* Elegant Scanning Line */}
+          {/* Elegant Scanning Line — transform-based (compositor only, no
+              per-frame layout like animating `top` caused) */}
           <motion.div
-            className="absolute left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent z-20 pointer-events-none opacity-50"
-            animate={{ top: ["0%", "100%", "0%"] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-          />
+            className="absolute inset-0 z-20 pointer-events-none"
+            animate={isFlipped ? { y: ["-50%", "50%", "-50%"] } : { y: "-50%" }}
+            transition={isFlipped ? { duration: 6, repeat: Infinity, ease: "linear" } : { duration: 0.3 }}
+          >
+            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50" />
+          </motion.div>
 
           {/* Center Watermark Logo */}
           <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">

@@ -8,7 +8,8 @@ import { useRef, useState, Suspense, useMemo, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport } from "@/hooks/use-in-viewport";
+import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { markSceneWarmed } from "@/lib/utils";
 
 // Feature data matching original About.tsx EXACTLY
 const features = [
@@ -356,15 +357,15 @@ function OrbitingNode({ feature, index, totalCount, onHover, isActive }: { featu
                                 toneMapped={false}
                             />
                         </mesh>
-                        {/* Glow halo around node */}
-                        <mesh scale={isActive ? 2.0 : 1.5}>
+                        {/* Glow halo around node — kept tight to the surface */}
+                        <mesh scale={isActive ? 1.6 : 1.3}>
                             <sphereGeometry args={[0.4, 32, 32]} />
-                            <meshBasicMaterial color={feature.color} transparent opacity={isActive ? 0.15 : 0.05} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
+                            <meshBasicMaterial color={feature.color} transparent opacity={isActive ? 0.12 : 0.05} side={THREE.BackSide} blending={THREE.AdditiveBlending} />
                         </mesh>
                         {isActive && (
-                            <mesh scale={1.8}>
+                            <mesh scale={1.5}>
                                 <sphereGeometry args={[0.4, 32, 32]} />
-                                <meshBasicMaterial color={feature.color} transparent opacity={0.2} side={THREE.BackSide} />
+                                <meshBasicMaterial color={feature.color} transparent opacity={0.15} side={THREE.BackSide} />
                             </mesh>
                         )}
                         <Html position={[0, 0.7, 0]} center distanceFactor={10} style={{ pointerEvents: 'none' }}>
@@ -424,6 +425,20 @@ export default function About3D() {
     const [activeId, setActiveId] = useState<number | null>(null);
     const isMobile = useIsMobile();
     const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+    // Lazy-once canvas gate: mounts the WebGL canvas the first time the
+    // section comes within 1500px, then keeps it alive (render loop still
+    // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
+    const nearViewport = useRefInViewport(sectionRef, "1500px", true);
+    // Background pre-warm: build the scene shortly after load even if the
+    // user hasn't scrolled yet, so it's ready before they arrive.
+    const warmedUp = useWarmupTimer(1200);
+    const showCanvas = nearViewport || warmedUp;
+
+    // Mobile renders a carousel instead of a canvas — report the scene as
+    // trivially "warm" so the PageLoader isn't held waiting for it.
+    useEffect(() => {
+        if (isMobile) markSceneWarmed("about");
+    }, [isMobile]);
 
     // Hover logic
     const [displayId, setDisplayId] = useState<number>(0);
@@ -452,8 +467,8 @@ export default function About3D() {
 
             {/* 3D Scene Background - Covers Entire Section */}
             <div className="absolute inset-0 z-0">
-                {!isMobile && (
-                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} frameloop={inViewport ? "always" : "never"} className="cursor-move">
+                {!isMobile && showCanvas && (
+                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} onCreated={() => markSceneWarmed("about")} className="cursor-move">
                         <Suspense fallback={null}>
                             <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
                             <OrbitControls

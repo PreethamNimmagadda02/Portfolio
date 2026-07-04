@@ -31,7 +31,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport } from "@/hooks/use-in-viewport";
+import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { markSceneWarmed } from "@/lib/utils";
 
 // -----------------------------------------------------------------------------
 // Data
@@ -191,7 +192,8 @@ function AnimatedPlanet({
       coreRef.current.rotation.y = -t * 0.15;
       const m = coreRef.current.material as THREE.MeshPhysicalMaterial;
       if (m.emissiveIntensity !== undefined) {
-        m.emissiveIntensity = (isActive ? 2.5 : 1.5) + Math.sin(t * 2.5) * 0.4;
+        // Capped peak so the bloom halo stays tight around the core
+        m.emissiveIntensity = (isActive ? 1.8 : 1.2) + Math.sin(t * 2.5) * 0.3;
       }
     }
     if (shellRef.current) {
@@ -380,7 +382,7 @@ function ProjectCard3D({
     metalness: 0.85,
     roughness: 0.12,
     emissive: data.accent,
-    emissiveIntensity: isActive ? 2.2 : hovered ? 1.0 : 0.3,
+    emissiveIntensity: isActive ? 1.6 : hovered ? 0.9 : 0.3,
     transparent: true,
     opacity: isActive ? 0.95 : 0.85,
     envMapIntensity: 1.8,
@@ -481,7 +483,7 @@ function ProjectCard3D({
                   {data.title}
                 </h3>
                 <span
-                  className="inline-flex items-center gap-1.5 text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full border"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold mt-0.5 px-2 py-0.5 rounded-full border"
                   style={{
                     color: data.status === "Live" ? "#4ade80" : "#60a5fa",
                     borderColor:
@@ -523,11 +525,11 @@ function ProjectCard3D({
             {data.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2.5 py-1 rounded-full text-[11px] font-medium border"
+                className="px-2.5 py-1 rounded-full text-xs font-medium border"
                 style={{
                   color: data.accent,
-                  borderColor: `${data.accent}20`,
-                  backgroundColor: `${data.accent}08`,
+                  borderColor: `${data.accent}45`,
+                  backgroundColor: `${data.accent}18`,
                 }}
               >
                 {tag}
@@ -540,7 +542,7 @@ function ProjectCard3D({
             <Link
               href={data.links.demo}
               target="_blank"
-              className="text-xs font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group/link"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 py-1 group/link"
             >
               <ExternalLink
                 size={14}
@@ -551,7 +553,7 @@ function ProjectCard3D({
             <Link
               href={data.links.repo}
               target="_blank"
-              className="text-xs font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group/link"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 py-1 group/link"
             >
               <Github
                 size={14}
@@ -716,6 +718,13 @@ export default function Projects() {
   const [activeIndex, setActiveIndex] = useState(0);
   const isMobile = useIsMobile();
   const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+  // Lazy-once canvas gate: mounts the WebGL canvas the first time the
+  // section comes within 1500px, then keeps it alive (render loop still
+  // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
+  const nearViewport = useRefInViewport(sectionRef, "1500px", true);
+  // Background pre-warm: build the scene in idle time after load.
+  const warmedUp = useWarmupTimer(4400);
+  const showCanvas = nearViewport || warmedUp;
   const touchStartX = useRef(0);
 
   const navigate = useCallback(
@@ -736,11 +745,13 @@ export default function Projects() {
         rect.top < window.innerHeight * 0.5 &&
         rect.bottom > window.innerHeight * 0.5;
       if (!inView) return;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      // Only claim horizontal arrows — Up/Down must keep scrolling the page,
+      // otherwise keyboard users get trapped in this section.
+      if (e.key === "ArrowRight") {
         e.preventDefault();
         navigate(activeIndex + 1);
       }
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      if (e.key === "ArrowLeft") {
         e.preventDefault();
         navigate(activeIndex - 1);
       }
@@ -796,8 +807,11 @@ export default function Projects() {
             Projects
           </span>
         </motion.h2>
-        <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-          Navigate the gallery. Click on a planet to focus.
+        <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
+          Click a planet, swipe, or use the{" "}
+          <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/5 text-xs text-gray-200">←</kbd>{" "}
+          <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/5 text-xs text-gray-200">→</kbd>{" "}
+          keys to explore.
         </p>
       </div>
 
@@ -817,26 +831,57 @@ export default function Projects() {
         <ChevronRight size={isMobile ? 18 : 22} />
       </button>
 
+      {/* Pagination dots + index counter */}
+      <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+          {projects.map((proj, i) => (
+            <button
+              key={proj.id}
+              onClick={() => navigate(i)}
+              aria-label={`Go to project: ${proj.title}`}
+              aria-current={activeIndex === i ? "true" : undefined}
+              className="group relative p-1"
+            >
+              <span
+                className="block rounded-full transition-all duration-300"
+                style={{
+                  width: activeIndex === i ? 24 : 8,
+                  height: 8,
+                  background:
+                    activeIndex === i ? proj.color : "rgba(255,255,255,0.25)",
+                  boxShadow:
+                    activeIndex === i ? `0 0 12px ${proj.color}` : "none",
+                }}
+              />
+            </button>
+          ))}
+        </div>
+        <span className="text-xs font-mono text-gray-400 tabular-nums drop-shadow-md">
+          {String(activeIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+        </span>
+      </div>
 
-
-      {/* 3D Canvas */}
+      {/* 3D Canvas — mounted only when near the viewport */}
       <div className="absolute inset-0 w-full h-full z-0 cursor-default">
-        <Canvas
-          camera={{
-            position: isMobile ? [0, 2, 16] : [0, 2, 12],
-            fov: isMobile ? 55 : 45,
-          }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 1.5]}
-          frameloop={inViewport ? "always" : "never"}
-          performance={{ min: 0.5 }}
-        >
-          <Scene
-            activeIndex={activeIndex}
-            onSelect={setActiveIndex}
-            isMobile={isMobile}
-          />
-        </Canvas>
+        {showCanvas && (
+          <Canvas
+            camera={{
+              position: isMobile ? [0, 2, 16] : [0, 2, 12],
+              fov: isMobile ? 55 : 45,
+            }}
+            gl={{ antialias: true, alpha: true }}
+            dpr={[1, 1.5]}
+            frameloop={inViewport ? "always" : "never"}
+            performance={{ min: 0.5 }}
+            onCreated={() => markSceneWarmed("projects")}
+          >
+            <Scene
+              activeIndex={activeIndex}
+              onSelect={setActiveIndex}
+              isMobile={isMobile}
+            />
+          </Canvas>
+        )}
 
         {/* Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />

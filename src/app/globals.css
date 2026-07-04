@@ -77,7 +77,8 @@
   :focus-visible {
     outline: 2px solid rgba(167, 139, 250, 0.9);
     outline-offset: 2px;
-    border-radius: 4px;
+    /* No border-radius override — the outline follows each element's own
+       radius, so pills get pill-shaped rings instead of boxy corners. */
   }
 
   [data-theme="nebula"] :focus-visible {

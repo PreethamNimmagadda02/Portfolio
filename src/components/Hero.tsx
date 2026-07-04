@@ -1,13 +1,38 @@
 "use client";
 
-import { motion, useScroll, useTransform, Variants, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, Variants, useSpring, useInView } from "framer-motion";
 import { ArrowRight, Sparkles, ChevronDown, Code2, Zap, Library } from "lucide-react";
 import Link from "next/link";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { smoothScrollTo } from "@/lib/utils";
 
 // Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
 import AvatarFlipCard from "./AvatarFlipCard";
 import MagneticButton from "./MagneticButton";
+
+// Loader-completion hook with safety net: resolves via the "loader-done"
+// event, the global flag (if the event already fired before mount), or a
+// fallback timeout so hero content can never stay hidden forever.
+// Fallback must exceed the PageLoader's 5s hold — otherwise the hero
+// entrance animations play invisibly behind the loader overlay.
+function useLoaderDone(fallbackMs = 7000) {
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    const onDone = () => setDone(true);
+    window.addEventListener("loader-done", onDone);
+    // If the loader already finished before this component mounted, resolve
+    // on the next tick; otherwise arm the safety-net timeout.
+    const alreadyDone = (window as unknown as { __loaderDone?: boolean }).__loaderDone;
+    const fallback = setTimeout(onDone, alreadyDone ? 0 : fallbackMs);
+    return () => {
+      window.removeEventListener("loader-done", onDone);
+      clearTimeout(fallback);
+    };
+  }, [fallbackMs]);
+
+  return done;
+}
 
 // Roles to cycle through in the typing rotator
 const ROLES = [
@@ -23,11 +48,15 @@ const ROLES = [
 
 // Typing role rotator component
 function RoleRotator() {
+  const ref = useRef<HTMLSpanElement>(null);
+  // Pause the typing loop (setState every 40–80ms) while scrolled off-screen
+  const inView = useInView(ref);
   const [roleIndex, setRoleIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    if (!inView) return;
     const currentRole = ROLES[roleIndex];
     let timeout: NodeJS.Timeout;
 
@@ -52,16 +81,16 @@ function RoleRotator() {
     }
 
     return () => clearTimeout(timeout);
-  }, [displayed, isDeleting, roleIndex]);
+  }, [displayed, isDeleting, roleIndex, inView]);
 
   return (
-    <span className="inline-flex items-center">
+    <span ref={ref} className="inline-flex items-center">
       <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
         {displayed}
       </span>
       <motion.span
-        animate={{ opacity: [1, 0] }}
-        transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+        animate={inView ? { opacity: [1, 0] } : { opacity: 1 }}
+        transition={inView ? { duration: 0.5, repeat: Infinity, repeatType: "reverse" } : { duration: 0.2 }}
         className="inline-block w-[3px] h-[1.1em] bg-purple-400 ml-0.5 rounded-full"
       />
     </span>
@@ -198,18 +227,12 @@ function ScrollIndicator({ opacity }: { opacity: any }) {
 // Stats counter with count-up animation
 function AnimatedStat({ value, label, delay, gradient }: { value: string; label: React.ReactNode; delay: number; gradient: string }) {
   const [displayValue, setDisplayValue] = useState("0");
-  const [started, setStarted] = useState(false);
+  // Start counting as soon as the page loader finishes (with fallback)
+  const started = useLoaderDone();
   // Strip commas for parsing, keep suffix like "+"
   const rawNumeric = value.replace(/,/g, "").match(/[\d.]+/)?.[0] || "0";
   const suffix = value.replace(/,/g, "").replace(/[\d.]+/, "");
   const hasComma = value.includes(",");
-
-  // Start counting as soon as the page loader finishes
-  useEffect(() => {
-    const onDone = () => setStarted(true);
-    window.addEventListener("loader-done", onDone);
-    return () => window.removeEventListener("loader-done", onDone);
-  }, []);
 
   useEffect(() => {
     if (!started) return;
@@ -288,13 +311,7 @@ const letterVariants: Variants = {
 function AnimatedWord({ word, className, isOutline = false, reverse = false }: { word: string; className?: string; isOutline?: boolean; reverse?: boolean }) {
   const isGradient = className?.includes("bg-clip-text");
   const letters = reverse ? word.split("").reverse() : word.split("");
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const onDone = () => setReady(true);
-    window.addEventListener("loader-done", onDone);
-    return () => window.removeEventListener("loader-done", onDone);
-  }, []);
+  const ready = useLoaderDone();
 
   return (
     <motion.span
@@ -345,18 +362,15 @@ export default function Hero() {
   // Hydration fix & Mobile detection
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [loaderDone, setLoaderDone] = useState(false);
+  const loaderDone = useLoaderDone();
 
   useEffect(() => {
     setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    const onLoaderDone = () => setLoaderDone(true);
-    window.addEventListener("loader-done", onLoaderDone);
     return () => {
       window.removeEventListener("resize", checkMobile);
-      window.removeEventListener("loader-done", onLoaderDone);
     };
   }, []);
 
@@ -431,7 +445,7 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
-                Forging the <span className="text-blue-400 font-bold">autonomous AI copilot</span> at <span className="text-white font-bold">Matters.AI</span> that doesn't wait for breaches—it <span className="text-purple-400 font-bold">eliminates them before they exist</span>. Turning DSPM into a living, self-healing system where every threat is detected, analysed and <span className="text-pink-400 font-bold">autonomously remediated</span> at the speed of thought.
+                Forging the <span className="text-purple-400 font-bold">autonomous AI copilot</span> at <span className="text-white font-bold">Matters.AI</span> that doesn't wait for breaches—it <span className="text-white font-semibold">eliminates them before they exist</span>. Turning DSPM into a living, self-healing system where every threat is detected, analysed and <span className="text-purple-400 font-bold">autonomously remediated</span> at the speed of thought.
               </p>
             </motion.div>
           </motion.div>
@@ -489,8 +503,7 @@ export default function Hero() {
               href="#contact"
               onClick={(e) => {
                 e.preventDefault();
-                const el = document.getElementById("contact");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
+                smoothScrollTo("contact");
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -501,10 +514,7 @@ export default function Hero() {
               <span className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
               <span className="absolute inset-[1px] rounded-full bg-black/90 backdrop-blur-sm" />
 
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-              </span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
               <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
                 Open to <span className="text-white font-semibold">Opportunities</span>
               </span>
