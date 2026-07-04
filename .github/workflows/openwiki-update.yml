@@ -1,0 +1,51 @@
+name: OpenWiki Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub schedules use UTC; 08:00 UTC = 1:30 PM IST, every Monday
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install OpenWiki
+        run: npm install --global openwiki
+
+      - name: Run OpenWiki update
+        run: openwiki --update --print
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENWIKI_PROVIDER: anthropic
+          OPENWIKI_MODEL_ID: claude-haiku-4-5
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs(openwiki): automated documentation update"
+          branch: openwiki/auto-update
+          title: "docs: OpenWiki automated documentation update"
+          body: |
+            This PR was opened automatically by the [OpenWiki Update](.github/workflows/openwiki-update.yml) workflow.
+
+            OpenWiki scanned the codebase for changes and refreshed the documentation in `openwiki/`.
+
+            Review the diff and merge if the updates look correct.
+          labels: documentation,automated
+          delete-branch: true
