@@ -248,7 +248,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
           </motion.span>
           <h2 className="text-3xl md:text-5xl font-black text-white mb-3">
             Competitive{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-blue-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">
               Programming
             </span>
           </h2>
@@ -302,7 +302,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                 }}
                 className="relative group"
               >
-                <div className={`absolute -inset-[1px] bg-gradient-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
+                <div className={`absolute -inset-px bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
                 <div className="relative p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
 
                   {/* Header */}
@@ -406,7 +406,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts && (
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         <span>Hard Problems</span>
-                        <span className="font-mono text-gray-300 text-red-400"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
+                        <span className="font-mono text-red-400"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
                       </div>
                     )}
                   </div>

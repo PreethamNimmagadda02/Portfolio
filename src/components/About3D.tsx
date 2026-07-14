@@ -486,7 +486,7 @@ export default function About3D() {
                 )}
 
                 {/* Vignette Overlay */}
-                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90" />
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90" />
             </div>
 
             {/* Content Container - Glassmorphic Overlay */}
@@ -508,13 +508,13 @@ export default function About3D() {
                             </div>
 
                             <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-4 lg:mb-6 leading-tight">
-                                About <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Me</span>
+                                About <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-400">Me</span>
                             </h2>
 
-                            <div className="space-y-6 mb-8 text-gray-300 font-[var(--font-inter)]">
+                            <div className="space-y-6 mb-8 text-gray-300 font-(--font-inter)">
                                 <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight">
-                                    AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
+                                    AI <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300 font-bold">Tech Innovator</span> &{" "}
+                                    <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300 font-bold">Community Leader</span>
                                 </h3>
                                 <p className="text-base md:text-lg leading-relaxed">
                                     Building <span className="text-white font-bold">autonomous AI agents</span> that solve complex problems. Engineered systems with <span className="text-yellow-300 font-bold">20% efficiency gains</span>, pushing the boundaries of what&apos;s possible with AI.

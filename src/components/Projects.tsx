@@ -779,7 +779,7 @@ export default function Projects() {
     <section
       ref={sectionRef}
       id="projects"
-      className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
+      className="relative h-svh min-h-[600px] overflow-hidden flex items-center justify-center"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -801,7 +801,7 @@ export default function Projects() {
           className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
         >
           Signature{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400">
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400">
             Projects
           </span>
         </motion.h2>
@@ -882,7 +882,7 @@ export default function Projects() {
         )}
 
         {/* Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
       </div>
     </section>
   );

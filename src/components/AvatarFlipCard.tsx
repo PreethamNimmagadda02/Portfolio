@@ -16,7 +16,7 @@ export default function AvatarFlipCard() {
 
   return (
     <div
-      className="relative w-44 h-56 sm:w-56 sm:h-72 md:w-64 md:h-80 [perspective:1000px] rounded-2xl cursor-pointer"
+      className="relative w-44 h-56 sm:w-56 sm:h-72 md:w-64 md:h-80 perspective-[1000px] rounded-2xl cursor-pointer"
       role="button"
       tabIndex={0}
       aria-pressed={isFlipped}
@@ -72,7 +72,7 @@ export default function AvatarFlipCard() {
             style={{ transformOrigin: "center center" }}
           >
             <div
-              className="rounded-full bg-gradient-to-br from-purple-400 to-blue-400 opacity-60"
+              className="rounded-full bg-linear-to-br from-purple-400 to-blue-400 opacity-60"
               style={{
                 width: particle.size,
                 height: particle.size,
@@ -111,7 +111,7 @@ export default function AvatarFlipCard() {
             />
           </picture>
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
           {/* Animated corner accents */}
           <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-purple-400/60 rounded-tl" />
@@ -136,7 +136,7 @@ export default function AvatarFlipCard() {
         >
           {/* Subtle Holographic Sheen — animates only while the back face shows */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-pink-500/5 to-transparent opacity-40 z-10 pointer-events-none"
+            className="absolute inset-0 bg-linear-to-tr from-purple-500/10 via-pink-500/5 to-transparent opacity-40 z-10 pointer-events-none"
             animate={isFlipped ? { opacity: [0.2, 0.4, 0.2] } : { opacity: 0.2 }}
             transition={isFlipped ? { duration: 4, repeat: Infinity } : { duration: 0.3 }}
           />
@@ -148,7 +148,7 @@ export default function AvatarFlipCard() {
             animate={isFlipped ? { y: ["-50%", "50%", "-50%"] } : { y: "-50%" }}
             transition={isFlipped ? { duration: 6, repeat: Infinity, ease: "linear" } : { duration: 0.3 }}
           >
-            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50" />
+            <div className="absolute top-1/2 left-0 w-full h-px bg-linear-to-r from-transparent via-purple-400 to-transparent opacity-50" />
           </motion.div>
 
           {/* Center Watermark Logo */}
@@ -159,7 +159,7 @@ export default function AvatarFlipCard() {
           </div>
 
           {/* Clean Grid Background */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none" />
 
           {/* Content Container */}
           <div className="absolute inset-0 p-6 flex flex-col z-10 font-sans">
@@ -179,7 +179,7 @@ export default function AvatarFlipCard() {
             <div className="flex-1 space-y-5">
               <div className="group">
                 <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Name</div>
-                <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 tracking-wide">PREETHAM N.</div>
+                <div className="text-lg font-bold text-transparent bg-clip-text bg-linear-to-r from-white to-gray-300 tracking-wide">PREETHAM N.</div>
               </div>
 
               <div className="flex justify-between items-end">
