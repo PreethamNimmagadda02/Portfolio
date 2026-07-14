@@ -457,7 +457,7 @@ function ProjectCard3D({
         transform={false}
       >
         <div
-          className="w-[280px] sm:w-[320px] md:w-[340px] p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10 relative overflow-hidden"
+          className="w-[calc(100vw-6rem)] max-w-[280px] sm:w-[320px] sm:max-w-none md:w-[340px] p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10 relative overflow-hidden"
           style={{
             background: `linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.65))`,
             boxShadow: isActive

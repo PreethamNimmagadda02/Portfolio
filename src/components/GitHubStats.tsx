@@ -528,9 +528,9 @@ export default function GitHubStats() {
           </motion.span>
           <h2 className="text-3xl md:text-5xl font-black text-white mb-3">
             {activeTab === "github" ? (
-              <>GitHub <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">Activity</span></>
+              <>GitHub <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400">Activity</span></>
             ) : (
-              <>Competitive <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-blue-400">Programming</span></>
+              <>Competitive <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">Programming</span></>
             )}
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto">
@@ -615,7 +615,7 @@ export default function GitHubStats() {
                       }}
                       className="relative group block cursor-pointer"
                     >
-                      <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
+                      <div className={`absolute -inset-px bg-linear-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
                       <div className="relative p-4 sm:p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
                         <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
                           <stat.icon
@@ -623,10 +623,10 @@ export default function GitHubStats() {
                             className="text-gray-400 group-hover:text-white transition-colors"
                           />
                         </div>
-                        <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient} drop-shadow-sm`}>
+                        <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-linear-to-r ${stat.gradient} drop-shadow-sm`}>
                           {stat.isText ? (
                                <span
-                                 className="block text-2xl md:text-3xl mx-auto text-center break-words"
+                                 className="block text-2xl md:text-3xl mx-auto text-center wrap-break-word"
                                  title={String(stat.value)}
                                >
                               {stat.value}
@@ -651,8 +651,8 @@ export default function GitHubStats() {
                   transition={{ duration: 0.6, delay: 0.3 }}
                   className="lg:col-span-2 relative group flex flex-col"
                 >
-                  <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
+                  <div className="absolute -inset-px bg-linear-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
+                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col grow">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-bold text-white flex items-center gap-2">
                         <Code2 size={18} className="text-purple-400" />
@@ -669,7 +669,7 @@ export default function GitHubStats() {
                         <ExternalLink size={14} />
                       </a>
                     </div>
-                    <div className="flex-grow flex items-center justify-center">
+                    <div className="grow flex items-center justify-center">
                       {loading ? (
                         <div className="flex items-center justify-center h-32 w-full">
                           <Loader2
@@ -695,13 +695,13 @@ export default function GitHubStats() {
                   transition={{ duration: 0.6, delay: 0.45 }}
                   className="relative group flex flex-col"
                 >
-                  <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col flex-grow">
+                  <div className="absolute -inset-px bg-linear-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
+                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col grow">
                     <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                       <Code2 size={18} className="text-blue-400" />
                       Top Languages
                     </h3>
-                    <div className="flex-grow flex flex-col justify-center">
+                    <div className="grow flex flex-col justify-center">
                       {loading ? (
                         <div className="space-y-4 w-full">
                           {Array.from({ length: 4 }).map((_, i) => (

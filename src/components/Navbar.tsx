@@ -264,10 +264,10 @@ export default function Navbar() {
           />
 
           {/* Top specular highlight */}
-          <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent z-0" />
+          <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent z-0" />
 
           {/* Bottom shadow line for 3D depth */}
-          <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-black/30 to-transparent z-0" />
+          <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-linear-to-r from-transparent via-black/30 to-transparent z-0" />
 
           {/* Floating particles */}
           {[0, 1, 2, 3, 4, 5].map(i => (
@@ -280,7 +280,7 @@ export default function Navbar() {
             style={{ opacity: scrolled ? 0.6 : 0 }}
           >
             <div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent"
+              className="absolute inset-0 bg-linear-to-r from-transparent via-purple-500/10 to-transparent"
               style={{
                 animationName: scrolled ? "navShimmer" : "none",
                 animationDuration: "2s",
@@ -306,21 +306,21 @@ export default function Navbar() {
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <motion.div
-                  className="absolute -inset-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-70 blur-lg transition-opacity duration-300"
+                  className="absolute -inset-1.5 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-70 blur-lg transition-opacity duration-300"
                 />
-                <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.35)]">
+                <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.35)]">
                   <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
                     <span className="text-sm font-black tracking-tighter text-white">
                       PN
                     </span>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 </div>
               </motion.div>
               <div className="flex flex-col">
                 <span className="relative text-base sm:text-lg font-bold tracking-tight leading-none whitespace-nowrap">
                   <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
-                  <span className="absolute inset-0 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
+                  <span className="absolute inset-0 bg-clip-text text-transparent bg-linear-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
                 </span>
                 <span className="text-[10px] sm:text-xs text-purple-300/90 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
                   AI & Full Stack Engineer
@@ -330,7 +330,7 @@ export default function Navbar() {
 
             {/* Desktop Menu — xl+ only: brand + 8 links + toggle + CTA needs
                 ~1090px, which overflows the pill on tablets/small laptops */}
-            <div className="hidden xl:flex items-center gap-0.5 p-1 rounded-full bg-white/[0.03] border border-white/[0.04]">
+            <div className="hidden xl:flex items-center gap-0.5 p-1 rounded-full bg-white/3 border border-white/4">
               {navLinks.map((link) => {
                 const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
                 return (
@@ -365,7 +365,7 @@ export default function Navbar() {
 
                     {/* Hover underline glow */}
                     {!isActive && (
-                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-purple-400 to-blue-400 rounded-full group-hover/link:w-3/4 transition-all duration-300 opacity-0 group-hover/link:opacity-70 blur-[0.5px]" />
+                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-linear-to-r from-purple-400 to-blue-400 rounded-full group-hover/link:w-3/4 transition-all duration-300 opacity-0 group-hover/link:opacity-70 blur-[0.5px]" />
                     )}
                   </a>
                 );
@@ -385,14 +385,14 @@ export default function Navbar() {
               style={{ transformStyle: "preserve-3d" }}
             >
               <div className={cn(
-                "absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur-md transition-all duration-300",
+                "absolute -inset-1 bg-linear-to-r from-purple-600 to-blue-600 rounded-full blur-md transition-all duration-300",
                 activeSection === "contact" ? "opacity-100 blur-lg scale-110" : "opacity-0 group-hover:opacity-80"
               )} />
               <a
                 href="#contact"
                 onClick={(e) => scrollToSection(e, "#contact")}
                 className={cn(
-                  "relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all overflow-hidden",
+                  "relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all overflow-hidden",
                   activeSection === "contact"
                     ? "ring-2 ring-purple-400/60"
                     : ""
@@ -404,7 +404,7 @@ export default function Navbar() {
                 }}
               >
                 {/* Button shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
@@ -455,7 +455,7 @@ export default function Navbar() {
                         className={cn(
                           "block px-4 py-3 rounded-xl text-lg font-medium transition-colors",
                           isActive
-                            ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
+                            ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
                             : "text-gray-400 hover:bg-white/5 hover:text-white"
                         )}
                       >
@@ -483,7 +483,7 @@ export default function Navbar() {
                   <a
                     href="#contact"
                     onClick={(e) => scrollToSection(e, "#contact")}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-linear-to-r from-purple-600 to-blue-600 text-white font-medium"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     Hire Me

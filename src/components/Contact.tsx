@@ -51,7 +51,7 @@ function Toast({
           <AlertCircle className="w-6 h-6" />
         )}
       </motion.div>
-      <span className="font-medium flex-1 min-w-0 break-words">{message}</span>
+      <span className="font-medium flex-1 min-w-0 wrap-break-word">{message}</span>
       <button
         onClick={onClose}
         aria-label="Dismiss notification"
@@ -93,7 +93,7 @@ function FloatingInput({
     <div className="relative">
       {/* Animated glow effect */}
       <motion.div
-        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
+        className={`absolute -inset-px rounded-xl bg-linear-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
           } opacity-0 blur-sm`}
         animate={{ opacity: isFocused ? 0.5 : 0 }}
         transition={{ duration: 0.3 }}
@@ -223,7 +223,7 @@ function FloatingTextarea({
     <div className="relative">
       {/* Animated glow effect */}
       <motion.div
-        className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
+        className={`absolute -inset-px rounded-xl bg-linear-to-r ${error ? "from-red-500 to-pink-500" : "from-purple-500 to-blue-500"
           } opacity-0 blur-sm`}
         animate={{ opacity: isFocused ? 0.5 : 0 }}
         transition={{ duration: 0.3 }}
@@ -348,13 +348,13 @@ function ContactCard({
 
   const content = (
     <motion.div
-      className="relative [perspective:1500px] group"
+      className="relative perspective-[1500px] group"
       whileHover={{ scale: 1.03 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
       {/* Animated gradient border */}
       <motion.div
-        className={`absolute -inset-[1px] bg-gradient-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
+        className={`absolute -inset-px bg-linear-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
         animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
         transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
         style={{ backgroundSize: "200% 200%" }}
@@ -368,7 +368,7 @@ function ContactCard({
       >
         {/* Floating Icon */}
         <motion.div
-          className={`p-3 rounded-full bg-gradient-to-br ${gradient} shadow-lg`}
+          className={`p-3 rounded-full bg-linear-to-br ${gradient} shadow-lg`}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           style={{ transform: "translateZ(20px)" }}
@@ -544,7 +544,7 @@ export default function Contact() {
             className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl relative overflow-hidden"
           >
             {/* Top gradient line */}
-            <div className="absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+            <div className="absolute top-0 left-4 right-4 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
 
             <div className="flex items-center gap-2">
               <span className="relative flex h-3 w-3">
@@ -579,7 +579,7 @@ export default function Contact() {
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 50 } } }}
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                Let's build something <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">extraordinary</span>
+                Let's build something <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-blue-400">extraordinary</span>
               </h3>
               <p className="text-gray-300 text-lg leading-relaxed mb-8">
                 Got a groundbreaking idea? Looking for a driven developer? I'm always excited to collaborate on projects that push boundaries.
@@ -603,10 +603,10 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ amount: 0.2 }}
             transition={{ duration: 0.6, type: "spring" as const, stiffness: 50 }}
-            className="relative [perspective:1500px] group"
+            className="relative perspective-[1500px] group"
           >
             {/* Gradient border for form — static at rest, brightens on hover */}
-            <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 rounded-2xl opacity-30 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
+            <div className="absolute -inset-px bg-linear-to-r from-purple-500 via-blue-500 to-purple-500 rounded-2xl opacity-30 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
 
             <form
               ref={formRef}
@@ -621,7 +621,7 @@ export default function Contact() {
                 </div>
                 <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                    className="h-full bg-linear-to-r from-purple-500 to-blue-500 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${formCompletion}%` }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
@@ -671,10 +671,10 @@ export default function Contact() {
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(168, 85, 247, 0.4)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold transition-all flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
+                  className="w-full px-8 py-4 rounded-xl bg-linear-to-r from-purple-600 to-blue-600 text-white font-bold transition-all flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
                 >
                   {/* Shine sweep on hover only — no perpetual motion */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
 
                   <AnimatePresence mode="wait">
                     {isSubmitting ? (

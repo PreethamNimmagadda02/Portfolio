@@ -83,7 +83,7 @@ function RoleRotator() {
 
   return (
     <span ref={ref} className="inline-flex items-center">
-      <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
+      <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
         {displayed}
       </span>
       <motion.span
@@ -221,10 +221,10 @@ function AnimatedStat({ value, label, delay, gradient }: { value: string; label:
       transition={{ duration: 0.5, type: "spring" }}
       className="text-center"
     >
-      <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
+      <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-linear-to-r ${gradient}`}>
         {displayValue}{suffix}
       </div>
-      <div className="text-sm text-gray-200 mt-1 font-medium font-[var(--font-inter)]">{label}</div>
+      <div className="text-sm text-gray-200 mt-1 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{label}</div>
     </motion.div>
   );
 }
@@ -265,7 +265,7 @@ function AnimatedWord({ word, className, isOutline = false, reverse = false }: {
 
   return (
     <motion.span
-      className={`inline-flex px-1 [perspective:1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
+      className={`inline-flex px-1 perspective-[1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
       variants={containerVariants}
       initial="hidden"
       animate={ready ? "visible" : "hidden"}
@@ -331,7 +331,7 @@ export default function Hero() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
     >
       {/* Static grid background (Replaced with Ecosystem radial gradient) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none z-0" />
 
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
@@ -346,7 +346,7 @@ export default function Hero() {
             <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
               <AnimatedWord
                 word="REDEFINING"
-                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
+                className="bg-clip-text text-transparent bg-linear-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
               />
             </h1>
           </motion.div>
@@ -385,7 +385,7 @@ export default function Hero() {
             <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mt-2 lg:mt-0">
               <AnimatedWord
                 word="AI SECURITY"
-                className="bg-clip-text text-transparent bg-gradient-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
+                className="bg-clip-text text-transparent bg-linear-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
               />
             </h1>
             <motion.div
@@ -394,7 +394,7 @@ export default function Hero() {
               animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-[var(--font-inter)]">
+              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left" style={{ fontFamily: "var(--font-inter)" }}>
                 Forging the <span className="text-purple-400 font-bold">autonomous AI copilot</span> at <span className="text-white font-bold">Matters.AI</span> that doesn't wait for breaches—it <span className="text-white font-semibold">eliminates them before they exist</span>. Turning DSPM into a living, self-healing system where every threat is detected, analysed and <span className="text-purple-400 font-bold">autonomously remediated</span> at the speed of thought.
               </p>
             </motion.div>
@@ -440,7 +440,7 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4 }}
         >
-          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300 font-[var(--font-inter)]">
+          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300" style={{ fontFamily: "var(--font-inter)" }}>
             Roles: <RoleRotator />
           </div>
         </motion.div>
@@ -461,8 +461,8 @@ export default function Hero() {
               className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
             >
               {/* Animated gradient border */}
-              <span className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
-              <span className="absolute inset-[1px] rounded-full bg-black/90 backdrop-blur-sm" />
+              <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
+              <span className="absolute inset-px rounded-full bg-black/90 backdrop-blur-sm" />
 
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
               <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">

@@ -144,8 +144,8 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
           /* Near-solid bg instead of backdrop-blur: dozens of animating
              backdrop filters are one of the most expensive things a
              compositor can do — visually identical over a dark scene. */
-          ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/95 border border-white/[0.08] group relative overflow-hidden"
-          : "flex-shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/95 border border-white/[0.08] hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
+          ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/95 border border-white/8 group relative overflow-hidden"
+          : "shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/95 border border-white/8 hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
       }
       style={{
         rotateX: mobile ? 0 : rotateX,
@@ -179,7 +179,7 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
 
       {/* Quote icon with accent glow */}
       <div className="flex items-center justify-between mb-4 relative z-10" style={depth(38)}>
-        <div className="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+        <div className="p-2 rounded-lg bg-white/3 border border-white/5">
           <Quote size={20} style={{ color: t.accent }} className="opacity-60" />
         </div>
         <div className="flex gap-0.5">
@@ -190,14 +190,14 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       </div>
 
       {/* Quote text */}
-      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-[var(--font-inter)] tracking-[-0.01em] relative z-10" style={depth(22)}>
+      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-(--font-inter) tracking-[-0.01em] relative z-10" style={depth(22)}>
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06] relative z-10" style={depth(42)}>
+      <div className="flex items-center gap-3 pt-4 border-t border-white/6 relative z-10" style={depth(42)}>
         <div
-          className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-500`}
+          className={`w-11 h-11 rounded-full bg-linear-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-500`}
         >
           {t.initials}
         </div>
@@ -282,7 +282,7 @@ export default function Testimonials() {
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-24 relative overflow-hidden">
-      <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-gradient-to-r from-purple-500/5 via-transparent to-blue-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-linear-to-r from-purple-500/5 via-transparent to-blue-500/5 blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
@@ -301,7 +301,7 @@ export default function Testimonials() {
           </motion.span>
           <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
             What People{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Say</span>
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-400">Say</span>
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
         </motion.div>
@@ -314,10 +314,10 @@ export default function Testimonials() {
         <>
           {/* Marquee Row 1 — scrolls left */}
           <div className="relative mb-5">
-            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-linear-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-linear-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
             <div
-              className="flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:[animation:none]"
+              className="flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:animate-none"
               style={{ animationPlayState: marqueeActive ? undefined : "paused" }}
             >
               {row1.map((t, i) => (
@@ -328,10 +328,10 @@ export default function Testimonials() {
 
           {/* Marquee Row 2 — scrolls right */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-linear-to-r from-black via-black/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-linear-to-l from-black via-black/80 to-transparent z-10 pointer-events-none" />
             <div
-              className="flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:[animation:none]"
+              className="flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:animate-none"
               style={{ animationPlayState: marqueeActive ? undefined : "paused" }}
             >
               {row2.map((t, i) => (

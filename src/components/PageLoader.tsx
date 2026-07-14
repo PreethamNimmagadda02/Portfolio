@@ -85,7 +85,7 @@ export default function PageLoader() {
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                    className="fixed inset-0 z-[99999] flex items-center justify-center bg-[#030014]"
+                    className="fixed inset-0 z-99999 flex items-center justify-center bg-[#030014]"
                 >
                     {/* Twinkling star field */}
                     <div className="absolute inset-0 overflow-hidden">
@@ -150,11 +150,11 @@ export default function PageLoader() {
                             />
 
                             {/* Logo card */}
-                            <div className="relative w-[88px] h-[88px] rounded-2xl bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 p-[1.5px]"
+                            <div className="relative w-[88px] h-[88px] rounded-2xl bg-linear-to-br from-purple-500 via-indigo-500 to-blue-600 p-[1.5px]"
                                 style={{ boxShadow: "0 0 40px rgba(139,92,246,0.3), 0 0 80px rgba(139,92,246,0.1)" }}>
                                 <div className="w-full h-full rounded-[14.5px] bg-[#030014] flex items-center justify-center">
                                     <motion.span
-                                        className="text-[28px] font-black tracking-tight bg-gradient-to-b from-white via-white to-gray-400 bg-clip-text text-transparent select-none"
+                                        className="text-[28px] font-black tracking-tight bg-linear-to-b from-white via-white to-gray-400 bg-clip-text text-transparent select-none"
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -174,7 +174,7 @@ export default function PageLoader() {
                             transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                         >
                             <p
-                                className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-gradient-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
+                                className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-linear-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
                                 style={{
                                     textShadow: "0 0 30px rgba(139,92,246,0.3)",
                                     fontFamily: "var(--font-space-grotesk)",
@@ -207,7 +207,7 @@ export default function PageLoader() {
                     </motion.div>
 
                     {/* Subtle radial vignette */}
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(3,0,20,0.8)_100%)] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(3,0,20,0.8)_100%)] pointer-events-none" />
                 </motion.div>
             )}
         </AnimatePresence>

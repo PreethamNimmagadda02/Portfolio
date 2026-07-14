@@ -274,7 +274,7 @@ export default function KonamiEasterEgg() {
                         ? { duration: 1, ease: [0.55, 0, 1, 0.45] }
                         : { duration: 1, ease: [0.22, 1, 0.36, 1] }
                     }
-                    className="fixed inset-0 z-[99998] pointer-events-auto overflow-hidden cursor-pointer"
+                    className="fixed inset-0 z-99998 pointer-events-auto overflow-hidden cursor-pointer"
                     onClick={handleClick}
                     onMouseMove={handleMouseMove}
                 >
@@ -430,10 +430,10 @@ export default function KonamiEasterEgg() {
                                     ))}
 
                                     {/* The PN badge */}
-                                    <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 p-[2px] shadow-[0_0_80px_rgba(139,92,246,0.5)]">
+                                    <div className="relative w-24 h-24 rounded-2xl bg-linear-to-br from-purple-500 via-pink-500 to-indigo-500 p-[2px] shadow-[0_0_80px_rgba(139,92,246,0.5)]">
                                         <div className="w-full h-full rounded-[14px] bg-[#030014] flex items-center justify-center">
                                             <span
-                                                className="text-3xl font-black tracking-tight bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent"
+                                                className="text-3xl font-black tracking-tight bg-linear-to-b from-white to-gray-300 bg-clip-text text-transparent"
                                                 style={{ fontFamily: "var(--font-space-grotesk)" }}
                                             >
                                                 PN
@@ -452,7 +452,7 @@ export default function KonamiEasterEgg() {
                             >
                                 <TypewriterText
                                     text="Welcome to the Matrix"
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400"
+                                    className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-indigo-400"
                                     delay={0.7}
                                 />
                             </motion.div>
@@ -469,7 +469,7 @@ export default function KonamiEasterEgg() {
 
                             {/* Decorative line */}
                             <motion.div
-                                className="w-32 h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent"
+                                className="w-32 h-px bg-linear-to-r from-transparent via-purple-400 to-transparent"
                                 initial={{ scaleX: 0, opacity: 0 }}
                                 animate={{ scaleX: 1, opacity: 0.6 }}
                                 transition={{ delay: 2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -491,7 +491,7 @@ export default function KonamiEasterEgg() {
                     </motion.div>
 
                     {/* Vignette */}
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(3,0,20,0.8)_100%)] pointer-events-none z-20" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(3,0,20,0.8)_100%)] pointer-events-none z-20" />
                 </motion.div>
             )}
         </AnimatePresence>

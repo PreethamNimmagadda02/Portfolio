@@ -975,7 +975,7 @@ export default function SkillsMarquee() {
       className="py-12 md:py-16 relative w-full overflow-hidden flex flex-col items-center justify-center"
     >
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
 
       {/* Section Header */}
       <div className="relative z-10 text-center px-4 mb-4">
@@ -987,7 +987,7 @@ export default function SkillsMarquee() {
           className="text-4xl md:text-5xl font-black text-white tracking-tight mb-2"
         >
           Technical{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-cyan-400">
             Ecosystem
           </span>
         </motion.h2>
@@ -1081,7 +1081,7 @@ export default function SkillsMarquee() {
         initial={{ opacity: 0, y: 20 }}
         animate={statsInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="relative z-10 mt-4 md:mt-6 flex flex-wrap items-center justify-around gap-4 sm:gap-6 w-[min(92vw,44rem)] px-4 sm:px-8 py-4 sm:py-6 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl"
+        className="relative z-10 mt-4 md:mt-6 flex flex-wrap items-center justify-around gap-4 sm:gap-6 w-[min(92vw,44rem)] px-4 sm:px-8 py-4 sm:py-6 rounded-2xl bg-white/3 border border-white/10 backdrop-blur-xl"
       >
         <AnimatedCounter end={skillsData.length} label="Total Skills" suffix="+" />
         <div className="w-px h-10 bg-white/10 hidden sm:block" />

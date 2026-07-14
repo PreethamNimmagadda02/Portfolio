@@ -64,6 +64,10 @@
     scroll-behavior: auto;
     /* Prevent overscroll bounce on macOS/iOS for cleaner feel */
     overscroll-behavior: none;
+    /* Global horizontal-overflow guard. `clip` (not `hidden`) prevents any
+       accidental sideways scroll on small screens without creating a scroll
+       container — so it never interferes with position: sticky/fixed. */
+    overflow-x: clip;
   }
 
   body {

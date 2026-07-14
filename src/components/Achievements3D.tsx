@@ -467,7 +467,7 @@ function AchievementMonolith({
                 zIndexRange={[100, 0]} // Ensure it stays on top without depth sorting issues
                 transform={false} // Prevent matrix math jittering
             >
-                <div className="w-[280px] sm:w-[320px] md:w-72 p-4 md:p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
+                <div className="w-[calc(100vw-6rem)] max-w-[280px] sm:w-[320px] sm:max-w-none md:w-72 p-4 md:p-5 rounded-2xl backdrop-blur-md bg-black/60 border border-white/10"
                     style={{
                         boxShadow: isActive ? `0 0 30px -10px ${data.color}` : 'none',
                         transformStyle: 'preserve-3d',
@@ -634,7 +634,7 @@ export default function Achievements3D() {
     );
 
     return (
-        <section ref={sectionRef} id="achievements" className="relative h-[100svh] min-h-[600px] overflow-hidden flex items-center justify-center"
+        <section ref={sectionRef} id="achievements" className="relative h-svh min-h-[600px] overflow-hidden flex items-center justify-center"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >
@@ -646,7 +646,7 @@ export default function Achievements3D() {
                     viewport={{ once: true }}
                     className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
                 >
-                    My <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
+                    My <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
                 </motion.h2>
                 <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
                     Navigate the gallery. Click on a planet to focus.
@@ -679,7 +679,7 @@ export default function Achievements3D() {
                 )}
 
                 {/* Vignette */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
             </div>
         </section>
     );

@@ -606,7 +606,7 @@ function ExperienceCard3D({
         transform={false}
       >
         <div
-          className="w-[280px] sm:w-[320px] md:w-80 p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10"
+          className="w-[calc(100vw-6rem)] max-w-[280px] sm:w-[320px] sm:max-w-none md:w-80 p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10"
           style={{
             background: `linear-gradient(135deg, rgba(0,0,0,0.75), rgba(0,0,0,0.6))`,
             boxShadow: isActive

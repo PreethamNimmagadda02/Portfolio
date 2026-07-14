@@ -77,11 +77,11 @@ export default function Footer() {
     <footer ref={footerRef} className="relative z-10 overflow-hidden">
       {/* Animated gradient hairline */}
       <div className="relative h-px w-full">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-purple-500/60 to-transparent" />
         <div className="absolute inset-0 animate-shimmer" />
       </div>
 
-      <div className="relative bg-black/30 backdrop-blur-md [perspective:1000px]">
+      <div className="relative bg-black/30 backdrop-blur-md perspective-[1000px]">
         {/* Background glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90vw] max-w-[700px] h-[260px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[60vw] max-w-[400px] h-[200px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -90,7 +90,7 @@ export default function Footer() {
         <motion.div
           aria-hidden
           style={{ y: watermarkY, rotateX: watermarkRotateX, opacity: watermarkOpacity, transformStyle: "preserve-3d", transformOrigin: "bottom" }}
-          className="absolute inset-x-0 bottom-[-1.5rem] md:bottom-[-3rem] text-center font-black tracking-tighter select-none pointer-events-none text-[18vw] md:text-[11rem] leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.045)]"
+          className="absolute inset-x-0 -bottom-6 md:-bottom-12 text-center font-black tracking-tighter select-none pointer-events-none text-[18vw] md:text-[11rem] leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.045)]"
         >
           PREETHAM
         </motion.div>
@@ -107,7 +107,7 @@ export default function Footer() {
               className="md:col-span-5 text-center md:text-left"
             >
               <Link href="/" className="text-2xl md:text-3xl font-black tracking-tighter group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-white to-gray-200 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
                 <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
               </Link>
               <p className="text-gray-400 text-sm mt-3 max-w-sm mx-auto md:mx-0 leading-relaxed">
@@ -147,7 +147,7 @@ export default function Footer() {
                     onClick={(e) => handleNavClick(e, link.id)}
                     className="group inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                   >
-                    <span className="hidden md:block w-0 group-hover:w-3 h-px bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300" />
+                    <span className="hidden md:block w-0 group-hover:w-3 h-px bg-linear-to-r from-purple-400 to-pink-400 transition-all duration-300" />
                     {link.label}
                   </a>
                 ))}
@@ -175,7 +175,7 @@ export default function Footer() {
                     >
                       {/* Animated gradient border */}
                       <motion.div
-                        className={`absolute -inset-[1px] bg-gradient-to-r ${social.gradient} rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300`}
+                        className={`absolute -inset-px bg-linear-to-r ${social.gradient} rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300`}
                         animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                         style={{ backgroundSize: "200% 200%" }}
