@@ -4,10 +4,11 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, Suspense, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "@/lib/motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useInViewport } from "@/hooks/use-in-viewport";
+import { useDocumentVisible } from "@/lib/viewport-store";
 
 interface DividerColors {
   from?: string;
@@ -205,6 +206,7 @@ export default function SectionDivider3D({
   const isMobile = useIsMobile();
   const reduced = useReducedMotion();
   const [ref, inView] = useInViewport<HTMLDivElement>("600px");
+  const visible = useDocumentVisible();
 
   // Lightweight, dependency-free fallback line.
   if (isMobile || reduced) {
@@ -244,7 +246,7 @@ export default function SectionDivider3D({
             camera={{ position: [0, 0, 7], fov: 55 }}
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
             dpr={[1, 1.5]}
-            frameloop="always"
+            frameloop={visible ? "always" : "never"}
             style={{ background: "transparent" }}
           >
             <Suspense fallback={null}>

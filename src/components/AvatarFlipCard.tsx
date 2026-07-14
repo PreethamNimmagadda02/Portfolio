@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "@/lib/motion";
 import { useState } from "react";
 
 // Floating particles around the avatar - reduced for performance

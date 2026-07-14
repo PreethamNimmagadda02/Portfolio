@@ -4,9 +4,10 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useMemo, useRef, useState, useEffect, Suspense, useCallback } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "@/lib/motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { useDocumentVisible } from "@/lib/viewport-store";
 import { markSceneWarmed } from "@/lib/utils";
 
 // Skills data with categories for color coding
@@ -925,6 +926,7 @@ export default function SkillsMarquee() {
   const statsInView = useInView(statsRef, { once: true, amount: 0.3 });
   // Pause the WebGL render loop entirely when the section is off-screen
   const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+  const visible = useDocumentVisible();
   // Lazy-once canvas gate: mounts the WebGL canvas the first time the
   // section comes within 1500px, then keeps it alive (render loop still
   // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
@@ -1035,7 +1037,7 @@ export default function SkillsMarquee() {
             camera={{ position: [0, 0, 9], fov: 45 }}
             gl={{ antialias: !isMobile, alpha: true }}
             dpr={[1, 1.5]}
-            frameloop={inViewport ? "always" : "never"}
+            frameloop={inViewport && visible ? "always" : "never"}
             onCreated={() => markSceneWarmed("skills")}
             className="w-full h-full"
             // pan-y everywhere: vertical swipes scroll the page natively,

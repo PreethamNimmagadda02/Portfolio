@@ -14,7 +14,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
-import { motion } from "framer-motion";
+import { motion } from "@/lib/motion";
 import {
   ExternalLink,
   Github,
@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { useDocumentVisible } from "@/lib/viewport-store";
 import { markSceneWarmed } from "@/lib/utils";
 
 // -----------------------------------------------------------------------------
@@ -716,6 +717,7 @@ export default function Projects() {
   const [activeIndex, setActiveIndex] = useState(0);
   const isMobile = useIsMobile();
   const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+  const visible = useDocumentVisible();
   // Lazy-once canvas gate: mounts the WebGL canvas the first time the
   // section comes within 1500px, then keeps it alive (render loop still
   // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
@@ -867,7 +869,7 @@ export default function Projects() {
             }}
             gl={{ antialias: true, alpha: true }}
             dpr={[1, 1.5]}
-            frameloop={inViewport ? "always" : "never"}
+            frameloop={inViewport && visible ? "always" : "never"}
             performance={{ min: 0.5 }}
             onCreated={() => markSceneWarmed("projects")}
           >

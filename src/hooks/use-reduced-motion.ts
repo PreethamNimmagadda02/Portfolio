@@ -1,23 +1,11 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useMediaQuery } from "@/lib/viewport-store";
 
-function getSnapshot() {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function subscribe(callback: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-  mq.addEventListener("change", callback);
-  return () => mq.removeEventListener("change", callback);
-}
-
-function getServerSnapshot() {
-  return false;
-}
-
+/**
+ * Reactive `prefers-reduced-motion` hook. Backed by the shared media-query
+ * store so every consumer reuses one `MediaQueryList` and one listener.
+ */
 export function useReducedMotion() {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useMediaQuery("(prefers-reduced-motion: reduce)", false);
 }

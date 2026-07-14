@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, Variants, useSpring, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, Variants, useSpring, useInView } from "@/lib/motion";
 import { Sparkles, ChevronDown } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { smoothScrollTo } from "@/lib/utils";

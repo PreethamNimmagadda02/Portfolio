@@ -1,69 +1,65 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { usePointer, usePointerMove, useMediaQuery } from "@/lib/viewport-store";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function SpotlightCursor() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
   const position = useRef({ x: 0, y: 0 });
-  const target = useRef({ x: 0, y: 0 });
   const rafId = useRef<number>(0);
+  const loopActive = useRef(false);
+  // Holds the current spring stepper so the wake callback can kick it without
+  // depending on its identity (avoids self-referential useCallback recursion).
+  const stepRef = useRef<() => void>(() => {});
 
+  // Touch/coarse-pointer devices skip the spotlight entirely.
+  const coarsePointer = useMediaQuery("(pointer: coarse)", false);
+  const isMobile = useIsMobile();
+  const disabled = coarsePointer || isMobile;
+
+  // Shared pointer object (single window listener). Read as the spring target.
+  const pointer = usePointer();
+
+  // Spring animation loop — runs only while the spotlight is catching up to the
+  // cursor; once it converges (mouse stopped) the loop stops, so an idle page
+  // costs nothing. Defined inside the effect so its self-recursive rAF call is
+  // a safe local closure.
   useEffect(() => {
-    // Detect touch devices and skip
-    const checkMobile = () => {
-      setIsMobile(window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    // Smooth animation loop with spring physics.
-    // Runs only while the spotlight is catching up to the cursor — once it
-    // converges (mouse stopped) the loop stops, so an idle page costs nothing.
-    let running = true;
-    let loopActive = false;
-
     const animate = () => {
-      if (!running || !containerRef.current) {
-        loopActive = false;
+      const el = containerRef.current;
+      if (!el) {
+        loopActive.current = false;
         return;
       }
-
-      // Spring interpolation for smooth following
-      const dx = target.current.x - position.current.x;
-      const dy = target.current.y - position.current.y;
+      const dx = pointer.px - position.current.x;
+      const dy = pointer.py - position.current.y;
       position.current.x += dx * 0.12;
       position.current.y += dy * 0.12;
 
-      containerRef.current.style.setProperty("--cx", `${position.current.x}px`);
-      containerRef.current.style.setProperty("--cy", `${position.current.y}px`);
+      el.style.setProperty("--cx", `${position.current.x}px`);
+      el.style.setProperty("--cy", `${position.current.y}px`);
 
       if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
-        loopActive = false;
+        loopActive.current = false;
         return;
       }
       rafId.current = requestAnimationFrame(animate);
     };
+    stepRef.current = animate;
+    return () => cancelAnimationFrame(rafId.current);
+  }, [pointer]);
 
-    const onMouseMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY };
-      if (!loopActive) {
-        loopActive = true;
-        rafId.current = requestAnimationFrame(animate);
-      }
-    };
+  // Wake the spring loop on movement (via the shared pointer-move fan-out).
+  const wake = useCallback(() => {
+    if (!disabled && !loopActive.current) {
+      loopActive.current = true;
+      rafId.current = requestAnimationFrame(() => stepRef.current());
+    }
+  }, [disabled]);
+  usePointerMove(wake);
 
-    window.addEventListener("pointermove", onMouseMove, { passive: true });
-
-    return () => {
-      running = false;
-      cancelAnimationFrame(rafId.current);
-      window.removeEventListener("pointermove", onMouseMove);
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
-
-  if (isMobile) return null;
+  if (disabled) return null;
 
   return (
     <div

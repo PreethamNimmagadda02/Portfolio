@@ -13,10 +13,11 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
-import { motion } from "framer-motion";
+import { motion } from "@/lib/motion";
 import { Star, Trophy, Code, Flame, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { useDocumentVisible } from "@/lib/viewport-store";
 import { markSceneWarmed } from "@/lib/utils";
 
 // -----------------------------------------------------------------------------
@@ -607,6 +608,7 @@ export default function Achievements3D() {
     const [activeIndex, setActiveIndex] = useState(0);
     const isMobile = useIsMobile();
     const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+    const visible = useDocumentVisible();
     // Lazy-once canvas gate: mounts the WebGL canvas the first time the
     // section comes within 1500px, then keeps it alive (render loop still
     // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
@@ -671,7 +673,7 @@ export default function Achievements3D() {
             {/* Canvas takes up entire section — mounted only when near the viewport */}
             <div className="absolute inset-0 w-full h-full z-0 cursor-default">
                 {showCanvas && (
-                    <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} performance={{ min: 0.5 }} onCreated={() => markSceneWarmed("achievements")}>
+                    <Canvas camera={{ position: isMobile ? [0, 2, 16] : [0, 2, 10], fov: isMobile ? 55 : 45 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport && visible ? "always" : "never"} performance={{ min: 0.5 }} onCreated={() => markSceneWarmed("achievements")}>
                         <Scene activeIndex={activeIndex} onSelect={setActiveIndex} isMobile={isMobile} />
                     </Canvas>
                 )}

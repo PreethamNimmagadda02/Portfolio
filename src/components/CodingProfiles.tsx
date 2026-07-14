@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "@/lib/motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, BarChart2 } from "lucide-react";
 

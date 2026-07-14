@@ -1,29 +1,17 @@
-import * as React from "react"
+import { useMediaQuery } from "@/lib/viewport-store"
 
 const MOBILE_BREAKPOINT = 768
 
+/**
+ * `true` below the mobile breakpoint. Backed by the shared media-query store,
+ * so the many client-only components that call this reuse a single
+ * `MediaQueryList` and listener rather than each allocating their own.
+ *
+ * The synchronous initial value is preserved: `useSyncExternalStore` reads the
+ * live `matchMedia` result on the client during render, so phones never get a
+ * throwaway desktop-flavored first paint (which previously created and
+ * destroyed a WebGL context).
+ */
 export function useIsMobile() {
-    // Synchronous initial value: consumers are all client-only (ssr:false)
-    // components, so reading matchMedia in the initializer is hydration-safe
-    // and prevents a throwaway desktop-flavored first render on phones
-    // (which previously created and destroyed a WebGL context).
-    const [isMobile, setIsMobile] = React.useState(() =>
-        typeof window !== "undefined"
-            ? window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`).matches
-            : false
-    )
-
-    React.useEffect(() => {
-        const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-
-        const onChange = (e: MediaQueryListEvent) => {
-            setIsMobile(e.matches)
-        }
-
-        mql.addEventListener("change", onChange)
-
-        return () => mql.removeEventListener("change", onChange)
-    }, [])
-
-    return isMobile
+    return useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`, false)
 }

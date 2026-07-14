@@ -2,48 +2,15 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useRef, useMemo, Suspense } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// -----------------------------------------------------------------------------
-// Performance helpers — refs only, zero React re-renders
-// -----------------------------------------------------------------------------
-function useVisibleCanvas() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const handle = () => setVisible(document.visibilityState === "visible");
-    document.addEventListener("visibilitychange", handle);
-    return () => document.removeEventListener("visibilitychange", handle);
-  }, []);
-  return visible;
-}
-
-function useMouseRef() {
-  const mouseRef = useRef({ x: 0, y: 0 });
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-  return mouseRef;
-}
-
-function useScrollRef() {
-  const scrollRef = useRef(0);
-  useEffect(() => {
-    const onScroll = () => {
-      const p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      scrollRef.current = isNaN(p) ? 0 : p;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return scrollRef;
-}
+import {
+  usePointer,
+  useScrollTracker,
+  useDocumentVisible,
+  type PointerState,
+  type ScrollState,
+} from "@/lib/viewport-store";
 
 // -----------------------------------------------------------------------------
 // Aurora Nebula — single fullscreen-ish plane with FBM noise shader.
@@ -117,11 +84,11 @@ const nebulaFragment = /* glsl */ `
 `;
 
 function AuroraNebula({
-  mouseRef,
-  scrollRef,
+  pointer,
+  scroll,
 }: {
-  mouseRef: React.RefObject<{ x: number; y: number }>;
-  scrollRef: React.RefObject<number>;
+  pointer: PointerState;
+  scroll: ScrollState;
 }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { viewport } = useThree();
@@ -140,9 +107,9 @@ function AuroraNebula({
     const u = matRef.current.uniforms;
     u.uTime.value = state.clock.elapsedTime;
     // Smooth-damp mouse + scroll for buttery motion
-    u.uMouse.value.x += (mouseRef.current.x - u.uMouse.value.x) * 0.04;
-    u.uMouse.value.y += (mouseRef.current.y - u.uMouse.value.y) * 0.04;
-    u.uScroll.value += ((scrollRef.current ?? 0) - u.uScroll.value) * 0.04;
+    u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.04;
+    u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.04;
+    u.uScroll.value += (scroll.progress - u.uScroll.value) * 0.04;
   });
 
   return (
@@ -221,12 +188,12 @@ const STAR_PALETTE = [
 ];
 
 function GPUStars({
-  mouseRef,
-  scrollRef,
+  pointer,
+  scroll,
   count,
 }: {
-  mouseRef: React.RefObject<{ x: number; y: number }>;
-  scrollRef: React.RefObject<number>;
+  pointer: PointerState;
+  scroll: ScrollState;
   count: number;
 }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
@@ -264,9 +231,9 @@ function GPUStars({
     if (!matRef.current) return;
     const u = matRef.current.uniforms;
     u.uTime.value = state.clock.elapsedTime;
-    u.uMouse.value.x += (mouseRef.current.x - u.uMouse.value.x) * 0.05;
-    u.uMouse.value.y += (mouseRef.current.y - u.uMouse.value.y) * 0.05;
-    u.uScroll.value += ((scrollRef.current ?? 0) - u.uScroll.value) * 0.05;
+    u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.05;
+    u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.05;
+    u.uScroll.value += (scroll.progress - u.uScroll.value) * 0.05;
   });
 
   return (
@@ -360,10 +327,10 @@ function ShootingStar({ seed }: { seed: number }) {
 // Main export
 // -----------------------------------------------------------------------------
 export default function ParticleField() {
-  const mouseRef = useMouseRef();
-  const scrollRef = useScrollRef();
+  const pointer = usePointer();
+  const scroll = useScrollTracker();
   const isMobile = useIsMobile();
-  const visible = useVisibleCanvas();
+  const visible = useDocumentVisible();
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
@@ -375,8 +342,8 @@ export default function ParticleField() {
         frameloop={visible ? "always" : "never"}
       >
         <Suspense fallback={null}>
-          <AuroraNebula mouseRef={mouseRef} scrollRef={scrollRef} />
-          <GPUStars mouseRef={mouseRef} scrollRef={scrollRef} count={isMobile ? 500 : 1800} />
+          <AuroraNebula pointer={pointer} scroll={scroll} />
+          <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 500 : 1800} />
           {!isMobile && (
             <>
               <ShootingStar seed={0.1} />

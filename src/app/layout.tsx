@@ -122,7 +122,7 @@ const jsonLd = {
 import SmoothScroll from "@/components/SmoothScroll";
 import SpotlightCursor from "@/components/SpotlightCursor";
 import PerformanceProvider from "@/components/PerformanceProvider";
-import { MotionConfig } from "framer-motion";
+import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
 
 export default function RootLayout({
   children,
@@ -154,6 +154,7 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
+        <LazyMotion features={domMax} strict>
         <MotionConfig reducedMotion="user">
           <PerformanceProvider>
             <ThemeProvider>
@@ -171,6 +172,7 @@ export default function RootLayout({
             </ThemeProvider>
           </PerformanceProvider>
         </MotionConfig>
+        </LazyMotion>
       </body>
     </html>
   );

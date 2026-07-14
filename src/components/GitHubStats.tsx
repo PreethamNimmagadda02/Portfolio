@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "@/lib/motion";
 import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";

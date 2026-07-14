@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext } from "react";
-import { motion } from "framer-motion";
+import { motion } from "@/lib/motion";
 
 type Theme = "deep-space" | "nebula";
 

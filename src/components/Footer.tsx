@@ -2,7 +2,7 @@
 
 import { Github, Linkedin, Mail, ArrowUp, MapPin } from "lucide-react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "@/lib/motion";
 import MagneticButton from "./MagneticButton";
 import { useState, useEffect, useRef } from "react";
 import { smoothScrollTo } from "@/lib/utils";

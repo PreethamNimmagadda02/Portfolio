@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/motion";
 
 // Secret: type "PN" anywhere on the page
 const KONAMI_CODE = ["KeyP", "KeyN"];

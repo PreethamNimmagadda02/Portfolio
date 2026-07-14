@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "@/lib/motion";
 import { cn, smoothScrollTo, seededRandom } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
 

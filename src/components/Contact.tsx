@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "@/lib/motion";
 import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, User, MessageSquare, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import emailjs from '@emailjs/browser';

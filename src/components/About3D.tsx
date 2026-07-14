@@ -5,10 +5,11 @@ import { Float, MeshTransmissionMaterial, Html, OrbitControls, Environment, Spar
 import * as THREE from "three";
 import SceneEffects from "./three/SceneEffects";
 import { useRef, useState, Suspense, useMemo, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "@/lib/motion";
 import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target, ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
+import { useDocumentVisible } from "@/lib/viewport-store";
 import { markSceneWarmed } from "@/lib/utils";
 
 // Feature data matching original About.tsx EXACTLY
@@ -425,6 +426,7 @@ export default function About3D() {
     const [activeId, setActiveId] = useState<number | null>(null);
     const isMobile = useIsMobile();
     const [sectionRef, inViewport] = useInViewport<HTMLElement>();
+    const visible = useDocumentVisible();
     // Lazy-once canvas gate: mounts the WebGL canvas the first time the
     // section comes within 1500px, then keeps it alive (render loop still
     // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
@@ -468,7 +470,7 @@ export default function About3D() {
             {/* 3D Scene Background - Covers Entire Section */}
             <div className="absolute inset-0 z-0">
                 {!isMobile && showCanvas && (
-                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport ? "always" : "never"} onCreated={() => markSceneWarmed("about")} className="cursor-move">
+                    <Canvas camera={{ position: isMobile ? [0, 0, 20] : [0, 0, 14], fov: isMobile ? 45 : 35 }} gl={{ antialias: true, alpha: true }} dpr={[1, 1.5]} frameloop={inViewport && visible ? "always" : "never"} onCreated={() => markSceneWarmed("about")} className="cursor-move">
                         <Suspense fallback={null}>
                             <Scene onHover={handleHover} activeId={activeId} isMobile={isMobile} />
                             <OrbitControls
