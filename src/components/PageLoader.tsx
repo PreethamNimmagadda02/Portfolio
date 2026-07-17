@@ -41,8 +41,8 @@ export default function PageLoader() {
         //  - every scene has reported ready ("scene-warmed" events), or
         //  - MAX_WAIT elapses (slow devices / a scene failing to mount).
         // MIN_SHOWN keeps the branding from flashing on very fast machines.
-        const MIN_SHOWN = 1500;
-        const MAX_WAIT = 5000;
+        const MIN_SHOWN = 700;
+        const MAX_WAIT = 2500;
         const start = performance.now();
         let done = false;
         let minTimer: ReturnType<typeof setTimeout> | undefined;
@@ -184,9 +184,8 @@ export default function PageLoader() {
                             </p>
                         </motion.div>
 
-                        {/* Minimal loading bar — fills over ~3s (the typical
-                            all-scenes-warmed time); on slower devices it
-                            holds at 100% until the 5s max dismissal */}
+                        {/* Minimal loading bar — fills over the loader's short hold; on slow
+                            devices it holds at 100% until the max dismissal */}
                         <motion.div
                             className="w-36 h-[1.5px] rounded-full overflow-hidden"
                             style={{ background: "rgba(255,255,255,0.04)" }}
@@ -201,7 +200,7 @@ export default function PageLoader() {
                                 }}
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
-                                transition={{ duration: 3, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                transition={{ duration: 2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                             />
                         </motion.div>
                     </motion.div>

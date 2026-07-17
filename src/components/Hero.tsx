@@ -9,21 +9,32 @@ import { smoothScrollTo } from "@/lib/utils";
 import AvatarFlipCard from "./AvatarFlipCard";
 
 // Loader-completion hook with safety net: resolves via the "loader-done"
-// event, the global flag (if the event already fired before mount), or a
-// fallback timeout so hero content can never stay hidden forever.
-// Fallback must exceed the PageLoader's 5s hold — otherwise the hero
-// entrance animations play invisibly behind the loader overlay.
-function useLoaderDone(fallbackMs = 7000) {
+// event, the global flag (if the event already fired before mount),
+// document.fonts.ready, or a fallback timeout — whichever comes first —
+// so hero content can never stay hidden forever, and the hero (real HTML
+// content) never waits on WebGL scene warm-up to reveal itself.
+function useLoaderDone(fallbackMs = 2500) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     const onDone = () => setDone(true);
     window.addEventListener("loader-done", onDone);
-    // If the loader already finished before this component mounted, resolve
-    // on the next tick; otherwise arm the safety-net timeout.
+
+    // If the loader already finished before mount, resolve next tick.
     const alreadyDone = (window as unknown as { __loaderDone?: boolean }).__loaderDone;
     const fallback = setTimeout(onDone, alreadyDone ? 0 : fallbackMs);
+
+    // Reveal as soon as web fonts are ready even if scenes are still warming —
+    // the hero is real HTML content and must not wait on WebGL.
+    let cancelled = false;
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(() => {
+        if (!cancelled) onDone();
+      });
+    }
+
     return () => {
+      cancelled = true;
       window.removeEventListener("loader-done", onDone);
       clearTimeout(fallback);
     };
