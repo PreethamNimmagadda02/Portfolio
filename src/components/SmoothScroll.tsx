@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import Lenis from "lenis";
+import { frame, cancelFrame } from "@/lib/motion";
+import { setScrollVelocity } from "@/lib/scroll-velocity";
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
     const lenisRef = useRef<Lenis | null>(null);
@@ -27,15 +29,21 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
         // Expose lenis globally for programmatic scrolling from other components
         (window as unknown as { lenis: Lenis }).lenis = lenis;
 
-        function raf(time: number) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
+        // Publish signed velocity for velocity-reactive effects (Task 6).
+        lenis.on("scroll", (e: Lenis) => setScrollVelocity(e.velocity));
 
-        requestAnimationFrame(raf);
+        // Drive Lenis inside framer-motion's single frame loop so smoothed scroll
+        // and every Framer scroll-linked animation are computed in the same frame —
+        // eliminating the one-frame desync from two independent rAF loops.
+        const update = (data: { timestamp: number }) => {
+            lenis.raf(data.timestamp);
+        };
+        frame.update(update, true); // keepAlive: run every frame
 
         return () => {
+            cancelFrame(update);
             lenis.destroy();
+            setScrollVelocity(0);
             if ((window as unknown as { lenis: Lenis }).lenis === lenis) {
                 delete (window as unknown as { lenis?: Lenis }).lenis;
             }
