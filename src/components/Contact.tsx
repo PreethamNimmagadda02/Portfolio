@@ -349,7 +349,7 @@ function ContactCard({
   const content = (
     <motion.div
       className="relative perspective-[1500px] group"
-      whileHover={{ scale: 1.03 }}
+      whileHover={{ scale: 1.03, y: -4 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
       {/* Animated gradient border */}
@@ -611,7 +611,7 @@ export default function Contact() {
             <form
               ref={formRef}
               onSubmit={handleSubmit}
-              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300"
+              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 hover-lift"
             >
               {/* Form progress indicator */}
               <div className="mb-6">

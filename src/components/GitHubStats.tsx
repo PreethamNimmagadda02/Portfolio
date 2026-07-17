@@ -613,6 +613,7 @@ export default function GitHubStats() {
                         duration: 0.5,
                         type: "spring",
                       }}
+                      whileHover={{ y: -4 }}
                       className="relative group block cursor-pointer"
                     >
                       <div className={`absolute -inset-px bg-linear-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />

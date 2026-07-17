@@ -527,6 +527,7 @@ export default function About3D() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
+                                whileHover={{ y: -4 }}
                                 className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg relative overflow-hidden group mb-8"
                             >
                                 <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: activeFeature.color }} />
