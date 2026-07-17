@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import Contact from "@/components/Contact";
 import NoiseBackground from "@/components/NoiseBackground";
 import ScrollReveal from "@/components/ScrollReveal";
+import VelocityScroll from "@/components/VelocityScroll";
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIdle } from "@/lib/viewport-store";
@@ -70,64 +71,66 @@ export default function Home() {
 
       <NoiseBackground />
 
-      <div className="relative z-10 flex flex-col gap-16 md:gap-40">
-        {/* Hero Section */}
-        <Hero />
+      <VelocityScroll>
+        <div className="relative z-10 flex flex-col gap-16 md:gap-40">
+          {/* Hero Section */}
+          <Hero />
 
-        {/* About Section */}
-        <ScrollReveal direction="none">
-          <About3D />
-        </ScrollReveal>
+          {/* About Section */}
+          <ScrollReveal direction="none">
+            <About3D />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
+          <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
 
-        {/* Experience Section */}
-        <ScrollReveal direction="none">
-          <Experience />
-        </ScrollReveal>
+          {/* Experience Section */}
+          <ScrollReveal direction="none">
+            <Experience />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#3b82f6" to="#a855f7" accent="#6366f1" />
+          <SectionDivider3D from="#3b82f6" to="#a855f7" accent="#6366f1" />
 
-        {/* Skills Marquee */}
-        <ScrollReveal direction="none">
-          <SkillsMarquee />
-        </ScrollReveal>
+          {/* Skills Marquee */}
+          <ScrollReveal direction="none">
+            <SkillsMarquee />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#a855f7" to="#ec4899" accent="#d946ef" flip />
+          <SectionDivider3D from="#a855f7" to="#ec4899" accent="#d946ef" flip />
 
-        {/* Projects Section */}
-        <ScrollReveal direction="none">
-          <Projects />
-        </ScrollReveal>
+          {/* Projects Section */}
+          <ScrollReveal direction="none">
+            <Projects />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#ec4899" to="#06b6d4" accent="#f472b6" />
+          <SectionDivider3D from="#ec4899" to="#06b6d4" accent="#f472b6" />
 
-        {/* Coding Activity Section */}
-        <ScrollReveal direction="none">
-          <GitHubStats />
-        </ScrollReveal>
+          {/* Coding Activity Section */}
+          <ScrollReveal direction="none">
+            <GitHubStats />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#06b6d4" to="#fbbf24" accent="#22d3ee" flip />
+          <SectionDivider3D from="#06b6d4" to="#fbbf24" accent="#22d3ee" flip />
 
-        {/* Achievements Section */}
-        <ScrollReveal direction="none">
-          <Achievements3D />
-        </ScrollReveal>
+          {/* Achievements Section */}
+          <ScrollReveal direction="none">
+            <Achievements3D />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#fbbf24" to="#8b5cf6" accent="#f59e0b" flip />
+          <SectionDivider3D from="#fbbf24" to="#8b5cf6" accent="#f59e0b" flip />
 
-        {/* Testimonials Section */}
-        <ScrollReveal direction="none">
-          <Testimonials />
-        </ScrollReveal>
+          {/* Testimonials Section */}
+          <ScrollReveal direction="none">
+            <Testimonials />
+          </ScrollReveal>
 
-        <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
+          <SectionDivider3D from="#8b5cf6" to="#3b82f6" accent="#a855f7" />
 
-        {/* Contact Section */}
-        <ScrollReveal direction="none">
-          <Contact />
-        </ScrollReveal>
-      </div>
+          {/* Contact Section */}
+          <ScrollReveal direction="none">
+            <Contact />
+          </ScrollReveal>
+        </div>
+      </VelocityScroll>
     </main>
   );
 }
