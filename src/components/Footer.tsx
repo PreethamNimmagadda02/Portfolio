@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { smoothScrollTo } from "@/lib/utils";
 
 const socialLinks = [
-  { icon: Github, href: "https://github.com/preethamnimmagadda", label: "GitHub", gradient: "from-gray-500 to-gray-700" },
+  { icon: Github, href: "https://github.com/PreethamNimmagadda02", label: "GitHub", gradient: "from-gray-500 to-gray-700" },
   { icon: Linkedin, href: "https://linkedin.com/in/preethamnimmagadda", label: "LinkedIn", gradient: "from-blue-500 to-cyan-500" },
   { icon: Mail, href: "mailto:preethamnimmagadda@gmail.com", label: "Email", gradient: "from-purple-500 to-pink-500" },
 ];
