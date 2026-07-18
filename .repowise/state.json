@@ -1,0 +1,43 @@
+{
+  "last_sync_commit": "8796eddbbde6d3c9c81f099df8d1967457cffe82",
+  "total_pages": 55,
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-lite-preview",
+  "docs_enabled": true,
+  "run_mode": "standard",
+  "git_tier": "full",
+  "include_submodules": false,
+  "total_tokens": 104799,
+  "phase_timings": {
+    "traverse": 0.68,
+    "co_change": 0.21,
+    "git": 2.11,
+    "parse": 1.67,
+    "tsconfig": 0.0,
+    "graph.ts_index": 0.0,
+    "graph.imports": 0.01,
+    "graph.type_refs": 0.0,
+    "graph.heritage": 0.0,
+    "graph.calls": 0.0,
+    "dynamic_hints": 0.02,
+    "graph.metrics": 0.24,
+    "graph.communities": 0.03,
+    "external_systems": 0.02,
+    "dead_code": 0.08,
+    "health": 1.68,
+    "decisions": 6.15,
+    "knowledge_graph.skeleton": 0.0,
+    "graph.flows": 0.0
+  },
+  "knowledge_graph": {
+    "version": "1.0.0",
+    "node_count": 87,
+    "layer_count": 4,
+    "tour_steps": 12,
+    "has_summaries": true,
+    "fingerprint": "19dc1914c80a4775"
+  },
+  "store_format_version": 1,
+  "written_by_version": "0.33.0",
+  "config_fingerprint": "cd072d5378cf9d326237d81808e79cda3f6ae972f860264cc36911162f8a5d53"
+}

@@ -1,0 +1,2763 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "Portfolio",
+    "is_monorepo": false,
+    "total_files": 62,
+    "entry_points": [],
+    "tech_stack": [
+      {
+        "name": "Next.js",
+        "version": "16.0.4",
+        "category": "framework"
+      },
+      {
+        "name": "React",
+        "version": "19.2.0",
+        "category": "framework"
+      },
+      {
+        "name": "Tailwind CSS",
+        "version": "4",
+        "category": "framework"
+      },
+      {
+        "name": "Node.js",
+        "version": null,
+        "category": "language"
+      },
+      {
+        "name": "TypeScript",
+        "version": "5",
+        "category": "language"
+      }
+    ],
+    "entry_candidates": [],
+    "graph_mode": "flow"
+  },
+  "nodes": [
+    {
+      "id": "file:.agents/rules/graphify.md",
+      "type": "document",
+      "filePath": ".agents/rules/graphify.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 23,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 6,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: graphify.md."
+    },
+    {
+      "id": "file:.agents/workflows/graphify.md",
+      "type": "document",
+      "filePath": ".agents/workflows/graphify.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 6,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 7,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: graphify.md."
+    },
+    {
+      "id": "file:.claude/settings.local.json",
+      "type": "config",
+      "filePath": ".claude/settings.local.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 16,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 8,
+      "tags": [
+        "config",
+        "low_signal_summary"
+      ],
+      "summary": "Configuration file: settings.local.json."
+    },
+    {
+      "id": "file:.github/workflows/deploy.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/deploy.yml",
+      "language": "yaml",
+      "symbolCount": 0,
+      "lineCount": 21,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 9,
+      "tags": [
+        "config",
+        "ci"
+      ],
+      "summary": "GitHub Actions CI/CD workflow definition."
+    },
+    {
+      "id": "file:.github/workflows/openwiki-update.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/openwiki-update.yml",
+      "language": "yaml",
+      "symbolCount": 0,
+      "lineCount": 37,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 10,
+      "tags": [
+        "config",
+        "ci"
+      ],
+      "summary": "GitHub Actions CI/CD workflow definition."
+    },
+    {
+      "id": "file:CLAUDE.md",
+      "type": "document",
+      "filePath": "CLAUDE.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 76,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 11,
+      "tags": [],
+      "summary": "Repository instructions and context for AI coding agents."
+    },
+    {
+      "id": "file:README.md",
+      "type": "document",
+      "filePath": "README.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 65,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 12,
+      "tags": [],
+      "summary": "Project overview and entry point for new readers."
+    },
+    {
+      "id": "file:eslint.config.mjs",
+      "type": "file",
+      "filePath": "eslint.config.mjs",
+      "language": "javascript",
+      "symbolCount": 0,
+      "lineCount": 11,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 4,
+      "tags": [],
+      "summary": "Application module eslint.config.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:firebase.json",
+      "type": "config",
+      "filePath": "firebase.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 27,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 13,
+      "tags": [
+        "config",
+        "low_signal_summary"
+      ],
+      "summary": "Configuration file: firebase.json."
+    },
+    {
+      "id": "file:next.config.ts",
+      "type": "file",
+      "filePath": "next.config.ts",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 45,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 5,
+      "tags": [],
+      "summary": "Application module next.config (1 symbols).",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:openwiki/.last-update.json",
+      "type": "config",
+      "filePath": "openwiki/.last-update.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 3,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 14,
+      "tags": [
+        "config",
+        "low_signal_summary"
+      ],
+      "summary": "Configuration file: .last-update.json."
+    },
+    {
+      "id": "file:openwiki/architecture/3d-performance.md",
+      "type": "document",
+      "filePath": "openwiki/architecture/3d-performance.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 298,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 15,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: 3d-performance.md."
+    },
+    {
+      "id": "file:openwiki/architecture/overview.md",
+      "type": "document",
+      "filePath": "openwiki/architecture/overview.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 278,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 16,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: overview.md."
+    },
+    {
+      "id": "file:openwiki/components/structure.md",
+      "type": "document",
+      "filePath": "openwiki/components/structure.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 364,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 17,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: structure.md."
+    },
+    {
+      "id": "file:openwiki/content/data-structure.md",
+      "type": "document",
+      "filePath": "openwiki/content/data-structure.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 346,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 18,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: data-structure.md."
+    },
+    {
+      "id": "file:openwiki/development.md",
+      "type": "document",
+      "filePath": "openwiki/development.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 295,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 19,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: development.md."
+    },
+    {
+      "id": "file:openwiki/operations/deployment.md",
+      "type": "document",
+      "filePath": "openwiki/operations/deployment.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 341,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 20,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: deployment.md."
+    },
+    {
+      "id": "file:openwiki/quickstart.md",
+      "type": "document",
+      "filePath": "openwiki/quickstart.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 316,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 21,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: quickstart.md."
+    },
+    {
+      "id": "file:package.json",
+      "type": "config",
+      "filePath": "package.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 23,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 22,
+      "tags": [
+        "config"
+      ],
+      "summary": "Node package manifest: dependencies, scripts, and metadata."
+    },
+    {
+      "id": "file:postcss.config.mjs",
+      "type": "file",
+      "filePath": "postcss.config.mjs",
+      "language": "javascript",
+      "symbolCount": 1,
+      "lineCount": 2,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 23,
+      "tags": [],
+      "summary": "Application module postcss.config (1 symbols).",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:public/manifest.json",
+      "type": "config",
+      "filePath": "public/manifest.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 12,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 24,
+      "tags": [
+        "config",
+        "low_signal_summary"
+      ],
+      "summary": "Configuration file: manifest.json."
+    },
+    {
+      "id": "file:public/sw.js",
+      "type": "file",
+      "filePath": "public/sw.js",
+      "language": "javascript",
+      "symbolCount": 1,
+      "lineCount": 232,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 25,
+      "tags": [],
+      "summary": "Application module sw defining a.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:public/workbox-4754cb34.js",
+      "type": "file",
+      "filePath": "public/workbox-4754cb34.js",
+      "language": "javascript",
+      "symbolCount": 81,
+      "lineCount": 589,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 26,
+      "tags": [],
+      "summary": "Application module workbox-4754cb34 defining e, s, constructor.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/app/layout.tsx",
+      "type": "file",
+      "filePath": "src/app/layout.tsx",
+      "language": "typescript",
+      "symbolCount": 4,
+      "lineCount": 147,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 0,
+      "tags": [],
+      "summary": "Application module layout defining RootLayout.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/app/page.tsx",
+      "type": "file",
+      "filePath": "src/app/page.tsx",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 123,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 3,
+      "tags": [],
+      "summary": "Application module page defining SectionSkeleton, Home.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/app/robots.ts",
+      "type": "file",
+      "filePath": "src/app/robots.ts",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 8,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 5,
+      "tags": [],
+      "summary": "Application module robots defining robots.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/app/sitemap.ts",
+      "type": "file",
+      "filePath": "src/app/sitemap.ts",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 25,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 5,
+      "tags": [],
+      "summary": "Application module sitemap defining sitemap.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/About3D.tsx",
+      "type": "file",
+      "filePath": "src/components/About3D.tsx",
+      "language": "typescript",
+      "symbolCount": 10,
+      "lineCount": 670,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module About3D defining AnimatedCounter, TechBackdrop, CentralCore.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Achievements3D.tsx",
+      "type": "file",
+      "filePath": "src/components/Achievements3D.tsx",
+      "language": "typescript",
+      "symbolCount": 8,
+      "lineCount": 795,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module Achievements3D defining getPosition, AnimatedPlanet, AchievementMonolith.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/AvatarFlipCard.tsx",
+      "type": "file",
+      "filePath": "src/components/AvatarFlipCard.tsx",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 279,
+      "complexity": "moderate",
+      "pagerank": 0.00919,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module AvatarFlipCard defining AvatarFlipCard.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/CodingProfiles.tsx",
+      "type": "file",
+      "filePath": "src/components/CodingProfiles.tsx",
+      "language": "typescript",
+      "symbolCount": 11,
+      "lineCount": 453,
+      "complexity": "moderate",
+      "pagerank": 0.009031,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module CodingProfiles defining PlatformUserStats, PlatformQuestionStats, BadgeStat.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Contact.tsx",
+      "type": "file",
+      "filePath": "src/components/Contact.tsx",
+      "language": "typescript",
+      "symbolCount": 7,
+      "lineCount": 670,
+      "complexity": "complex",
+      "pagerank": 0.008656,
+      "communityId": 3,
+      "tags": [],
+      "summary": "UI module Contact defining Toast, FloatingInput, FloatingTextarea.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Experience.tsx",
+      "type": "file",
+      "filePath": "src/components/Experience.tsx",
+      "language": "typescript",
+      "symbolCount": 11,
+      "lineCount": 846,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module Experience defining ExperienceData, getPosition, AnimatedPlanet.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Footer.tsx",
+      "type": "file",
+      "filePath": "src/components/Footer.tsx",
+      "language": "typescript",
+      "symbolCount": 4,
+      "lineCount": 270,
+      "complexity": "moderate",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module Footer defining LocalTime, Footer.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/GitHubStats.tsx",
+      "type": "file",
+      "filePath": "src/components/GitHubStats.tsx",
+      "language": "typescript",
+      "symbolCount": 16,
+      "lineCount": 756,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module GitHubStats defining ContributionDay, ContributionsResponse, GitHubRepo.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Hero.tsx",
+      "type": "file",
+      "filePath": "src/components/Hero.tsx",
+      "language": "typescript",
+      "symbolCount": 11,
+      "lineCount": 464,
+      "complexity": "moderate",
+      "pagerank": 0.008656,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module Hero defining useLoaderDone, RoleRotator, CurrentlyBuilding.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/KonamiEasterEgg.tsx",
+      "type": "file",
+      "filePath": "src/components/KonamiEasterEgg.tsx",
+      "language": "typescript",
+      "symbolCount": 10,
+      "lineCount": 558,
+      "complexity": "complex",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module KonamiEasterEgg defining makeParticles, makeMatrixColumns, makeOrbitals.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/MagneticButton.tsx",
+      "type": "file",
+      "filePath": "src/components/MagneticButton.tsx",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 31,
+      "complexity": "simple",
+      "pagerank": 0.00889,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module MagneticButton defining MagneticButtonProps, MagneticButton.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Navbar.tsx",
+      "type": "file",
+      "filePath": "src/components/Navbar.tsx",
+      "language": "typescript",
+      "symbolCount": 5,
+      "lineCount": 522,
+      "complexity": "complex",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module Navbar defining NavParticleStyle, makeNavParticleStyle, NavParticle.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/NoiseBackground.tsx",
+      "type": "file",
+      "filePath": "src/components/NoiseBackground.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 19,
+      "complexity": "simple",
+      "pagerank": 0.008656,
+      "communityId": 3,
+      "tags": [],
+      "summary": "UI module NoiseBackground defining NoiseBackground.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/PageLoader.tsx",
+      "type": "file",
+      "filePath": "src/components/PageLoader.tsx",
+      "language": "typescript",
+      "symbolCount": 3,
+      "lineCount": 263,
+      "complexity": "moderate",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module PageLoader defining Star, makeStars, PageLoader.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/ParticleField.tsx",
+      "type": "file",
+      "filePath": "src/components/ParticleField.tsx",
+      "language": "typescript",
+      "symbolCount": 9,
+      "lineCount": 268,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module ParticleField defining AuroraNebula, GPUStars, ShootingStar.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/PerformanceProvider.tsx",
+      "type": "file",
+      "filePath": "src/components/PerformanceProvider.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 6,
+      "complexity": "simple",
+      "pagerank": 0.008265,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module PerformanceProvider defining PerformanceProvider.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Projects.tsx",
+      "type": "file",
+      "filePath": "src/components/Projects.tsx",
+      "language": "typescript",
+      "symbolCount": 9,
+      "lineCount": 750,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module Projects defining ProjectData, getPosition, AnimatedPlanet.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/ScrollProgress.tsx",
+      "type": "file",
+      "filePath": "src/components/ScrollProgress.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 15,
+      "complexity": "simple",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module ScrollProgress defining ScrollProgress.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/ScrollReveal.tsx",
+      "type": "file",
+      "filePath": "src/components/ScrollReveal.tsx",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 32,
+      "complexity": "simple",
+      "pagerank": 0.008656,
+      "communityId": 3,
+      "tags": [],
+      "summary": "UI module ScrollReveal defining ScrollRevealProps, ScrollReveal.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/SectionDivider.tsx",
+      "type": "file",
+      "filePath": "src/components/SectionDivider.tsx",
+      "language": "typescript",
+      "symbolCount": 3,
+      "lineCount": 83,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module SectionDivider defining SectionDividerProps, SectionDivider.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/SectionDivider3D.tsx",
+      "type": "file",
+      "filePath": "src/components/SectionDivider3D.tsx",
+      "language": "typescript",
+      "symbolCount": 8,
+      "lineCount": 216,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module SectionDivider3D defining DividerColors, PortalRings, CoreOrb.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/SkillsMarquee.tsx",
+      "type": "file",
+      "filePath": "src/components/SkillsMarquee.tsx",
+      "language": "typescript",
+      "symbolCount": 22,
+      "lineCount": 922,
+      "complexity": "complex",
+      "pagerank": 0.007719,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module SkillsMarquee defining getCategoryColor, useSphereRotation, SkillNode.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/SmoothScroll.tsx",
+      "type": "file",
+      "filePath": "src/components/SmoothScroll.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 37,
+      "complexity": "simple",
+      "pagerank": 0.008265,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module SmoothScroll defining SmoothScroll.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/SpotlightCursor.tsx",
+      "type": "file",
+      "filePath": "src/components/SpotlightCursor.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 80,
+      "complexity": "simple",
+      "pagerank": 0.008265,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module SpotlightCursor defining SpotlightCursor.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/Testimonials.tsx",
+      "type": "file",
+      "filePath": "src/components/Testimonials.tsx",
+      "language": "typescript",
+      "symbolCount": 4,
+      "lineCount": 347,
+      "complexity": "moderate",
+      "pagerank": 0.007719,
+      "communityId": 2,
+      "tags": [],
+      "summary": "UI module Testimonials defining TestimonialCard, MobileCarousel, Testimonials.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/ThemeToggle.tsx",
+      "type": "file",
+      "filePath": "src/components/ThemeToggle.tsx",
+      "language": "typescript",
+      "symbolCount": 4,
+      "lineCount": 109,
+      "complexity": "moderate",
+      "pagerank": 0.00967,
+      "communityId": 0,
+      "tags": [],
+      "summary": "UI module ThemeToggle defining useTheme, ThemeProvider, ThemeToggle.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/components/three/SceneEffects.tsx",
+      "type": "file",
+      "filePath": "src/components/three/SceneEffects.tsx",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 33,
+      "complexity": "simple",
+      "pagerank": 0.010055,
+      "communityId": 1,
+      "tags": [],
+      "summary": "UI module SceneEffects defining SceneEffects.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/hooks/use-in-viewport.ts",
+      "type": "file",
+      "filePath": "src/hooks/use-in-viewport.ts",
+      "language": "typescript",
+      "symbolCount": 3,
+      "lineCount": 84,
+      "complexity": "simple",
+      "pagerank": 0.011513,
+      "communityId": 1,
+      "tags": [],
+      "summary": "Application module use-in-viewport defining useInViewport, useWarmupTimer, useRefInViewport.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/hooks/use-mobile.tsx",
+      "type": "file",
+      "filePath": "src/hooks/use-mobile.tsx",
+      "language": "typescript",
+      "symbolCount": 2,
+      "lineCount": 17,
+      "complexity": "simple",
+      "pagerank": 0.020968,
+      "communityId": 1,
+      "tags": [],
+      "summary": "Application module use-mobile defining useIsMobile.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/hooks/use-reduced-motion.ts",
+      "type": "file",
+      "filePath": "src/hooks/use-reduced-motion.ts",
+      "language": "typescript",
+      "symbolCount": 1,
+      "lineCount": 8,
+      "complexity": "simple",
+      "pagerank": 0.009385,
+      "communityId": 3,
+      "tags": [],
+      "summary": "Application module use-reduced-motion defining useReducedMotion.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/lib/motion.ts",
+      "type": "file",
+      "filePath": "src/lib/motion.ts",
+      "language": "typescript",
+      "symbolCount": 0,
+      "lineCount": 24,
+      "complexity": "simple",
+      "pagerank": 0.05509,
+      "communityId": 0,
+      "tags": [],
+      "summary": "Service module motion.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/lib/performance-monitoring.ts",
+      "type": "file",
+      "filePath": "src/lib/performance-monitoring.ts",
+      "language": "typescript",
+      "symbolCount": 3,
+      "lineCount": 64,
+      "complexity": "simple",
+      "pagerank": 0.014744,
+      "communityId": 2,
+      "tags": [],
+      "summary": "Service module performance-monitoring defining log, usePerformanceMonitoring.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/lib/utils.ts",
+      "type": "file",
+      "filePath": "src/lib/utils.ts",
+      "language": "typescript",
+      "symbolCount": 9,
+      "lineCount": 68,
+      "complexity": "moderate",
+      "pagerank": 0.017173,
+      "communityId": 0,
+      "tags": [],
+      "summary": "Service module utils defining cn, seededRandom, markSceneWarmed.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:src/lib/viewport-store.ts",
+      "type": "file",
+      "filePath": "src/lib/viewport-store.ts",
+      "language": "typescript",
+      "symbolCount": 23,
+      "lineCount": 199,
+      "complexity": "complex",
+      "pagerank": 0.041905,
+      "communityId": 1,
+      "tags": [],
+      "summary": "Service module viewport-store defining PointerState, handlePointerMove, ensurePointerListener.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:tsconfig.json",
+      "type": "config",
+      "filePath": "tsconfig.json",
+      "language": "json",
+      "symbolCount": 0,
+      "lineCount": 16,
+      "complexity": "simple",
+      "pagerank": 0.007719,
+      "communityId": 28,
+      "tags": [
+        "config"
+      ],
+      "summary": "TypeScript compiler configuration."
+    },
+    {
+      "id": "function:src/hooks/use-in-viewport.ts:useInViewport",
+      "type": "function",
+      "filePath": "src/hooks/use-in-viewport.ts",
+      "name": "useInViewport",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/hooks/use-in-viewport.ts:useRefInViewport",
+      "type": "function",
+      "filePath": "src/hooks/use-in-viewport.ts",
+      "name": "useRefInViewport",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/hooks/use-in-viewport.ts:useWarmupTimer",
+      "type": "function",
+      "filePath": "src/hooks/use-in-viewport.ts",
+      "name": "useWarmupTimer",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/hooks/use-mobile.tsx:useIsMobile",
+      "type": "function",
+      "filePath": "src/hooks/use-mobile.tsx",
+      "name": "useIsMobile",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/performance-monitoring.ts:log",
+      "type": "function",
+      "filePath": "src/lib/performance-monitoring.ts",
+      "name": "log",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/performance-monitoring.ts:usePerformanceMonitoring",
+      "type": "function",
+      "filePath": "src/lib/performance-monitoring.ts",
+      "name": "usePerformanceMonitoring",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:cn",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "cn",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:easeOutExpo",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "easeOutExpo",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:markSceneWarmed",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "markSceneWarmed",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:seededRandom",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "seededRandom",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:smoothScrollTo",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "smoothScrollTo",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/utils.ts:warmedSceneCount",
+      "type": "function",
+      "filePath": "src/lib/utils.ts",
+      "name": "warmedSceneCount",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:ensurePointerListener",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "ensurePointerListener",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:getMediaQuery",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "getMediaQuery",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:getVisibilitySnapshot",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "getVisibilitySnapshot",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:handlePointerMove",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "handlePointerMove",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:handleScroll",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "handleScroll",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:readScroll",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "readScroll",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:subscribeVisibility",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "subscribeVisibility",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:useDocumentVisible",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "useDocumentVisible",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:useIdle",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "useIdle",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:useMediaQuery",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "useMediaQuery",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:usePointer",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "usePointer",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:usePointerMove",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "usePointerMove",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    },
+    {
+      "id": "function:src/lib/viewport-store.ts:useScrollTracker",
+      "type": "function",
+      "filePath": "src/lib/viewport-store.ts",
+      "name": "useScrollTracker",
+      "language": "typescript",
+      "tags": [],
+      "summary": ""
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:eslint.config.mjs",
+      "target": "file:external:eslint-config-next/core-web-vitals",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:eslint.config.mjs",
+      "target": "file:external:eslint-config-next/typescript",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:eslint.config.mjs",
+      "target": "file:external:eslint/config",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:next.config.ts",
+      "target": "file:external:next",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:external:next",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:external:next/font/google",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/Footer.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/KonamiEasterEgg.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/Navbar.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/PageLoader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/PerformanceProvider.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/ScrollProgress.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/SmoothScroll.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/SpotlightCursor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/components/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/layout.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:external:next/dynamic",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/components/Contact.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/components/Hero.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/components/NoiseBackground.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/components/ScrollReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/hooks/use-reduced-motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/page.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/robots.ts",
+      "target": "file:external:next",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/app/sitemap.ts",
+      "target": "file:external:next",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/components/three/SceneEffects.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/About3D.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/components/three/SceneEffects.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Achievements3D.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/AvatarFlipCard.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/AvatarFlipCard.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/CodingProfiles.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/CodingProfiles.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/CodingProfiles.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Contact.tsx",
+      "target": "file:external:@emailjs/browser",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Contact.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Contact.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Contact.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/components/three/SceneEffects.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Experience.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:external:next/link",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:src/components/MagneticButton.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Footer.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/GitHubStats.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/GitHubStats.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/GitHubStats.tsx",
+      "target": "file:src/components/CodingProfiles.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/GitHubStats.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/GitHubStats.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Hero.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Hero.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Hero.tsx",
+      "target": "file:src/components/AvatarFlipCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Hero.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Hero.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/KonamiEasterEgg.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/KonamiEasterEgg.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/MagneticButton.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/MagneticButton.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Navbar.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Navbar.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Navbar.tsx",
+      "target": "file:src/components/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Navbar.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Navbar.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/PageLoader.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/PageLoader.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/PageLoader.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ParticleField.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ParticleField.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ParticleField.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ParticleField.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ParticleField.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/PerformanceProvider.tsx",
+      "target": "file:src/lib/performance-monitoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:next/link",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/components/three/SceneEffects.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Projects.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ScrollProgress.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ScrollReveal.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ScrollReveal.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:src/hooks/use-reduced-motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SectionDivider3D.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:external:@react-three/drei",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:external:@react-three/fiber",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:external:three",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:src/hooks/use-in-viewport.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SkillsMarquee.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SmoothScroll.tsx",
+      "target": "file:external:lenis",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SmoothScroll.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SpotlightCursor.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SpotlightCursor.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/SpotlightCursor.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Testimonials.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Testimonials.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Testimonials.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Testimonials.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ThemeToggle.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/ThemeToggle.tsx",
+      "target": "file:src/lib/motion.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/three/SceneEffects.tsx",
+      "target": "file:external:@react-three/postprocessing",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/three/SceneEffects.tsx",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/three/SceneEffects.tsx",
+      "target": "file:src/hooks/use-mobile.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-in-viewport.ts",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-in-viewport.ts",
+      "target": "function:src/hooks/use-in-viewport.ts:useInViewport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-in-viewport.ts",
+      "target": "function:src/hooks/use-in-viewport.ts:useRefInViewport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-in-viewport.ts",
+      "target": "function:src/hooks/use-in-viewport.ts:useWarmupTimer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-mobile.tsx",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-mobile.tsx",
+      "target": "function:src/hooks/use-mobile.tsx:useIsMobile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/hooks/use-reduced-motion.ts",
+      "target": "file:src/lib/viewport-store.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/motion.ts",
+      "target": "file:external:framer-motion",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/performance-monitoring.ts",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/performance-monitoring.ts",
+      "target": "function:src/lib/performance-monitoring.ts:log",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/performance-monitoring.ts",
+      "target": "function:src/lib/performance-monitoring.ts:usePerformanceMonitoring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "file:external:clsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "file:external:tailwind-merge",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:cn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:easeOutExpo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:markSceneWarmed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:seededRandom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:smoothScrollTo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:warmedSceneCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "file:external:react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:ensurePointerListener",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:getMediaQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:getVisibilitySnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:handlePointerMove",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:handleScroll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:readScroll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:subscribeVisibility",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:useDocumentVisible",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:useIdle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:useMediaQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:usePointer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:usePointerMove",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/lib/viewport-store.ts",
+      "target": "function:src/lib/viewport-store.ts:useScrollTracker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:ui",
+      "name": "Interactive Visual Components",
+      "description": "A collection of reusable React components and Three.js elements designed for building the application's interactive user interface.",
+      "nodeIds": [
+        "file:openwiki/components/structure.md",
+        "file:src/components/About3D.tsx",
+        "file:src/components/Achievements3D.tsx",
+        "file:src/components/AvatarFlipCard.tsx",
+        "file:src/components/CodingProfiles.tsx",
+        "file:src/components/Contact.tsx",
+        "file:src/components/Experience.tsx",
+        "file:src/components/Footer.tsx",
+        "file:src/components/GitHubStats.tsx",
+        "file:src/components/Hero.tsx",
+        "file:src/components/KonamiEasterEgg.tsx",
+        "file:src/components/MagneticButton.tsx",
+        "file:src/components/Navbar.tsx",
+        "file:src/components/NoiseBackground.tsx",
+        "file:src/components/PageLoader.tsx",
+        "file:src/components/ParticleField.tsx",
+        "file:src/components/PerformanceProvider.tsx",
+        "file:src/components/Projects.tsx",
+        "file:src/components/ScrollProgress.tsx",
+        "file:src/components/ScrollReveal.tsx",
+        "file:src/components/SectionDivider.tsx",
+        "file:src/components/SectionDivider3D.tsx",
+        "file:src/components/SkillsMarquee.tsx",
+        "file:src/components/SmoothScroll.tsx",
+        "file:src/components/SpotlightCursor.tsx",
+        "file:src/components/Testimonials.tsx",
+        "file:src/components/ThemeToggle.tsx",
+        "file:src/components/three/SceneEffects.tsx"
+      ],
+      "display_order": 0,
+      "order_basis": "imports"
+    },
+    {
+      "id": "layer:config",
+      "name": "Project Automation Settings",
+      "description": "Configuration files and workflow definitions for CI/CD pipelines and AI-assisted development environments.",
+      "nodeIds": [
+        "file:.agents/rules/graphify.md",
+        "file:.agents/workflows/graphify.md",
+        "file:.claude/settings.local.json",
+        "file:.github/workflows/deploy.yml",
+        "file:.github/workflows/openwiki-update.yml"
+      ],
+      "display_order": 1,
+      "order_basis": "imports"
+    },
+    {
+      "id": "layer:application",
+      "name": "Environment and Utility Hooks",
+      "description": "A collection of custom React hooks and project-wide configuration files that manage application state and build environment settings.",
+      "nodeIds": [
+        "file:CLAUDE.md",
+        "file:README.md",
+        "file:eslint.config.mjs",
+        "file:firebase.json",
+        "file:next.config.ts",
+        "file:openwiki/.last-update.json",
+        "file:openwiki/architecture/3d-performance.md",
+        "file:openwiki/architecture/overview.md",
+        "file:openwiki/content/data-structure.md",
+        "file:openwiki/development.md",
+        "file:openwiki/operations/deployment.md",
+        "file:openwiki/quickstart.md",
+        "file:package.json",
+        "file:postcss.config.mjs",
+        "file:public/manifest.json",
+        "file:public/sw.js",
+        "file:public/workbox-4754cb34.js",
+        "file:src/app/layout.tsx",
+        "file:src/app/page.tsx",
+        "file:src/app/robots.ts",
+        "file:src/app/sitemap.ts",
+        "file:src/hooks/use-in-viewport.ts",
+        "file:src/hooks/use-mobile.tsx",
+        "file:src/hooks/use-reduced-motion.ts",
+        "file:tsconfig.json"
+      ],
+      "display_order": 2,
+      "order_basis": "imports"
+    },
+    {
+      "id": "layer:service",
+      "name": "Core Logic Utilities",
+      "description": "Shared helper functions and state management logic used to handle animations, performance tracking, and general data manipulation.",
+      "nodeIds": [
+        "file:src/lib/motion.ts",
+        "file:src/lib/performance-monitoring.ts",
+        "file:src/lib/utils.ts",
+        "file:src/lib/viewport-store.ts"
+      ],
+      "display_order": 3,
+      "order_basis": "imports"
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "target_path": "README.md",
+      "page_type": "repo_overview",
+      "title": "README.md",
+      "depth": 0,
+      "kind": "overview",
+      "reason": "Start here for the end-to-end picture before diving into the code.",
+      "layer_id": "layer:application"
+    },
+    {
+      "order": 2,
+      "target_path": "src/app/layout.tsx",
+      "page_type": "file_page",
+      "title": "layout.tsx",
+      "depth": 0,
+      "kind": "code",
+      "reason": "The walk's anchor \u2014 its imports fan out the widest in a repo with no single entry point.",
+      "layer_id": "layer:application"
+    },
+    {
+      "order": 3,
+      "target_path": "src/lib/motion.ts",
+      "page_type": "file_page",
+      "title": "motion.ts",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:service"
+    },
+    {
+      "order": 4,
+      "target_path": "src/components/ThemeToggle.tsx",
+      "page_type": "file_page",
+      "title": "ThemeToggle.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 5,
+      "target_path": "src/components/Footer.tsx",
+      "page_type": "file_page",
+      "title": "Footer.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 6,
+      "target_path": "src/components/KonamiEasterEgg.tsx",
+      "page_type": "file_page",
+      "title": "KonamiEasterEgg.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 7,
+      "target_path": "src/components/Navbar.tsx",
+      "page_type": "file_page",
+      "title": "Navbar.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 8,
+      "target_path": "src/components/PageLoader.tsx",
+      "page_type": "file_page",
+      "title": "PageLoader.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 9,
+      "target_path": "src/components/PerformanceProvider.tsx",
+      "page_type": "file_page",
+      "title": "PerformanceProvider.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 10,
+      "target_path": "src/components/ScrollProgress.tsx",
+      "page_type": "file_page",
+      "title": "ScrollProgress.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 11,
+      "target_path": "src/components/SmoothScroll.tsx",
+      "page_type": "file_page",
+      "title": "SmoothScroll.tsx",
+      "depth": 1,
+      "kind": "code",
+      "reason": "Directly imported by the anchor above; a core collaborator.",
+      "layer_id": "layer:ui"
+    },
+    {
+      "order": 12,
+      "target_path": "src/components/GitHubStats.tsx",
+      "page_type": "file_page",
+      "title": "GitHubStats.tsx",
+      "depth": 0,
+      "kind": "code",
+      "reason": "A top churn hotspot \u2014 one of the most frequently changed files in the repo; worth understanding early.",
+      "layer_id": "layer:ui"
+    }
+  ],
+  "modules": [
+    {
+      "id": "module:ui",
+      "name": "UI",
+      "path": "",
+      "layerId": "layer:ui",
+      "nodeIds": [
+        "file:openwiki/components/structure.md",
+        "file:src/components/About3D.tsx",
+        "file:src/components/Achievements3D.tsx",
+        "file:src/components/AvatarFlipCard.tsx",
+        "file:src/components/CodingProfiles.tsx",
+        "file:src/components/Contact.tsx",
+        "file:src/components/Experience.tsx",
+        "file:src/components/Footer.tsx",
+        "file:src/components/GitHubStats.tsx",
+        "file:src/components/Hero.tsx",
+        "file:src/components/KonamiEasterEgg.tsx",
+        "file:src/components/MagneticButton.tsx",
+        "file:src/components/Navbar.tsx",
+        "file:src/components/NoiseBackground.tsx",
+        "file:src/components/PageLoader.tsx",
+        "file:src/components/ParticleField.tsx",
+        "file:src/components/PerformanceProvider.tsx",
+        "file:src/components/Projects.tsx",
+        "file:src/components/ScrollProgress.tsx",
+        "file:src/components/ScrollReveal.tsx",
+        "file:src/components/SectionDivider.tsx",
+        "file:src/components/SectionDivider3D.tsx",
+        "file:src/components/SkillsMarquee.tsx",
+        "file:src/components/SmoothScroll.tsx",
+        "file:src/components/SpotlightCursor.tsx",
+        "file:src/components/Testimonials.tsx",
+        "file:src/components/ThemeToggle.tsx",
+        "file:src/components/three/SceneEffects.tsx"
+      ],
+      "wholeLayer": true,
+      "language": "typescript"
+    },
+    {
+      "id": "module:config",
+      "name": "Config",
+      "path": "",
+      "layerId": "layer:config",
+      "nodeIds": [
+        "file:.agents/rules/graphify.md",
+        "file:.agents/workflows/graphify.md",
+        "file:.claude/settings.local.json",
+        "file:.github/workflows/deploy.yml",
+        "file:.github/workflows/openwiki-update.yml"
+      ],
+      "wholeLayer": true,
+      "language": "markdown"
+    },
+    {
+      "id": "module:application",
+      "name": "Application",
+      "path": "",
+      "layerId": "layer:application",
+      "nodeIds": [
+        "file:CLAUDE.md",
+        "file:README.md",
+        "file:eslint.config.mjs",
+        "file:firebase.json",
+        "file:next.config.ts",
+        "file:openwiki/.last-update.json",
+        "file:openwiki/architecture/3d-performance.md",
+        "file:openwiki/architecture/overview.md",
+        "file:openwiki/content/data-structure.md",
+        "file:openwiki/development.md",
+        "file:openwiki/operations/deployment.md",
+        "file:openwiki/quickstart.md",
+        "file:package.json",
+        "file:postcss.config.mjs",
+        "file:public/manifest.json",
+        "file:public/sw.js",
+        "file:public/workbox-4754cb34.js",
+        "file:src/app/layout.tsx",
+        "file:src/app/page.tsx",
+        "file:src/app/robots.ts",
+        "file:src/app/sitemap.ts",
+        "file:src/hooks/use-in-viewport.ts",
+        "file:src/hooks/use-mobile.tsx",
+        "file:src/hooks/use-reduced-motion.ts",
+        "file:tsconfig.json"
+      ],
+      "wholeLayer": true,
+      "language": "markdown"
+    },
+    {
+      "id": "module:src-lib",
+      "name": "Service",
+      "path": "src/lib",
+      "layerId": "layer:service",
+      "nodeIds": [
+        "file:src/lib/motion.ts",
+        "file:src/lib/performance-monitoring.ts",
+        "file:src/lib/utils.ts",
+        "file:src/lib/viewport-store.ts"
+      ],
+      "wholeLayer": true,
+      "language": "typescript"
+    }
+  ]
+}

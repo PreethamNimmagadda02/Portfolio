@@ -41,3 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 /graphify-out
+
+# repowise — ignore caches, sessions, jobs, secrets & vector DB
+# Keep: config.yaml, wiki.db, state.json, knowledge-graph.json, mcp.json
+.repowise/.env
+.repowise/*.pkl
+.repowise/lancedb/
+.repowise/sessions/
+.repowise/omissions/
+.repowise/jobs/
