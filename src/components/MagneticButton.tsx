@@ -44,6 +44,11 @@ export default function MagneticButton({
       style={{ x: xSpring, y: ySpring }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      // The magnetic pull only exists for mouse pointers, but every CTA
+      // wrapped here (Hero, Projects, Footer) still needs touch feedback —
+      // whileTap uses Framer's pointer/touch gesture recognizer, so it fires
+      // reliably on tap where CSS :active often doesn't.
+      whileTap={{ scale: 0.94 }}
       className={className}
     >
       {children}

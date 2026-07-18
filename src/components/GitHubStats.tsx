@@ -646,7 +646,7 @@ export default function GitHubStats() {
                             <AnimatedCounter value={Number(stat.value)} suffix={stat.suffix} />
                           )}
                         </div>
-                        <p className="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
+                        <p className="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest group-hover:text-white transition-colors">
                           {stat.label}
                         </p>
                       </div>
