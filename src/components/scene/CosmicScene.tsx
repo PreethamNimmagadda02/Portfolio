@@ -66,12 +66,21 @@ const nebulaVertex = /* glsl */ `
     return v;
   }
 
-  // Same drift as the fragment domain-warp, sampled here to raise the gas
-  // into real 3D relief instead of a flat painted gradient.
+  // Same swirl + drift as the fragment domain-warp, sampled here to raise
+  // the gas into real 3D relief instead of a flat painted gradient. The
+  // coordinates spiral around a slowly drifting center rather than sliding
+  // in a straight line, so the surface visibly churns instead of just
+  // tilting as a rigid plane.
   float heightAt(vec2 p) {
     float t = uTime * 0.035;
+    vec2 center = vec2(0.5 + sin(t * 0.3) * 0.06, 0.45 + cos(t * 0.24) * 0.05);
+    vec2 toCenter = p - center;
+    float radius = length(toCenter);
+    float angle = atan(toCenter.y, toCenter.x);
+    angle += sin(radius * 6.0 - t * 2.2) * (0.35 + uVelocity * 0.3);
+    vec2 swirlP = center + vec2(cos(angle), sin(angle)) * radius;
     vec2 drift = vec2(t * 0.6, -t * 0.3);
-    return vFbm(p * 3.0 + drift);
+    return vFbm(swirlP * 3.0 + drift);
   }
 
   void main() {
@@ -141,13 +150,30 @@ const nebulaFragment = /* glsl */ `
     // move and settles when you stop.
     float stir = 1.0 + uVelocity * 0.9;
 
+    // Swirling vortex warp — coordinates spiral around a slowly drifting
+    // center instead of sliding in a straight line, so the gas visibly
+    // churns rather than reading as a flat plane sliding under a tilt.
+    vec2 swirlCenter = vec2(0.5 + sin(t * 0.3) * 0.06, 0.45 + cos(t * 0.24) * 0.05);
+    vec2 toCenter = uv - swirlCenter;
+    float radius = length(toCenter);
+    float angle = atan(toCenter.y, toCenter.x);
+    angle += sin(radius * 6.0 - t * 2.2) * (0.35 + uVelocity * 0.3);
+    vec2 swirlUv = swirlCenter + vec2(cos(angle), sin(angle)) * radius;
+
     vec2 drift = vec2(t * 0.6, -t * 0.3) + uMouse * 0.05 + vec2(0.0, uScroll * 1.4);
-    vec2 q = vec2(fbm(uv * 2.2 + drift), fbm(uv * 2.2 + vec2(5.2, 1.3) - drift));
-    float f = fbm(uv * 2.6 + q * 1.6 * stir);
+    vec2 q = vec2(fbm(swirlUv * 2.2 + drift), fbm(swirlUv * 2.2 + vec2(5.2, 1.3) - drift));
+    float f = fbm(swirlUv * 2.6 + q * 1.6 * stir);
 
     vec3 col = uColorC;
     col = mix(col, uColorA, smoothstep(0.35, 0.85, f) * (0.5 + uVelocity * 0.18));
     col = mix(col, uColorB, smoothstep(0.5, 1.0, q.x * f) * 0.4);
+
+    // Aurora ribbons — traveling color curtains riding the swirl, the
+    // classic aurora-borealis look instead of a static gradient blob.
+    float ribbon = sin(swirlUv.x * 7.0 + f * 4.0 - t * 3.0) * 0.5 + 0.5;
+    ribbon = pow(ribbon, 4.0) * smoothstep(0.2, 0.8, f);
+    vec3 ribbonColor = mix(uColorA, uColorB, sin(t * 0.4) * 0.5 + 0.5);
+    col += ribbonColor * ribbon * 0.35;
 
     float d = distance(uv, vec2(0.5 + uMouse.x * 0.02, 0.45 - uMouse.y * 0.02));
     col *= smoothstep(0.95, 0.25, d);
@@ -182,7 +208,7 @@ const nebulaFragment = /* glsl */ `
     float luma = dot(col, vec3(0.299, 0.587, 0.114));
     col = mix(vec3(luma), col, 1.18);
 
-    gl_FragColor = vec4(col, 1.0) * 0.7;
+    gl_FragColor = vec4(col, 1.0) * 0.52;
   }
 `;
 
@@ -226,13 +252,14 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
     uC.set(uC.x + (c[0] - uC.x) * 0.06, uC.y + (c[1] - uC.y) * 0.06, uC.z + (c[2] - uC.z) * 0.06);
     u.uScroll.value = scroll.progress;
 
-    // Gentle pointer-driven tilt + a slow constant wobble — reveals the
-    // displaced surface's real depth via perspective instead of a static
-    // face-on billboard.
+    // A faint pointer-driven tilt — just enough residual parallax to sell
+    // the displaced surface's depth. The swirl + ribbons above now carry
+    // the actual dynamism, so this stays subtle rather than being the
+    // primary motion (a rigid whole-object rotation reads as mechanical).
     if (meshRef.current) {
       const wobble = state.clock.elapsedTime * 0.06;
-      const targetRotX = pointer.ny * 0.1 + Math.sin(wobble) * 0.035;
-      const targetRotY = -pointer.nx * 0.12 + Math.cos(wobble * 0.85) * 0.035;
+      const targetRotX = pointer.ny * 0.04 + Math.sin(wobble) * 0.015;
+      const targetRotY = -pointer.nx * 0.05 + Math.cos(wobble * 0.85) * 0.015;
       meshRef.current.rotation.x += (targetRotX - meshRef.current.rotation.x) * 0.04;
       meshRef.current.rotation.y += (targetRotY - meshRef.current.rotation.y) * 0.04;
     }
