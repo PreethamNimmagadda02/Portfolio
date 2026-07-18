@@ -50,3 +50,6 @@ next-env.d.ts
 .repowise/sessions/
 .repowise/omissions/
 .repowise/jobs/
+
+
+package-lock.json
