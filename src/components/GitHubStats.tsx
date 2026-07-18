@@ -501,7 +501,7 @@ export default function GitHubStats() {
     <section
       ref={sectionRef}
       id="github-stats"
-      className="py-20 relative overflow-hidden"
+      className="relative w-full py-20 md:py-32 overflow-hidden"
     >
       <div
         className="absolute inset-0 pointer-events-none"

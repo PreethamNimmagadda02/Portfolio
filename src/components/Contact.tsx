@@ -464,7 +464,7 @@ export default function Contact() {
   ].filter(Boolean).length / 3 * 100;
 
   return (
-    <section id="contact" className="py-20 relative overflow-hidden">
+    <section id="contact" className="relative w-full py-20 md:py-32 overflow-hidden">
       {/* Toast notifications */}
       <AnimatePresence>
         {toast && (
@@ -486,28 +486,21 @@ export default function Contact() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ amount: 0.3 }}
-          transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
-          className="text-center mb-16"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4"
+        <InViewClass>
+          <SectionKicker num="08" label="Contact" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.3 }}
+            transition={{ duration: 0.8, type: "spring" as const, stiffness: 100 }}
+            className="text-center mb-16"
           >
-            Contact
-          </motion.span>
-          <InViewClass as="div">
             <h2 className="text-display text-3xl md:text-5xl text-white mb-4">
               <span className="line-mask">
                 <span className="line-rise">Get in Touch</span>
               </span>
             </h2>
-          </InViewClass>
-          <p className="text-gray-300 max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
+            <p className="text-gray-300 text-sm md:text-base max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
 
           {/* Availability Status Card */}
           <motion.div
@@ -535,7 +528,8 @@ export default function Contact() {
               <p className="text-gray-300 text-xs">Response within 24 hours</p>
             </div>
           </motion.div>
-        </motion.div>
+          </motion.div>
+        </InViewClass>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Contact Info */}

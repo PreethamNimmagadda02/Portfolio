@@ -2,10 +2,10 @@
 
 import { motion, useInView } from "@/lib/motion";
 import { useRef, useState, useCallback } from "react";
-import { Quote, MessageCircle, Star } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InteractiveCard from "./InteractiveCard";
-import { InViewClass } from "./Reveal";
+import { InViewClass, SectionKicker } from "./Reveal";
 
 const testimonials = [
   {
@@ -231,25 +231,18 @@ export default function Testimonials() {
   const row2 = [...rotated, ...rotated];
 
   return (
-    <section ref={sectionRef} id="testimonials" className="py-24 relative overflow-hidden">
+    <section ref={sectionRef} id="testimonials" className="relative w-full py-20 md:py-32 overflow-hidden">
       <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-linear-to-r from-purple-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4"
+        <InViewClass>
+          <SectionKicker num="07" label="Voices" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
           >
-            <MessageCircle size={16} />
-            <span>Testimonials</span>
-          </motion.span>
-          <InViewClass as="div">
             <h2 className="text-display text-3xl md:text-5xl text-white mb-4">
               <span className="line-mask">
                 <span className="line-rise">
@@ -258,9 +251,9 @@ export default function Testimonials() {
                 </span>
               </span>
             </h2>
-          </InViewClass>
-          <p className="text-gray-300 max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
-        </motion.div>
+            <p className="text-gray-300 text-sm md:text-base max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
+          </motion.div>
+        </InViewClass>
       </div>
 
       {isMobile ? (

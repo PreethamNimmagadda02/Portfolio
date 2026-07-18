@@ -106,7 +106,7 @@ export default function Skills() {
   }, []);
 
   return (
-    <section id="skills-sphere" className="py-16 md:py-24 relative w-full">
+    <section id="skills-sphere" className="relative w-full py-20 md:py-32">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <InViewClass>
           <SectionKicker num="03" label="Toolbox" />
