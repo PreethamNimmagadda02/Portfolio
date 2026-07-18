@@ -1,41 +1,21 @@
 "use client";
 
-import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import {
-  Float,
-  Environment,
-  Sparkles,
-  Html,
-  ContactShadows,
-  useCursor,
-  BakeShadows,
-  MeshTransmissionMaterial
-} from "@react-three/drei";
-import * as THREE from "three";
-import SceneEffects from "./three/SceneEffects";
 import { motion } from "@/lib/motion";
 import {
   ExternalLink,
   Github,
-  ArrowUpRight,
   GraduationCap,
   Ticket,
   TrendingUp,
-  ChevronLeft,
-  ChevronRight,
   Bot,
   Code,
+  LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useInViewport, useRefInViewport, useWarmupTimer } from "@/hooks/use-in-viewport";
-import { useDocumentVisible } from "@/lib/viewport-store";
-import { markSceneWarmed } from "@/lib/utils";
+import MagneticButton from "./MagneticButton";
+import { InViewClass, SectionKicker } from "./Reveal";
+import type { CSSProperties } from "react";
 
-// -----------------------------------------------------------------------------
-// Data
-// -----------------------------------------------------------------------------
 interface ProjectData {
   id: number;
   title: string;
@@ -43,11 +23,9 @@ interface ProjectData {
   tags: string[];
   links: { demo: string; repo: string };
   status: string;
-  featured: boolean;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   accent: string;
-  geometry: string;
 }
 
 const projects: ProjectData[] = [
@@ -55,60 +33,40 @@ const projects: ProjectData[] = [
     id: 0,
     title: "College Central",
     description:
-      "The Digital Backbone of IIT(ISM) Dhanbad. A centralized platform empowering students with real-time academic insights, campus navigation, and event integration.",
-    tags: [
-      "React",
-      "TypeScript",
-      "Firebase",
-      "REST APIs",
-      "Tailwind CSS",
-      "Vite",
-      "Framer Motion",
-    ],
-    links: {
-      demo: "https://collegecentral.live/#/",
-      repo: "https://github.com/PreethamNimmagadda02/College-Central",
-    },
+      "The digital backbone of IIT (ISM) Dhanbad. A centralized platform empowering students with real-time academic insights, campus navigation, and event integration.",
+    tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
+    links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     status: "Live",
-    featured: true,
     icon: GraduationCap,
     color: "#a855f7",
     accent: "#ec4899",
-    geometry: "nexus",
   },
   {
     id: 1,
     title: "FestFlow",
     description:
-      "Autonomous Event Orchestration at scale. Leveraging multi-agent AI to transform abstract constraints into executable logistical plans.",
+      "Autonomous event orchestration at scale. Leveraging multi-agent AI to transform abstract constraints into executable logistical plans.",
     tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
-    links: {
-      demo: "https://festflow.co.in/",
-      repo: "https://github.com/PreethamNimmagadda02/FestFlow",
-    },
+    links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
-    featured: false,
     icon: Ticket,
     color: "#3b82f6",
     accent: "#06b6d4",
-    geometry: "flow",
   },
   {
     id: 2,
     title: "AI Trading System",
     description:
-      "Algorithmic Trading Infrastructure. A swarm of AI agents analyzing market signals to execute high-frequency trading strategies with precision.",
+      "Algorithmic trading infrastructure. A swarm of AI agents analyzing market signals to execute high-frequency trading strategies with precision.",
     tags: ["Python", "CrewAI", "GPT API", "Financial Tech"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System",
       repo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System",
     },
     status: "Complete",
-    featured: false,
     icon: TrendingUp,
     color: "#22c55e",
     accent: "#10b981",
-    geometry: "matrix",
   },
   {
     id: 3,
@@ -121,768 +79,163 @@ const projects: ProjectData[] = [
       repo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
     },
     status: "Complete",
-    featured: true,
     icon: Code,
     color: "#f43f5e",
     accent: "#e11d48",
-    geometry: "nexus",
   },
   {
     id: 4,
     title: "Slack AI Data Bot",
     description:
       "A generative AI Slack assistant translating plain English into actionable PostgreSQL insights. Features auto-generated charts, 1-click CSV exports, and intelligent query caching.",
-    tags: ["Node.js", "LangChain", "OpenAI", "PostgreSQL", "Slack API", "Natural Language Processing"],
+    tags: ["Node.js", "LangChain", "OpenAI", "PostgreSQL", "Slack API", "NLP"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
       repo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
     },
     status: "Complete",
-    featured: true,
     icon: Bot,
     color: "#eab308",
     accent: "#f59e0b",
-    geometry: "flow",
   },
 ];
 
-// Circle arrangement
-const RADIUS = 4.5;
-function getPosition(index: number, total: number): [number, number, number] {
-  const angle = (index / total) * Math.PI * 2;
-  return [Math.cos(angle) * RADIUS, 0, Math.sin(angle) * RADIUS];
-}
-
-// -----------------------------------------------------------------------------
-// 3D Geometries — unique, premium themed shapes per project
-// -----------------------------------------------------------------------------
-function AnimatedPlanet({
-  type,
-  materialProps,
-  isActive,
-}: {
-  type: string;
-  materialProps: Record<string, any>;
-  isActive: boolean;
-}) {
-  const ringRef = useRef<THREE.Mesh>(null);
-  const ring2Ref = useRef<THREE.Mesh>(null);
-  const orbitRef = useRef<THREE.Group>(null);
-  const atmosphereRef = useRef<THREE.Mesh>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
-  const shellRef = useRef<THREE.Mesh>(null);
-  const debrisRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (ringRef.current) ringRef.current.rotation.z = t * 0.3;
-    if (ring2Ref.current) ring2Ref.current.rotation.z = -t * 0.25;
-    if (orbitRef.current) {
-      orbitRef.current.rotation.y = t * 0.5;
-      orbitRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
-    }
-    if (atmosphereRef.current) {
-      const s = 1.0 + Math.sin(t * 1.5) * 0.02; // Subtle pulse
-      atmosphereRef.current.scale.set(s, s, s);
-      atmosphereRef.current.rotation.y = t * 0.1;
-      atmosphereRef.current.rotation.x = t * 0.05;
-    }
-    if (coreRef.current) {
-      coreRef.current.rotation.y = -t * 0.15;
-      const m = coreRef.current.material as THREE.MeshPhysicalMaterial;
-      if (m.emissiveIntensity !== undefined) {
-        // Capped peak so the bloom halo stays tight around the core
-        m.emissiveIntensity = (isActive ? 1.8 : 1.2) + Math.sin(t * 2.5) * 0.3;
-      }
-    }
-    if (shellRef.current) {
-      shellRef.current.rotation.y = t * 0.2;
-      shellRef.current.rotation.x = t * 0.15;
-    }
-    if (debrisRef.current) {
-      debrisRef.current.rotation.y = t * 0.6;
-    }
-  });
-
-  const mat = <meshPhysicalMaterial {...materialProps} />;
-
-  // Premium glass material for outer shells
-  const glassMaterial = (
-    <MeshTransmissionMaterial
-      {...materialProps}
-      transmission={0.9}
-      thickness={0.5}
-      roughness={0.1}
-      ior={1.5}
-      chromaticAberration={0.05}
-      resolution={256}
-      backside={true}
-      color={materialProps.color}
-      emissive={materialProps.emissive}
-      emissiveIntensity={isActive ? 0.5 : 0.2}
-    />
-  );
-
-  switch (type) {
-    case "nexus":
-      // College Central (Purple) - Solid glowing core + glass shell + tech rings
-      return (
-        <group>
-          {/* Inner dense core */}
-          <mesh ref={coreRef}>
-            <sphereGeometry args={[0.55, 64, 64]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2 : 1} />
-          </mesh>
-          {/* Refractive outer shell */}
-          <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.7, 64, 64]} />
-            {glassMaterial}
-          </mesh>
-          {/* Outer tech ring */}
-          <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
-            <torusGeometry args={[1.0, 0.015, 32, 100]} />
-            <meshPhysicalMaterial {...materialProps} opacity={0.6} transparent />
-          </mesh>
-          {/* Inner contra-rotating ring */}
-          <mesh ref={ring2Ref} rotation={[-Math.PI / 3, 0, 0]}>
-            <torusGeometry args={[1.1, 0.015, 32, 100]} />
-            <meshPhysicalMaterial {...materialProps} opacity={0.4} transparent />
-          </mesh>
-          {/* Orbiting data nodes */}
-          <group ref={orbitRef}>
-            {[0, 1, 2, 3].map((i) => {
-              const a = (i / 4) * Math.PI * 2;
-              return (
-                <mesh key={i} position={[Math.cos(a) * 1.05, Math.sin(a) * 0.4, Math.sin(a) * 1.05]} scale={0.12}>
-                  <sphereGeometry args={[1, 32, 32]} />
-                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={(isActive ? 2 : 1)} toneMapped={false} />
-                </mesh>
-              );
-            })}
-          </group>
-        </group>
-      );
-
-    case "flow":
-      // FestFlow (Blue/Cyan) - Glass bubble + smooth intersecting thick flow rings
-      return (
-        <group>
-          {/* Central refractive bubble */}
-          <mesh ref={atmosphereRef}>
-            <sphereGeometry args={[0.55, 64, 64]} />
-            {glassMaterial}
-          </mesh>
-          {/* Flow rings */}
-          {[0, 1, 2].map((i) => (
-            <mesh
-              key={i}
-              ref={i === 0 ? ringRef : i === 1 ? ring2Ref : undefined}
-              rotation={[Math.PI / 2 + i * 0.4, i * 0.6, i * 0.3]}
-              scale={1 + i * 0.15}
-            >
-              <torusGeometry args={[0.75, 0.08, 32, 100]} />
-              <MeshTransmissionMaterial
-                {...materialProps}
-                transmission={0.8}
-                thickness={0.8}
-                roughness={0.1}
-                ior={1.4}
-                opacity={(materialProps.opacity || 0.9) * (0.6 - i * 0.15)}
-                transparent
-              />
-            </mesh>
-          ))}
-        </group>
-      );
-
-    case "matrix":
-      // AI Trading (Green) - Sharp inner octahedron + pulsing wireframe shell + data cubes
-      return (
-        <group>
-          {/* Sharp AI core */}
-          <mesh ref={coreRef}>
-            <octahedronGeometry args={[0.55, 0]} />
-            <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1.5} toneMapped={false} flatShading />
-          </mesh>
-          {/* Tech wireframe shield */}
-          <mesh ref={shellRef} scale={1.2}>
-            <sphereGeometry args={[0.6, 32, 32]} />
-            <meshPhysicalMaterial {...materialProps} wireframe opacity={isActive ? 0.4 : 0.2} transparent emissive={materialProps.emissive} emissiveIntensity={1} />
-          </mesh>
-          {/* Data block debris */}
-          <group ref={debrisRef}>
-            {[0, 1, 2, 3, 4].map((i) => {
-              const a = (i / 5) * Math.PI * 2;
-              return (
-                <mesh key={i} position={[Math.cos(a) * 0.95, (i % 2 === 0 ? 0.3 : -0.3), Math.sin(a) * 0.95]}>
-                  <boxGeometry args={[0.1, 0.1, 0.1]} />
-                  <meshPhysicalMaterial {...materialProps} emissiveIntensity={isActive ? 2.5 : 1} toneMapped={false} />
-                </mesh>
-              );
-            })}
-          </group>
-        </group>
-      );
-
-    default:
-      return (
-        <mesh>
-          <sphereGeometry args={[0.75, 64, 64]} />
-          {mat}
-        </mesh>
-      );
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-// Single 3D Project Card — geometry + HUD
-// -----------------------------------------------------------------------------
-function ProjectCard3D({
-  data,
-  index,
-  total,
-  isActive,
-  isMobile,
-  onClick,
-}: {
-  data: ProjectData;
-  index: number;
-  total: number;
-  isActive: boolean;
-  isMobile: boolean;
-  onClick: () => void;
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const pos = getPosition(index, total);
-  const [hovered, setHovered] = useState(false);
-
-  useCursor(hovered);
-
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
-
-    // Continuous rotation - faster when active/hovered
-    groupRef.current.rotation.y += delta * (isActive ? 0.4 : (hovered ? 0.3 : 0.1));
-    groupRef.current.rotation.x += delta * (isActive ? 0.1 : 0.03);
-
-    // Scale lerp with spring-like feel
-    const targetScale = isActive ? 1.15 : hovered ? 0.95 : 0.7;
-    groupRef.current.scale.lerp(
-      new THREE.Vector3(targetScale, targetScale, targetScale),
-      0.06
-    );
-  });
-
-  const Icon = data.icon;
-
-  const materialProps = {
-    color: data.color,
-    metalness: 0.85,
-    roughness: 0.12,
-    emissive: data.accent,
-    emissiveIntensity: isActive ? 1.6 : hovered ? 0.9 : 0.3,
-    transparent: true,
-    opacity: isActive ? 0.95 : 0.85,
-    envMapIntensity: 1.8,
-    clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    iridescence: 0.9,
-    iridescenceIOR: 1.6,
-    iridescenceThicknessRange: [100, 400] as [number, number],
-    sheen: 0.5,
-    sheenColor: data.accent,
-    toneMapped: false,
-  };
+function ProjectRow({ project, index }: { project: ProjectData; index: number }) {
+  const Icon = project.icon;
+  const reversed = index % 2 === 1;
 
   return (
-    <group position={pos} scale={isMobile ? 0.45 : 0.65}>
-      {/* Floating 3D geometry */}
-      <Float
-        floatIntensity={isActive ? 2.2 : 0.8}
-        rotationIntensity={isActive ? 1.3 : 0.4}
-        speed={isActive ? 2.5 : 1}
-      >
-        <group
-          ref={groupRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            setHovered(true);
-          }}
-          onPointerOut={() => setHovered(false)}
-        >
-          <AnimatedPlanet type={data.geometry} materialProps={materialProps} isActive={isActive} />
-        </group>
-      </Float>
-
-      {/* Glowing Color Platform */}
-      <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[2.0, 64]} />
-        <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.35 : 0.05} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-      <mesh position={[0, -2.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.9, 2.3, 64]} />
-        <meshBasicMaterial color={data.color} transparent opacity={isActive ? 0.2 : 0.03} side={THREE.DoubleSide} toneMapped={false} blending={THREE.AdditiveBlending} />
-      </mesh>
-
-      {/* Energy beam */}
-      {isActive && (
-        <mesh position={[0, -1, 0]}>
-          <cylinderGeometry args={[0.015, 0.12, 2, 8]} />
-          <meshBasicMaterial
-            color={data.color}
-            transparent
-            opacity={0.2}
-            toneMapped={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      )}
-
-      {/* HTML HUD card */}
-      <Html
-        position={[0, -4.0, 0]}
-        center
-        className="pointer-events-none z-50"
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="relative py-10 md:py-14 border-b border-white/5 last:border-b-0 group/row"
+      style={{ "--proj-color": project.color, "--proj-accent": project.accent } as CSSProperties}
+    >
+      {/* Row hover wash — project-tinted, gpu-cheap */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-700 pointer-events-none"
         style={{
-          opacity: isActive ? 1 : 0,
-          pointerEvents: isActive ? "auto" : "none",
-          transition: "opacity 0.4s ease",
+          background: `radial-gradient(600px circle at ${reversed ? "80%" : "20%"} 30%, ${project.color}0a, transparent 70%)`,
         }}
-        zIndexRange={[100, 0]}
-        transform={false}
-      >
-        <div
-          className="w-[calc(100vw-6rem)] max-w-[280px] sm:w-[320px] sm:max-w-none md:w-[340px] p-4 md:p-5 rounded-2xl backdrop-blur-xl border border-white/10 relative overflow-hidden"
-          style={{
-            background: `linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.65))`,
-            boxShadow: isActive
-              ? `0 0 50px -12px ${data.color}, inset 0 1px 0 rgba(255,255,255,0.08)`
-              : "none",
-          }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div
-                className="p-2.5 rounded-xl border border-white/10"
-                style={{
-                  background: `linear-gradient(135deg, ${data.color}25, ${data.accent}15)`,
-                  boxShadow: `inset 0 0 15px ${data.color}25`,
-                }}
-              >
-                <Icon size={20} color={data.color} />
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-black text-white leading-tight">
-                  {data.title}
-                </h3>
-                <span
-                  className="inline-flex items-center gap-1.5 text-[11px] font-bold mt-0.5 px-2 py-0.5 rounded-full border"
-                  style={{
-                    color: data.status === "Live" ? "#4ade80" : "#60a5fa",
-                    borderColor:
-                      data.status === "Live"
-                        ? "rgba(74,222,128,0.3)"
-                        : "rgba(96,165,250,0.3)",
-                    backgroundColor:
-                      data.status === "Live"
-                        ? "rgba(74,222,128,0.1)"
-                        : "rgba(96,165,250,0.1)",
-                  }}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${data.status === "Live"
-                      ? "bg-green-400 animate-pulse"
-                      : "bg-blue-400"
-                      }`}
-                  />
-                  {data.status}
-                </span>
-              </div>
-            </div>
-            <Link
-              href={data.links.demo}
-              target="_blank"
-              className="p-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all hover:scale-110 hover:rotate-45 text-white"
+      />
+      <div className={`relative flex flex-col md:flex-row gap-6 md:gap-12 items-start ${reversed ? "md:flex-row-reverse" : ""}`}>
+        {/* Index + icon column */}
+        <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-6 md:w-40 shrink-0">
+          <span
+            className="text-5xl md:text-7xl font-black leading-none select-none transition-colors duration-500 text-[color-mix(in_srgb,var(--proj-color)_18%,transparent)] group-hover/row:text-(--proj-color) group-hover/row:drop-shadow-[0_0_20px_var(--proj-color)]"
+            style={{ fontFamily: "var(--font-space-grotesk)" }}
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div
+            className="p-3 rounded-2xl transition-all duration-500 group-hover/row:scale-110 group-hover/row:shadow-[0_0_28px_-6px_var(--proj-color)]"
+            style={{ backgroundColor: `${project.color}14`, color: project.color }}
+          >
+            <Icon size={24} />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <h3
+              className="text-2xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent transition-[background-position] duration-700 ease-out bg-position-[100%_0] group-hover/row:bg-position-[0%_0]"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${project.color}, ${project.accent} 45%, #fff 55%, #fff)`,
+                backgroundSize: "220% 100%",
+              }}
             >
-              <ArrowUpRight size={16} />
-            </Link>
+              {project.title}
+            </h3>
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
+              style={{
+                color: project.status === "Live" ? "#4ade80" : "#60a5fa",
+                borderColor: project.status === "Live" ? "rgba(74,222,128,0.3)" : "rgba(96,165,250,0.3)",
+                backgroundColor: project.status === "Live" ? "rgba(74,222,128,0.08)" : "rgba(96,165,250,0.08)",
+              }}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${project.status === "Live" ? "bg-green-400 animate-pulse" : "bg-blue-400"}`} />
+              {project.status}
+            </span>
           </div>
 
-          {/* Description */}
-          <p className="text-sm text-gray-300 leading-relaxed mb-4">
-            {data.description}
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-5 max-w-2xl" style={{ fontFamily: "var(--font-inter)" }}>
+            {project.description}
           </p>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {data.tags.map((tag) => (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {project.tags.map((tag) => (
               <span
                 key={tag}
                 className="px-2.5 py-1 rounded-full text-xs font-medium border"
-                style={{
-                  color: data.accent,
-                  borderColor: `${data.accent}45`,
-                  backgroundColor: `${data.accent}18`,
-                }}
+                style={{ color: project.accent, borderColor: `${project.accent}30`, backgroundColor: `${project.accent}0a` }}
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-4 pt-3 border-t border-white/5">
-            <Link
-              href={data.links.demo}
-              target="_blank"
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 py-1 group/link"
-            >
-              <ExternalLink
-                size={14}
-                className="group-hover/link:scale-110 transition-transform"
-              />
-              Live Demo
-            </Link>
-            <Link
-              href={data.links.repo}
-              target="_blank"
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 py-1 group/link"
-            >
-              <Github
-                size={14}
-                className="group-hover/link:scale-110 transition-transform"
-              />
-              Source
-            </Link>
+          <div className="flex items-center gap-5">
+            <MagneticButton strength={0.35} className="inline-block">
+              <Link
+                href={project.links.demo}
+                target="_blank"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:gap-3 transition-all group"
+              >
+                Live Demo
+                <ExternalLink size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </Link>
+            </MagneticButton>
+            <MagneticButton strength={0.35} className="inline-block">
+              <Link
+                href={project.links.repo}
+                target="_blank"
+                className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+              >
+                <Github size={15} />
+                Source
+              </Link>
+            </MagneticButton>
           </div>
-
-          {/* Bottom accent line */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl"
-            style={{
-              background: `linear-gradient(90deg, transparent, ${data.color}, ${data.accent}, transparent)`,
-            }}
-          />
         </div>
-      </Html>
-    </group>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Camera Rig
-// -----------------------------------------------------------------------------
-function CameraRig({
-  activeIndex,
-  isMobile,
-}: {
-  activeIndex: number;
-  isMobile: boolean;
-}) {
-  const { camera } = useThree();
-
-  // Reusable vectors — avoid per-frame allocations (GC pressure causes hitches)
-  const _targetPos = useMemo(() => new THREE.Vector3(), []);
-  const _lookAt = useMemo(() => new THREE.Vector3(), []);
-  const _currLook = useMemo(() => new THREE.Vector3(), []);
-
-  useFrame((state, delta) => {
-    // Frame-rate independent damping — consistent feel at any refresh rate
-    const k = 1 - Math.exp(-2.4 * delta);
-
-    const angle = (activeIndex / projects.length) * Math.PI * 2;
-    const dist = RADIUS + (isMobile ? 10 : 7);
-    const breathe = Math.sin(state.clock.elapsedTime * 0.4) * 0.15;
-    _targetPos.set(Math.cos(angle) * dist, 1.5 + breathe, Math.sin(angle) * dist);
-
-    camera.position.lerp(_targetPos, k);
-
-    const activePos = getPosition(activeIndex, projects.length);
-    _lookAt.set(activePos[0], -1.3, activePos[2]);
-
-    _currLook
-      .set(0, 0, -1)
-      .applyQuaternion(camera.quaternion)
-      .add(camera.position);
-    _currLook.lerp(_lookAt, k);
-    camera.lookAt(_currLook);
-  });
-
-  return null;
-}
-
-// -----------------------------------------------------------------------------
-// Scene
-// -----------------------------------------------------------------------------
-function Scene({
-  activeIndex,
-  onSelect,
-  isMobile,
-}: {
-  activeIndex: number;
-  onSelect: (i: number) => void;
-  isMobile: boolean;
-}) {
-  const active = projects[activeIndex];
-
-  return (
-    <>
-      <Environment preset="city" />
-      {/* Depth fog — distant planets melt into the void */}
-      <fog attach="fog" args={["#05010d", 10, 28]} />
-      <ambientLight intensity={0.25} />
-      <pointLight
-        position={[0, 5, 0]}
-        intensity={1.5}
-        color="#ffffff"
-        distance={20}
-      />
-      <pointLight
-        position={[-4, -2, 4]}
-        intensity={0.5}
-        color="#ffffff"
-        distance={18}
-      />
-      {/* Accent rim light tinted by the active project */}
-      <pointLight
-        position={[5, 2, -5]}
-        intensity={1.2}
-        color={active.color}
-        distance={16}
-      />
-
-      <CameraRig activeIndex={activeIndex} isMobile={isMobile} />
-
-      <group position={[0, -0.4, 0]}>
-        {projects.map((proj, i) => (
-          <ProjectCard3D
-            key={proj.id}
-            data={proj}
-            index={i}
-            total={projects.length}
-            isActive={activeIndex === i}
-            isMobile={isMobile}
-            onClick={() => onSelect(i)}
-          />
-        ))}
-      </group>
-
-      {/* Central energy */}
-      <Float floatIntensity={2.5} speed={2}>
-        <mesh position={[0, 0, 0]}>
-          <icosahedronGeometry args={[0.2, 1]} />
-          <meshBasicMaterial
-            color={active.accent}
-            wireframe
-            transparent
-            opacity={0.25}
-          />
-        </mesh>
-      </Float>
-
-      <BakeShadows />
-      <Sparkles
-        count={50}
-        scale={25}
-        size={5}
-        speed={0.12}
-        opacity={0.25}
-        color={active.color}
-      />
-      <ContactShadows
-        frames={1}
-        position={[0, -2.5, 0]}
-        opacity={0.4}
-        scale={20}
-        blur={2}
-        far={10}
-        color="#111111"
-      />
-
-      <SceneEffects bloomIntensity={0.85} />
-    </>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Main Component
-// -----------------------------------------------------------------------------
-export default function Projects() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const isMobile = useIsMobile();
-  const [sectionRef, inViewport] = useInViewport<HTMLElement>();
-  const visible = useDocumentVisible();
-  // Lazy-once canvas gate: mounts the WebGL canvas the first time the
-  // section comes within 1500px, then keeps it alive (render loop still
-  // pauses via frameloop). Avoids re-initializing shaders/HDR on scroll.
-  const nearViewport = useRefInViewport(sectionRef, "1500px", true);
-  // Background pre-warm: build the scene in idle time after load.
-  const warmedUp = useWarmupTimer(4400);
-  const showCanvas = nearViewport || warmedUp;
-  const touchStartX = useRef(0);
-
-  const navigate = useCallback(
-    (newIndex: number) => {
-      setActiveIndex(
-        ((newIndex % projects.length) + projects.length) % projects.length
-      );
-    },
-    []
-  );
-
-  // Keyboard nav
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const inView =
-        rect.top < window.innerHeight * 0.5 &&
-        rect.bottom > window.innerHeight * 0.5;
-      if (!inView) return;
-      // Only claim horizontal arrows — Up/Down must keep scrolling the page,
-      // otherwise keyboard users get trapped in this section.
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        navigate(activeIndex + 1);
-      }
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        navigate(activeIndex - 1);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeIndex, navigate]);
-
-  // Swipe
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const delta = e.changedTouches[0].clientX - touchStartX.current;
-      if (Math.abs(delta) > 50) {
-        navigate(delta < 0 ? activeIndex + 1 : activeIndex - 1);
-      }
-    },
-    [activeIndex, navigate]
-  );
-
-  return (
-    <section
-      ref={sectionRef}
-      id="projects"
-      className="relative h-svh min-h-[600px] overflow-hidden flex items-center justify-center"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Header */}
-      <div className="absolute top-8 left-0 w-full text-center z-20 pointer-events-none">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-3">
-            Portfolio
-          </span>
-        </motion.div>
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-3xl md:text-5xl font-black text-white mb-2 drop-shadow-2xl"
-        >
-          Signature{" "}
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400">
-            Projects
-          </span>
-        </motion.h2>
-        <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-          Click a planet, swipe, or use the{" "}
-          <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/5 text-xs text-gray-200">←</kbd>{" "}
-          <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-white/5 text-xs text-gray-200">→</kbd>{" "}
-          keys to explore.
-        </p>
       </div>
+    </motion.div>
+  );
+}
 
-      {/* Nav arrows - Positioned lower on mobile to dodge central planet */}
-      <button
-        onClick={() => navigate(activeIndex - 1)}
-        aria-label="Previous project"
-        className="absolute left-2 md:left-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
-      >
-        <ChevronLeft size={isMobile ? 18 : 22} />
-      </button>
-      <button
-        onClick={() => navigate(activeIndex + 1)}
-        aria-label="Next project"
-        className="absolute right-2 md:right-8 top-[60%] md:top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-sm text-white/60 hover:text-white hover:border-white/30 hover:bg-black/60 transition-all hover:scale-110 active:scale-90"
-      >
-        <ChevronRight size={isMobile ? 18 : 22} />
-      </button>
+export default function Projects() {
+  return (
+    <section id="projects" className="relative w-full py-20 md:py-32">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <InViewClass>
+          <SectionKicker num="04" label="Selected Work" />
+          <motion.div initial={{ opacity: 0, y: -10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4">
+              Portfolio
+            </span>
+          </motion.div>
+          <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
+            <span className="line-mask">
+              <span className="line-rise">
+                Signature{" "}
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400">
+                  Projects
+                </span>
+              </span>
+            </span>
+          </h2>
+          <p className="text-gray-300 text-sm md:text-base mb-6">Five builds that shipped, scaled, and solved real problems.</p>
+        </InViewClass>
 
-      {/* Pagination dots + index counter */}
-      <div className="absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
-          {projects.map((proj, i) => (
-            <button
-              key={proj.id}
-              onClick={() => navigate(i)}
-              aria-label={`Go to project: ${proj.title}`}
-              aria-current={activeIndex === i ? "true" : undefined}
-              className="group relative p-1"
-            >
-              <span
-                className="block rounded-full transition-all duration-300"
-                style={{
-                  width: activeIndex === i ? 24 : 8,
-                  height: 8,
-                  background:
-                    activeIndex === i ? proj.color : "rgba(255,255,255,0.25)",
-                  boxShadow:
-                    activeIndex === i ? `0 0 12px ${proj.color}` : "none",
-                }}
-              />
-            </button>
+        <div>
+          {projects.map((project, i) => (
+            <ProjectRow key={project.id} project={project} index={i} />
           ))}
         </div>
-        <span className="text-xs font-mono text-gray-400 tabular-nums drop-shadow-md">
-          {String(activeIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
-        </span>
-      </div>
-
-      {/* 3D Canvas — mounted only when near the viewport */}
-      <div className="absolute inset-0 w-full h-full z-0 cursor-default">
-        {showCanvas && (
-          <Canvas
-            camera={{
-              position: isMobile ? [0, 2, 16] : [0, 2, 12],
-              fov: isMobile ? 55 : 45,
-            }}
-            gl={{ antialias: true, alpha: true }}
-            dpr={[1, 1.5]}
-            frameloop={inViewport && visible ? "always" : "never"}
-            performance={{ min: 0.5 }}
-            onCreated={() => markSceneWarmed("projects")}
-          >
-            <Scene
-              activeIndex={activeIndex}
-              onSelect={setActiveIndex}
-              isMobile={isMobile}
-            />
-          </Canvas>
-        )}
-
-        {/* Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none" />
       </div>
     </section>
   );

@@ -1,12 +1,14 @@
 "use client";
 
-import { motion, useScroll, useTransform, Variants, useSpring, useInView } from "@/lib/motion";
+import { motion, useScroll, useTransform, Variants, useSpring, useInView, MotionValue } from "@/lib/motion";
 import { Sparkles, ChevronDown } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { smoothScrollTo } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 // Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
 import AvatarFlipCard from "./AvatarFlipCard";
+import MagneticButton from "./MagneticButton";
 
 // Loader-completion hook with safety net: resolves via the "loader-done"
 // event, the global flag (if the event already fired before mount), or a
@@ -49,6 +51,7 @@ function RoleRotator() {
   const ref = useRef<HTMLSpanElement>(null);
   // Pause the typing loop (setState every 40–80ms) while scrolled off-screen
   const inView = useInView(ref);
+  const prefersReducedMotion = useReducedMotion();
   const [roleIndex, setRoleIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -87,8 +90,8 @@ function RoleRotator() {
         {displayed}
       </span>
       <motion.span
-        animate={inView ? { opacity: [1, 0] } : { opacity: 1 }}
-        transition={inView ? { duration: 0.5, repeat: Infinity, repeatType: "reverse" } : { duration: 0.2 }}
+        animate={inView && !prefersReducedMotion ? { opacity: [1, 0] } : { opacity: 1 }}
+        transition={inView && !prefersReducedMotion ? { duration: 0.5, repeat: Infinity, repeatType: "reverse" } : { duration: 0.2 }}
         className="inline-block w-[3px] h-[1.1em] bg-purple-400 ml-0.5 rounded-full"
       />
     </span>
@@ -111,7 +114,7 @@ function CurrentlyBuilding() {
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
       </span>
-      <span className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+      <span className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
         Building: <span className="text-white font-semibold text-base group-hover:text-blue-400 transition-colors">Matters.AI</span>
       </span>
     </motion.a>
@@ -120,39 +123,44 @@ function CurrentlyBuilding() {
 
 // Floating badge component — simplified for performance
 function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: 1,
-        y: [0, -8, 0],
+        y: prefersReducedMotion ? 0 : [0, -8, 0],
       }}
       transition={{
         opacity: { delay, duration: 0.6 },
-        y: { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" }
+        y: prefersReducedMotion
+          ? { delay, duration: 0.6 }
+          : { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" },
       }}
       className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/10 text-sm text-gray-300"
     >
-      <Sparkles size={14} className="text-purple-400" />
+      <Sparkles size={14} className="text-purple-400" aria-hidden />
       {children}
     </motion.div>
   );
 }
 
 // Scroll indicator component
-function ScrollIndicator({ opacity }: { opacity: any }) {
+function ScrollIndicator({ opacity }: { opacity: MotionValue<number> }) {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1.2, duration: 0.6 }}
       className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      aria-hidden
     >
       <motion.div style={{ opacity }} className="flex flex-col items-center gap-2">
         <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          animate={prefersReducedMotion ? { y: 0 } : { y: [0, 8, 0] }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="flex flex-col items-center"
         >
           <ChevronDown size={20} className="text-gray-500" />
@@ -164,13 +172,24 @@ function ScrollIndicator({ opacity }: { opacity: any }) {
 }
 
 // Stats counter with count-up animation
-function AnimatedStat({ value, label, delay, gradient }: { value: string; label: React.ReactNode; delay: number; gradient: string }) {
+function AnimatedStat({
+  value,
+  label,
+  delay,
+  gradient,
+  loaderDone,
+}: {
+  value: string;
+  label: React.ReactNode;
+  delay: number;
+  gradient: string;
+  loaderDone: boolean;
+}) {
   const [displayValue, setDisplayValue] = useState("0");
   // Loader-done is the earliest any stat can start; `delay` (in seconds,
   // same unit as the surrounding motion transitions) then staggers each
   // stat's count-up relative to its siblings instead of all three firing
   // in lockstep.
-  const loaderDone = useLoaderDone();
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
@@ -258,10 +277,21 @@ const letterVariants: Variants = {
 };
 
 // AnimatedWord component — waits for loader to finish before revealing
-function AnimatedWord({ word, className, isOutline = false, reverse = false }: { word: string; className?: string; isOutline?: boolean; reverse?: boolean }) {
+function AnimatedWord({
+  word,
+  className,
+  isOutline = false,
+  reverse = false,
+  ready,
+}: {
+  word: string;
+  className?: string;
+  isOutline?: boolean;
+  reverse?: boolean;
+  ready: boolean;
+}) {
   const isGradient = className?.includes("bg-clip-text");
   const letters = reverse ? word.split("").reverse() : word.split("");
-  const ready = useLoaderDone();
 
   return (
     <motion.span
@@ -330,9 +360,6 @@ export default function Hero() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
     >
-      {/* Static grid background (Replaced with Ecosystem radial gradient) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black/80 to-black/90 pointer-events-none z-0" />
-
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
@@ -343,10 +370,17 @@ export default function Hero() {
             style={{ y: isMobile ? 0 : yLeft, opacity }}
             className="flex flex-col flex-1 w-full items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
           >
-            <h1 className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none">
+            {/* Single accessible heading for the split title — the second
+                half below is aria-hidden so screen readers announce this
+                name exactly once instead of two sibling <h1>s. */}
+            <h1
+              aria-label="Redefining AI Security"
+              className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] drop-shadow-2xl"
+            >
               <AnimatedWord
                 word="REDEFINING"
-                className="bg-clip-text text-transparent bg-linear-to-b from-white via-cyan-300 to-blue-400 drop-shadow-2xl"
+                className="bg-clip-text text-transparent hero-sheen bg-linear-to-r from-white via-cyan-300 to-blue-400"
+                ready={loaderDone}
               />
             </h1>
           </motion.div>
@@ -382,12 +416,16 @@ export default function Hero() {
             style={{ y: isMobile ? 0 : yRight, opacity }}
             className="flex flex-col flex-1 w-full items-center lg:items-start text-center lg:text-left order-3 relative z-10"
           >
-            <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mt-2 lg:mt-0">
+            <p
+              aria-hidden
+              className="text-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] mt-2 lg:mt-0 drop-shadow-2xl"
+            >
               <AnimatedWord
                 word="AI SECURITY"
-                className="bg-clip-text text-transparent bg-linear-to-b from-white via-cyan-300 to-purple-400 drop-shadow-2xl"
+                className="bg-clip-text text-transparent hero-sheen bg-linear-to-r from-white via-cyan-300 to-purple-400"
+                ready={loaderDone}
               />
-            </h1>
+            </p>
             <motion.div
               className="mt-8 max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0"
               initial={{ opacity: 0, y: 20 }}
@@ -416,18 +454,21 @@ export default function Hero() {
                 label={<><span className="text-pink-400 font-bold">Hours</span> of Coding</>}
                 delay={1.2}
                 gradient="from-[#a855f7] via-[#ec4899] to-[#fb923c]"
+                loaderDone={loaderDone}
               />
               <AnimatedStat
                 value="1,000+"
                 label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
                 delay={1}
                 gradient="from-[#3b82f6] via-[#2dd4bf] to-[#4ade80]"
+                loaderDone={loaderDone}
               />
               <AnimatedStat
                 value="5+"
                 label={<><span className="text-orange-400 font-bold">Products</span> Built</>}
                 delay={1.4}
                 gradient="from-[#f43f5e] via-[#f59e0b] to-[#fbbf24]"
+                loaderDone={loaderDone}
               />
             </>
           )}
@@ -449,26 +490,28 @@ export default function Hero() {
         <div className="flex flex-wrap justify-center items-center gap-3 mt-5">
           {mounted && <CurrentlyBuilding />}
           {mounted && (
-            <motion.a
-              href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                smoothScrollTo("contact");
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2.0, duration: 0.6 }}
-              className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
-            >
-              {/* Animated gradient border */}
-              <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
-              <span className="absolute inset-px rounded-full bg-black/90 backdrop-blur-sm" />
+            <MagneticButton strength={0.25}>
+              <motion.a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  smoothScrollTo("contact");
+                }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.0, duration: 0.6 }}
+                className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
+              >
+                {/* Animated gradient border */}
+                <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
+                <span className="absolute inset-px rounded-full bg-black/90 backdrop-blur-sm" />
 
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-              <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
-                Open to <span className="text-white font-semibold">Opportunities</span>
-              </span>
-            </motion.a>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
+                  Open to <span className="text-white font-semibold">Opportunities</span>
+                </span>
+              </motion.a>
+            </MagneticButton>
           )}
         </div>
       </div>

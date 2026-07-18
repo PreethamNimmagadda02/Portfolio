@@ -29,7 +29,7 @@ export function seededRandom(seed: number): () => number {
    max timeout elapses — so the loader covers exactly as much time as the
    warm-up actually needs, no more. */
 
-export const TOTAL_WARMED_SCENES = 5; // about, experience, skills, projects, achievements
+export const TOTAL_WARMED_SCENES = 1; // the single persistent CosmicScene background
 
 type WarmedWindow = Window & { __warmedScenes?: Set<string> };
 

@@ -357,7 +357,7 @@ export default function Navbar() {
                         "relative z-10 inline-block transition-all duration-200",
                         isActive
                           ? "text-white drop-shadow-[0_0_10px_rgba(139,92,246,0.6)]"
-                          : "text-gray-400 group-hover/link:text-white group-hover/link:-translate-y-[2px] group-hover/link:drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]"
+                          : "text-gray-300 group-hover/link:text-white group-hover/link:-translate-y-[2px] group-hover/link:drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]"
                       )}
                     >
                       {link.name}
@@ -456,7 +456,7 @@ export default function Navbar() {
                           "block px-4 py-3 rounded-xl text-lg font-medium transition-colors",
                           isActive
                             ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
-                            : "text-gray-400 hover:bg-white/5 hover:text-white"
+                            : "text-gray-300 hover:bg-white/5 hover:text-white"
                         )}
                       >
                         {link.name}

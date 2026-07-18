@@ -252,7 +252,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
               Programming
             </span>
           </h2>
-          <p className="text-gray-400 max-w-lg mx-auto">
+          <p className="text-gray-300 max-w-lg mx-auto">
             Live statistics fetched directly from global coding platforms.
           </p>
 
@@ -276,7 +276,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
             const config = PLATFORM_CONFIG[profile.platform] || {
               name: profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1),
               icon: Code2,
-              color: "text-gray-400",
+              color: "text-gray-300",
               bgGradient: "from-gray-500/20 to-zinc-500/20",
             };
 
@@ -428,9 +428,14 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
 
   return (
     <section ref={sectionRef} id="coding-profiles" className="py-20 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none" />
+      {/* Background Effects — cheap gradients, no backdrop blur */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 70% 30%, rgba(99,102,241,0.05), transparent 45%), radial-gradient(circle at 25% 75%, rgba(6,182,212,0.05), transparent 45%)",
+        }}
+      />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {innerContent}

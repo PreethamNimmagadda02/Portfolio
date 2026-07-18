@@ -208,9 +208,9 @@ export default function KonamiEasterEgg() {
     const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const autoCloseRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [particles] = useState(() => makeParticles(100));
-    const [matrixColumns] = useState(() => makeMatrixColumns(40));
-    const [orbitals] = useState(() => makeOrbitals(8));
+    const [particles] = useState(() => makeParticles(30));
+    const [matrixColumns] = useState(() => makeMatrixColumns(24));
+    const [orbitals] = useState(() => makeOrbitals(6));
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -459,7 +459,7 @@ export default function KonamiEasterEgg() {
 
                             {/* Subtitle */}
                             <motion.p
-                                className="text-sm sm:text-base text-gray-400 tracking-[0.3em] uppercase font-medium font-mono"
+                                className="text-sm sm:text-base text-gray-300 tracking-[0.3em] uppercase font-medium font-mono"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 0.8, y: 0 }}
                                 transition={{ delay: 1.8, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}

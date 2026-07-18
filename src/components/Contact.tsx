@@ -1,16 +1,18 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "@/lib/motion";
+import { motion, AnimatePresence } from "@/lib/motion";
 import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, User, MessageSquare, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import emailjs from '@emailjs/browser';
 import React from "react";
+import InteractiveCard from "./InteractiveCard";
+import { InViewClass, SectionKicker } from "./Reveal";
 
 // Color schemes for each contact type
 const contactColors = {
-  email: { gradient: "from-blue-500 to-cyan-500" },
-  location: { gradient: "from-emerald-500 to-teal-500" },
-  phone: { gradient: "from-purple-500 to-pink-500" }
+  email: { gradient: "from-blue-500 to-cyan-500", accent: "#22d3ee" },
+  location: { gradient: "from-emerald-500 to-teal-500", accent: "#2dd4bf" },
+  phone: { gradient: "from-purple-500 to-pink-500", accent: "#c084fc" }
 };
 
 // Toast notification component
@@ -115,7 +117,7 @@ function FloatingInput({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-400"
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-300"
             }`}
           animate={{
             top: isActive ? "8px" : "50%",
@@ -245,7 +247,7 @@ function FloatingTextarea({
         {/* Floating Label */}
         <motion.label
           htmlFor={id}
-          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-400"
+          className={`absolute left-11 pointer-events-none font-medium transition-colors ${error ? "text-red-400" : isActive ? "text-purple-400" : "text-gray-300"
             }`}
           animate={{
             top: isActive ? "8px" : "16px",
@@ -287,7 +289,7 @@ function FloatingTextarea({
               transition={{ duration: 0.2 }}
             />
           </div>
-          <span className={`text-xs font-mono ${charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-400"
+          <span className={`text-xs font-mono ${charPercentage > 90 ? "text-red-400" : charPercentage > 70 ? "text-yellow-400" : "text-gray-300"
             }`}>
             {charCount}/{maxLength}
           </span>
@@ -318,69 +320,30 @@ function ContactCard({
   label,
   value,
   href,
-  gradient
+  gradient,
+  accent,
 }: {
   icon: any,
   label: string,
   value: string,
   href?: string,
-  gradient: string
+  gradient: string,
+  accent: string,
 }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
-  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
-
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]);
-
-  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top, width, height } = currentTarget.getBoundingClientRect();
-    x.set((clientX - left) / width - 0.5);
-    y.set((clientY - top) / height - 0.5);
-  }
-
-  function onMouseLeave() {
-    x.set(0);
-    y.set(0);
-  }
-
   const content = (
-    <motion.div
-      className="relative perspective-[1500px] group"
-      whileHover={{ scale: 1.03 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    <InteractiveCard
+      accent={accent}
+      tilt={4}
+      className="group rounded-2xl flex items-center gap-4 p-5 bg-zinc-900/90 border border-white/10 hover:border-white/20 transition-[border-color,box-shadow] duration-500 hover:shadow-[0_16px_44px_-20px_var(--ic-accent)]"
     >
-      {/* Animated gradient border */}
-      <motion.div
-        className={`absolute -inset-px bg-linear-to-r ${gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}
-        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-        style={{ backgroundSize: "200% 200%" }}
-      />
-
-      <motion.div
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative flex items-center gap-4 p-5 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all"
-      >
-        {/* Floating Icon */}
-        <motion.div
-          className={`p-3 rounded-full bg-linear-to-br ${gradient} shadow-lg`}
-          animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transform: "translateZ(20px)" }}
-        >
-          <Icon size={24} className="text-white" />
-        </motion.div>
-        <div style={{ transform: "translateZ(15px)" }} className="min-w-0 flex-1">
-          <p className="text-sm text-gray-400">{label}</p>
-          <p className="font-semibold text-white text-sm sm:text-base break-all">{value}</p>
-        </div>
-      </motion.div>
-    </motion.div>
+      <div className={`relative z-3 p-3 rounded-full bg-linear-to-br ${gradient} shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-0.5`}>
+        <Icon size={24} className="text-white" />
+      </div>
+      <div className="relative z-3 min-w-0 flex-1">
+        <p className="text-sm text-gray-300">{label}</p>
+        <p className="font-semibold text-white text-sm sm:text-base break-all">{value}</p>
+      </div>
+    </InteractiveCard>
   );
 
   return href ? (
@@ -513,9 +476,14 @@ export default function Contact() {
         )}
       </AnimatePresence>
 
-      {/* Background glow */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-purple-500/10 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-blue-500/10 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
+      {/* Background glow — cheap gradients, no backdrop blur */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 25% 50%, rgba(168,85,247,0.08), transparent 45%), radial-gradient(circle at 75% 50%, rgba(59,130,246,0.08), transparent 45%)",
+        }}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
@@ -532,8 +500,14 @@ export default function Contact() {
           >
             Contact
           </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">Get in Touch</h2>
-          <p className="text-gray-400 max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
+          <InViewClass as="div">
+            <h2 className="text-display text-3xl md:text-5xl text-white mb-4">
+              <span className="line-mask">
+                <span className="line-rise">Get in Touch</span>
+              </span>
+            </h2>
+          </InViewClass>
+          <p className="text-gray-300 max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
 
           {/* Availability Status Card */}
           <motion.div
@@ -558,7 +532,7 @@ export default function Contact() {
 
             <div className="text-left">
               <p className="text-white text-sm font-medium">Internships & Full-time Roles</p>
-              <p className="text-gray-400 text-xs">Response within 24 hours</p>
+              <p className="text-gray-300 text-xs">Response within 24 hours</p>
             </div>
           </motion.div>
         </motion.div>
@@ -587,13 +561,13 @@ export default function Contact() {
             </motion.div>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 30, scale: 0.9 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 50 } } }}>
-              <ContactCard icon={Mail} label="Email" value="preethamnimmagadda@gmail.com" href="mailto:preethamnimmagadda@gmail.com" gradient={contactColors.email.gradient} />
+              <ContactCard icon={Mail} label="Email" value="preethamnimmagadda@gmail.com" href="mailto:preethamnimmagadda@gmail.com" gradient={contactColors.email.gradient} accent={contactColors.email.accent} />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 30, scale: 0.9 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 50 } } }}>
-              <ContactCard icon={MapPin} label="Location" value="Hyderabad, Telangana" gradient={contactColors.location.gradient} />
+              <ContactCard icon={MapPin} label="Location" value="Hyderabad, Telangana" gradient={contactColors.location.gradient} accent={contactColors.location.accent} />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 30, scale: 0.9 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 50 } } }}>
-              <ContactCard icon={Phone} label="Phone" value="+91 80740 21047" href="tel:+918074021047" gradient={contactColors.phone.gradient} />
+              <ContactCard icon={Phone} label="Phone" value="+91 80740 21047" href="tel:+918074021047" gradient={contactColors.phone.gradient} accent={contactColors.phone.accent} />
             </motion.div>
           </motion.div>
 
@@ -605,8 +579,10 @@ export default function Contact() {
             transition={{ duration: 0.6, type: "spring" as const, stiffness: 50 }}
             className="relative perspective-[1500px] group"
           >
-            {/* Gradient border for form — static at rest, brightens on hover */}
-            <div className="absolute -inset-px bg-linear-to-r from-purple-500 via-blue-500 to-purple-500 rounded-2xl opacity-30 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
+            {/* Gradient border for form — static at rest; a rotating conic
+                highlight takes over on hover/focus (see .conic-border) */}
+            <div className="absolute -inset-px bg-linear-to-r from-purple-500 via-blue-500 to-purple-500 rounded-2xl opacity-30 blur-sm transition-opacity duration-500 group-hover:opacity-0 group-focus-within:opacity-0" />
+            <div className="conic-border" aria-hidden />
 
             <form
               ref={formRef}
@@ -616,7 +592,7 @@ export default function Contact() {
               {/* Form progress indicator */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-400 font-medium">Form completion</span>
+                  <span className="text-xs text-gray-300 font-medium">Form completion</span>
                   <span className="text-xs text-purple-400 font-mono">{Math.round(formCompletion)}%</span>
                 </div>
                 <div className="h-1 bg-white/10 rounded-full overflow-hidden">

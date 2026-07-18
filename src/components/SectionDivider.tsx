@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from "@/lib/motion";
 import { useRef } from "react";
+import { InViewClass } from "./Reveal";
 
 type DividerVariant = "wave" | "mesh" | "glow";
 
@@ -28,32 +29,36 @@ export default function SectionDivider({
 
   if (variant === "glow") {
     return (
-      <div ref={ref} className="relative h-24 md:h-32 w-full overflow-hidden pointer-events-none">
-        <motion.div
-          style={{ x: xShift }}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <div
-            className="w-[80%] h-[2px] rounded-full"
-            style={{
-              background: `linear-gradient(90deg, transparent, ${colorFrom}, ${colorTo}, transparent)`,
-              boxShadow: `0 0 40px 8px ${colorFrom}, 0 0 80px 16px ${colorTo}`,
-            }}
-          />
-        </motion.div>
-        {/* Subtle dots */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.2, 0.8] }}
-              transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: i === 1 ? colorFrom : colorTo }}
+      <InViewClass amount={0.6}>
+        <div ref={ref} className="relative h-24 md:h-32 w-full overflow-hidden pointer-events-none">
+          <motion.div
+            style={{ x: xShift }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div
+              className="w-[80%] h-[2px] rounded-full"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${colorFrom}, ${colorTo}, transparent)`,
+                boxShadow: `0 0 40px 8px ${colorFrom}, 0 0 80px 16px ${colorTo}`,
+              }}
             />
-          ))}
+          </motion.div>
+          {/* Comet — travels the line once when the divider reveals */}
+          <div className="comet" />
+          {/* Subtle dots */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-2">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.2, 0.8] }}
+                transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: i === 1 ? colorFrom : colorTo }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      </InViewClass>
     );
   }
 

@@ -45,7 +45,7 @@ function LocalTime() {
   if (!time) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-gray-400 text-xs md:text-sm tabular-nums">
+    <span className="inline-flex items-center gap-1.5 text-gray-300 text-xs md:text-sm tabular-nums">
       <MapPin size={12} className="text-purple-400/70" />
       India · {time} IST
     </span>
@@ -82,9 +82,14 @@ export default function Footer() {
       </div>
 
       <div className="relative bg-black/30 backdrop-blur-md perspective-[1000px]">
-        {/* Background glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[90vw] max-w-[700px] h-[260px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[60vw] max-w-[400px] h-[200px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+        {/* Background glows — cheap gradients, no backdrop blur */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 700px 260px at 50% 0%, rgba(168,85,247,0.08), transparent 70%), radial-gradient(ellipse 400px 200px at 100% 100%, rgba(59,130,246,0.05), transparent 70%)",
+          }}
+        />
 
         {/* Giant watermark name — tilts up into view in 3D */}
         <motion.div
@@ -110,7 +115,7 @@ export default function Footer() {
                 <span className="bg-clip-text text-transparent bg-linear-to-r from-white to-gray-200 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
                 <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
               </Link>
-              <p className="text-gray-400 text-sm mt-3 max-w-sm mx-auto md:mx-0 leading-relaxed">
+              <p className="text-gray-300 text-sm mt-3 max-w-sm mx-auto md:mx-0 leading-relaxed">
                 AI Engineer crafting <span className="text-purple-300">autonomous agents</span> and{" "}
                 <span className="text-blue-300">immersive web experiences</span>. Building the future, one innovation at a time.
               </p>
@@ -136,7 +141,7 @@ export default function Footer() {
               transition={{ delay: 0.1, duration: 0.6, type: "spring" as const, stiffness: 100 }}
               className="md:col-span-3 text-center md:text-left"
             >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-300 mb-4">
                 Navigate
               </h3>
               <nav className="grid grid-cols-3 md:grid-cols-1 gap-x-2 gap-y-2.5 justify-items-center md:justify-items-start">
@@ -145,7 +150,7 @@ export default function Footer() {
                     key={link.id}
                     href={`#${link.id}`}
                     onClick={(e) => handleNavClick(e, link.id)}
-                    className="group inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                    className="group inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
                   >
                     <span className="hidden md:block w-0 group-hover:w-3 h-px bg-linear-to-r from-purple-400 to-pink-400 transition-all duration-300" />
                     {link.label}
@@ -162,7 +167,7 @@ export default function Footer() {
               transition={{ delay: 0.2, duration: 0.6, type: "spring" as const, stiffness: 100 }}
               className="md:col-span-4 flex flex-col items-center md:items-end gap-4"
             >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 md:self-end">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-300 md:self-end">
                 Connect
               </h3>
               <div className="flex items-center gap-3 md:gap-4">
@@ -204,7 +209,7 @@ export default function Footer() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
+            <p className="text-gray-300 text-xs md:text-sm text-center md:text-left">
               © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
             </p>
 
@@ -212,11 +217,11 @@ export default function Footer() {
               onClick={scrollToTop}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.9 }}
-              className="group flex items-center gap-2 text-xs md:text-sm text-gray-400 hover:text-purple-400 transition-colors"
+              className="group flex items-center gap-2 text-xs md:text-sm text-gray-300 hover:text-purple-400 transition-colors"
             >
               <span>Back to Top</span>
               <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(139,92,246,0.25)] transition-all">
-                <ArrowUp size={12} className="text-gray-400 group-hover:text-purple-400 md:w-4 md:h-4 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUp size={12} className="text-gray-300 group-hover:text-purple-400 md:w-4 md:h-4 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             </motion.button>
           </motion.div>

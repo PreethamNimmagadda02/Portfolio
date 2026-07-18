@@ -28,30 +28,42 @@
 }
 
 :root {
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  /* Deeper-than-black void so glows and starlight have somewhere to bloom */
+  --background: 240 30% 2.4%;
+  --foreground: 0 0% 97%;
+  --card: 250 22% 6%;
+  --card-foreground: 0 0% 97%;
+  --popover: 250 22% 6%;
+  --popover-foreground: 0 0% 97%;
+  --primary: 258 90% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 255 16% 12%;
+  --secondary-foreground: 0 0% 97%;
+  --muted: 255 14% 12%;
+  --muted-foreground: 240 8% 62%;
+  --accent: 189 85% 55%;
+  --accent-foreground: 240 30% 4%;
+  --destructive: 0 70% 55%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  --border: 255 16% 16%;
+  --input: 255 16% 14%;
+  --ring: 258 90% 66%;
+  --chart-1: 258 90% 66%;
+  --chart-2: 189 85% 55%;
+  --chart-3: 330 80% 60%;
+  --chart-4: 38 92% 58%;
+  --chart-5: 160 70% 50%;
+
+  /* ── Cosmic Journey identity tokens ──
+     Used by CosmicScene uniforms, editorial gradients, and section accents.
+     Kept as plain hex (not HSL) so they can be passed straight into WebGL. */
+  --iris: #8b5cf6;
+  --iris-soft: #a78bfa;
+  --cyan: #22d3ee;
+  --amber: #fbbf24;
+  --rose: #f472b6;
+  --void: #030308;
+  --ink: #07070d;
 }
 
 @layer base {
@@ -60,6 +72,9 @@
   }
 
   html {
+    /* Match the void — prevents white checkerboard flashes when the
+       compositor outruns paint during fast scrolling */
+    background-color: #030308;
     /* Lenis handles smooth scrolling - remove native to avoid conflicts */
     scroll-behavior: auto;
     /* Prevent overscroll bounce on macOS/iOS for cleaner feel */
@@ -307,13 +322,275 @@ h1 {
   animation: spin-slow 20s linear infinite;
 }
 
-/* ── GPU compositing hints for fixed overlays ── */
-/* Promotes fixed full-screen layers (3D canvases, backgrounds) to their own
-   GPU compositor layers so scroll and animation changes don't repaint the page */
-.fixed.inset-0 {
+/* ── GPU compositing hint — opt-in only ──
+   Previously applied to every `.fixed.inset-0` element globally, which
+   promoted every full-screen overlay (cursor glow, noise, canvas, loader...)
+   to its own GPU layer simultaneously. Apply `.gpu-layer` explicitly to the
+   one or two elements that actually benefit (the cosmic canvas backdrop). */
+.gpu-layer {
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* ── Editorial display type + line-reveal masks ── */
+.text-display {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.text-gradient-iris {
+  background: linear-gradient(120deg, #fff 0%, var(--iris-soft) 55%, var(--cyan) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.line-mask {
+  overflow: hidden;
+  display: block;
+}
+
+.card-hairline {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  /* Slightly warm-dark frosted fill: reads as a real surface over the busy
+     cosmic backdrop while staying translucent enough to keep the depth. */
+  background: rgba(14, 12, 24, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── InteractiveCard — pointer-following sheen + rim light ──
+   Driven by CSS vars written from a self-stopping rAF loop
+   (see InteractiveCard.tsx). The pseudo-elements composite on the GPU;
+   only custom properties change per frame. */
+.icard {
+  position: relative;
+  --ic-accent: var(--iris);
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.icard::before {
+  /* Radial sheen following the pointer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--ic-opacity, 0);
+  background: radial-gradient(320px circle at var(--icx, 50%) var(--icy, 50%),
+      color-mix(in srgb, var(--ic-accent) 10%, transparent),
+      transparent 65%);
+  z-index: 1;
+}
+
+.icard::after {
+  /* Rim light — a masked border ring that brightens near the pointer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--ic-opacity, 0);
+  background: radial-gradient(200px circle at var(--icx, 50%) var(--icy, 50%),
+      color-mix(in srgb, var(--ic-accent) 55%, transparent),
+      transparent 70%);
+  padding: 1px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  z-index: 2;
+}
+
+/* ── Masked line reveal — headings slide up out of a clipping mask ── */
+@keyframes lineRise {
+  from {
+    transform: translateY(110%);
+    opacity: 0.001;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.line-rise {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0.001;
+}
+
+.in-view .line-rise {
+  animation: lineRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+/* ── Section kicker — ghost numeral + label + drawing hairline ── */
+.kicker {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.kicker-num {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.35em;
+  color: color-mix(in srgb, var(--iris-soft) 55%, transparent);
+}
+
+.kicker-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.kicker-line {
+  flex: 1;
+  height: 1px;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--iris) 45%, transparent), transparent);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+
+.in-view .kicker-line {
+  transform: scaleX(1);
+}
+
+/* ── Hero headline shimmer — a light sweep across the gradient text ── */
+@keyframes textSheen {
+
+  0%,
+  55%,
+  100% {
+    background-position: 200% center;
+  }
+
+  75% {
+    background-position: -50% center;
+  }
+}
+
+.hero-sheen {
+  background-size: 250% auto;
+  animation: textSheen 7s ease-in-out infinite;
+}
+
+/* ── Comet divider — a bright particle travels the line once on reveal ── */
+@keyframes cometTravel {
+  0% {
+    left: 8%;
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 92%;
+    opacity: 0;
+  }
+}
+
+.comet {
+  position: absolute;
+  top: 50%;
+  width: 44px;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 999px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9));
+  box-shadow: 0 0 12px 2px rgba(167, 139, 250, 0.6);
+  pointer-events: none;
+}
+
+.in-view .comet {
+  animation: cometTravel 1.6s cubic-bezier(0.45, 0, 0.2, 1) 0.15s both;
+}
+
+/* ── Off-screen rendering skip — the single biggest scroll-perf win.
+   The browser skips layout/paint entirely for sections outside the
+   viewport; contain-intrinsic-size reserves scroll space. ── */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+/* ── Count-up completion flare ── */
+@keyframes statFlare {
+  0% {
+    text-shadow: 0 0 0 transparent;
+  }
+
+  35% {
+    text-shadow: 0 0 24px currentColor;
+  }
+
+  100% {
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+.stat-flare {
+  animation: statFlare 0.9s ease-out both;
+}
+
+/* ── Conic border rotation (Contact form focus) — animates a registered
+   custom property so only paint of the border layer updates ── */
+@property --conic-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes conicSpin {
+  to {
+    --conic-angle: 360deg;
+  }
+}
+
+.conic-border {
+  position: absolute;
+  inset: -1px;
+  border-radius: 1rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: conic-gradient(from var(--conic-angle),
+      transparent 0%,
+      color-mix(in srgb, var(--iris) 70%, transparent) 12%,
+      transparent 28%,
+      transparent 55%,
+      color-mix(in srgb, var(--cyan) 55%, transparent) 68%,
+      transparent 82%);
+  padding: 1px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+.group:hover .conic-border,
+.group:focus-within .conic-border {
+  opacity: 1;
+  animation: conicSpin 4s linear infinite;
 }
 
 /* ── Haptic-style tap feedback for touch devices ── */
@@ -361,6 +638,13 @@ h1 {
   --color-purple-700: #be185d;
   --color-purple-800: #9d174d;
   --color-purple-900: #831843;
+
+  /* Cosmic identity tokens follow the theme too (read by CosmicScene) */
+  --iris: #ec4899;
+  --iris-soft: #f9a8d4;
+  --cyan: #38bdf8;
+  --amber: #fbbf24;
+  --rose: #fb7185;
 }
 
 /* Nebula — override hardcoded purple glow/shadow rgba values */
@@ -434,4 +718,24 @@ h1 {
 
 .animate-marquee-right {
   animation: marquee-right 45s linear infinite;
+}
+
+/* GitHub contribution heatmap — CSS-only stagger-in instead of ~365
+   individually-mounted Framer Motion nodes. Delay is set inline per-cell
+   via `--d` (see GitHubStats.tsx). */
+@keyframes cellIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cell-in {
+  animation: cellIn 0.25s ease-out both;
+  animation-delay: var(--d, 0ms);
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "@/lib/motion";
+import { motion, useInView } from "@/lib/motion";
 import { useRef, useState, useCallback } from "react";
 import { Quote, MessageCircle, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import InteractiveCard from "./InteractiveCard";
+import { InViewClass } from "./Reveal";
 
 const testimonials = [
   {
@@ -105,40 +107,10 @@ const testimonials = [
 ];
 
 function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mobile?: boolean }) {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const rotateX = useSpring(
-    useTransform(mouseY, [-0.5, 0.5], [10, -10]),
-    { stiffness: 150, damping: 20 }
-  );
-  const rotateY = useSpring(
-    useTransform(mouseX, [-0.5, 0.5], [-10, 10]),
-    { stiffness: 150, damping: 20 }
-  );
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  }
-
-  function handleMouseLeave() {
-    mouseX.set(0);
-    mouseY.set(0);
-  }
-
-  // Lifts an element toward the viewer for parallax depth on tilt (desktop only).
-  const depth = (z: number): React.CSSProperties =>
-    mobile ? {} : { transform: `translateZ(${z}px)`, transformStyle: "preserve-3d" };
-
   return (
-    <motion.div
-      onMouseMove={mobile ? undefined : handleMouseMove}
-      onMouseLeave={mobile ? undefined : handleMouseLeave}
-      whileHover={mobile ? undefined : { scale: 1.05, zIndex: 20 }}
+    <InteractiveCard
+      accent={t.accent}
+      tilt={mobile ? 0 : 4}
       className={
         mobile
           /* Near-solid bg instead of backdrop-blur: dozens of animating
@@ -147,38 +119,16 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
           ? "w-full h-full flex flex-col p-5 rounded-2xl bg-zinc-900/95 border border-white/8 group relative overflow-hidden"
           : "shrink-0 w-[340px] md:w-[420px] p-6 rounded-2xl bg-zinc-900/95 border border-white/8 hover:border-white/30 transition-colors duration-500 group relative overflow-hidden mx-3 cursor-default"
       }
-      style={{
-        rotateX: mobile ? 0 : rotateX,
-        rotateY: mobile ? 0 : rotateY,
-        transformPerspective: 1000,
-        transformStyle: "preserve-3d",
-        boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
-      }}
+      style={{ boxShadow: `0 4px 40px -10px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)` }}
     >
-      {/* Spotlight effect */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background: useTransform(
-            [mouseX, mouseY],
-            (values) => {
-              const [x, y] = values as number[];
-              const px = (x + 0.5) * 100;
-              const py = (y + 0.5) * 100;
-              return `radial-gradient(circle at ${px}% ${py}%, ${t.accent}15, transparent 70%)`;
-            }
-          ),
-        }}
-      />
-
       {/* Accent gradient top line */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)`, ...depth(55) }}
+        style={{ background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)` }}
       />
 
       {/* Quote icon with accent glow */}
-      <div className="flex items-center justify-between mb-4 relative z-10" style={depth(38)}>
+      <div className="flex items-center justify-between mb-4 relative z-10">
         <div className="p-2 rounded-lg bg-white/3 border border-white/5">
           <Quote size={20} style={{ color: t.accent }} className="opacity-60" />
         </div>
@@ -190,12 +140,12 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
       </div>
 
       {/* Quote text */}
-      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-(--font-inter) tracking-[-0.01em] relative z-10" style={depth(22)}>
+      <p className="flex-1 text-gray-300 text-sm sm:text-[15px] leading-[1.7] mb-6 font-(--font-inter) tracking-[-0.01em] relative z-10">
         &ldquo;{t.quote}&rdquo;
       </p>
 
       {/* Author */}
-      <div className="flex items-center gap-3 pt-4 border-t border-white/6 relative z-10" style={depth(42)}>
+      <div className="flex items-center gap-3 pt-4 border-t border-white/6 relative z-10">
         <div
           className={`w-11 h-11 rounded-full bg-linear-to-br ${t.gradient} flex items-center justify-center text-white text-sm font-bold shadow-lg ring-2 ring-white/10 group-hover:ring-white/30 transition-all duration-500`}
         >
@@ -203,10 +153,10 @@ function TestimonialCard({ t, mobile = false }: { t: typeof testimonials[0]; mob
         </div>
         <div>
           <p className="text-white font-semibold text-sm tracking-tight">{t.name}</p>
-          <p className="text-gray-400 text-xs mt-0.5">{t.role}</p>
+          <p className="text-gray-300 text-xs mt-0.5">{t.role}</p>
         </div>
       </div>
-    </motion.div>
+    </InteractiveCard>
   );
 }
 
@@ -282,7 +232,7 @@ export default function Testimonials() {
 
   return (
     <section ref={sectionRef} id="testimonials" className="py-24 relative overflow-hidden">
-      <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-linear-to-r from-purple-500/5 via-transparent to-blue-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-0 w-full h-[400px] -translate-y-1/2 bg-linear-to-r from-purple-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
@@ -299,11 +249,17 @@ export default function Testimonials() {
             <MessageCircle size={16} />
             <span>Testimonials</span>
           </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4">
-            What People{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-400">Say</span>
-          </h2>
-          <p className="text-gray-400 max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
+          <InViewClass as="div">
+            <h2 className="text-display text-3xl md:text-5xl text-white mb-4">
+              <span className="line-mask">
+                <span className="line-rise">
+                  What People{" "}
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-400">Say</span>
+                </span>
+              </span>
+            </h2>
+          </InViewClass>
+          <p className="text-gray-300 max-w-lg mx-auto mb-4">Words from collaborators, mentors, and peers.</p>
         </motion.div>
       </div>
 

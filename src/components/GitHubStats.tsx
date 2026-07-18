@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, useInView, AnimatePresence } from "@/lib/motion";
-import { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import { useRef, useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
 import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { InViewClass, SectionKicker } from "./Reveal";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
 
@@ -317,19 +318,17 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
                     return <div key={dy} className="w-full aspect-square" />;
                   }
                   return (
-                    <motion.div
+                    <div
                       key={dy}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                      transition={{
-                        delay: wk * 0.005 + dy * 0.005,
-                        duration: 0.2,
-                      }}
                       title={`${day.count} contributions on ${day.date}`}
-                      className="w-full aspect-square rounded-[3px] hover:ring-2 hover:ring-white/50 transition-all cursor-crosshair z-10 hover:z-20 hover:scale-125"
+                      className={
+                        "w-full aspect-square rounded-[3px] hover:ring-2 hover:ring-white/50 transition-all cursor-crosshair z-10 hover:z-20 hover:scale-125" +
+                        (isInView ? " cell-in" : " opacity-0")
+                      }
                       style={{
                         backgroundColor: cellColors[Math.min(day.level, 4)],
-                      }}
+                        "--d": `${(wk * 5 + dy * 5) % 600}ms`,
+                      } as CSSProperties}
                     />
                   );
                 })}
@@ -504,8 +503,13 @@ export default function GitHubStats() {
       id="github-stats"
       className="py-20 relative overflow-hidden"
     >
-      <div className="absolute top-1/3 left-1/4 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-purple-500/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/3 right-1/4 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-blue-500/5 rounded-full blur-[100px] md:blur-[150px] pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 25% 30%, rgba(168,85,247,0.06), transparent 45%), radial-gradient(circle at 75% 70%, rgba(59,130,246,0.05), transparent 45%)",
+        }}
+      />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
@@ -526,14 +530,21 @@ export default function GitHubStats() {
               <Loader2 size={14} className="animate-spin text-purple-300" />
             )}
           </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-3">
-            {activeTab === "github" ? (
-              <>GitHub <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400">Activity</span></>
-            ) : (
-              <>Competitive <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">Programming</span></>
-            )}
-          </h2>
-          <p className="text-gray-400 max-w-lg mx-auto">
+          <InViewClass as="div">
+            <SectionKicker num="05" label="Activity" />
+            <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
+              <span className="line-mask">
+                <span className="line-rise">
+                  {activeTab === "github" ? (
+                    <>GitHub <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400">Activity</span></>
+                  ) : (
+                    <>Competitive <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">Programming</span></>
+                  )}
+                </span>
+              </span>
+            </h2>
+          </InViewClass>
+          <p className="text-gray-300 max-w-lg mx-auto">
             {activeTab === "github"
               ? "Consistency breeds excellence. Every purple square represents dedication."
               : "Live statistics fetched directly from global coding platforms."}
@@ -559,7 +570,7 @@ export default function GitHubStats() {
                   onClick={() => setActiveTab(tab)}
                   aria-pressed={activeTab === tab}
                   aria-label={tab === "github" ? "Show GitHub stats" : "Show competitive programming stats"}
-                  className={`relative px-4 sm:px-6 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-400 hover:text-white"
+                  className={`relative px-4 sm:px-6 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-300 hover:text-white"
                     }`}
                 >
                   {activeTab === tab && (
@@ -620,7 +631,7 @@ export default function GitHubStats() {
                         <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
                           <stat.icon
                             size={24}
-                            className="text-gray-400 group-hover:text-white transition-colors"
+                            className="text-gray-300 group-hover:text-white transition-colors"
                           />
                         </div>
                         <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-linear-to-r ${stat.gradient} drop-shadow-sm`}>
@@ -635,7 +646,7 @@ export default function GitHubStats() {
                             <AnimatedCounter value={Number(stat.value)} suffix={stat.suffix} />
                           )}
                         </div>
-                        <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
+                        <p className="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest group-hover:text-gray-300 transition-colors">
                           {stat.label}
                         </p>
                       </div>
@@ -662,7 +673,7 @@ export default function GitHubStats() {
                         href={`https://github.com/${GITHUB_USERNAME}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-400 hover:text-purple-400 transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-300 hover:text-purple-400 transition-colors font-medium"
                       >
                         <span className="hidden sm:inline">View on GitHub</span>
                         <span className="sm:hidden">GitHub</span>
@@ -680,7 +691,7 @@ export default function GitHubStats() {
                       ) : contributions.length > 0 ? (
                         <ContributionHeatmap data={contributions} />
                       ) : (
-                        <div className="flex items-center justify-center h-32 text-gray-400 text-sm w-full">
+                        <div className="flex items-center justify-center h-32 text-gray-300 text-sm w-full">
                           No contribution data available
                         </div>
                       )}

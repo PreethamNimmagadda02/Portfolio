@@ -26,4 +26,4 @@ export {
   useMotionValue,
 } from "framer-motion";
 
-export type { Variants } from "framer-motion";
+export type { Variants, MotionValue } from "framer-motion";

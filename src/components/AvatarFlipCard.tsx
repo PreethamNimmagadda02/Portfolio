@@ -199,7 +199,7 @@ export default function AvatarFlipCard() {
                 <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Vision</div>
                 <div className="text-sm font-medium text-white border-l-2 border-purple-500 pl-3 py-0.5">
                   Engineering Intelligence From First Principles
-                  <span className="block text-xs text-gray-400 font-normal mt-0.5 italic">"Forging intuition from logic"</span>
+                  <span className="block text-xs text-gray-300 font-normal mt-0.5 italic">"Forging intuition from logic"</span>
                 </div>
               </div>
             </div>

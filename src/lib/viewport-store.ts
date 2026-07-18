@@ -89,19 +89,53 @@ export interface ScrollState {
   progress: number;
   /** Raw scrollY in pixels. */
   y: number;
+  /**
+   * Smoothed scroll velocity in px/ms, exponentially decayed toward 0 when
+   * scrolling stops. Consumers (the WebGL background) read it every frame to
+   * make the scene react to motion — star stretch, nebula swell, etc.
+   * Positive = scrolling down.
+   */
+  velocity: number;
 }
 
-const scroll: ScrollState = { progress: 0, y: 0 };
+const scroll: ScrollState = { progress: 0, y: 0, velocity: 0 };
 let scrollSubscribers = 0;
 let scrollRaf = 0;
 let scrollQueued = false;
+let lastScrollY = 0;
+let lastScrollTime = 0;
+let velocityDecayRaf = 0;
+
+function decayVelocity() {
+  // Ease velocity back to zero once scroll events stop arriving. Runs a short
+  // self-terminating rAF chain — no permanent loop.
+  scroll.velocity *= 0.9;
+  if (Math.abs(scroll.velocity) > 0.001) {
+    velocityDecayRaf = requestAnimationFrame(decayVelocity);
+  } else {
+    scroll.velocity = 0;
+    velocityDecayRaf = 0;
+  }
+}
 
 function readScroll() {
   scrollQueued = false;
   const y = window.scrollY;
   const max = document.documentElement.scrollHeight - window.innerHeight;
+  const now = performance.now();
+  const dt = now - lastScrollTime;
+  if (dt > 0 && dt < 250) {
+    const instant = (y - lastScrollY) / dt;
+    // Light smoothing so a single janky event doesn't spike the scene
+    scroll.velocity += (instant - scroll.velocity) * 0.35;
+  }
+  lastScrollY = y;
+  lastScrollTime = now;
   scroll.y = y;
   scroll.progress = max > 0 ? Math.min(Math.max(y / max, 0), 1) : 0;
+  // (Re)arm the decay chain
+  if (velocityDecayRaf) cancelAnimationFrame(velocityDecayRaf);
+  velocityDecayRaf = requestAnimationFrame(decayVelocity);
 }
 
 function handleScroll() {
@@ -127,6 +161,8 @@ export function useScrollTracker(): ScrollState {
       if (--scrollSubscribers === 0) {
         window.removeEventListener("scroll", handleScroll);
         cancelAnimationFrame(scrollRaf);
+        if (velocityDecayRaf) cancelAnimationFrame(velocityDecayRaf);
+        velocityDecayRaf = 0;
         scrollQueued = false;
       }
     };
