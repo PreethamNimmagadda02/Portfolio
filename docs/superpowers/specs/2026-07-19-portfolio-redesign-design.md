@@ -19,9 +19,10 @@ Editorial-first: typography, whitespace, and motion craft become the primary pre
 ## 4. Design System Foundation
 
 ### Typography
-- **Display serif — Fraunces** (variable): Hero headline, section titles, pull-quotes. Carries the "editorial luxury" signal.
-- **Body/UI sans — Geist Sans**: body copy, nav, buttons, form fields. Neutral and premium without being a generic system stack.
-- **Mono accent — Geist Mono** (fallback JetBrains Mono): labels, dates, tags, stats, role-rotator text, filter pills. Reinforces engineering identity in the metadata layer.
+- **Display serif — Fraunces** (variable): Hero headline, section titles, pull-quotes. Carries the "editorial luxury" signal. Replaces the current `Space_Grotesk` display font (`--font-space-grotesk`, loaded via `next/font/google` in `src/app/layout.tsx`).
+- **Body/UI sans — Geist Sans**: body copy, nav, buttons, form fields. Neutral and premium without being a generic system stack. Replaces the current `Inter` body font (`--font-inter`, same loading mechanism).
+- **Mono accent — Geist Mono** (fallback JetBrains Mono): labels, dates, tags, stats, role-rotator text, filter pills. Reinforces engineering identity in the metadata layer. New addition — no mono font currently loaded.
+- All three load via `next/font/google` (same mechanism already in use), keeping the CSS variable pattern (`--font-*`) the codebase already follows.
 - Type scale: a deliberate modular scale (ratio ~1.25–1.333) with generous line-height on serif headlines; no default browser/Tailwind type scale left unstyled.
 
 ### Color
@@ -42,28 +43,36 @@ Editorial-first: typography, whitespace, and motion craft become the primary pre
 
 ## 5. 3D Strategy
 
-- Reduce from the current 6 Three.js canvases (Hero/About/Experience/Projects/Achievements/SectionDivider) to **one mandatory signature moment: the Hero**. This is a single, precisely-lit, restrained abstract 3D piece — not a "cosmic scene with floating everything." It should look considered enough to stand as the site's visual signature.
-- **Optional second moment:** a subtle WebGL shader/gradient background (much cheaper than a full R3F scene) in the Contact/Footer area as a closing visual beat. This is optional and may be cut during implementation if it doesn't earn its complexity/performance cost.
-- Every other currently-3D section (About torus + orbiting cards, Experience's 3D cards, Achievements' 3D stat cards, SectionDivider) converts to 2D, with typography, layout, and motion carrying the visual weight instead.
-- Existing 3D performance infrastructure (dynamic imports, `useInViewport`, scene warm-up via `markSceneWarmed`, mobile detection disabling post-processing) is preserved for whichever canvas(es) remain; it should end up doing less work overall since canvas count drops.
+**Correction vs. original assumption:** CLAUDE.md/openwiki describe a stale architecture (6 per-section canvases). The actual current implementation (verified against source) already consolidated to **one persistent WebGL background**, `src/components/scene/CosmicScene.tsx`, mounted once at the page level and running continuously behind all sections. It's chapter-driven: `src/lib/scene-store.ts` maps scroll progress to 9 chapters (hero/about/experience/skills/projects/activity/achievements/testimonials/contact), each with its own color/camera/focus targets that the scene lerps toward. About/Experience/Achievements/Testimonials are already 2D (Framer Motion + CSS), not 3D — the openwiki descriptions of "3D torus," "3D filterable cards," "3D stat cards," "3D tilt" are inaccurate for the current code.
+
+Given this, the 3D strategy is **recomposition, not migration**:
+- Keep the single persistent `CosmicScene` canvas (remounting a fresh canvas per section would be a performance regression vs. today, and the existing warm-up/adaptive-quality/visibility-pause infrastructure is sound). Do not reintroduce per-section canvases.
+- Recolor the scene's chapter palette (`SCENE_CHAPTERS` in `scene-store.ts`) from the current iris/cyan/rose "cosmic" palette to the new near-black/warm-amber tokens.
+- Change its *prominence* per chapter so it reads as one signature moment rather than a pervasive backdrop: full presence/complexity during the **hero** chapter (this is the mandatory signature moment), then recede to a much lower-opacity, simplified ambient presence for every other chapter (fewer active shader layers, lower particle/star density, minimal camera movement) so it never competes with the editorial content sections.
+- Drop or simplify shader layers that don't earn their cost under the new restrained aesthetic (e.g. `EnergyRibbons`, `CrystalShards`, `WarpRings` are candidates to cut or reserve for the hero chapter only) — exact cuts are an implementation-plan-level decision made against the existing `CosmicScene.tsx` structure.
+- `AvatarFlipCard.tsx`'s flip is CSS 3D (`rotateY`/`preserve-3d`), not WebGL — it's cheap and can be restyled to the new palette rather than removed.
+- **Optional second moment:** if the hero-only presence isn't sufficient, a lower-cost shader accent in Contact/Footer using the same `CosmicScene` infrastructure (a dedicated chapter) is acceptable — optional, cut if it doesn't earn its cost.
+- Existing performance infrastructure (`markSceneWarmed`, `useIdle`-gated mount, `AdaptiveQuality`, `frameloop` pause on hidden tab, reduced-motion static fallback) is preserved unchanged.
 
 ## 6. Section-by-Section Direction
 
-| Section | Current | New Direction |
-|---|---|---|
-| Navbar | Nav + `ThemeToggle` | Thin, minimal, wordmark + nav links; `ThemeToggle` removed (single theme, component deleted or repurposed) |
-| Hero | Role rotator, CTA, 3D backdrop | Serif display headline, mono role-rotator, signature 3D piece (see §5), restyled magnetic CTA |
-| About | 3D torus + orbiting feature cards | Editorial bio layout: serif pull-quote + mono-labeled feature list (AI specialist, elite coder, campus leader, architect), 2D |
-| Skills | Marquee + glassmorphism cards | Marquee motion kept; cards become a clean mono-labeled pill/tag grid, glass effects removed |
-| Experience | 3D filterable cards | Editorial timeline/list; filter pills kept functionally; 2D cards with hover elevation via border/shadow, not 3D transform |
-| Projects | 3D carousel | Premium 2D case-study list/gallery; cursor-follow "view project" label on hover; links to demos/repos preserved |
-| Achievements | 3D stat cards/badges | Animated numeral counters in serif/mono, minimal flat badge icons |
-| GitHub Stats | Heatmap + metrics | Layout mechanics kept; restyled to new palette (mono stats, amber-scaled heatmap) |
-| Testimonials | 3D tilt/spotlight cards | Clean serif-italic quote cards, scroll-snap carousel, 2D |
-| Contact | EmailJS form | Minimal underline-style form inputs; optional shader accent (§5) |
-| Footer | 3D watermark | Typographic wordmark treatment replaces 3D watermark |
+Corrected against actual current implementation (see §5 note) — most sections are already 2D; the work is retheming/simplifying their existing Framer Motion + CSS execution to the new typography/color/spacing system and reducing glass/glow noise, not migrating away from 3D.
 
-Filtering, linking, and data-fetching behavior in Experience/Projects/GitHub Stats/Contact is preserved as-is — only visual/motion execution changes per this table.
+| Section | Current (verified) | New Direction |
+|---|---|---|
+| Navbar | Framer Motion + hand-rolled tilt/spotlight, hardcoded non-theme-reactive purple/blue gradients, renders `ThemeToggle` x2 | Thin, minimal, wordmark + nav links, restyled to new tokens; `ThemeToggle` and its `ThemeProvider`/`ThemeContext` (both defined in `ThemeToggle.tsx`) removed entirely; single-theme CSS vars hardcoded into `:root` |
+| Hero | `.text-display` (Space Grotesk) headline, Inter body, persistent `CosmicScene` background at full prominence | Fraunces serif headline, Geist Mono role-rotator, `CosmicScene`'s hero chapter is the signature 3D moment (see §5), restyled magnetic CTA |
+| About | 2D Framer Motion feature cards (`InteractiveCard`, `.card-hairline`) + CSS-3D `AvatarFlipCard` | Retheme to editorial layout: serif pull-quote + mono-labeled feature list; `AvatarFlipCard` restyled to new palette, kept |
+| Skills | Marquee + `.card-hairline` chips, cross-linked to `CosmicScene`'s `SkillsConstellation` via `scene-store.ts` filter state | Marquee motion and the constellation cross-link kept; chip styling becomes a clean mono-labeled pill/tag grid; `CosmicScene` constellation recolored per §5 |
+| Experience | 2D Framer Motion `whileInView` timeline, `InteractiveCard` tilt, scroll-drawn gradient rail | Retheme to editorial timeline/list; filter pills kept functionally; rail and hover elevation restyled to new tokens |
+| Projects | 2D alternating rows, Framer Motion `whileInView`, `MagneticButton` CTAs | Retheme to premium case-study list; cursor-follow "view project" label added on hover; links to demos/repos preserved |
+| Achievements | 2D Framer Motion cards, manual rAF count-up, `.stat-flare` | Retheme: animated numeral counters in serif/mono, minimal flat badge icons, `.stat-flare` restyled to amber |
+| GitHub Stats | Live-fetched heatmap/stats, hardcoded non-theme-reactive purple `cellColors`/`LANG_COLORS` | Layout and fetch logic kept; restyled to new palette (mono stats, amber-scaled heatmap) |
+| Testimonials | Marquee rows + mobile carousel, hover glow; **dead code:** `animate-float-particle`/`drift-a`/`drift-b` referenced but never defined | Retheme to serif-italic quote cards; dead animation references removed or intentionally implemented as part of this task (not left dangling) |
+| Contact | EmailJS form, floating-label inputs, `.conic-border` focus ring | Retheme to minimal underline-style inputs; optional shader accent (§5) |
+| Footer | Framer Motion watermark parallax + `.animate-shimmer` | Retheme to typographic wordmark treatment, same parallax mechanic |
+
+Filtering, linking, live data-fetching, and cross-component state (e.g. Skills↔CosmicScene constellation linking) are preserved as-is — only visual/motion/typography execution changes per this table.
 
 ## 7. Content & Copy
 
