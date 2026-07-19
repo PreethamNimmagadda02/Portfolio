@@ -1446,6 +1446,7 @@ function CameraRig({ pointer, scroll }: { pointer: PointerState; scroll: ScrollS
 function SceneContents({ isMobile }: { isMobile: boolean }) {
   const pointer = usePointer();
   const scroll = useScrollTracker();
+  const heroActive = getSceneState(scroll.progress).index === 0;
 
   return (
     <>
@@ -1462,9 +1463,9 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
         </>
       )}
       <FocusCore scroll={scroll} pointer={pointer} />
-      {!isMobile && <EnergyRibbons scroll={scroll} />}
-      {!isMobile && <CrystalShards scroll={scroll} />}
-      {!isMobile && <WarpRings scroll={scroll} />}
+      {!isMobile && heroActive && <EnergyRibbons scroll={scroll} />}
+      {!isMobile && heroActive && <CrystalShards scroll={scroll} />}
+      {!isMobile && heroActive && <WarpRings scroll={scroll} />}
       {!isMobile && <SkillsConstellation scroll={scroll} />}
       {!isMobile && <Embers scroll={scroll} />}
     </>

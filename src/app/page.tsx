@@ -52,7 +52,7 @@ export default function Home() {
       {!idle && !prefersReducedMotion && (
         <div
           className="fixed inset-0 z-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.12), transparent 60%), #030308" }}
+          style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(201,151,74,0.12), transparent 60%), #08070a" }}
           aria-hidden
         />
       )}
