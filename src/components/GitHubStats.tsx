@@ -501,7 +501,7 @@ export default function GitHubStats() {
     <section
       ref={sectionRef}
       id="github-stats"
-      className="relative w-full py-20 md:py-32 overflow-hidden"
+      className="relative w-full py-10 md:py-14 overflow-visible"
     >
       <div
         className="absolute inset-0 pointer-events-none"
@@ -517,12 +517,12 @@ export default function GitHubStats() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-6"
         >
           <motion.span
             initial={{ opacity: 0, scale: 0.8 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-2"
           >
             <Activity size={16} />
             <span>Coding Activity</span>
@@ -532,7 +532,7 @@ export default function GitHubStats() {
           </motion.span>
           <InViewClass as="div">
             <SectionKicker num="05" label="Activity" />
-            <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
+            <h2 className="text-display text-3xl md:text-4xl text-white mb-1">
               <span className="line-mask">
                 <span className="line-rise">
                   {activeTab === "github" ? (
@@ -544,7 +544,7 @@ export default function GitHubStats() {
               </span>
             </h2>
           </InViewClass>
-          <p className="text-gray-300 max-w-lg mx-auto">
+          <p className="text-gray-400 text-sm max-w-lg mx-auto">
             {activeTab === "github"
               ? "A year of commits and contribution streaks, pulled live from GitHub."
               : "Live ratings and rankings, pulled directly from each platform."}
@@ -562,7 +562,7 @@ export default function GitHubStats() {
           )}
 
           {/* Toggle Button */}
-          <div className="flex justify-center mt-8 relative z-20">
+          <div className="flex justify-center mt-4 relative z-20">
             <div className="bg-black/70 p-1.5 rounded-full border border-white/10 flex items-center relative shadow-xl">
               {(["github", "competitive"] as const).map((tab) => (
                 <button

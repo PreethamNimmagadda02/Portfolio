@@ -269,7 +269,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex flex-wrap justify-center gap-4">
         {loading
           ? Array.from({ length: 3 }).map((_, i) => <ProfileSkeleton key={i} />)
           : profiles.map((profile, idx) => {
@@ -300,18 +300,18 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                   duration: 0.5,
                   type: "spring",
                 }}
-                className="relative group"
+                className="relative group w-full md:w-[calc(50%-8px)] lg:w-[calc(33.333%-12px)] min-w-[260px]"
               >
                 <div className={`absolute -inset-px bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                <div className="relative p-6 rounded-2xl bg-zinc-900/90 border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
+                <div className="relative p-4 rounded-2xl bg-zinc-900/90 border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
 
                   {/* Header */}
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className={`p-3 rounded-xl bg-zinc-800/80 border border-white/5 ${config.color}`}>
-                      <config.icon size={24} />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2.5 rounded-xl bg-zinc-800/80 border border-white/5 ${config.color}`}>
+                      <config.icon size={20} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white tracking-wide">
+                      <h3 className="text-lg font-bold text-white tracking-wide">
                         {config.name}
                       </h3>
                       {displayBadge && (
@@ -323,18 +323,18 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 mt-auto">
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
-                      <span className="text-sm text-gray-500 mb-1">Solved</span>
-                      <span className="text-2xl font-black text-white">
+                  <div className="grid grid-cols-2 gap-2 mt-auto">
+                    <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
+                      <span className="text-xs text-gray-500 mb-0.5">Solved</span>
+                      <span className="text-xl font-black text-white">
                         <AnimatedCounter value={profile.totalQuestionStats?.totalQuestionCounts || 0} />
                       </span>
                     </div>
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
-                      <span className="text-sm text-gray-500 mb-1 truncate w-full px-1">
+                    <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
+                      <span className="text-xs text-gray-500 mb-0.5 truncate w-full px-1">
                         {profile.platform === "hackerrank" && topBadge ? topBadge.name : (profile.platform === "tuf" ? "Max Streak" : "Rating")}
                       </span>
-                      <span className={`text-2xl font-black ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
+                      <span className={`text-xl font-black ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
                         {profile.platform === "hackerrank" && topBadge
                           ? <><AnimatedCounter value={topBadge.stars || 0} />★</>
                           : profile.platform === "tuf"
@@ -351,7 +351,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                   </div>
 
                   {/* Extra Meta */}
-                  <div className="mt-4 pt-4 border-t border-white/5 flex flex-col gap-2">
+                  <div className="mt-2 pt-2 border-t border-white/5 flex flex-col gap-1">
                     {/* Max Rating (LC, CF, CC) */}
                     {profile.userStats?.maxRating && (
                       <div className="flex justify-between items-center text-xs text-gray-500">

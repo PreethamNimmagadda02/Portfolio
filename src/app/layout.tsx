@@ -87,6 +87,10 @@ export const metadata: Metadata = {
 // Runs before paint to apply the saved theme, preventing a flash (FOUC)
 const themeInitScript = `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='nebula'||t==='deep-space'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
+// Disable browser scroll restoration so every refresh always starts at the top
+const scrollResetScript = `if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);`;
+
+
 // JSON-LD Structured Data for SEO
 const jsonLd = {
   "@context": "https://schema.org",
@@ -140,6 +144,10 @@ export default function RootLayout({
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: scrollResetScript }}
         />
         <script
           suppressHydrationWarning
