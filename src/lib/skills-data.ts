@@ -24,7 +24,7 @@ export const skillsData: SkillItem[] = [
   { name: "Redis", category: "DB" },
   { name: "AWS S3", category: "Cloud" },
   { name: "Next.js", category: "Web" },
-  { name: "Antigravity", category: "AI" },
+  { name: "Antigravity IDE", category: "AI" },
   { name: "Postman", category: "Tools" },
   { name: "Python", category: "Lang" },
   { name: "Three.js", category: "Web" },
