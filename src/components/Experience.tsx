@@ -167,7 +167,7 @@ function TimelineEntry({ data, index }: { data: ExperienceData; index: number })
           {data.role}
         </h4>
 
-        <p className="text-sm md:text-[15px] text-gray-300 leading-relaxed mb-4" style={{ fontFamily: "var(--font-inter)" }}>
+        <p className="font-sans text-sm md:text-[15px] text-gray-300 leading-relaxed mb-4">
           {data.description}
         </p>
 
