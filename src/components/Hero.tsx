@@ -84,7 +84,7 @@ function RoleRotator() {
 
   return (
     <span ref={ref} className="inline-flex items-center">
-      <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
+      <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 font-bold font-mono">
         {displayed}
       </span>
       <motion.span
@@ -241,7 +241,7 @@ function AnimatedStat({
       <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-linear-to-r ${gradient}`}>
         {displayValue}{suffix}
       </div>
-      <div className="text-sm text-gray-200 mt-1 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{label}</div>
+      <div className="text-sm text-gray-200 mt-1 font-medium font-sans">{label}</div>
     </motion.div>
   );
 }
@@ -438,7 +438,7 @@ export default function Hero() {
               animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left" style={{ fontFamily: "var(--font-inter)" }}>
+              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-sans">
                 Autonomous systems shouldn&apos;t wait for breaches — they should eliminate them.
                 At <span className="text-white font-bold">Matters.AI</span>, I build the AI copilot that turns
                 data security from passive monitoring into a self-healing defense layer, detecting and
@@ -490,7 +490,7 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4 }}
         >
-          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300" style={{ fontFamily: "var(--font-inter)" }}>
+          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300 font-sans">
             Roles: <RoleRotator />
           </div>
         </motion.div>
