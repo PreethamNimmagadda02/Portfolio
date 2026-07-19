@@ -500,7 +500,7 @@ export default function Contact() {
                 <span className="line-rise">Get in Touch</span>
               </span>
             </h2>
-            <p className="text-gray-300 text-sm md:text-base max-w-lg mx-auto mb-6">Let&apos;s build something extraordinary together</p>
+            <p className="text-gray-300 text-sm md:text-base max-w-lg mx-auto mb-6">Have a role or a project worth building? Let&apos;s talk.</p>
 
           {/* Availability Status Card */}
           <motion.div
@@ -547,10 +547,10 @@ export default function Contact() {
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 50 } } }}
             >
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                Let's build something <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-blue-400">extraordinary</span>
+                Let&apos;s build something <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-blue-400">that matters</span>
               </h3>
               <p className="text-gray-300 text-lg leading-relaxed mb-8">
-                Got a groundbreaking idea? Looking for a driven developer? I'm always excited to collaborate on projects that push boundaries.
+                Open to internships, full-time roles, and collaborations in AI and autonomous systems.
               </p>
             </motion.div>
 

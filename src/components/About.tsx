@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "@/lib/motion";
-import { Code, Rocket, Globe, BookOpen, Sparkles, Users, Zap, Target } from "lucide-react";
+import { Code, Rocket, Globe, BookOpen, Users, Zap, Target } from "lucide-react";
 import InteractiveCard from "./InteractiveCard";
 import { InViewClass, SectionKicker } from "./Reveal";
 
@@ -10,12 +10,11 @@ const features = [
   {
     id: 0,
     icon: Code,
-    title: "Generative AI Specialist",
+    title: "Multimodal & Agent Systems",
     description: (
       <>
-        Pioneering <span className="text-blue-400 font-semibold">multimodal systems</span> that see beyond the
-        pixel. Architecting <span className="text-purple-400 font-semibold">cognitive agents</span> capable of
-        complex reasoning and autonomous decision-making in dynamic environments.
+        I build AI that <span className="text-blue-400 font-semibold">acts, not just answers</span> — vision-language
+        pipelines and autonomous agents that reason over real-world data and make decisions without a human in the loop.
       </>
     ),
     color: "#60a5fa",
@@ -23,12 +22,11 @@ const features = [
   {
     id: 1,
     icon: Rocket,
-    title: "Elite Coder",
+    title: "Competitive Problem Solver",
     description: (
       <>
-        <span className="text-yellow-400 font-semibold">Global top 1%</span> on CodeChef (1864 rating) —
-        exceptional algorithmic speed. <span className="text-purple-400 font-semibold">Codeforces Specialist</span>{" "}
-        with <span className="text-blue-400 font-semibold">1000+ problems</span> solved.
+        <span className="text-yellow-400 font-semibold">CodeChef 4★, top 0.8%</span> of 2M+ coders. Codeforces
+        Specialist, top 20%. 1,000+ problems solved — the same rigor I bring to production systems.
       </>
     ),
     color: "#c084fc",
@@ -36,12 +34,11 @@ const features = [
   {
     id: 2,
     icon: Globe,
-    title: "Campus Leader",
+    title: "Community Builder",
     description: (
       <>
-        <span className="text-emerald-400 font-semibold">Strategic leader</span> orchestrating impact for{" "}
-        <span className="text-teal-400 font-semibold">4000+ students</span>. Managed budgets & logistics for{" "}
-        <span className="text-green-400 font-semibold">large-scale operations</span>.
+        Led initiatives reaching <span className="text-teal-400 font-semibold">4,000+ students</span>, managing
+        budgets and logistics for large-scale campus operations.
       </>
     ),
     color: "#34d399",
@@ -52,9 +49,8 @@ const features = [
     title: "Agent Systems Architect",
     description: (
       <>
-        Building <span className="text-orange-400 font-semibold">autonomous swarms</span> for trading & logistics.
-        Expert in <span className="text-yellow-400 font-semibold">multi-agent orchestration</span> &{" "}
-        <span className="text-amber-400 font-semibold">scalable infrastructure</span>.
+        Designing <span className="text-amber-400 font-semibold">multi-agent orchestration</span> for trading and
+        logistics — systems that coordinate, not just execute.
       </>
     ),
     color: "#fbbf24",
@@ -168,10 +164,6 @@ export default function About() {
             >
               <InViewClass>
                 <SectionKicker num="01" label="Who I Am" />
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 text-sm text-purple-300">
-                  <Sparkles size={14} />
-                  <span>Who I Am</span>
-                </div>
 
                 <h2 className="text-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
                   <span className="line-mask">
@@ -182,15 +174,14 @@ export default function About() {
                 </h2>
               </InViewClass>
 
-              <div className="space-y-5 mb-8 text-gray-300" style={{ fontFamily: "var(--font-inter)" }}>
+              <div className="space-y-5 mb-8 text-gray-300 max-w-prose" style={{ fontFamily: "var(--font-inter)" }}>
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">
-                  AI <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">Tech Innovator</span> &{" "}
-                  <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">Community Leader</span>
+                  I build AI systems that <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">act</span>,
+                  {" "}not just <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">answer</span>
                 </h3>
                 <p className="text-base md:text-lg leading-relaxed">
-                  Building <span className="text-white font-semibold">autonomous AI agents</span> that solve complex
-                  problems. Engineered systems with <span className="text-yellow-300 font-semibold">20% efficiency
-                  gains</span>, pushing the boundaries of what&apos;s possible with AI.
+                  Autonomous agents, multimodal pipelines, and infrastructure engineered for real efficiency gains —
+                  I ship systems that reason and decide, not just respond.
                 </p>
               </div>
 

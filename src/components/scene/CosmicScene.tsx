@@ -294,6 +294,8 @@ const starsVertex = /* glsl */ `
   varying vec3 vColor;
   varying float vTwinkle;
   varying float vStretch;
+  varying float vGravity;
+  varying float vDepth;
 
   void main() {
     vColor = aColor;
@@ -305,11 +307,22 @@ const starsVertex = /* glsl */ `
     pos.y += uMouse.y * depth * 0.7 + uScroll * depth * 4.0;
     // Warp-speed feel: while scrolling, near stars trail vertically
     pos.y -= uVelocity * depth * 0.9;
+
+    // Pointer gravity — stars near the cursor are gently pushed away and
+    // flare brighter, like a passing gravitational disturbance in the field.
+    vec2 mouseWorld = uMouse * vec2(9.0, 6.0);
+    vec2 toStar = pos.xy - mouseWorld;
+    float distToMouse = length(toStar);
+    float gravity = smoothstep(3.2, 0.0, distToMouse) * (0.4 + depth * 0.6);
+    pos.xy += normalize(toStar + vec2(0.0001)) * gravity * 0.9;
+    vGravity = gravity;
+    vDepth = depth;
+
     vTwinkle = 0.55 + 0.45 * sin(uTime * (1.2 + aPhase * 2.0) + aPhase * 40.0);
     vStretch = clamp(abs(uVelocity) * (0.4 + depth), 0.0, 1.0);
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-    // Stars grow slightly + brighten under motion
-    gl_PointSize = aSize * vTwinkle * (160.0 / -mv.z) * (1.0 + vStretch * 1.6);
+    // Stars grow slightly + brighten under motion and pointer proximity
+    gl_PointSize = aSize * vTwinkle * (160.0 / -mv.z) * (1.0 + vStretch * 1.6 + vGravity * 1.2);
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -320,6 +333,8 @@ const starsFragment = /* glsl */ `
   varying vec3 vColor;
   varying float vTwinkle;
   varying float vStretch;
+  varying float vGravity;
+  varying float vDepth;
   void main() {
     vec2 c = gl_PointCoord - 0.5;
     // Elongate the sprite vertically while scrolling → motion streaks
@@ -331,8 +346,11 @@ const starsFragment = /* glsl */ `
     // uModMix is held low (~0.35) so the original palette still reads —
     // the chapter tint is an ambient wash, not a recolor.
     vec3 base = mix(vColor, uColorMod * (0.7 + core + vStretch * 0.35), uModMix);
-    vec3 col = base * vTwinkle;
-    gl_FragColor = vec4(col, alpha * vTwinkle);
+    // Depth fog — distant stars (low vDepth) fall back into the void,
+    // near ones stay crisp. Sells real spatial depth instead of a flat field.
+    float fog = mix(0.35, 1.0, vDepth);
+    vec3 col = base * vTwinkle * fog + vec3(1.0) * vGravity * 0.5;
+    gl_FragColor = vec4(col, alpha * vTwinkle * (0.5 + fog * 0.5));
   }
 `;
 
@@ -422,10 +440,33 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
 }
 
 // -----------------------------------------------------------------------------
-// Shooting stars — rare meteor streaks for life and depth (desktop only)
+// Shooting stars — rare meteor comets with a fading trail (desktop only)
 // -----------------------------------------------------------------------------
+const cometVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const cometFragment = /* glsl */ `
+  uniform float uOpacity;
+  varying vec2 vUv;
+  void main() {
+    // Bright core at the head (uv.x near 1), fading tail toward uv.x = 0
+    float trail = pow(vUv.x, 2.2);
+    float thickness = smoothstep(0.5, 0.0, abs(vUv.y - 0.5) * 2.0);
+    float head = smoothstep(0.85, 1.0, vUv.x);
+    vec3 col = mix(vec3(0.55, 0.4, 1.0), vec3(1.0), head);
+    float alpha = trail * thickness * uOpacity;
+    gl_FragColor = vec4(col, alpha);
+  }
+`;
+
 function ShootingStar({ seed }: { seed: number }) {
   const ref = useRef<THREE.Mesh>(null);
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+  const cometUniforms = useMemo(() => ({ uOpacity: { value: 0 } }), []);
   const state = useRef({
     active: false,
     nextLaunch: 2 + seed * 7,
@@ -459,8 +500,10 @@ function ShootingStar({ seed }: { seed: number }) {
     mesh.position.copy(st.start).addScaledVector(st.dir, dist);
     mesh.visible = true;
 
-    const mat = mesh.material as THREE.MeshBasicMaterial;
-    mat.opacity = Math.min(st.progress * 8, 1) * Math.max(1 - st.progress, 0) * 0.8;
+    if (matRef.current) {
+      matRef.current.uniforms.uOpacity.value =
+        Math.min(st.progress * 8, 1) * Math.max(1 - st.progress, 0) * 0.9;
+    }
 
     if (st.progress >= 1) {
       st.active = false;
@@ -470,8 +513,16 @@ function ShootingStar({ seed }: { seed: number }) {
 
   return (
     <mesh ref={ref} visible={false}>
-      <planeGeometry args={[2.4, 0.025]} />
-      <meshBasicMaterial color="#cdb4ff" transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+      <planeGeometry args={[2.4, 0.05]} />
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={cometVertex}
+        fragmentShader={cometFragment}
+        uniforms={cometUniforms}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
     </mesh>
   );
 }
@@ -556,12 +607,40 @@ function makeHaloTexture(): THREE.Texture {
   return tex;
 }
 
-function FocusCore({ scroll }: { scroll: ScrollState }) {
+// Cinematic light shafts radiating from behind the orb — the classic
+// "god ray" look. A thin elongated plane with a soft radial falloff along
+// its width and a fade-in/out along its length, additive blended. Two
+// counter-rotating shafts read as a slow searchlight sweep behind the core.
+const shaftVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const shaftFragment = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  varying vec2 vUv;
+  void main() {
+    float d = abs(vUv.y - 0.5) * 2.0;
+    float shaft = smoothstep(1.0, 0.0, d);
+    float lengthFade = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.55, vUv.x);
+    float alpha = shaft * shaft * lengthFade * uOpacity;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
+function FocusCore({ scroll, pointer }: { scroll: ScrollState; pointer: PointerState }) {
   const shellRef = useRef<THREE.Mesh>(null);
   const orbMatRef = useRef<THREE.ShaderMaterial>(null);
   const groupRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const spriteRef = useRef<THREE.Sprite>(null);
+  const shaftGroupRef = useRef<THREE.Group>(null);
+  const shaftMat1Ref = useRef<THREE.ShaderMaterial>(null);
+  const shaftMat2Ref = useRef<THREE.ShaderMaterial>(null);
+  const lean = useRef({ x: 0, y: 0 });
 
   const haloTexture = useMemo(() => makeHaloTexture(), []);
   const orbUniforms = useMemo(
@@ -572,18 +651,25 @@ function FocusCore({ scroll }: { scroll: ScrollState }) {
     }),
     []
   );
+  const shaftUniforms1 = useMemo(() => ({ uColor: { value: new THREE.Color("#8b5cf6") }, uOpacity: { value: 0 } }), []);
+  const shaftUniforms2 = useMemo(() => ({ uColor: { value: new THREE.Color("#22d3ee") }, uOpacity: { value: 0 } }), []);
   const tintColor = useMemo(() => new THREE.Color(), []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     const { chapter, next, blend } = getSceneState(scroll.progress);
 
+    // The core leans gently toward the cursor — a living presence that
+    // notices you, without ever fully chasing the pointer.
+    lean.current.x += (pointer.nx * 0.5 - lean.current.x) * 0.02;
+    lean.current.y += (pointer.ny * 0.3 - lean.current.y) * 0.02;
+
     if (groupRef.current) {
       groupRef.current.rotation.y = t * 0.07;
       groupRef.current.rotation.x = Math.sin(t * 0.1) * 0.08;
       // Gentle drift so the orb isn't perfectly static across the whole page
-      const driftX = Math.sin(t * 0.05) * 0.7;
-      const driftY = Math.cos(t * 0.07) * 0.35;
+      const driftX = Math.sin(t * 0.05) * 0.7 + lean.current.x;
+      const driftY = Math.cos(t * 0.07) * 0.35 + lean.current.y;
       groupRef.current.position.set(driftX, driftY, -3);
       // Breathing
       const s = 0.8 + Math.sin(t * 0.5) * 0.02;
@@ -626,10 +712,53 @@ function FocusCore({ scroll }: { scroll: ScrollState }) {
       const mat = ringRef.current.material as THREE.MeshBasicMaterial;
       mat.opacity = signalWeight * 0.3 * (1 - cycle);
     }
+
+    // Light shafts — slow counter-rotating sweep behind the orb
+    if (shaftGroupRef.current) {
+      shaftGroupRef.current.children[0].rotation.z = t * 0.05;
+      shaftGroupRef.current.children[1].rotation.z = -t * 0.035 + Math.PI / 3;
+    }
+    const bC = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
+    if (shaftMat1Ref.current) {
+      (shaftMat1Ref.current.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.02);
+      shaftMat1Ref.current.uniforms.uOpacity.value += (coreWeight * 0.16 - shaftMat1Ref.current.uniforms.uOpacity.value) * 0.04;
+    }
+    if (shaftMat2Ref.current) {
+      const bTint = new THREE.Color(bC[0], bC[1], bC[2]);
+      (shaftMat2Ref.current.uniforms.uColor.value as THREE.Color).lerp(bTint, 0.02);
+      shaftMat2Ref.current.uniforms.uOpacity.value += (coreWeight * 0.12 - shaftMat2Ref.current.uniforms.uOpacity.value) * 0.04;
+    }
   });
 
   return (
     <group ref={groupRef}>
+      {/* Cinematic light shafts — behind the orb (negative z), additive */}
+      <group ref={shaftGroupRef} position={[0, 0, -0.3]}>
+        <mesh>
+          <planeGeometry args={[7, 1.1]} />
+          <shaderMaterial
+            ref={shaftMat1Ref}
+            vertexShader={shaftVertex}
+            fragmentShader={shaftFragment}
+            uniforms={shaftUniforms1}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+        <mesh>
+          <planeGeometry args={[5.5, 0.8]} />
+          <shaderMaterial
+            ref={shaftMat2Ref}
+            vertexShader={shaftVertex}
+            fragmentShader={shaftFragment}
+            uniforms={shaftUniforms2}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      </group>
       {/* Energy orb — fresnel rim + swimming plasma */}
       <mesh>
         <sphereGeometry args={[0.85, 48, 48]} />
@@ -1312,7 +1441,7 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
           <ShootingStar seed={0.9} />
         </>
       )}
-      <FocusCore scroll={scroll} />
+      <FocusCore scroll={scroll} pointer={pointer} />
       {!isMobile && <EnergyRibbons scroll={scroll} />}
       {!isMobile && <CrystalShards scroll={scroll} />}
       {!isMobile && <WarpRings scroll={scroll} />}
@@ -1365,6 +1494,10 @@ export default function CosmicScene() {
           </Suspense>
         </Canvas>
       )}
+      {/* Cinematic vignette — a static CSS radial-gradient overlay, zero GPU
+          cost. Darkens the frame edges for a deep-space keynote look and
+          doubles as a free readability aid for the content sitting on top. */}
+      <div className="cosmic-vignette" aria-hidden />
     </div>
   );
 }

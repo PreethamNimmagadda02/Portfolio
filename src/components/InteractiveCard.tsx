@@ -78,6 +78,7 @@ export default function InteractiveCard({
         s.op = 0;
         el.style.setProperty("--ic-opacity", "0");
         if (tilt > 0) el.style.transform = "";
+        el.style.willChange = "";
         loopActive.current = false;
         return;
       }
@@ -89,6 +90,9 @@ export default function InteractiveCard({
   const startLoop = useCallback(() => {
     if (loopActive.current) return;
     loopActive.current = true;
+    // Only promote to a GPU layer while actively animating (hover + decay);
+    // released again once the tick loop converges back to rest.
+    if (ref.current) ref.current.style.willChange = "transform";
     rafId.current = requestAnimationFrame(tick);
   }, [tick]);
 

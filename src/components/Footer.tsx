@@ -91,15 +91,6 @@ export default function Footer() {
           }}
         />
 
-        {/* Giant watermark name — tilts up into view in 3D */}
-        <motion.div
-          aria-hidden
-          style={{ y: watermarkY, rotateX: watermarkRotateX, opacity: watermarkOpacity, transformStyle: "preserve-3d", transformOrigin: "bottom" }}
-          className="absolute inset-x-0 -bottom-6 md:-bottom-12 text-center font-black tracking-tighter select-none pointer-events-none text-[18vw] md:text-[11rem] leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.045)]"
-        >
-          PREETHAM
-        </motion.div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-12 md:pt-16 pb-6 md:pb-8">
           {/* ── Top grid: brand / nav / connect ── */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
@@ -116,8 +107,8 @@ export default function Footer() {
                 <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
               </Link>
               <p className="text-gray-300 text-sm mt-3 max-w-sm mx-auto md:mx-0 leading-relaxed">
-                AI Engineer crafting <span className="text-purple-300">autonomous agents</span> and{" "}
-                <span className="text-blue-300">immersive web experiences</span>. Building the future, one innovation at a time.
+                AI Engineer building <span className="text-purple-300">autonomous agents</span> and{" "}
+                <span className="text-blue-300">systems that act on their own</span>.
               </p>
 
               {/* Availability badge */}
@@ -174,15 +165,25 @@ export default function Footer() {
                 {socialLinks.map((social) => (
                   <MagneticButton key={social.label} strength={0.3}>
                     <motion.div
-                      className="relative group"
-                      whileHover={{ scale: 1.1 }}
+                      className="relative"
+                      initial="rest"
+                      whileHover="hover"
+                      variants={{ rest: { scale: 1 }, hover: { scale: 1.1 } }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}
                     >
-                      {/* Animated gradient border */}
+                      {/* Animated gradient border — inherits hover/rest state
+                          from the parent; the background-position tween only
+                          ticks while actually hovered, not forever. */}
                       <motion.div
-                        className={`absolute -inset-px bg-linear-to-r ${social.gradient} rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300`}
-                        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className={`absolute -inset-px bg-linear-to-r ${social.gradient} rounded-full blur-sm`}
+                        variants={{
+                          rest: { opacity: 0 },
+                          hover: {
+                            opacity: 1,
+                            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                            transition: { backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.3 } },
+                          },
+                        }}
                         style={{ backgroundSize: "200% 200%" }}
                       />
                       <Link
@@ -224,6 +225,26 @@ export default function Footer() {
                 <ArrowUp size={12} className="text-gray-300 group-hover:text-purple-400 md:w-4 md:h-4 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             </motion.button>
+          </motion.div>
+        </div>
+
+        {/* Giant watermark name — a dedicated clipped strip below the bottom
+            bar, cropped to roughly half the letterforms so the name peeks up
+            from the edge rather than reading fully, and can never collide
+            with the copyright row above it. */}
+        <div className="relative h-12 sm:h-14 md:h-20 overflow-hidden" aria-hidden>
+          <motion.div
+            style={{
+              y: watermarkY,
+              rotateX: watermarkRotateX,
+              opacity: watermarkOpacity,
+              transformStyle: "preserve-3d",
+              transformOrigin: "top",
+              WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
+            }}
+            className="absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/[0.06]"
+          >
+            PREETHAM
           </motion.div>
         </div>
       </div>

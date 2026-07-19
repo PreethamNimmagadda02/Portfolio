@@ -30,17 +30,17 @@
 :root {
   /* Deeper-than-black void so glows and starlight have somewhere to bloom */
   --background: 240 30% 2.4%;
-  --foreground: 0 0% 97%;
-  --card: 250 22% 6%;
-  --card-foreground: 0 0% 97%;
-  --popover: 250 22% 6%;
-  --popover-foreground: 0 0% 97%;
+  --foreground: 0 0% 98%;
+  --card: 250 22% 7%;
+  --card-foreground: 0 0% 98%;
+  --popover: 250 22% 7%;
+  --popover-foreground: 0 0% 98%;
   --primary: 258 90% 66%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 255 16% 12%;
-  --secondary-foreground: 0 0% 97%;
-  --muted: 255 14% 12%;
-  --muted-foreground: 240 8% 62%;
+  --secondary: 255 16% 14%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 255 14% 14%;
+  --muted-foreground: 240 8% 74%;
   --accent: 189 85% 55%;
   --accent-foreground: 240 30% 4%;
   --destructive: 0 70% 55%;
@@ -89,6 +89,9 @@
     @apply bg-background text-foreground;
     /* Prevent selection during scroll for smoother feel */
     -webkit-tap-highlight-color: transparent;
+    /* Base text shadow — a hairline of contrast over the cosmic backdrop.
+       Cheap (no blur radius spread), applies once to every text node. */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
   }
 
   /* ── Visible keyboard focus indicator (a11y) ──
@@ -374,6 +377,27 @@ h1 {
   background: rgba(14, 12, 24, 0.72);
 }
 
+/* ── Cinematic vignette — static CSS overlay, zero GPU cost ──
+   Darkens the frame edges (deep-space keynote look) and dims a soft
+   vertical column so body copy always sits on a darker patch of sky,
+   regardless of what the nebula/stars are doing underneath. */
+.cosmic-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(2, 2, 6, 0.55) 100%),
+    linear-gradient(180deg, rgba(2, 2, 6, 0.25) 0%, transparent 12%, transparent 88%, rgba(2, 2, 6, 0.35) 100%);
+}
+
+/* ── Section surface — stronger than .card-hairline, used to wrap entire
+   sections so paragraph copy stays legible against the busiest parts of
+   the scene (nebula churn, light shafts). Solid fill, no backdrop-filter. */
+.content-panel {
+  background: rgba(6, 5, 12, 0.55);
+  border-radius: 1.5rem;
+}
+
 /* ── InteractiveCard — pointer-following sheen + rim light ──
    Driven by CSS vars written from a self-stopping rAF loop
    (see InteractiveCard.tsx). The pseudo-elements composite on the GPU;
@@ -381,7 +405,9 @@ h1 {
 .icard {
   position: relative;
   --ic-accent: var(--iris);
-  will-change: transform;
+  /* will-change is toggled by InteractiveCard.tsx's rAF loop (only while
+     hovering/decaying), not held statically — dozens of idle cards on a
+     page would otherwise force dozens of permanent GPU layers for nothing. */
   transform-style: preserve-3d;
 }
 
@@ -676,21 +702,9 @@ h1 {
   scrollbar-color: rgba(236, 72, 153, 0.3) rgba(255, 255, 255, 0.03);
 }
 
-/* Override the purple glow used in the pulse-glow animation */
-[data-theme="nebula"] .animate-pulse-glow {
-  animation: nebula-pulse-glow 2s ease-in-out infinite !important;
-}
-
-@keyframes nebula-pulse-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.5), 0 0 60px rgba(236, 72, 153, 0.2);
-  }
+/* Override the pink/rose glow color for the pulse-glow-layer, opacity-only */
+[data-theme="nebula"] .pulse-glow-layer {
+  background: radial-gradient(closest-side, rgba(236, 72, 153, 0.45), transparent 70%);
 }
 
 /* Hide scrollbar while keeping scrollability (mobile carousels) */

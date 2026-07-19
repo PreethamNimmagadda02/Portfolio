@@ -546,8 +546,8 @@ export default function GitHubStats() {
           </InViewClass>
           <p className="text-gray-300 max-w-lg mx-auto">
             {activeTab === "github"
-              ? "Consistency breeds excellence. Every purple square represents dedication."
-              : "Live statistics fetched directly from global coding platforms."}
+              ? "A year of commits and contribution streaks, pulled live from GitHub."
+              : "Live ratings and rankings, pulled directly from each platform."}
           </p>
 
           {error && activeTab === "github" && (

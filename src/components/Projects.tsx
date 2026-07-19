@@ -33,7 +33,7 @@ const projects: ProjectData[] = [
     id: 0,
     title: "College Central",
     description:
-      "The digital backbone of IIT (ISM) Dhanbad. A centralized platform empowering students with real-time academic insights, campus navigation, and event integration.",
+      "The digital backbone of IIT (ISM) Dhanbad — one platform for academic records, campus navigation, and event coordination, used daily by the student body.",
     tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
     links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     status: "Live",
@@ -45,7 +45,7 @@ const projects: ProjectData[] = [
     id: 1,
     title: "FestFlow",
     description:
-      "Autonomous event orchestration at scale. Leveraging multi-agent AI to transform abstract constraints into executable logistical plans.",
+      "Multi-agent AI that turns event requirements into complete logistical plans — scheduling, budgets, and vendor coordination, generated automatically.",
     tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
     links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
@@ -57,7 +57,7 @@ const projects: ProjectData[] = [
     id: 2,
     title: "AI Trading System",
     description:
-      "Algorithmic trading infrastructure. A swarm of AI agents analyzing market signals to execute high-frequency trading strategies with precision.",
+      "A swarm of AI agents that reads market signals and executes trading strategies autonomously, in real time.",
     tags: ["Python", "CrewAI", "GPT API", "Financial Tech"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System",
@@ -72,7 +72,7 @@ const projects: ProjectData[] = [
     id: 3,
     title: "Agentic VS Code",
     description:
-      "A custom-compiled VS Code distribution with deeply embedded agentic AI capabilities. Empowers developers with seamless natural-language-to-code execution and autonomous project workflows.",
+      "A custom VS Code build with agentic AI at its core — natural language becomes working code, and routine project work runs itself.",
     tags: ["Electron", "TypeScript", "Agentic AI", "LLMs"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
@@ -87,7 +87,7 @@ const projects: ProjectData[] = [
     id: 4,
     title: "Slack AI Data Bot",
     description:
-      "A generative AI Slack assistant translating plain English into actionable PostgreSQL insights. Features auto-generated charts, 1-click CSV exports, and intelligent query caching.",
+      "A Slack assistant that turns plain English into PostgreSQL insights — auto-generated charts, one-click CSV exports, and smart query caching built in.",
     tags: ["Node.js", "LangChain", "OpenAI", "PostgreSQL", "Slack API", "NLP"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
@@ -171,8 +171,16 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
             {project.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2.5 py-1 rounded-full text-xs font-medium border"
+                className="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-300 cursor-default hover:text-white"
                 style={{ color: project.accent, borderColor: `${project.accent}30`, backgroundColor: `${project.accent}0a` }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = project.accent;
+                  e.currentTarget.style.borderColor = project.accent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `${project.accent}0a`;
+                  e.currentTarget.style.borderColor = `${project.accent}30`;
+                }}
               >
                 {tag}
               </span>

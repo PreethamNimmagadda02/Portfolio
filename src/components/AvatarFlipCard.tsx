@@ -33,10 +33,8 @@ export default function AvatarFlipCard() {
         }
       }}
     >
-      {/* Outer pulsing glow ring - CSS animation for compositor thread - Desktop Only */}
-      <div
-        className="absolute -inset-4 rounded-3xl opacity-60 hidden md:block animate-pulse-glow"
-      />
+      {/* Outer pulsing glow ring - opacity-only pulse layer - Desktop Only */}
+      <div className="pulse-glow-layer !inset-[-1rem] !rounded-3xl hidden md:block" />
 
       {/* Orbiting ring 1 - CSS animation for compositor thread - Desktop Only */}
       <div

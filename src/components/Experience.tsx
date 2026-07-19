@@ -28,7 +28,7 @@ const experiences: ExperienceData[] = [
     company: "Matters.AI",
     period: "Mar 2026 — Present",
     description:
-      "Forging the autonomous AI copilot that hunts data threats and exposures in real time — and remediates them before damage is done. Transforming DSPM from passive monitoring into a self-healing, AI-native defense layer.",
+      "Building the AI copilot that finds data exposures in real time and remediates them automatically — turning data security from passive monitoring into a self-healing defense layer.",
     type: "work",
     skills: ["Autonomous AI", "DSPM", "ML Engineering", "Data Security"],
     highlight: "Autonomous AI Copilot",
@@ -54,7 +54,7 @@ const experiences: ExperienceData[] = [
     company: "Perplexity",
     period: "Sept 2025 — Nov 2025",
     description:
-      "Spearheaded market expansion strategies for Perplexity. Orchestrated adoption campaigns & built strategic partnerships to drive user acquisition.",
+      "Led campus adoption for Perplexity — built the partnerships and campaigns that drove real user growth across the university.",
     type: "community",
     skills: ["Growth Hacking", "Strategic Partnerships", "Brand Strategy"],
     highlight: "20+ Strategic Leads",
@@ -175,8 +175,20 @@ function TimelineEntry({ data, index }: { data: ExperienceData; index: number })
           {data.skills.map((skill) => (
             <span
               key={skill}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium border"
-              style={{ color: data.accent, borderColor: `${data.accent}25`, backgroundColor: `${data.accent}08` }}
+              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors duration-300 cursor-default hover:text-white"
+              style={{
+                color: data.accent,
+                borderColor: `${data.accent}25`,
+                backgroundColor: `${data.accent}08`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = data.accent;
+                e.currentTarget.style.borderColor = data.accent;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = `${data.accent}08`;
+                e.currentTarget.style.borderColor = `${data.accent}25`;
+              }}
             >
               {skill}
             </span>

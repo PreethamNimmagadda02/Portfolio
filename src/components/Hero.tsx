@@ -36,14 +36,12 @@ function useLoaderDone(fallbackMs = 7000) {
 
 // Roles to cycle through in the typing rotator
 const ROLES = [
-  "Perpetual Learner",
   "AI Engineer",
-  "Full Stack Developer",
-  "AI Security Visionary",
-  "Open Source Builder",
-  "Competitive Programmer",
   "Agent Systems Architect",
-  "Relentless Innovator"
+  "Full Stack Developer",
+  "Competitive Programmer",
+  "Open Source Builder",
+  "Perpetual Learner",
 ];
 
 // Typing role rotator component
@@ -360,6 +358,14 @@ export default function Hero() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
     >
+      {/* Legibility scrim — cheap radial gradient, keeps hero text readable
+          over the light shafts + pointer-reactive starfield without any
+          blur or backdrop-filter cost. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(2,2,8,0.35), transparent 70%)" }}
+      />
       <div
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
       >
@@ -398,7 +404,7 @@ export default function Hero() {
               transition={{ delay: 0.2 }}
             >
               <FloatingBadge delay={0.3}>
-                🚀 Innovating at the Edge of AI
+                Building Systems That Act — Not Just Predict
               </FloatingBadge>
             </motion.div>
 
@@ -433,7 +439,10 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
             >
               <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left" style={{ fontFamily: "var(--font-inter)" }}>
-                Forging the <span className="text-purple-400 font-bold">autonomous AI copilot</span> at <span className="text-white font-bold">Matters.AI</span> that doesn't wait for breaches—it <span className="text-white font-semibold">eliminates them before they exist</span>. Turning DSPM into a living, self-healing system where every threat is detected, analysed and <span className="text-purple-400 font-bold">autonomously remediated</span> at the speed of thought.
+                Autonomous systems shouldn&apos;t wait for breaches — they should eliminate them.
+                At <span className="text-white font-bold">Matters.AI</span>, I build the AI copilot that turns
+                data security from passive monitoring into a self-healing defense layer, detecting and
+                remediating threats before they cause damage.
               </p>
             </motion.div>
           </motion.div>
@@ -502,8 +511,9 @@ export default function Hero() {
                 transition={{ delay: 2.0, duration: 0.6 }}
                 className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
               >
-                {/* Animated gradient border */}
-                <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300 animate-pulse-glow" />
+                {/* Animated gradient border + opacity-only pulse layer */}
+                <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
+                <span className="pulse-glow-layer" />
                 <span className="absolute inset-px rounded-full bg-black/90 backdrop-blur-sm" />
 
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
