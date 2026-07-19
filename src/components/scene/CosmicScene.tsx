@@ -826,108 +826,7 @@ function Embers({ scroll }: { scroll: ScrollState }) {
 }
 
 // -----------------------------------------------------------------------------
-// Galaxy dust — a sparse spiral ribbon of dim points drifting at a different
-// parallax depth than the stars, adding a distinct mid-layer of depth.
-// One Points draw call; motion entirely in the vertex shader.
-// -----------------------------------------------------------------------------
-const dustVertex = /* glsl */ `
-  uniform float uTime;
-  uniform float uScroll;
-  uniform vec2 uMouse;
-  attribute float aPhase;
-  varying float vFade;
 
-  void main() {
-    vec3 pos = position;
-    // Slow orbital swirl around the spiral's own axis
-    float a = uTime * 0.02 + aPhase * 6.2831;
-    pos.x += sin(a) * 0.35;
-    pos.y += cos(a * 0.7) * 0.2;
-    // Deeper parallax than stars — dust drifts slower with mouse, faster with scroll
-    pos.x += uMouse.x * 0.4;
-    pos.y += uMouse.y * 0.25 + uScroll * 6.0;
-    vFade = 0.35 + 0.65 * fract(aPhase * 7.31);
-    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = (1.4 + fract(aPhase * 3.7) * 2.2) * (120.0 / -mv.z);
-    gl_Position = projectionMatrix * mv;
-  }
-`;
-
-const dustFragment = /* glsl */ `
-  uniform vec3 uColor;
-  varying float vFade;
-  void main() {
-    vec2 c = gl_PointCoord - 0.5;
-    float d = length(c);
-    float alpha = smoothstep(0.5, 0.0, d) * 0.22 * vFade;
-    gl_FragColor = vec4(uColor, alpha);
-  }
-`;
-
-function GalaxyDust({ pointer, scroll, count = 350 }: { pointer: PointerState; scroll: ScrollState; count?: number }) {
-  const matRef = useRef<THREE.ShaderMaterial>(null);
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
-  const { positions, phases } = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const phases = new Float32Array(count);
-    // Logarithmic spiral band, tilted, far behind the stars
-    const rand = seededRandom(4242);
-    for (let i = 0; i < count; i++) {
-      const t = (i / count) * Math.PI * 5;
-      const r = 2 + t * 1.15 + (rand() - 0.5) * 1.6;
-      const x = Math.cos(t + rand() * 0.4) * r;
-      const y = Math.sin(t + rand() * 0.4) * r * 0.45 + (rand() - 0.5) * 2;
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = -6 - rand() * 4;
-      phases[i] = rand();
-    }
-    return { positions, phases };
-  }, [count]);
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uScroll: { value: 0 },
-      uMouse: { value: new THREE.Vector2(0, 0) },
-      uColor: { value: new THREE.Color("#a78bfa") },
-    }),
-    []
-  );
-
-  useFrame((state) => {
-    if (!matRef.current) return;
-    const u = matRef.current.uniforms;
-    u.uTime.value = state.clock.elapsedTime;
-    u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.03;
-    u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.03;
-    u.uScroll.value += (scroll.progress - u.uScroll.value) * 0.04;
-    // Follow chapter tint at low saturation
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    tintColor.setRGB(a[0], a[1], a[2]);
-    (u.uColor.value as THREE.Color).lerp(tintColor, 0.02);
-  });
-
-  return (
-    <points rotation={[0.4, 0, 0.18]}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aPhase" args={[phases, 1]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={matRef}
-        vertexShader={dustVertex}
-        fragmentShader={dustFragment}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
 
 // -----------------------------------------------------------------------------
 // Energy Ribbons — flowing sine-wave trails orbiting the focus orb. A custom
@@ -1405,7 +1304,7 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
       <AdaptiveQuality maxDpr={isMobile ? 1 : 1.5} />
       <AuroraNebula pointer={pointer} scroll={scroll} />
       <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 500 : 1600} />
-      <GalaxyDust pointer={pointer} scroll={scroll} count={isMobile ? 180 : 350} />
+
       {!isMobile && (
         <>
           <ShootingStar seed={0.1} />
