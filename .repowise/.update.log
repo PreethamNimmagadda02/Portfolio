@@ -946,3 +946,67 @@ Warning: there are non-text parts in the response: ['thought_signature'], return
 2026-07-19 11:31:01 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
 2026-07-19 11:36:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
 2026-07-19 11:41:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+
+--- post-commit hook fired at Sun Jul 19 11:42:04 IST 2026 for HEAD 7124e70d21af85d8421c63f2e7119b89acf1e189 ---
+repowise update · Portfolio
+e9ba8f0e..7124e70d
+23 changed · 21 modified, 2 deleted
+    modified  .claude/CLAUDE.md
+     deleted  .repowise/.update.lock
+    modified  .repowise/.update.log
+     deleted  .repowise/.update.queued
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+    modified  public/sw.js
+    modified  src/app/globals.css
+    modified  src/components/About.tsx
+  +13 more (use -v to list all)
+2026-07-19 11:42:05 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio submodules_skipped=0
+2026-07-19 11:42:05 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-19 11:42:05 [info     ] parse_cache_used               hits=65 misses=0
+2026-07-19 11:42:05 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-19 11:42:05 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.01, 'yaml': 0.0}
+2026-07-19 11:42:05 [info     ] type_use edges emitted         per_language={'typescript': 3}
+2026-07-19 11:42:05 [info     ] Heritage edges resolved        total=0
+2026-07-19 11:42:05 [info     ] Call edges resolved            total=217
+2026-07-19 11:42:05 [info     ] Graph built                    edge_types={'defines': 367, 'imports': 136, 'calls': 217, 'has_method': 46} edges=766 file_nodes=81 symbol_nodes=367
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-19 11:42:05 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-19 11:42:06 [debug    ] repo_commit_index_built        commits_parsed=137 files_with_history=23 indexable_files=23
+2026-07-19 11:42:06 [debug    ] blame_index_failed             error=Cmd('git') failed due to: exit code(128)
+  cmdline: git blame --line-porcelain HEAD -- .repowise/.update.lock
+  stderr: 'fatal: no such path .repowise/.update.lock in HEAD' path=.repowise/.update.lock
+2026-07-19 11:42:06 [debug    ] co_change_computed             commit_limit=2000 commits=137 files_with_entropy=63 files_with_partners=26 min_count=2 pairs_above_threshold=169 pairs_considered=779 tracked_files=65
+2026-07-19 11:42:06 [info     ] Co-change edges added          count=99
+2026-07-19 11:42:06 [info     ] betweenness_reused_from_cache  kind=file nodes=82
+2026-07-19 11:42:06 [info     ] betweenness_reused_from_cache  kind=symbol nodes=367
+2026-07-19 11:42:06 [info     ] file_communities_detected      algorithm=louvain communities=33 prod_files=82 test_files=0 total_files=82
+2026-07-19 11:42:06 [info     ] symbol_communities_detected    communities=186 connected=194 total_symbols=367
+2026-07-19 11:42:06 [info     ] execution_flows_traced         candidates_scored=32 deduplicated=0 traced=27
+Pages to regenerate: 26
+Pages to decay: 2
+2026-07-19 11:42:06 [debug    ] duplication_incremental_splice changed=16 deleted=0 pairs=3210 touched_buckets=33043
+2026-07-19 11:42:06 [debug    ] health_duplication_limits      degenerate_buckets=0 files_considered=16 files_tokenized=14 incremental=True skipped_minified=1 skipped_token_cap=0 skipped_unreadable=0 timed_out=False total_windows=35363 window_budget_hit=False
+Health analysis (partial): 21 files, 67 findings
+Dead code findings (partial): 3
+Knowledge graph refreshed: 4 layers, 12 tour steps
+2026-07-19 11:42:09 [info     ] decision_extractor.scanning_inline_markers total_files=21
+2026-07-19 11:42:09 [info     ] session_mining.done            pending_backlog=0 promoted=0 staged=0 structured=0
