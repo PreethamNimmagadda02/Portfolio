@@ -72,7 +72,7 @@
       "filePath": ".claude/CLAUDE.md",
       "language": "markdown",
       "symbolCount": 0,
-      "lineCount": 191,
+      "lineCount": 188,
       "complexity": "moderate",
       "pagerank": 0.007578,
       "communityId": 10,
@@ -388,7 +388,8 @@
       "pagerank": 0.007578,
       "communityId": 29,
       "tags": [],
-      "summary": "Application module sw defining a."
+      "summary": "Application module sw defining a.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:public/workbox-4754cb34.js",
@@ -461,12 +462,13 @@
       "filePath": "src/components/About.tsx",
       "language": "typescript",
       "symbolCount": 5,
-      "lineCount": 241,
+      "lineCount": 222,
       "complexity": "moderate",
       "pagerank": 0.007578,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module About defining AnimatedCounter, PillarCard, About."
+      "summary": "UI module About defining AnimatedCounter, PillarCard, About.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/Achievements.tsx",
@@ -479,7 +481,8 @@
       "pagerank": 0.007578,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module Achievements defining Achievement, StatNumber, AchievementCard."
+      "summary": "UI module Achievements defining Achievement, StatNumber, AchievementCard.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/AvatarFlipCard.tsx",
@@ -487,12 +490,13 @@
       "filePath": "src/components/AvatarFlipCard.tsx",
       "language": "typescript",
       "symbolCount": 2,
-      "lineCount": 279,
+      "lineCount": 278,
       "complexity": "moderate",
       "pagerank": 0.008596,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module AvatarFlipCard defining AvatarFlipCard."
+      "summary": "UI module AvatarFlipCard defining AvatarFlipCard.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/CodingProfiles.tsx",
@@ -500,12 +504,13 @@
       "filePath": "src/components/CodingProfiles.tsx",
       "language": "typescript",
       "symbolCount": 11,
-      "lineCount": 455,
+      "lineCount": 454,
       "complexity": "moderate",
       "pagerank": 0.008652,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module CodingProfiles defining PlatformUserStats, PlatformQuestionStats, BadgeStat."
+      "summary": "UI module CodingProfiles defining PlatformUserStats, PlatformQuestionStats, BadgeStat.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/Contact.tsx",
@@ -513,7 +518,7 @@
       "filePath": "src/components/Contact.tsx",
       "language": "typescript",
       "symbolCount": 7,
-      "lineCount": 641,
+      "lineCount": 639,
       "complexity": "complex",
       "pagerank": 0.008383,
       "communityId": 1,
@@ -527,12 +532,13 @@
       "filePath": "src/components/Experience.tsx",
       "language": "typescript",
       "symbolCount": 6,
-      "lineCount": 233,
+      "lineCount": 245,
       "complexity": "moderate",
       "pagerank": 0.007578,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module Experience defining ExperienceData, getPosition, AnimatedPlanet."
+      "summary": "UI module Experience defining ExperienceData, getPosition, AnimatedPlanet.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/Footer.tsx",
@@ -540,12 +546,13 @@
       "filePath": "src/components/Footer.tsx",
       "language": "typescript",
       "symbolCount": 4,
-      "lineCount": 271,
+      "lineCount": 291,
       "complexity": "moderate",
       "pagerank": 0.008115,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module Footer defining LocalTime, Footer."
+      "summary": "UI module Footer defining LocalTime, Footer.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/GitHubStats.tsx",
@@ -553,7 +560,7 @@
       "filePath": "src/components/GitHubStats.tsx",
       "language": "typescript",
       "symbolCount": 16,
-      "lineCount": 762,
+      "lineCount": 759,
       "complexity": "complex",
       "pagerank": 0.007578,
       "communityId": 1,
@@ -567,12 +574,13 @@
       "filePath": "src/components/Hero.tsx",
       "language": "typescript",
       "symbolCount": 11,
-      "lineCount": 487,
+      "lineCount": 495,
       "complexity": "moderate",
       "pagerank": 0.008383,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module Hero defining useLoaderDone, RoleRotator, CurrentlyBuilding."
+      "summary": "UI module Hero defining useLoaderDone, RoleRotator, CurrentlyBuilding.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/InteractiveCard.tsx",
@@ -580,12 +588,13 @@
       "filePath": "src/components/InteractiveCard.tsx",
       "language": "typescript",
       "symbolCount": 2,
-      "lineCount": 103,
+      "lineCount": 109,
       "complexity": "moderate",
       "pagerank": 0.013704,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module InteractiveCard defining InteractiveCardProps, InteractiveCard."
+      "summary": "UI module InteractiveCard defining InteractiveCardProps, InteractiveCard.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/KonamiEasterEgg.tsx",
@@ -611,8 +620,7 @@
       "pagerank": 0.010819,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module MagneticButton defining MagneticButtonProps, MagneticButton.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module MagneticButton defining MagneticButtonProps, MagneticButton."
     },
     {
       "id": "file:src/components/Navbar.tsx",
@@ -620,12 +628,13 @@
       "filePath": "src/components/Navbar.tsx",
       "language": "typescript",
       "symbolCount": 5,
-      "lineCount": 522,
+      "lineCount": 521,
       "complexity": "complex",
       "pagerank": 0.008115,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module Navbar defining NavParticleStyle, makeNavParticleStyle, NavParticle."
+      "summary": "UI module Navbar defining NavParticleStyle, makeNavParticleStyle, NavParticle.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/NoiseBackground.tsx",
@@ -633,12 +642,13 @@
       "filePath": "src/components/NoiseBackground.tsx",
       "language": "typescript",
       "symbolCount": 1,
-      "lineCount": 19,
+      "lineCount": 18,
       "complexity": "simple",
       "pagerank": 0.008383,
       "communityId": 3,
       "tags": [],
-      "summary": "UI module NoiseBackground defining NoiseBackground."
+      "summary": "UI module NoiseBackground defining NoiseBackground.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/PageLoader.tsx",
@@ -672,12 +682,13 @@
       "filePath": "src/components/Projects.tsx",
       "language": "typescript",
       "symbolCount": 4,
-      "lineCount": 242,
+      "lineCount": 251,
       "complexity": "moderate",
       "pagerank": 0.007578,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module Projects defining ProjectData, getPosition, AnimatedPlanet."
+      "summary": "UI module Projects defining ProjectData, getPosition, AnimatedPlanet.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/Reveal.tsx",
@@ -742,8 +753,7 @@
       "pagerank": 0.007578,
       "communityId": 2,
       "tags": [],
-      "summary": "UI module Skills defining AnimatedCounter, CategoryChip, SkillTag.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module Skills defining AnimatedCounter, CategoryChip, SkillTag."
     },
     {
       "id": "file:src/components/SmoothScroll.tsx",
@@ -782,8 +792,7 @@
       "pagerank": 0.007578,
       "communityId": 1,
       "tags": [],
-      "summary": "UI module Testimonials defining TestimonialCard, MobileCarousel, Testimonials.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module Testimonials defining TestimonialCard, MobileCarousel, Testimonials."
     },
     {
       "id": "file:src/components/ThemeToggle.tsx",
@@ -803,8 +812,8 @@
       "type": "file",
       "filePath": "src/components/scene/CosmicScene.tsx",
       "language": "typescript",
-      "symbolCount": 28,
-      "lineCount": 1261,
+      "symbolCount": 32,
+      "lineCount": 1397,
       "complexity": "complex",
       "pagerank": 0.007578,
       "communityId": 2,
@@ -2446,8 +2455,7 @@
       "depth": 0,
       "kind": "overview",
       "reason": "Start here for the end-to-end picture before diving into the code.",
-      "layer_id": "layer:application",
-      "wikiPageIds": []
+      "layer_id": "layer:application"
     },
     {
       "order": 2,
@@ -2457,8 +2465,7 @@
       "depth": 0,
       "kind": "code",
       "reason": "The walk's anchor \u2014 its imports fan out the widest in a repo with no single entry point.",
-      "layer_id": "layer:application",
-      "wikiPageIds": []
+      "layer_id": "layer:application"
     },
     {
       "order": 3,
@@ -2468,8 +2475,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:service",
-      "wikiPageIds": []
+      "layer_id": "layer:service"
     },
     {
       "order": 4,
@@ -2479,8 +2485,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 5,
@@ -2490,8 +2495,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 6,
@@ -2501,8 +2505,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 7,
@@ -2512,8 +2515,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 8,
@@ -2523,8 +2525,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 9,
@@ -2534,8 +2535,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 10,
@@ -2545,8 +2545,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 11,
@@ -2556,8 +2555,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 12,
@@ -2567,8 +2565,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     }
   ],
   "modules": [

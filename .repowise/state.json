@@ -1,5 +1,5 @@
 {
-  "last_sync_commit": "e9ba8f0eb38b47fed23e20f2857829dd862e3726",
+  "last_sync_commit": "819a1d0d13854bf1b27575451ca84112f39c56a0",
   "total_pages": 64,
   "provider": "gemini",
   "model": "gemini-3.1-flash-lite-preview",
@@ -35,10 +35,10 @@
     "layer_count": 4,
     "tour_steps": 12,
     "has_summaries": true,
-    "fingerprint": "2f5b4deee7b03255"
+    "fingerprint": "994c464d35cb534e"
   },
   "store_format_version": 1,
   "written_by_version": "0.33.0",
   "config_fingerprint": "da9b083027ea2f36ea0e9f0612e93b07cb1a84fd73e5301d483524580d3b18af",
-  "last_docs_commit": "e9ba8f0eb38b47fed23e20f2857829dd862e3726"
+  "last_docs_commit": "819a1d0d13854bf1b27575451ca84112f39c56a0"
 }

@@ -1010,3 +1010,8 @@ Dead code findings (partial): 3
 Knowledge graph refreshed: 4 layers, 12 tour steps
 2026-07-19 11:42:09 [info     ] decision_extractor.scanning_inline_markers total_files=21
 2026-07-19 11:42:09 [info     ] session_mining.done            pending_backlog=0 promoted=0 staged=0 structured=0
+
+--- post-commit hook fired at Sun Jul 19 12:09:17 IST 2026 for HEAD 17d7439406618ad0d136fc87b9b6798e6a0c1bbd ---
+Another `repowise update` is already running (pid 88263, target 7124e70d, 
+started 1633s ago).
+HEAD 17d74394 marked as pending; the running update will roll forward to it.

@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Bot,
   Code,
+  Briefcase,
   LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -43,6 +44,21 @@ const projects: ProjectData[] = [
   },
   {
     id: 1,
+    title: "CareerOps",
+    description:
+      "A fully automated command center for your job search — discovering the right roles, scoring your fit with AI, and managing the entire application pipeline from end to end.",
+    tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI"],
+    links: {
+      demo: "http://careerops-alb-328156002.ap-southeast-2.elb.amazonaws.com/",
+      repo: "https://github.com/PreethamNimmagadda02/CareerOps",
+    },
+    status: "Live",
+    icon: Briefcase,
+    color: "#14b8a6",
+    accent: "#0f766e",
+  },
+  {
+    id: 2,
     title: "FestFlow",
     description:
       "Multi-agent AI that turns event requirements into complete logistical plans — scheduling, budgets, and vendor coordination, generated automatically.",
@@ -54,7 +70,7 @@ const projects: ProjectData[] = [
     accent: "#06b6d4",
   },
   {
-    id: 2,
+    id: 3,
     title: "AI Trading System",
     description:
       "A swarm of AI agents that reads market signals and executes trading strategies autonomously, in real time.",
@@ -69,7 +85,7 @@ const projects: ProjectData[] = [
     accent: "#10b981",
   },
   {
-    id: 3,
+    id: 4,
     title: "Agentic VS Code",
     description:
       "A custom VS Code build with agentic AI at its core — natural language becomes working code, and routine project work runs itself.",
@@ -84,7 +100,7 @@ const projects: ProjectData[] = [
     accent: "#e11d48",
   },
   {
-    id: 4,
+    id: 5,
     title: "Slack AI Data Bot",
     description:
       "A Slack assistant that turns plain English into PostgreSQL insights — auto-generated charts, one-click CSV exports, and smart query caching built in.",
