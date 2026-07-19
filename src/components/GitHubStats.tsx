@@ -674,6 +674,7 @@ export default function GitHubStats() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-300 hover:text-purple-400 transition-colors font-medium"
+                        suppressHydrationWarning
                       >
                         <span className="hidden sm:inline">View on GitHub</span>
                         <span className="sm:hidden">GitHub</span>

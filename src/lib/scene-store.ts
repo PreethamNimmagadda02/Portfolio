@@ -99,6 +99,7 @@ function subscribe(cb: () => void) {
   return () => listeners.delete(cb);
 }
 
+const emptySkillCategories = new Set<string>();
 export function useActiveSkillCategories(): Set<string> {
-  return useSyncExternalStore(subscribe, getActiveSkillCategories, () => new Set<string>());
+  return useSyncExternalStore(subscribe, getActiveSkillCategories, () => emptySkillCategories);
 }

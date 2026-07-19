@@ -247,6 +247,7 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
                 href={project.links.demo}
                 target="_blank"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:gap-3 transition-all group"
+                suppressHydrationWarning
               >
                 Live Demo
                 <ExternalLink size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -257,6 +258,7 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
                 href={project.links.repo}
                 target="_blank"
                 className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                suppressHydrationWarning
               >
                 <Github size={15} />
                 Source
