@@ -41,7 +41,7 @@ export default function AvatarFlipCard() {
         className="absolute -inset-6 border border-purple-500/30 rounded-full pointer-events-none hidden md:block animate-spin-slow"
         style={{ animationDuration: '10s' }}
       >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(139,92,246,0.8)]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(201,151,74,0.8)]" />
       </div>
 
       {/* Orbiting ring 2 (reverse) - CSS animation for compositor thread - Desktop Only */}
@@ -126,7 +126,7 @@ export default function AvatarFlipCard() {
 
         {/* Back Side - Holographic ID Card (Refined) */}
         <div
-          className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.15)] bg-[#030303]"
+          className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden border border-purple-500/20 shadow-[0_0_30px_rgba(201,151,74,0.15)] bg-[#08070a]"
           style={{
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)"
