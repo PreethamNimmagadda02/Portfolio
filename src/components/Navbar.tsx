@@ -371,7 +371,6 @@ export default function Navbar() {
               })}
             </div>
 
-
             {/* CTA Button */}
             <motion.div
               whileHover={{ scale: 1.06, rotateY: -6 }}
@@ -459,7 +458,6 @@ export default function Navbar() {
                     </motion.div>
                   );
                 })}
-
 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
