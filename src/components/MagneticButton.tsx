@@ -50,6 +50,7 @@ export default function MagneticButton({
       // reliably on tap where CSS :active often doesn't.
       whileTap={{ scale: 0.94 }}
       className={className}
+      suppressHydrationWarning
     >
       {children}
     </motion.div>

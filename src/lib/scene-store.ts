@@ -31,15 +31,15 @@ export interface SceneChapter {
 }
 
 export const SCENE_CHAPTERS: SceneChapter[] = [
-  { id: "hero", start: 0.0, end: 0.06, colorA: "#8b5cf6", colorB: "#3b82f6", colorC: "#06010f", camera: [0, 0, 6.5], lookAt: [0, 0, 0], focus: "core" },
-  { id: "about", start: 0.06, end: 0.17, colorA: "#60a5fa", colorB: "#8b5cf6", colorC: "#020410", camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], focus: "core" },
-  { id: "experience", start: 0.17, end: 0.33, colorA: "#818cf8", colorB: "#a855f7", colorC: "#070414", camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], focus: "signal" },
-  { id: "skills", start: 0.33, end: 0.43, colorA: "#ec4899", colorB: "#22d3ee", colorC: "#0a0414", camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], focus: "constellation" },
-  { id: "projects", start: 0.43, end: 0.59, colorA: "#a855f7", colorB: "#06b6d4", colorC: "#04030f", camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], focus: "prism" },
-  { id: "activity", start: 0.59, end: 0.71, colorA: "#22c55e", colorB: "#06b6d4", colorC: "#03100c", camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], focus: "signal" },
-  { id: "achievements", start: 0.71, end: 0.81, colorA: "#fbbf24", colorB: "#f97316", colorC: "#100704", camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], focus: "flame" },
-  { id: "testimonials", start: 0.81, end: 0.91, colorA: "#a855f7", colorB: "#f472b6", colorC: "#0a0411", camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], focus: "quiet" },
-  { id: "contact", start: 0.91, end: 1.0, colorA: "#8b5cf6", colorB: "#3b82f6", colorC: "#06010f", camera: [0, 0, 7], lookAt: [0, 0, 0], focus: "core" },
+  { id: "hero", start: 0.0, end: 0.06, colorA: "#c9974a", colorB: "#f3e3c0", colorC: "#0e0a06", camera: [0, 0, 6.5], lookAt: [0, 0, 0], focus: "core" },
+  { id: "about", start: 0.06, end: 0.17, colorA: "#2b2620", colorB: "#1a1712", colorC: "#08070a", camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], focus: "core" },
+  { id: "experience", start: 0.17, end: 0.33, colorA: "#2b2620", colorB: "#1a1712", colorC: "#08070a", camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], focus: "signal" },
+  { id: "skills", start: 0.33, end: 0.43, colorA: "#3a3226", colorB: "#1e1a14", colorC: "#08070a", camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], focus: "constellation" },
+  { id: "projects", start: 0.43, end: 0.59, colorA: "#2b2620", colorB: "#1a1712", colorC: "#08070a", camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], focus: "prism" },
+  { id: "activity", start: 0.59, end: 0.71, colorA: "#2b2620", colorB: "#1a1712", colorC: "#08070a", camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], focus: "signal" },
+  { id: "achievements", start: 0.71, end: 0.81, colorA: "#4a3a20", colorB: "#241c10", colorC: "#0a0806", camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], focus: "flame" },
+  { id: "testimonials", start: 0.81, end: 0.91, colorA: "#2b2620", colorB: "#1a1712", colorC: "#08070a", camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], focus: "quiet" },
+  { id: "contact", start: 0.91, end: 1.0, colorA: "#c9974a", colorB: "#f3e3c0", colorC: "#0e0a06", camera: [0, 0, 7], lookAt: [0, 0, 0], focus: "core" },
 ];
 
 export function hexToVec3(hex: string): [number, number, number] {
@@ -99,6 +99,7 @@ function subscribe(cb: () => void) {
   return () => listeners.delete(cb);
 }
 
+const emptySkillCategories = new Set<string>();
 export function useActiveSkillCategories(): Set<string> {
-  return useSyncExternalStore(subscribe, getActiveSkillCategories, () => new Set<string>());
+  return useSyncExternalStore(subscribe, getActiveSkillCategories, () => emptySkillCategories);
 }

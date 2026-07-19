@@ -27,3 +27,9 @@ export {
 } from "framer-motion";
 
 export type { Variants, MotionValue } from "framer-motion";
+
+/** Restrained, no-bounce easing — replaces ad hoc bounce/elastic curves. */
+export const EASE_EDITORIAL = [0.16, 1, 0.3, 1] as const;
+
+/** Restrained spring — replaces high-stiffness/low-damping "bouncy" springs. */
+export const SPRING_RESTRAINED = { type: "spring", stiffness: 140, damping: 22, mass: 1 } as const;

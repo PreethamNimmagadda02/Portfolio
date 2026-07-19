@@ -135,7 +135,7 @@ function PillarCard({
           </div>
           <div>
             <h3 className="text-lg md:text-xl font-bold text-white mb-2">{feature.title}</h3>
-            <p className="text-sm md:text-[15px] text-gray-300 leading-relaxed" style={{ fontFamily: "var(--font-inter)" }}>
+            <p className="text-sm md:text-[15px] text-gray-300 leading-relaxed font-sans">
               {feature.description}
             </p>
           </div>
@@ -174,7 +174,7 @@ export default function About() {
                 </h2>
               </InViewClass>
 
-              <div className="space-y-5 mb-8 text-gray-300 max-w-prose" style={{ fontFamily: "var(--font-inter)" }}>
+              <div className="space-y-5 mb-8 text-gray-300 max-w-prose font-sans">
                 <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">
                   I build AI systems that <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">act</span>,
                   {" "}not just <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">answer</span>

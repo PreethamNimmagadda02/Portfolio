@@ -72,14 +72,14 @@ export const skillsData: SkillItem[] = [
 ];
 
 export const categoryColors: Record<string, string> = {
-  AI: "#ec4899",
-  Web: "#06b6d4",
-  DB: "#8b5cf6",
-  Cloud: "#3b82f6",
-  DevOps: "#f59e0b",
-  Lang: "#22c55e",
-  Tools: "#64748b",
-  Automation: "#f97316",
+  AI: "#c9974a",
+  Web: "#d3a662",
+  DB: "#ad7f3c",
+  Cloud: "#e2bd85",
+  DevOps: "#8a6530",
+  Lang: "#f3e3c0",
+  Tools: "#b8874a",
+  Automation: "#9c7238",
 };
 
 export const categoryLabels: Record<string, string> = {

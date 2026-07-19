@@ -10,9 +10,9 @@ import { InViewClass, SectionKicker } from "./Reveal";
 
 // Color schemes for each contact type
 const contactColors = {
-  email: { gradient: "from-blue-500 to-cyan-500", accent: "#22d3ee" },
-  location: { gradient: "from-emerald-500 to-teal-500", accent: "#2dd4bf" },
-  phone: { gradient: "from-purple-500 to-pink-500", accent: "#c084fc" }
+  email: { gradient: "from-primary to-primary", accent: "#c9974a" },
+  location: { gradient: "from-primary to-primary", accent: "#c9974a" },
+  phone: { gradient: "from-primary to-primary", accent: "#c9974a" }
 };
 
 // Toast notification component

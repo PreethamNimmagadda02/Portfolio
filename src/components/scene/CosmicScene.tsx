@@ -1078,17 +1078,16 @@ function EnergyRibbons({ scroll }: { scroll: ScrollState }) {
       groupRef.current.rotation.z = Math.cos(t * 0.06) * 0.06;
     }
     const v = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
+    // Ribbons are a hero-only signature flourish — fade in during the hero
+    // chapter, fade out everywhere else, continuously as the user scrolls
+    const heroWeight = lerp1(chapter.id === "hero" ? 1 : 0, next.id === "hero" ? 1 : 0, blend);
     matsRef.current.forEach((m, i) => {
       if (!m) return;
       const u = m.uniforms;
       u.uTime.value = t;
       u.uVelocity.value += (v - u.uVelocity.value) * 0.08;
       (u.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-      // Ribbons ride alongside the orb's "core" weight — visible and breathing
-      // except during the constellation chapter when they fade out
-      const w =
-        1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-      u.uWeight.value += (w * 0.7 + 0.15 - u.uWeight.value) * 0.04;
+      u.uWeight.value += (heroWeight * 0.85 - u.uWeight.value) * 0.04;
     });
   });
 
@@ -1197,9 +1196,9 @@ function CrystalShards({ scroll }: { scroll: ScrollState }) {
     const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
     tintColor.setRGB(a[0], a[1], a[2]);
 
-    // Slightly reduce shard presence during constellation chapter
-    const w =
-      1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
+    // Shards are a hero-only signature flourish — fade in during the hero
+    // chapter, fade out everywhere else, continuously as the user scrolls
+    const heroWeight = lerp1(chapter.id === "hero" ? 1 : 0, next.id === "hero" ? 1 : 0, blend);
 
     shards.forEach((s, i) => {
       const mesh = meshRefs.current[i];
@@ -1220,7 +1219,7 @@ function CrystalShards({ scroll }: { scroll: ScrollState }) {
       if (m) {
         m.uniforms.uTime.value = t;
         (m.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-        m.uniforms.uWeight.value += (w * 0.55 - m.uniforms.uWeight.value) * 0.04;
+        m.uniforms.uWeight.value += (heroWeight * 0.55 - m.uniforms.uWeight.value) * 0.04;
       }
     });
 
@@ -1322,6 +1321,9 @@ function WarpRings({ scroll }: { scroll: ScrollState }) {
     tintColor.setRGB(a[0], a[1], a[2]);
 
     const v = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
+    // Rings are a hero-only signature flourish — fade in during the hero
+    // chapter, fade out everywhere else, continuously as the user scrolls
+    const heroWeight = lerp1(chapter.id === "hero" ? 1 : 0, next.id === "hero" ? 1 : 0, blend);
 
     if (groupRef.current) {
       groupRef.current.rotation.z = t * 0.04;
@@ -1340,9 +1342,7 @@ function WarpRings({ scroll }: { scroll: ScrollState }) {
         m.uniforms.uTime.value = t;
         m.uniforms.uVelocity.value += (v - m.uniforms.uVelocity.value) * 0.1;
         (m.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-        const w =
-          1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-        m.uniforms.uWeight.value += (w * 0.7 - m.uniforms.uWeight.value) * 0.04;
+        m.uniforms.uWeight.value += (heroWeight * 0.7 - m.uniforms.uWeight.value) * 0.04;
       }
     });
   });

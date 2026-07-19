@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "@/lib/motion";
 import { cn, smoothScrollTo, seededRandom } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -308,7 +307,7 @@ export default function Navbar() {
                 <motion.div
                   className="absolute -inset-1.5 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-70 blur-lg transition-opacity duration-300"
                 />
-                <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.35)]">
+                <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden shadow-[0_0_20px_rgba(201,151,74,0.35)]">
                   <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
                     <span className="text-sm font-black tracking-tighter text-white">
                       PN
@@ -318,7 +317,7 @@ export default function Navbar() {
                 </div>
               </motion.div>
               <div className="flex flex-col">
-                <span className="relative text-base sm:text-lg font-bold tracking-tight leading-none whitespace-nowrap">
+                <span className="relative text-base sm:text-lg font-bold tracking-tight leading-none whitespace-nowrap font-display">
                   <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
                   <span className="absolute inset-0 bg-clip-text text-transparent bg-linear-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
                 </span>
@@ -370,11 +369,6 @@ export default function Navbar() {
                   </a>
                 );
               })}
-            </div>
-
-            {/* Theme Toggle */}
-            <div className="hidden xl:block">
-              <ThemeToggle />
             </div>
 
             {/* CTA Button */}
@@ -464,15 +458,6 @@ export default function Navbar() {
                     </motion.div>
                   );
                 })}
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.22 }}
-                  className="flex justify-center py-2"
-                >
-                  <ThemeToggle />
-                </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}

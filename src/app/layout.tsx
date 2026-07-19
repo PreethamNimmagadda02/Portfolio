@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Fraunces } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeToggle";
 import PageLoader from "@/components/PageLoader";
 import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -84,9 +80,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before paint to apply the saved theme, preventing a flash (FOUC)
-const themeInitScript = `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='nebula'||t==='deep-space'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
-
 // Disable browser scroll restoration so every refresh always starts at the top
 const scrollResetScript = `if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);`;
 
@@ -133,18 +126,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // suppressHydrationWarning on <html>: the theme init script sets data-theme
-  // before React hydrates — an expected, intentional attribute mismatch.
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         {/* suppressHydrationWarning on both scripts: browser extensions can
             inject their own <script> tags into <head> before React hydrates,
             shifting node matching. App code can't prevent that. */}
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: scrollResetScript }}
@@ -157,7 +144,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground`}
+        className={`${fraunces.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased bg-background text-foreground`}
       >
         <a href="#main-content" className="skip-link">
           Skip to content
@@ -165,19 +152,17 @@ export default function RootLayout({
         <LazyMotion features={domMax} strict>
         <MotionConfig reducedMotion="user">
           <PerformanceProvider>
-            <ThemeProvider>
-              <PageLoader />
-              <ScrollProgress />
-              <KonamiEasterEgg />
-              <SpotlightCursor />
-              <SmoothScroll>
-                <Navbar />
-                <main id="main-content" className="min-h-screen">
-                  {children}
-                </main>
-                <Footer />
-              </SmoothScroll>
-            </ThemeProvider>
+            <PageLoader />
+            <ScrollProgress />
+            <KonamiEasterEgg />
+            <SpotlightCursor />
+            <SmoothScroll>
+              <Navbar />
+              <main id="main-content" className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </SmoothScroll>
           </PerformanceProvider>
         </MotionConfig>
         </LazyMotion>

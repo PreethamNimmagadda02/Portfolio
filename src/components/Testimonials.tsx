@@ -137,7 +137,7 @@ function CardParticles({ accent, active }: { accent: string; active: boolean }) 
       {particles.map((p) => (
         <div
           key={p.id}
-          className="absolute rounded-full animate-float-particle"
+          className="absolute rounded-full"
           style={{
             left: `${p.left}%`,
             bottom: "-8px",
@@ -460,25 +460,22 @@ function DriftingOrbs() {
       <div
         className="absolute w-[500px] h-[500px] rounded-full blur-3xl"
         style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201,151,74,0.07) 0%, transparent 70%)",
           top: "10%", left: "5%",
-          animation: "drift-a 20s ease-in-out infinite alternate",
         }}
       />
       <div
         className="absolute w-[400px] h-[400px] rounded-full blur-3xl"
         style={{
-          background: "radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201,151,74,0.06) 0%, transparent 70%)",
           bottom: "5%", right: "8%",
-          animation: "drift-b 25s ease-in-out infinite alternate",
         }}
       />
       <div
         className="absolute w-[300px] h-[300px] rounded-full blur-3xl"
         style={{
-          background: "radial-gradient(circle, rgba(244,63,94,0.05) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201,151,74,0.05) 0%, transparent 70%)",
           top: "40%", right: "30%",
-          animation: "drift-a 18s ease-in-out infinite alternate-reverse",
         }}
       />
     </div>

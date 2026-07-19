@@ -11,19 +11,19 @@ const GITHUB_USERNAME = "PreethamNimmagadda02";
 
 /* ─── Known language colors (GitHub linguist) ─── */
 const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f1e05a",
-  Python: "#3572A5",
-  "C++": "#f34b7d",
-  C: "#555555",
-  Java: "#b07219",
-  Go: "#00ADD8",
-  Rust: "#dea584",
-  HTML: "#e34c26",
-  CSS: "#563d7c",
-  Shell: "#89e051",
-  Dockerfile: "#384d54",
-  Other: "#8b5cf6",
+  TypeScript: "#c9974a",
+  JavaScript: "#d3a662",
+  Python: "#ad7f3c",
+  "C++": "#e2bd85",
+  C: "#8a6530",
+  Java: "#c9974a",
+  Go: "#d3a662",
+  Rust: "#ad7f3c",
+  HTML: "#e2bd85",
+  CSS: "#8a6530",
+  Shell: "#c9974a",
+  Dockerfile: "#d3a662",
+  Other: "#ad7f3c",
 };
 
 /* ─── Types ─── */
@@ -156,11 +156,11 @@ function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
 
 /* ─── Cell colors for heatmap ─── */
 const cellColors = [
-  "rgba(255,255,255,0.04)",
-  "rgba(139, 92, 246, 0.4)",
-  "rgba(168, 85, 247, 0.7)",
-  "rgba(192, 132, 252, 0.9)",
-  "rgba(216, 180, 254, 1)",
+  "rgba(245, 241, 234, 0.06)",
+  "rgba(201, 151, 74, 0.25)",
+  "rgba(201, 151, 74, 0.45)",
+  "rgba(201, 151, 74, 0.7)",
+  "rgba(201, 151, 74, 0.95)",
 ];
 
 /* ─── Animated counter ─── */
@@ -674,6 +674,7 @@ export default function GitHubStats() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-300 hover:text-purple-400 transition-colors font-medium"
+                        suppressHydrationWarning
                       >
                         <span className="hidden sm:inline">View on GitHub</span>
                         <span className="sm:hidden">GitHub</span>
