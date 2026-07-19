@@ -138,7 +138,7 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 /* ─── Skeleton ─── */
 function ProfileSkeleton() {
   return (
-    <div className="relative p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 animate-pulse">
+    <div className="relative p-6 rounded-2xl bg-zinc-900/90 border border-white/10 animate-pulse">
       <div className="flex items-center gap-4 mb-4">
         <div className="w-12 h-12 rounded-full bg-white/10" />
         <div>
@@ -303,7 +303,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                 className="relative group"
               >
                 <div className={`absolute -inset-px bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                <div className="relative p-6 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
+                <div className="relative p-6 rounded-2xl bg-zinc-900/90 border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
 
                   {/* Header */}
                   <div className="flex items-center gap-4 mb-6">

@@ -37,9 +37,9 @@ function Toast({
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.9 }}
-      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-8 sm:right-8 sm:max-w-md z-50 flex items-center gap-3 px-4 sm:px-6 py-4 rounded-2xl backdrop-blur-xl border shadow-2xl ${type === "success"
-          ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-          : "bg-red-500/20 border-red-500/30 text-red-300"
+      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-8 sm:right-8 sm:max-w-md z-50 flex items-center gap-3 px-4 sm:px-6 py-4 rounded-2xl border shadow-2xl ${type === "success"
+          ? "bg-emerald-950/95 border-emerald-500/30 text-emerald-300"
+          : "bg-red-950/95 border-red-500/30 text-red-300"
         }`}
     >
       <motion.div
@@ -508,7 +508,7 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.3 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 rounded-2xl bg-zinc-900/80 border border-white/10 backdrop-blur-xl relative overflow-hidden"
+            className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 rounded-2xl bg-zinc-900/90 border border-white/10 relative overflow-hidden"
           >
             {/* Top gradient line */}
             <div className="absolute top-0 left-4 right-4 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
@@ -581,7 +581,7 @@ export default function Contact() {
             <form
               ref={formRef}
               onSubmit={handleSubmit}
-              className="relative bg-zinc-900/90 backdrop-blur-xl p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300"
+              className="relative bg-zinc-900/95 p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300"
             >
               {/* Form progress indicator */}
               <div className="mb-6">

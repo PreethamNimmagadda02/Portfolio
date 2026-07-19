@@ -236,8 +236,8 @@ export default function Navbar() {
           className={cn(
             "relative rounded-full transition-all duration-700 overflow-hidden will-change-transform",
             scrolled
-              ? "px-3 sm:px-4 py-2 bg-black/90 backdrop-blur-2xl border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
-              : "px-4 sm:px-6 py-3 bg-black/30 backdrop-blur-md border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+              ? "px-3 sm:px-4 py-2 bg-black/95 border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
+              : "px-4 sm:px-6 py-3 bg-black/50 border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
           )}
         >
           {/* Cursor-following spotlight glow */}
@@ -437,7 +437,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="absolute top-16 left-0 w-full max-h-[calc(100svh-6rem)] overflow-y-auto bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 xl:hidden shadow-2xl"
+              className="absolute top-16 left-0 w-full max-h-[calc(100svh-6rem)] overflow-y-auto bg-black/95 border border-white/10 rounded-2xl p-4 xl:hidden shadow-2xl"
             >
               <div className="flex flex-col space-y-2">
                 {navLinks.map((link, i) => {

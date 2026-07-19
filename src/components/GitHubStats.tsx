@@ -356,7 +356,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
 /* ─── Loading skeleton for stat cards ─── */
 function StatSkeleton() {
   return (
-    <div className="relative p-4 md:p-5 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 text-center animate-pulse">
+    <div className="relative p-4 md:p-5 rounded-2xl bg-zinc-900/90 border border-white/10 text-center animate-pulse">
       <div className="w-6 h-6 mx-auto mb-2 rounded bg-white/10" />
       <div className="h-8 w-20 mx-auto rounded bg-white/10 mb-2" />
       <div className="h-3 w-16 mx-auto rounded bg-white/10" />
@@ -563,7 +563,7 @@ export default function GitHubStats() {
 
           {/* Toggle Button */}
           <div className="flex justify-center mt-8 relative z-20">
-            <div className="bg-black/50 p-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center relative shadow-xl">
+            <div className="bg-black/70 p-1.5 rounded-full border border-white/10 flex items-center relative shadow-xl">
               {(["github", "competitive"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -627,7 +627,7 @@ export default function GitHubStats() {
                       className="relative group block cursor-pointer"
                     >
                       <div className={`absolute -inset-px bg-linear-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                      <div className="relative p-4 sm:p-5 md:p-6 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
+                      <div className="relative p-4 sm:p-5 md:p-6 rounded-2xl bg-zinc-900/95 border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
                         <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
                           <stat.icon
                             size={24}
@@ -663,7 +663,7 @@ export default function GitHubStats() {
                   className="lg:col-span-2 relative group flex flex-col"
                 >
                   <div className="absolute -inset-px bg-linear-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col grow">
+                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/90 border border-white/10 flex flex-col grow">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-bold text-white flex items-center gap-2">
                         <Code2 size={18} className="text-purple-400" />
@@ -707,7 +707,7 @@ export default function GitHubStats() {
                   className="relative group flex flex-col"
                 >
                   <div className="absolute -inset-px bg-linear-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 flex flex-col grow">
+                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/90 border border-white/10 flex flex-col grow">
                     <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                       <Code2 size={18} className="text-blue-400" />
                       Top Languages

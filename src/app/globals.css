@@ -204,21 +204,35 @@ h1 {
   text-shadow: 0 0 80px rgba(139, 92, 246, 0.3);
 }
 
-/* Pulse glow animation — AvatarFlipCard outer ring, Hero CTA border */
+/* Pulse glow — opacity-only on a pseudo layer (see .pulse-glow-layer).
+   Animating box-shadow repaints every frame; animating opacity re-composites
+   an existing GPU layer at near-zero cost. */
+.pulse-glow-layer {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.45), transparent 70%);
+  z-index: -1;
+  opacity: 0.6;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 @keyframes pulse-glow {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+    opacity: 0.4;
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2);
+    opacity: 0.9;
   }
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  /* Legacy hook: no-op. New usage adds <span class="pulse-glow-layer" /> */
+  animation: none;
 }
 
 /* Shimmer effect — Footer's animated gradient hairline */
@@ -355,11 +369,9 @@ h1 {
 
 .card-hairline {
   border: 1px solid rgba(255, 255, 255, 0.14);
-  /* Slightly warm-dark frosted fill: reads as a real surface over the busy
-     cosmic backdrop while staying translucent enough to keep the depth. */
-  background: rgba(14, 12, 24, 0.42);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Solid warm-dark fill — no backdrop-filter. Cheaper than blur, and the
+     darker tone reads as a real surface over the cosmic backdrop. */
+  background: rgba(14, 12, 24, 0.72);
 }
 
 /* ── InteractiveCard — pointer-following sheen + rim light ──

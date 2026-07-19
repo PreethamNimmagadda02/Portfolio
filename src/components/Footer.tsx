@@ -81,7 +81,7 @@ export default function Footer() {
         <div className="absolute inset-0 animate-shimmer" />
       </div>
 
-      <div className="relative bg-black/30 backdrop-blur-md perspective-[1000px]">
+      <div className="relative bg-black/50 perspective-[1000px]">
         {/* Background glows — cheap gradients, no backdrop blur */}
         <div
           className="absolute inset-0 pointer-events-none"
