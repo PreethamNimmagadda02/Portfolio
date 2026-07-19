@@ -66,43 +66,43 @@ export default function Home() {
           <About />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(139,92,246,0.2)" colorTo="rgba(59,130,246,0.15)" />
+        <SectionDivider variant="glow" colorFrom="rgba(201,151,74,0.2)" colorTo="rgba(226,189,133,0.15)" />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Experience />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(59,130,246,0.2)" colorTo="rgba(168,85,247,0.15)" flip />
+        <SectionDivider variant="glow" colorFrom="rgba(226,189,133,0.2)" colorTo="rgba(201,151,74,0.15)" flip />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Skills />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(236,72,153,0.2)" colorTo="rgba(6,182,212,0.15)" />
+        <SectionDivider variant="glow" colorFrom="rgba(201,151,74,0.2)" colorTo="rgba(226,189,133,0.15)" />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Projects />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(6,182,212,0.2)" colorTo="rgba(34,197,94,0.15)" flip />
+        <SectionDivider variant="glow" colorFrom="rgba(226,189,133,0.2)" colorTo="rgba(201,151,74,0.15)" flip />
 
         <ScrollReveal direction="none" className="cv-auto">
           <GitHubStats />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(34,197,94,0.2)" colorTo="rgba(251,191,36,0.15)" />
+        <SectionDivider variant="glow" colorFrom="rgba(201,151,74,0.2)" colorTo="rgba(226,189,133,0.15)" />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Achievements />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(251,191,36,0.2)" colorTo="rgba(139,92,246,0.15)" flip />
+        <SectionDivider variant="glow" colorFrom="rgba(226,189,133,0.2)" colorTo="rgba(201,151,74,0.15)" flip />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Testimonials />
         </ScrollReveal>
 
-        <SectionDivider variant="glow" colorFrom="rgba(139,92,246,0.2)" colorTo="rgba(59,130,246,0.15)" />
+        <SectionDivider variant="glow" colorFrom="rgba(201,151,74,0.2)" colorTo="rgba(226,189,133,0.15)" />
 
         <ScrollReveal direction="none" className="cv-auto">
           <Contact />
