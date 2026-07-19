@@ -221,7 +221,7 @@ export default function Footer() {
               className="group flex items-center gap-2 text-xs md:text-sm text-gray-300 hover:text-purple-400 transition-colors"
             >
               <span>Back to Top</span>
-              <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(139,92,246,0.25)] transition-all">
+              <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(201,151,74,0.25)] transition-all">
                 <ArrowUp size={12} className="text-gray-300 group-hover:text-purple-400 md:w-4 md:h-4 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             </motion.button>
@@ -242,7 +242,7 @@ export default function Footer() {
               transformOrigin: "top",
               WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
             }}
-            className="absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/[0.06]"
+            className="font-display absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/[0.06]"
           >
             PREETHAM
           </motion.div>

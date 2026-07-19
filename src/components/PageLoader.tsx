@@ -150,15 +150,14 @@ export default function PageLoader() {
                             />
 
                             {/* Logo card */}
-                            <div className="relative w-[88px] h-[88px] rounded-2xl bg-linear-to-br from-purple-500 via-indigo-500 to-blue-600 p-[1.5px]"
-                                style={{ boxShadow: "0 0 40px rgba(139,92,246,0.3), 0 0 80px rgba(139,92,246,0.1)" }}>
+                            <div className="relative w-[88px] h-[88px] rounded-2xl bg-primary p-[1.5px]"
+                                style={{ boxShadow: "0 0 40px rgba(201,151,74,0.3), 0 0 80px rgba(201,151,74,0.1)" }}>
                                 <div className="w-full h-full rounded-[14.5px] bg-[#030014] flex items-center justify-center">
                                     <motion.span
-                                        className="text-[28px] font-black tracking-tight bg-linear-to-b from-white via-white to-gray-400 bg-clip-text text-transparent select-none"
+                                        className="font-display text-[28px] font-black tracking-tight bg-linear-to-b from-white via-white to-gray-400 bg-clip-text text-transparent select-none"
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                        style={{ fontFamily: "var(--font-space-grotesk)" }}
                                     >
                                         PN
                                     </motion.span>
@@ -174,10 +173,9 @@ export default function PageLoader() {
                             transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                         >
                             <p
-                                className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-linear-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
+                                className="font-display text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-linear-to-r from-primary via-white to-primary/50 bg-clip-text text-transparent"
                                 style={{
-                                    textShadow: "0 0 30px rgba(139,92,246,0.3)",
-                                    fontFamily: "var(--font-space-grotesk)",
+                                    textShadow: "0 0 30px rgba(201,151,74,0.3)",
                                 }}
                             >
                                 Preetham Nimmagadda
@@ -197,7 +195,7 @@ export default function PageLoader() {
                             <motion.div
                                 className="h-full rounded-full"
                                 style={{
-                                    background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(99,102,241,0.6), rgba(59,130,246,0.8))",
+                                    background: "linear-gradient(90deg, rgba(201,151,74,0.8), rgba(226,189,133,0.6), rgba(201,151,74,0.8))",
                                 }}
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
