@@ -5,7 +5,6 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeToggle";
 import PageLoader from "@/components/PageLoader";
 import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
@@ -81,9 +80,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Runs before paint to apply the saved theme, preventing a flash (FOUC)
-const themeInitScript = `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='nebula'||t==='deep-space'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
-
 // Disable browser scroll restoration so every refresh always starts at the top
 const scrollResetScript = `if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);`;
 
@@ -140,10 +136,6 @@ export default function RootLayout({
             shifting node matching. App code can't prevent that. */}
         <script
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
-        <script
-          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: scrollResetScript }}
         />
         <script
@@ -162,19 +154,17 @@ export default function RootLayout({
         <LazyMotion features={domMax} strict>
         <MotionConfig reducedMotion="user">
           <PerformanceProvider>
-            <ThemeProvider>
-              <PageLoader />
-              <ScrollProgress />
-              <KonamiEasterEgg />
-              <SpotlightCursor />
-              <SmoothScroll>
-                <Navbar />
-                <main id="main-content" className="min-h-screen">
-                  {children}
-                </main>
-                <Footer />
-              </SmoothScroll>
-            </ThemeProvider>
+            <PageLoader />
+            <ScrollProgress />
+            <KonamiEasterEgg />
+            <SpotlightCursor />
+            <SmoothScroll>
+              <Navbar />
+              <main id="main-content" className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </SmoothScroll>
           </PerformanceProvider>
         </MotionConfig>
         </LazyMotion>

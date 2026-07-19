@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "@/lib/motion";
 import { cn, smoothScrollTo, seededRandom } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -372,10 +371,6 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* Theme Toggle */}
-            <div className="hidden xl:block">
-              <ThemeToggle />
-            </div>
 
             {/* CTA Button */}
             <motion.div
@@ -465,14 +460,6 @@ export default function Navbar() {
                   );
                 })}
 
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.22 }}
-                  className="flex justify-center py-2"
-                >
-                  <ThemeToggle />
-                </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
