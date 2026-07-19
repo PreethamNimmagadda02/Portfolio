@@ -1,12 +1,24 @@
 "use client";
 
 import { useMemo, useRef, useState, useEffect } from "react";
-import { motion, useInView } from "@/lib/motion";
+import { motion, useInView, AnimatePresence } from "@/lib/motion";
+import { Brain, Globe, Database, Cloud, Boxes, Terminal, Wrench, Workflow, Sparkles, LayoutGrid, type LucideIcon } from "lucide-react";
 import { skillsData, categoryColors, categoryLabels } from "@/lib/skills-data";
 import { toggleSkillCategory, useActiveSkillCategories } from "@/lib/scene-store";
 import { InViewClass, SectionKicker } from "./Reveal";
 
-function AnimatedCounter({ end, label, suffix = "" }: { end: number; label: string; suffix?: string }) {
+const categoryIcons: Record<string, LucideIcon> = {
+  AI: Brain,
+  Web: Globe,
+  DB: Database,
+  Cloud,
+  DevOps: Boxes,
+  Lang: Terminal,
+  Tools: Wrench,
+  Automation: Workflow,
+};
+
+function AnimatedCounter({ end, label, suffix = "", icon: Icon }: { end: number; label: string; suffix?: string; icon?: LucideIcon }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
@@ -27,6 +39,7 @@ function AnimatedCounter({ end, label, suffix = "" }: { end: number; label: stri
 
   return (
     <div ref={ref} className="flex flex-col items-center gap-1">
+      {Icon && <Icon size={16} className="text-gray-500 mb-0.5" />}
       <span className="text-2xl md:text-3xl font-black text-white tabular-nums">
         {count}
         {suffix}
@@ -47,6 +60,7 @@ function CategoryChip({
   count: number;
   isActive: boolean;
 }) {
+  const Icon = categoryIcons[category];
   return (
     <motion.button
       whileHover={{ scale: 1.06, y: -2 }}
@@ -59,8 +73,17 @@ function CategoryChip({
         backgroundColor: isActive ? `${color}30` : `${color}08`,
       }}
     >
+      {isActive && (
+        <motion.span
+          className="absolute inset-0 rounded-full -z-10"
+          style={{ boxShadow: `0 0 0 1px ${color}60, 0 0 20px -2px ${color}` }}
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
       <span className="flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color, boxShadow: isActive ? `0 0 8px ${color}` : "none" }} />
+        {Icon ? <Icon size={12} /> : <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color, boxShadow: isActive ? `0 0 8px ${color}` : "none" }} />}
         {category}
         <span className="text-[9px] font-medium opacity-60 tabular-nums" style={{ color: isActive ? "#fff" : color }}>
           {count}
@@ -70,24 +93,26 @@ function CategoryChip({
   );
 }
 
-function SkillTag({ name, category, dimmed }: { name: string; category: string; dimmed: boolean }) {
+function SkillTag({ name, category, emphasized }: { name: string; category: string; emphasized: boolean }) {
   const color = categoryColors[category];
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      layout
+      initial={{ opacity: 0, y: 12, scale: 0.85 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.35 }}
-      animate={{ opacity: dimmed ? 0.35 : 1, scale: dimmed ? 0.96 : 1 }}
-      whileHover={{ scale: 1.05, y: -2 }}
-      className="flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-colors duration-300"
+      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15 } }}
+      transition={{ duration: 0.3, layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
+      whileHover={{ scale: 1.05, y: -2, boxShadow: `0 10px 28px -10px ${color}90` }}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-colors duration-300"
       style={{
-        borderColor: dimmed ? "rgba(255,255,255,0.06)" : `${color}30`,
-        backgroundColor: dimmed ? "rgba(255,255,255,0.02)" : `${color}0a`,
+        borderColor: emphasized ? `${color}80` : `${color}30`,
+        backgroundColor: emphasized ? `${color}22` : `${color}0a`,
+        boxShadow: emphasized ? `0 0 20px -6px ${color}` : "0 0 0px transparent",
       }}
     >
-      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: dimmed ? "none" : `0 0 6px ${color}` }} />
-      <span className="text-sm font-medium text-gray-200 whitespace-nowrap">{name}</span>
+      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }} />
+      <span className={`text-sm whitespace-nowrap ${emphasized ? "text-white font-semibold" : "text-gray-200 font-medium"}`}>{name}</span>
     </motion.div>
   );
 }
@@ -95,6 +120,17 @@ function SkillTag({ name, category, dimmed }: { name: string; category: string; 
 export default function Skills() {
   const activeCategories = useActiveSkillCategories();
   const allActive = activeCategories.size === 0;
+
+  const [shuffledSkills, setShuffledSkills] = useState(skillsData);
+
+  useEffect(() => {
+    const shuffled = [...skillsData];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    setShuffledSkills(shuffled);
+  }, []);
 
   const categories = useMemo(() => [...new Set(skillsData.map((s) => s.category))], []);
   const categoryCounts = useMemo(() => {
@@ -106,7 +142,11 @@ export default function Skills() {
   }, []);
 
   return (
-    <section id="skills-sphere" className="relative w-full py-20 md:py-32">
+    // Deliberately tighter rhythm than other sections (py-16 md:py-24 vs the
+    // site's usual py-20 md:py-32) — with 40+ skill tags this section is
+    // already much taller than its siblings, and matching their padding
+    // pushed the stats bar below the fold after a nav-triggered scroll.
+    <section id="skills-sphere" className="relative w-full py-16 md:py-24">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <InViewClass>
           <SectionKicker num="03" label="Toolbox" />
@@ -115,7 +155,7 @@ export default function Skills() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-10"
+            className="text-center mb-6 md:mb-8"
           >
             <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
               <span className="line-mask">
@@ -128,7 +168,8 @@ export default function Skills() {
               </span>
             </h2>
             <p className="text-gray-300 text-sm md:text-base max-w-lg mx-auto">
-              Tap a category to filter — and watch the constellation behind you respond.
+              Tap a category to filter.
+              <span className="hidden md:inline"> Watch the constellation behind you highlight the match.</span>
             </p>
           </motion.div>
         </InViewClass>
@@ -139,7 +180,7 @@ export default function Skills() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex flex-wrap justify-center gap-2 mb-8"
+          className="flex flex-wrap justify-center gap-2 mb-6"
         >
           {categories.map((cat) => (
             <CategoryChip
@@ -152,17 +193,26 @@ export default function Skills() {
           ))}
         </motion.div>
 
-        {/* Skill grid */}
-        <div className="flex flex-wrap justify-center gap-2.5 md:gap-3 mb-12">
-          {skillsData.map((skill) => (
-            <SkillTag
-              key={skill.name}
-              name={skill.name}
-              category={skill.category}
-              dimmed={!allActive && !activeCategories.has(skill.category)}
-            />
-          ))}
-        </div>
+        {/* Skill grid — filtering actually removes non-matching tags from
+            layout (rather than just dimming them in place) so a narrow
+            filter reflows into a small, unmissable cluster instead of
+            leaving a few faint matches scattered across a full-size grid. */}
+        <motion.div layout className="card-hairline rounded-3xl p-4 sm:p-5 md:p-6 mb-6">
+          <motion.div layout className="flex flex-wrap justify-center gap-2 md:gap-2.5">
+            <AnimatePresence mode="popLayout">
+              {shuffledSkills
+                .filter((skill) => allActive || activeCategories.has(skill.category))
+                .map((skill) => (
+                  <SkillTag
+                    key={skill.name}
+                    name={skill.name}
+                    category={skill.category}
+                    emphasized={!allActive}
+                  />
+                ))}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
 
         {/* Stats bar */}
         <motion.div
@@ -172,13 +222,13 @@ export default function Skills() {
           transition={{ duration: 0.6 }}
           className="flex flex-wrap items-center justify-around gap-4 sm:gap-6 max-w-2xl mx-auto px-4 sm:px-8 py-4 sm:py-6 rounded-2xl card-hairline"
         >
-          <AnimatedCounter end={skillsData.length} label="Total Skills" suffix="+" />
+          <AnimatedCounter end={skillsData.length} label="Total Skills" icon={Sparkles} />
           <div className="w-px h-10 bg-white/10 hidden sm:block" />
-          <AnimatedCounter end={categories.length} label="Categories" />
+          <AnimatedCounter end={categories.length} label="Categories" icon={LayoutGrid} />
           <div className="w-px h-10 bg-white/10 hidden sm:block" />
           <div className="flex flex-col items-center gap-2">
             <div className="flex gap-1.5">
-              {categories.slice(0, 5).map((cat) => (
+              {categories.map((cat) => (
                 <div
                   key={cat}
                   className="w-2.5 h-2.5 rounded-full"

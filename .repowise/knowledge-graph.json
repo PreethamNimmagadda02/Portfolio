@@ -2455,7 +2455,8 @@
       "depth": 0,
       "kind": "overview",
       "reason": "Start here for the end-to-end picture before diving into the code.",
-      "layer_id": "layer:application"
+      "layer_id": "layer:application",
+      "wikiPageIds": []
     },
     {
       "order": 2,
@@ -2465,7 +2466,8 @@
       "depth": 0,
       "kind": "code",
       "reason": "The walk's anchor \u2014 its imports fan out the widest in a repo with no single entry point.",
-      "layer_id": "layer:application"
+      "layer_id": "layer:application",
+      "wikiPageIds": []
     },
     {
       "order": 3,
@@ -2475,7 +2477,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:service"
+      "layer_id": "layer:service",
+      "wikiPageIds": []
     },
     {
       "order": 4,
@@ -2485,7 +2488,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 5,
@@ -2495,7 +2499,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 6,
@@ -2505,7 +2510,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 7,
@@ -2515,7 +2521,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 8,
@@ -2525,7 +2532,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 9,
@@ -2535,7 +2543,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 10,
@@ -2545,7 +2554,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 11,
@@ -2555,7 +2565,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     },
     {
       "order": 12,
@@ -2565,7 +2576,8 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui"
+      "layer_id": "layer:ui",
+      "wikiPageIds": []
     }
   ],
   "modules": [

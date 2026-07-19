@@ -872,8 +872,28 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
     const anyFilter = activeCats.size > 0;
     if (pointsRef.current) {
       const mat = pointsRef.current.material as THREE.PointsMaterial;
-      mat.opacity = weight * (anyFilter ? 0.55 : 0.9);
+      mat.opacity = weight * 0.9;
       mat.size = 0.05 + weight * 0.03;
+
+      // Per-skill response: stars matching the active filter stay at full
+      // brightness, everything else fades toward the background — a real
+      // highlight of the selection rather than one flat global dim.
+      // In-place mutation of a persistent typed array (+ needsUpdate below)
+      // is the standard r3f pattern for per-frame vertex-color updates —
+      // recreating the Float32Array every frame would defeat the point.
+      /* eslint-disable react-hooks/immutability */
+      const colorAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
+      for (let i = 0; i < skillsData.length; i++) {
+        const match = !anyFilter || activeCats.has(skillsData[i].category);
+        const base = colorArray[i];
+        const target = match ? 1 : 0.08;
+        const idx = i * 3;
+        colorsAttr[idx] += (base.r * target - colorsAttr[idx]) * 0.08;
+        colorsAttr[idx + 1] += (base.g * target - colorsAttr[idx + 1]) * 0.08;
+        colorsAttr[idx + 2] += (base.b * target - colorsAttr[idx + 2]) * 0.08;
+      }
+      /* eslint-enable react-hooks/immutability */
+      colorAttr.needsUpdate = true;
     }
     if (lineRef.current) {
       const mat = lineRef.current.material as THREE.LineBasicMaterial;
