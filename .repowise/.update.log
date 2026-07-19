@@ -873,3 +873,76 @@ Warning: there are non-text parts in the response: ['thought_signature'], return
 Another `repowise update` is already running (pid 84405, target 39b9f005, 
 started 895s ago).
 HEAD 549b589d marked as pending; the running update will roll forward to it.
+
+--- post-commit hook fired at Sun Jul 19 11:17:03 IST 2026 for HEAD 819a1d0d13854bf1b27575451ca84112f39c56a0 ---
+repowise update · Portfolio
+e9ba8f0e..819a1d0d
+24 changed · 20 modified, 4 deleted
+    modified  .claude/CLAUDE.md
+     deleted  .repowise/.update.lock
+     deleted  .repowise/.update.queued
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+     deleted  .repowise/wiki.db-shm
+     deleted  .repowise/wiki.db-wal
+    modified  public/sw.js
+    modified  src/app/globals.css
+  +14 more (use -v to list all)
+2026-07-19 11:17:04 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio submodules_skipped=0
+2026-07-19 11:17:04 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-19 11:17:04 [info     ] parse_cache_used               hits=52 misses=13
+2026-07-19 11:17:04 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-19 11:17:04 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.03, 'yaml': 0.0}
+2026-07-19 11:17:04 [info     ] type_use edges emitted         per_language={'typescript': 3}
+2026-07-19 11:17:04 [info     ] Heritage edges resolved        total=0
+2026-07-19 11:17:04 [info     ] Call edges resolved            total=217
+2026-07-19 11:17:04 [info     ] Graph built                    edge_types={'defines': 367, 'imports': 136, 'calls': 217, 'has_method': 46} edges=766 file_nodes=81 symbol_nodes=367
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-19 11:17:04 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-19 11:17:05 [debug    ] repo_commit_index_built        commits_parsed=136 files_with_history=24 indexable_files=24
+2026-07-19 11:17:05 [debug    ] blame_index_failed             error=Cmd('git') failed due to: exit code(128)
+  cmdline: git blame --line-porcelain HEAD -- .repowise/.update.lock
+  stderr: 'fatal: no such path .repowise/.update.lock in HEAD' path=.repowise/.update.lock
+2026-07-19 11:17:05 [debug    ] co_change_computed             commit_limit=2000 commits=136 files_with_entropy=63 files_with_partners=26 min_count=2 pairs_above_threshold=169 pairs_considered=779 tracked_files=65
+2026-07-19 11:17:05 [info     ] Co-change edges added          count=99
+2026-07-19 11:17:05 [info     ] betweenness_reused_from_cache  kind=file nodes=82
+2026-07-19 11:17:05 [info     ] symbol_communities_detected    communities=186 connected=194 total_symbols=367
+2026-07-19 11:17:05 [info     ] file_communities_detected      algorithm=louvain communities=33 prod_files=82 test_files=0 total_files=82
+2026-07-19 11:17:05 [info     ] execution_flows_traced         candidates_scored=32 deduplicated=0 traced=27
+Pages to regenerate: 27
+Pages to decay: 2
+2026-07-19 11:17:06 [debug    ] duplication_incremental_splice changed=16 deleted=0 pairs=3210 touched_buckets=35216
+2026-07-19 11:17:06 [debug    ] health_duplication_limits      degenerate_buckets=0 files_considered=16 files_tokenized=14 incremental=True skipped_minified=1 skipped_token_cap=0 skipped_unreadable=0 timed_out=False total_windows=35363 window_budget_hit=False
+Health analysis (partial): 20 files, 67 findings
+Dead code findings (partial): 3
+Knowledge graph refreshed: 4 layers, 12 tour steps
+2026-07-19 11:17:06 [info     ] decision_extractor.scanning_inline_markers total_files=20
+2026-07-19 11:17:06 [info     ] session_mining.done            pending_backlog=0 promoted=0 staged=0 structured=0
+2026-07-19 11:17:07 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+2026-07-19 11:21:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+2026-07-19 11:26:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+2026-07-19 11:31:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+Warning: there are non-text parts in the response: ['thought_signature'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2026-07-19 11:31:01 [debug    ] gemini.generate.done           input_tokens=595 output_tokens=54 request_id=None
+2026-07-19 11:31:01 [debug    ] cost_tracker.record            cost_usd=6.0825e-05 file_path=None input_tokens=595 model=gemini-3.1-flash-lite-preview operation=doc_generation output_tokens=54
+2026-07-19 11:31:01 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+2026-07-19 11:36:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
+2026-07-19 11:41:00 [debug    ] gemini.generate.start          max_tokens=400 model=gemini-3.1-flash-lite-preview request_id=None
