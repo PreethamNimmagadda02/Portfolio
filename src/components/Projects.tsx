@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "@/lib/motion";
+import { motion, useMotionValue, useSpring } from "@/lib/motion";
 import {
   ExternalLink,
   Github,
@@ -16,6 +16,7 @@ import Link from "next/link";
 import MagneticButton from "./MagneticButton";
 import { InViewClass, SectionKicker } from "./Reveal";
 import type { CSSProperties } from "react";
+import type { MotionValue } from "@/lib/motion";
 
 interface ProjectData {
   id: number;
@@ -27,6 +28,36 @@ interface ProjectData {
   icon: LucideIcon;
   color: string;
   accent: string;
+}
+
+// Cursor position is owned by the row (ProjectRow), not this component: the
+// label is `pointer-events-none` so it never receives its own pointer events
+// (that's the point — clicks must pass through to the row/links beneath it).
+// The row's onPointerMove feeds these motion values in; this component just
+// spring-damps and renders them.
+function ProjectHoverLabel({ x, y }: { x: MotionValue<number>; y: MotionValue<number> }) {
+  const springX = useSpring(x, { stiffness: 300, damping: 30 });
+  const springY = useSpring(y, { stiffness: 300, damping: 30 });
+
+  return (
+    <motion.span
+      aria-hidden
+      // `bg-primary`/`text-primary-foreground` resolve to invalid CSS here:
+      // `--primary`/`--primary-foreground` in globals.css are raw "H S% L%"
+      // triplets (the shadcn/ui convention), but the `@theme inline` block
+      // aliases `--color-primary` straight to that raw value instead of
+      // wrapping it in `hsl(...)` — so `background-color: var(--color-primary)`
+      // is an invalid declaration and silently no-ops (confirmed via computed
+      // style: transparent bg, inherited white text). This is a pre-existing,
+      // site-wide issue (also affects `selection:bg-primary` in page.tsx), out
+      // of scope to fix here, so the pill reaches the same amber/near-black
+      // tokens directly via `hsl(var(--...))` instead of the broken utilities.
+      style={{ left: springX, top: springY, backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest opacity-0 transition-opacity duration-200 group-hover/row:opacity-100"
+    >
+      View Project ↗
+    </motion.span>
+  );
 }
 
 const projects: ProjectData[] = [
@@ -119,6 +150,8 @@ const projects: ProjectData[] = [
 function ProjectRow({ project, index }: { project: ProjectData; index: number }) {
   const Icon = project.icon;
   const reversed = index % 2 === 1;
+  const labelX = useMotionValue(0);
+  const labelY = useMotionValue(0);
 
   return (
     <motion.div
@@ -126,6 +159,11 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      onPointerMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        labelX.set(e.clientX - rect.left);
+        labelY.set(e.clientY - rect.top);
+      }}
       className="relative py-10 md:py-14 border-b border-white/5 last:border-b-0 group/row"
       style={{ "--proj-color": project.color, "--proj-accent": project.accent } as CSSProperties}
     >
@@ -137,12 +175,12 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
           background: `radial-gradient(600px circle at ${reversed ? "80%" : "20%"} 30%, ${project.color}0a, transparent 70%)`,
         }}
       />
+      <ProjectHoverLabel x={labelX} y={labelY} />
       <div className={`relative flex flex-col md:flex-row gap-6 md:gap-12 items-start ${reversed ? "md:flex-row-reverse" : ""}`}>
         {/* Index + icon column */}
         <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-6 md:w-40 shrink-0">
           <span
-            className="text-5xl md:text-7xl font-black leading-none select-none transition-colors duration-500 text-[color-mix(in_srgb,var(--proj-color)_18%,transparent)] group-hover/row:text-(--proj-color) group-hover/row:drop-shadow-[0_0_20px_var(--proj-color)]"
-            style={{ fontFamily: "var(--font-space-grotesk)" }}
+            className="font-display text-5xl md:text-7xl font-black leading-none select-none transition-colors duration-500 text-[color-mix(in_srgb,var(--proj-color)_18%,transparent)] group-hover/row:text-(--proj-color) group-hover/row:drop-shadow-[0_0_20px_var(--proj-color)]"
           >
             {String(index + 1).padStart(2, "0")}
           </span>
@@ -179,7 +217,7 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
             </span>
           </div>
 
-          <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-5 max-w-2xl" style={{ fontFamily: "var(--font-inter)" }}>
+          <p className="font-sans text-gray-300 text-base md:text-lg leading-relaxed mb-5 max-w-2xl">
             {project.description}
           </p>
 
