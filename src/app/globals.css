@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -25,45 +28,108 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* ── Single-accent override ──
+     Every "cosmic rainbow" hue family the existing components already use
+     (purple-500, from-blue-500, text-cyan-400, etc.) is remapped onto one
+     warm-amber ramp. This makes every existing purple/blue/pink/cyan/rose/
+     indigo/violet/fuchsia/sky/teal Tailwind class render as amber, with no
+     changes needed in the component files that use them. Semantic colors
+     (red/green/yellow/orange used for destructive/success/warning states)
+     are deliberately NOT remapped here. */
+  --color-purple-50: #fbf4e7;   --color-violet-50: #fbf4e7;   --color-indigo-50: #fbf4e7;
+  --color-blue-50: #fbf4e7;     --color-sky-50: #fbf4e7;      --color-cyan-50: #fbf4e7;
+  --color-teal-50: #fbf4e7;     --color-fuchsia-50: #fbf4e7;  --color-pink-50: #fbf4e7;
+  --color-rose-50: #fbf4e7;
+
+  --color-purple-100: #f5e7c9; --color-violet-100: #f5e7c9; --color-indigo-100: #f5e7c9;
+  --color-blue-100: #f5e7c9;   --color-sky-100: #f5e7c9;    --color-cyan-100: #f5e7c9;
+  --color-teal-100: #f5e7c9;   --color-fuchsia-100: #f5e7c9; --color-pink-100: #f5e7c9;
+  --color-rose-100: #f5e7c9;
+
+  --color-purple-200: #ecd29e; --color-violet-200: #ecd29e; --color-indigo-200: #ecd29e;
+  --color-blue-200: #ecd29e;   --color-sky-200: #ecd29e;    --color-cyan-200: #ecd29e;
+  --color-teal-200: #ecd29e;   --color-fuchsia-200: #ecd29e; --color-pink-200: #ecd29e;
+  --color-rose-200: #ecd29e;
+
+  --color-purple-300: #e2bd85; --color-violet-300: #e2bd85; --color-indigo-300: #e2bd85;
+  --color-blue-300: #e2bd85;   --color-sky-300: #e2bd85;    --color-cyan-300: #e2bd85;
+  --color-teal-300: #e2bd85;   --color-fuchsia-300: #e2bd85; --color-pink-300: #e2bd85;
+  --color-rose-300: #e2bd85;
+
+  --color-purple-400: #d3a662; --color-violet-400: #d3a662; --color-indigo-400: #d3a662;
+  --color-blue-400: #d3a662;   --color-sky-400: #d3a662;    --color-cyan-400: #d3a662;
+  --color-teal-400: #d3a662;   --color-fuchsia-400: #d3a662; --color-pink-400: #d3a662;
+  --color-rose-400: #d3a662;
+
+  --color-purple-500: #c9974a; --color-violet-500: #c9974a; --color-indigo-500: #c9974a;
+  --color-blue-500: #c9974a;   --color-sky-500: #c9974a;    --color-cyan-500: #c9974a;
+  --color-teal-500: #c9974a;   --color-fuchsia-500: #c9974a; --color-pink-500: #c9974a;
+  --color-rose-500: #c9974a;
+
+  --color-purple-600: #ad7f3c; --color-violet-600: #ad7f3c; --color-indigo-600: #ad7f3c;
+  --color-blue-600: #ad7f3c;   --color-sky-600: #ad7f3c;    --color-cyan-600: #ad7f3c;
+  --color-teal-600: #ad7f3c;   --color-fuchsia-600: #ad7f3c; --color-pink-600: #ad7f3c;
+  --color-rose-600: #ad7f3c;
+
+  --color-purple-700: #8a6530; --color-violet-700: #8a6530; --color-indigo-700: #8a6530;
+  --color-blue-700: #8a6530;   --color-sky-700: #8a6530;    --color-cyan-700: #8a6530;
+  --color-teal-700: #8a6530;   --color-fuchsia-700: #8a6530; --color-pink-700: #8a6530;
+  --color-rose-700: #8a6530;
+
+  --color-purple-800: #664b24; --color-violet-800: #664b24; --color-indigo-800: #664b24;
+  --color-blue-800: #664b24;   --color-sky-800: #664b24;    --color-cyan-800: #664b24;
+  --color-teal-800: #664b24;   --color-fuchsia-800: #664b24; --color-pink-800: #664b24;
+  --color-rose-800: #664b24;
+
+  --color-purple-900: #453218; --color-violet-900: #453218; --color-indigo-900: #453218;
+  --color-blue-900: #453218;   --color-sky-900: #453218;    --color-cyan-900: #453218;
+  --color-teal-900: #453218;   --color-fuchsia-900: #453218; --color-pink-900: #453218;
+  --color-rose-900: #453218;
+
+  --color-purple-950: #2b1f10; --color-violet-950: #2b1f10; --color-indigo-950: #2b1f10;
+  --color-blue-950: #2b1f10;   --color-sky-950: #2b1f10;    --color-cyan-950: #2b1f10;
+  --color-teal-950: #2b1f10;   --color-fuchsia-950: #2b1f10; --color-pink-950: #2b1f10;
+  --color-rose-950: #2b1f10;
 }
 
 :root {
-  /* Deeper-than-black void so glows and starlight have somewhere to bloom */
-  --background: 240 30% 2.4%;
-  --foreground: 0 0% 98%;
-  --card: 250 22% 7%;
-  --card-foreground: 0 0% 98%;
-  --popover: 250 22% 7%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 258 90% 66%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 255 16% 14%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 255 14% 14%;
-  --muted-foreground: 240 8% 74%;
-  --accent: 189 85% 55%;
-  --accent-foreground: 240 30% 4%;
+  /* Warm near-black base — editorial, not cosmic-void */
+  --background: 30 10% 4%;
+  --foreground: 40 25% 95%;
+  --card: 30 10% 7%;
+  --card-foreground: 40 25% 95%;
+  --popover: 30 10% 7%;
+  --popover-foreground: 40 25% 95%;
+  --primary: 36 54% 54%;
+  --primary-foreground: 30 10% 4%;
+  --secondary: 30 8% 11%;
+  --secondary-foreground: 40 25% 95%;
+  --muted: 30 8% 11%;
+  --muted-foreground: 30 10% 62%;
+  --accent: 36 54% 54%;
+  --accent-foreground: 30 10% 4%;
   --destructive: 0 70% 55%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 255 16% 16%;
-  --input: 255 16% 14%;
-  --ring: 258 90% 66%;
-  --chart-1: 258 90% 66%;
-  --chart-2: 189 85% 55%;
-  --chart-3: 330 80% 60%;
-  --chart-4: 38 92% 58%;
-  --chart-5: 160 70% 50%;
+  --destructive-foreground: 40 25% 95%;
+  --border: 30 8% 16%;
+  --input: 30 8% 14%;
+  --ring: 36 54% 54%;
+  --chart-1: 36 54% 54%;
+  --chart-2: 30 35% 45%;
+  --chart-3: 24 20% 38%;
+  --chart-4: 42 60% 65%;
+  --chart-5: 18 12% 55%;
 
-  /* ── Cosmic Journey identity tokens ──
-     Used by CosmicScene uniforms, editorial gradients, and section accents.
-     Kept as plain hex (not HSL) so they can be passed straight into WebGL. */
-  --iris: #8b5cf6;
-  --iris-soft: #a78bfa;
-  --cyan: #22d3ee;
-  --amber: #fbbf24;
-  --rose: #f472b6;
-  --void: #030308;
-  --ink: #07070d;
+  /* ── Editorial identity tokens ──
+     Plain hex, consumed only by the CSS utilities below (.text-gradient-iris,
+     .icard, .kicker-line, .conic-border). NOT read by CosmicScene — its
+     palette lives entirely in src/lib/scene-store.ts (see Task 3). */
+  --iris: #c9974a;
+  --iris-soft: #e2bd85;
+  --cyan: #f3e3c0;
+  --amber: #c9974a;
+  --void: #08070a;
+  --ink: #141116;
 }
 
 @layer base {
@@ -352,10 +418,10 @@ h1 {
 
 /* ── Editorial display type + line-reveal masks ── */
 .text-display {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
 }
 
 .text-gradient-iris {
@@ -371,10 +437,9 @@ h1 {
 }
 
 .card-hairline {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  /* Solid warm-dark fill — no backdrop-filter. Cheaper than blur, and the
-     darker tone reads as a real surface over the cosmic backdrop. */
-  background: rgba(14, 12, 24, 0.72);
+  border: 1px solid rgba(245, 241, 234, 0.1);
+  /* Solid warm-dark fill matching --ink, no backdrop-filter. */
+  background: rgba(20, 17, 22, 0.75);
 }
 
 /* ── Cinematic vignette — static CSS overlay, zero GPU cost ──
@@ -386,15 +451,15 @@ h1 {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(2, 2, 6, 0.55) 100%),
-    linear-gradient(180deg, rgba(2, 2, 6, 0.25) 0%, transparent 12%, transparent 88%, rgba(2, 2, 6, 0.35) 100%);
+    radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(8, 7, 10, 0.55) 100%),
+    linear-gradient(180deg, rgba(8, 7, 10, 0.25) 0%, transparent 12%, transparent 88%, rgba(8, 7, 10, 0.35) 100%);
 }
 
 /* ── Section surface — stronger than .card-hairline, used to wrap entire
    sections so paragraph copy stays legible against the busiest parts of
    the scene (nebula churn, light shafts). Solid fill, no backdrop-filter. */
 .content-panel {
-  background: rgba(6, 5, 12, 0.55);
+  background: rgba(8, 7, 10, 0.6);
   border-radius: 1.5rem;
 }
 
@@ -477,11 +542,11 @@ h1 {
 }
 
 .kicker-num {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
-  font-size: 0.8rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 500;
+  font-size: 0.75rem;
   letter-spacing: 0.35em;
-  color: color-mix(in srgb, var(--iris-soft) 55%, transparent);
+  color: color-mix(in srgb, var(--iris-soft) 65%, transparent);
 }
 
 .kicker-label {
