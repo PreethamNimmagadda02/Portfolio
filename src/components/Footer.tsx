@@ -242,7 +242,7 @@ export default function Footer() {
               transformOrigin: "top",
               WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
             }}
-            className="font-display absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/[0.06]"
+            className="font-display absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/6"
           >
             PREETHAM
           </motion.div>
