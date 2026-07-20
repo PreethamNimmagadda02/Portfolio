@@ -125,8 +125,6 @@ function CardParticles({ accent, active }: { accent: string; active: boolean }) 
       Array.from({ length: 6 }, (_, i) => ({
         id: i,
         left: 10 + i * 14,
-        delay: i * 0.5,
-        dur: 2.5 + i * 0.4,
         size: 2 + (i % 3),
       })),
     []
@@ -145,8 +143,6 @@ function CardParticles({ accent, active }: { accent: string; active: boolean }) 
             height: p.size,
             backgroundColor: accent,
             opacity: 0.6,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.dur}s`,
           }}
         />
       ))}

@@ -130,7 +130,7 @@ export default function PageLoader() {
                             <motion.div
                                 className="absolute -inset-8 rounded-3xl"
                                 style={{
-                                    background: "conic-gradient(from 0deg, transparent 0%, rgba(139,92,246,0.5) 25%, transparent 50%, rgba(99,102,241,0.4) 75%, transparent 100%)",
+                                    background: "conic-gradient(from 0deg, transparent 0%, rgba(201,151,74,0.5) 25%, transparent 50%, rgba(226,189,133,0.4) 75%, transparent 100%)",
                                     filter: "blur(20px)",
                                     willChange: "transform",
                                 }}
@@ -142,7 +142,7 @@ export default function PageLoader() {
                             <motion.div
                                 className="absolute -inset-12 rounded-full"
                                 style={{
-                                    background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
+                                    background: "radial-gradient(circle, rgba(201,151,74,0.15) 0%, transparent 70%)",
                                     willChange: "opacity",
                                 }}
                                 animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.95, 1.05, 0.95] }}
