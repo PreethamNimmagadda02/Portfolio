@@ -91,9 +91,9 @@ export default function Footer() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-12 md:pt-16 pb-6 md:pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-8 md:pt-12 pb-4 md:pb-6">
           {/* ── Top grid: brand / nav / connect ── */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6">
             {/* Brand */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -130,21 +130,23 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ delay: 0.1, duration: 0.6, type: "spring" as const, stiffness: 100 }}
-              className="md:col-span-3 text-center md:text-left"
+              className="md:col-span-3 flex flex-col items-center"
             >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-300 mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-gray-300 mb-4 text-center">
                 Navigate
               </h3>
-              <nav className="grid grid-cols-3 md:grid-cols-1 gap-x-2 gap-y-2.5 justify-items-center md:justify-items-start">
+              <nav className="grid grid-cols-3 md:grid-cols-[max-content_max-content] gap-x-2 md:gap-x-20 gap-y-3 justify-items-center md:justify-items-start w-fit">
                 {navLinks.map((link) => (
                   <a
                     key={link.id}
                     href={`#${link.id}`}
                     onClick={(e) => handleNavClick(e, link.id)}
-                    className="group inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
+                    className="group relative inline-flex items-center text-base text-gray-300 hover:text-white transition-colors"
                   >
-                    <span className="hidden md:block w-0 group-hover:w-3 h-px bg-linear-to-r from-purple-400 to-pink-400 transition-all duration-300" />
-                    {link.label}
+                    <span className="absolute left-0 hidden md:block w-3 h-px bg-linear-to-r from-purple-400 to-pink-400 transition-all duration-300 opacity-0 scale-x-0 origin-left group-hover:opacity-100 group-hover:scale-x-100" />
+                    <span className="transition-transform duration-300 group-hover:translate-x-5">
+                      {link.label}
+                    </span>
                   </a>
                 ))}
               </nav>
@@ -204,7 +206,7 @@ export default function Footer() {
 
           {/* ── Bottom bar ── */}
           <motion.div
-            className="mt-10 md:mt-14 pt-5 md:pt-6 border-t border-white/5 flex flex-col-reverse md:flex-row justify-between items-center gap-4"
+            className="mt-6 md:mt-10 pt-4 md:pt-5 border-t border-white/5 flex flex-col-reverse md:flex-row justify-between items-center gap-4"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -232,7 +234,7 @@ export default function Footer() {
             bar, cropped to roughly half the letterforms so the name peeks up
             from the edge rather than reading fully, and can never collide
             with the copyright row above it. */}
-        <div className="relative h-12 sm:h-14 md:h-20 overflow-hidden" aria-hidden>
+        <div className="relative h-10 sm:h-12 md:h-16 overflow-hidden" aria-hidden>
           <motion.div
             style={{
               y: watermarkY,
@@ -242,7 +244,7 @@ export default function Footer() {
               transformOrigin: "top",
               WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
             }}
-            className="absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[16vw] md:text-[9.5rem] leading-none text-white/[0.06]"
+            className="absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[14vw] md:text-[8rem] leading-none text-white/6"
           >
             PREETHAM
           </motion.div>

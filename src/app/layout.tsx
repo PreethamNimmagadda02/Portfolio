@@ -124,7 +124,6 @@ const jsonLd = {
 };
 
 import SmoothScroll from "@/components/SmoothScroll";
-import SpotlightCursor from "@/components/SpotlightCursor";
 import PerformanceProvider from "@/components/PerformanceProvider";
 import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
 
@@ -169,7 +168,6 @@ export default function RootLayout({
               <PageLoader />
               <ScrollProgress />
               <KonamiEasterEgg />
-              <SpotlightCursor />
               <SmoothScroll>
                 <Navbar />
                 <main id="main-content" className="min-h-screen">

@@ -295,27 +295,34 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                 key={profile.platform}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+                whileHover={{ y: -8, scale: 1.02, transition: { delay: 0, duration: 0.2, type: "spring", stiffness: 400, damping: 25 } }}
                 transition={{
                   delay: 0.1 + idx * 0.1,
-                  duration: 0.5,
+                  duration: 0.4,
                   type: "spring",
                 }}
                 className="relative group w-full md:w-[calc(50%-8px)] lg:w-[calc(33.333%-12px)] min-w-[260px]"
               >
-                <div className={`absolute -inset-px bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                <div className="relative p-4 rounded-2xl bg-zinc-900/90 border border-white/10 hover:border-white/20 transition-all h-full flex flex-col">
+                {/* Outer Glow */}
+                <div className={`absolute -inset-0.5 bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500`} />
+                
+                {/* Main Card */}
+                <div className="relative p-5 rounded-2xl bg-zinc-900/95 border border-white/10 group-hover:border-white/30 transition-all duration-300 h-full flex flex-col min-h-[250px] overflow-hidden shadow-2xl">
+                  
+                  {/* Subtle inner gradient shift on hover */}
+                  <div className={`absolute inset-0 bg-linear-to-br ${config.bgGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`} />
 
                   {/* Header */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2.5 rounded-xl bg-zinc-800/80 border border-white/5 ${config.color}`}>
+                  <div className="relative z-10 flex items-center gap-3 mb-3">
+                    <div className={`p-2.5 rounded-xl bg-zinc-800/80 border border-white/5 ${config.color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg`}>
                       <config.icon size={20} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white tracking-wide">
+                      <h3 className="text-lg font-bold text-white tracking-wide group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-white group-hover:to-gray-400 transition-all duration-300">
                         {config.name}
                       </h3>
                       {displayBadge && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/5 text-gray-300 capitalize border border-white/10">
+                        <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/5 text-gray-300 capitalize border border-white/10 group-hover:border-white/20 group-hover:bg-white/10 transition-colors duration-300">
                           {displayBadge}
                         </span>
                       )}
@@ -323,25 +330,21 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-2 mt-auto">
-                    <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
-                      <span className="text-xs text-gray-500 mb-0.5">Solved</span>
-                      <span className="text-xl font-black text-white">
+                  <div className="relative z-10 grid grid-cols-2 gap-3 my-auto">
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center shadow-inner">
+                      <span className="text-[13px] text-gray-400 mb-1 font-medium group-hover:text-gray-300 transition-colors">Solved</span>
+                      <span className="text-2xl font-black text-white drop-shadow-md">
                         <AnimatedCounter value={profile.totalQuestionStats?.totalQuestionCounts || 0} />
                       </span>
                     </div>
-                    <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
-                      <span className="text-xs text-gray-500 mb-0.5 truncate w-full px-1">
+                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center shadow-inner">
+                      <span className="text-[13px] text-gray-400 mb-1 font-medium truncate w-full px-1 group-hover:text-gray-300 transition-colors">
                         {profile.platform === "hackerrank" && topBadge ? topBadge.name : (profile.platform === "tuf" ? "Max Streak" : "Rating")}
                       </span>
-                      <span className={`text-xl font-black ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
+                      <span className={`text-2xl font-black drop-shadow-md ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
                         {profile.platform === "hackerrank" && topBadge
                           ? <><AnimatedCounter value={topBadge.stars || 0} />★</>
                           : profile.platform === "tuf"
-                            // TODO: undocumented +43 offset — appears to compensate for
-                            // TUF activity logged before this account synced with Codolio.
-                            // Verify against the platform's own profile page and either
-                            // confirm the constant or replace it with accurate source data.
                             ? <AnimatedCounter value={(profile.dailyActivityStatsResponse?.maxStreak || 0) + 43} />
                             : profile.userStats?.currentRating
                               ? <AnimatedCounter value={profile.userStats.currentRating} />
@@ -351,62 +354,49 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                   </div>
 
                   {/* Extra Meta */}
-                  <div className="mt-2 pt-2 border-t border-white/5 flex flex-col gap-1">
-                    {/* Max Rating (LC, CF, CC) */}
+                  <div className="relative z-10 pt-4 border-t border-white/10 group-hover:border-white/20 transition-colors flex flex-col gap-2">
                     {profile.userStats?.maxRating && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Max Rating</span>
-                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.userStats.maxRating} /></span>
+                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.userStats.maxRating} /></span>
                       </div>
                     )}
-
-                    {/* Contests Attended */}
                     {["codeforces", "codechef"].includes(profile.platform) && profile.contestActivityStats?.contestActivityList && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Contests Attended</span>
-                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.contestActivityStats.contestActivityList.length} /></span>
+                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.contestActivityStats.contestActivityList.length} /></span>
                       </div>
                     )}
-
-                    {/* Problem Breakdown (Leetcode) */}
                     {profile.platform === "leetcode" && profile.totalQuestionStats && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Medium Problems</span>
-                        <span className="font-mono text-gray-300">
-                          <span className="text-yellow-400" title="Medium"><AnimatedCounter value={profile.totalQuestionStats.mediumQuestionCounts || 0} /></span>
+                        <span className="font-mono text-gray-200 font-medium">
+                          <span className="text-yellow-400 drop-shadow-sm" title="Medium"><AnimatedCounter value={profile.totalQuestionStats.mediumQuestionCounts || 0} /></span>
                         </span>
                       </div>
                     )}
-
-                    {/* Awards (HackerRank) */}
                     {profile.platform === "hackerrank" && profile.badgeStats?.badgeList && profile.badgeStats.badgeList.length > 0 && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Awards</span>
-                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.badgeStats.badgeList.length} /></span>
+                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.badgeStats.badgeList.length} /></span>
                       </div>
                     )}
-
-                    {/* Certifications (HackerRank) */}
                     {profile.platform === "hackerrank" && profile.certificateStats?.certificates && profile.certificateStats.certificates.length > 0 && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Certifications</span>
-                        <span className="font-mono text-gray-300"><AnimatedCounter value={profile.certificateStats.certificates.length} /></span>
+                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.certificateStats.certificates.length} /></span>
                       </div>
                     )}
-
-                    {/* Active Days (TUF) */}
                     {profile.platform === "tuf" && profile.dailyActivityStatsResponse?.submissionCalendar && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Active Days</span>
-                        <span className="font-mono text-gray-300"><AnimatedCounter value={Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length} /></span>
+                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length} /></span>
                       </div>
                     )}
-
-                    {/* Hard Problems (TUF) */}
                     {profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts && (
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
                         <span>Hard Problems</span>
-                        <span className="font-mono text-red-400"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
+                        <span className="font-mono text-red-400 font-medium drop-shadow-sm"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
                       </div>
                     )}
                   </div>

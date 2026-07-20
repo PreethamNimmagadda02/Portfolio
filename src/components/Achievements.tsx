@@ -43,7 +43,7 @@ const achievements: Achievement[] = [
   {
     id: 3,
     title: "1,000+ Problems Solved",
-    description: "Across Codeforces, CodeChef, and HackerRank — depth across every major judge.",
+    description: "Across Leetcode, TUF+, Codeforces, CodeChef, and HackerRank — depth across every major judge.",
     stat: "1000+",
     icon: Flame,
     color: "#f472b6",

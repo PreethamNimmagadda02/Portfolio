@@ -666,8 +666,8 @@ export default function Contact() {
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="flex items-center gap-2 relative z-10"
                       >
-                        <span>Send Message</span>
-                        <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+                        <span className="leading-none">Send Message</span>
+                        <Send size={18} className="mt-[2px] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
                       </motion.div>
                     )}
                   </AnimatePresence>

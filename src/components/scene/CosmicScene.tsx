@@ -1452,7 +1452,7 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
       <CameraRig pointer={pointer} scroll={scroll} />
       <AdaptiveQuality maxDpr={isMobile ? 1 : 1.5} />
       <AuroraNebula pointer={pointer} scroll={scroll} />
-      <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 500 : 1600} />
+      <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 200 : 600} />
 
       {!isMobile && (
         <>

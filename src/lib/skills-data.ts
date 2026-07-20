@@ -69,6 +69,11 @@ export const skillsData: SkillItem[] = [
   { name: "Gemma", category: "AI" },
   { name: "GitHub Actions", category: "DevOps" },
   { name: "Jira", category: "Tools" },
+  { name: "Temporal", category: "Automation" },
+  { name: "Exo", category: "AI" },
+  { name: "RepoWise", category: "Tools" },
+  { name: "OpenWiki", category: "Tools" },
+  { name: "Graphify", category: "Tools" },
 ];
 
 export const categoryColors: Record<string, string> = {
