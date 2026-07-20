@@ -308,10 +308,8 @@ function AnimatedWord({
         <motion.span
           key={i}
           variants={letterVariants}
-          className={`inline-block ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
-          style={{
-            marginRight: letter === " " ? "0.25em" : "0"
-          }}
+          className={`inline-block pr-3 -mr-3 pb-1 -mb-1 ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
+          style={letter === " " ? { marginRight: "0.25em" } : undefined}
         >
           {letter}
         </motion.span>
@@ -403,7 +401,7 @@ export default function Hero() {
           {/* Center Avatar - Dead Center */}
           <motion.div
             style={{ y: isMobile ? 0 : yCenter }}
-            className="relative z-20 my-2 lg:my-0 order-1 lg:order-2 flex flex-col items-center flex-none px-4 lg:px-12"
+            className="relative z-20 my-4 lg:my-0 order-1 lg:order-2 flex flex-col items-center flex-none px-4 lg:px-12"
           >
             {/* Badge - Absolute Positioned */}
             <motion.div
@@ -413,7 +411,7 @@ export default function Hero() {
               transition={{ delay: 0.2 }}
             >
               <FloatingBadge delay={0.3}>
-                Building Systems That Act — Not Just Predict
+                Architecting Autonomous Defense Systems
               </FloatingBadge>
             </motion.div>
 
@@ -441,19 +439,7 @@ export default function Hero() {
                 ready={loaderDone}
               />
             </p>
-            <motion.div
-              className="mt-8 max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0"
-              initial={{ opacity: 0, y: 20 }}
-              animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
-              transition={{ delay: 0.8 }}
-            >
-              <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed text-center lg:text-left font-sans">
-                Autonomous systems shouldn&apos;t wait for breaches — they should eliminate them.
-                At <span className="text-white font-bold">Matters.AI</span>, I build the AI copilot that turns
-                data security from passive monitoring into a self-healing defense layer, detecting and
-                remediating threats before they cause damage.
-              </p>
-            </motion.div>
+
           </motion.div>
 
         </div>

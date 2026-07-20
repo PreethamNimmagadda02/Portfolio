@@ -1760,3 +1760,292 @@ Traceback (most recent call last):
   File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/gemini.py", line 223, in __init__
     raise ProviderError(
 repowise.core.providers.llm.base.ProviderError: [gemini] No API key found. Pass api_key= or set GEMINI_API_KEY / GOOGLE_API_KEY env var.
+
+--- post-commit hook fired at Mon Jul 20 19:01:05 IST 2026 for HEAD bcfc48dc87cf3ea61489c8a98e4c2e17f26caa55 ---
+repowise update · portfolio-redesign
+819a1d0d..bcfc48dc
+39 changed · 33 modified, 5 added, 1 deleted
+    modified  .claude/CLAUDE.md
+    modified  .repowise/.augment-session.json
+       added  .repowise/.augment-warned
+    modified  .repowise/.update.log
+    modified  .repowise/.update.pending
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/serve.lock.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+       added  .repowise/wiki.db-shm
+  +29 more (use -v to list all)
+2026-07-20 19:01:06 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio/.claude/worktrees/portfolio-redesign submodules_skipped=0
+2026-07-20 19:01:06 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-20 19:01:06 [info     ] parse_cache_used               hits=62 misses=3
+2026-07-20 19:01:06 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-20 19:01:06 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.01, 'yaml': 0.0}
+2026-07-20 19:01:06 [info     ] type_use edges emitted         per_language={'typescript': 4}
+2026-07-20 19:01:06 [info     ] Heritage edges resolved        total=0
+2026-07-20 19:01:06 [info     ] Call edges resolved            total=220
+2026-07-20 19:01:06 [info     ] Graph built                    edge_types={'defines': 373, 'imports': 135, 'calls': 220, 'has_method': 46} edges=774 file_nodes=83 symbol_nodes=373
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-20 19:01:06 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-20 19:01:07 [debug    ] repo_commit_index_built        commits_parsed=163 files_with_history=39 indexable_files=39
+2026-07-20 19:01:07 [debug    ] co_change_computed             commit_limit=2000 commits=163 files_with_entropy=62 files_with_partners=28 min_count=2 pairs_above_threshold=176 pairs_considered=756 tracked_files=65
+2026-07-20 19:01:07 [info     ] Co-change edges added          count=98
+2026-07-20 19:01:07 [info     ] betweenness_reused_from_cache  kind=file nodes=84
+2026-07-20 19:01:07 [info     ] betweenness_reused_from_cache  kind=symbol nodes=373
+2026-07-20 19:01:07 [info     ] symbol_communities_detected    communities=189 connected=197 total_symbols=373
+2026-07-20 19:01:07 [info     ] file_communities_detected      algorithm=louvain communities=33 prod_files=84 test_files=0 total_files=84
+2026-07-20 19:01:08 [info     ] execution_flows_traced         candidates_scored=33 deduplicated=0 traced=27
+Pages to regenerate: 43
+2026-07-20 19:01:08 [debug    ] duplication_token_cache        hits=61 misses=2
+2026-07-20 19:01:08 [debug    ] health_duplication_limits      degenerate_buckets=0 files_considered=65 files_tokenized=37 skipped_minified=2 skipped_token_cap=0 skipped_unreadable=0 timed_out=False total_windows=53795 window_budget_hit=False
+Health analysis (partial): 38 files, 84 findings
+Dead code findings (partial): 6
+Knowledge graph refreshed: 5 layers, 12 tour steps
+Warning: Provider 'gemini' requires environment variables: GEMINI_API_KEY, 
+GOOGLE_API_KEY
+Traceback (most recent call last):
+  File "/opt/homebrew/bin/repowise", line 6, in <module>
+    sys.exit(cli())
+             ^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1462, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1383, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/_instrumented_group.py", line 63, in invoke
+    return super().invoke(ctx)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1850, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1246, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 814, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 294, in update_command
+    return run_update(
+           ^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 818, in run_update
+    provider = resolve_provider(provider_name, model, repo_path=repo_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/helpers.py", line 648, in resolve_provider
+    return get_provider(provider_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/registry.py", line 159, in get_provider
+    return cls(**kwargs)
+           ^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/gemini.py", line 223, in __init__
+    raise ProviderError(
+repowise.core.providers.llm.base.ProviderError: [gemini] No API key found. Pass api_key= or set GEMINI_API_KEY / GOOGLE_API_KEY env var.
+
+--- post-commit hook fired at Mon Jul 20 19:41:26 IST 2026 for HEAD 3d8d3ce7ad74b27394ba093b90f20e2d4f216e37 ---
+repowise update · portfolio-redesign
+819a1d0d..3d8d3ce7
+39 changed · 33 modified, 5 added, 1 deleted
+    modified  .claude/CLAUDE.md
+    modified  .repowise/.augment-session.json
+       added  .repowise/.augment-warned
+    modified  .repowise/.update.log
+    modified  .repowise/.update.pending
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/serve.lock.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+       added  .repowise/wiki.db-shm
+  +29 more (use -v to list all)
+2026-07-20 19:41:28 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio/.claude/worktrees/portfolio-redesign submodules_skipped=0
+2026-07-20 19:41:28 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-20 19:41:28 [info     ] parse_cache_used               hits=43 misses=23
+2026-07-20 19:41:29 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-20 19:41:29 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.02, 'yaml': 0.0}
+2026-07-20 19:41:29 [info     ] type_use edges emitted         per_language={'typescript': 4}
+2026-07-20 19:41:29 [info     ] Heritage edges resolved        total=0
+2026-07-20 19:41:29 [info     ] Call edges resolved            total=221
+2026-07-20 19:41:29 [info     ] Graph built                    edge_types={'defines': 374, 'imports': 137, 'calls': 221, 'has_method': 46} edges=778 file_nodes=85 symbol_nodes=374
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-20 19:41:29 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-20 19:41:30 [debug    ] repo_commit_index_built        commits_parsed=164 files_with_history=39 indexable_files=39
+2026-07-20 19:41:31 [debug    ] co_change_computed             commit_limit=2000 commits=164 files_with_entropy=62 files_with_partners=28 min_count=2 pairs_above_threshold=176 pairs_considered=756 tracked_files=66
+2026-07-20 19:41:31 [info     ] Co-change edges added          count=98
+2026-07-20 19:41:31 [info     ] symbol_communities_detected    communities=189 connected=197 total_symbols=374
+2026-07-20 19:41:31 [info     ] file_communities_detected      algorithm=louvain communities=35 prod_files=86 test_files=0 total_files=86
+2026-07-20 19:41:31 [info     ] execution_flows_traced         candidates_scored=33 deduplicated=0 traced=27
+Pages to regenerate: 43
+2026-07-20 19:41:32 [debug    ] duplication_token_cache        hits=42 misses=22
+2026-07-20 19:41:32 [debug    ] health_duplication_limits      degenerate_buckets=0 files_considered=66 files_tokenized=37 skipped_minified=2 skipped_token_cap=0 skipped_unreadable=0 timed_out=False total_windows=53776 window_budget_hit=False
+Health analysis (partial): 38 files, 84 findings
+Dead code findings (partial): 6
+Knowledge graph refreshed: 5 layers, 12 tour steps
+Warning: Provider 'gemini' requires environment variables: GEMINI_API_KEY, 
+GOOGLE_API_KEY
+Traceback (most recent call last):
+  File "/opt/homebrew/bin/repowise", line 6, in <module>
+    sys.exit(cli())
+             ^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1462, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1383, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/_instrumented_group.py", line 63, in invoke
+    return super().invoke(ctx)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1850, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1246, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 814, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 294, in update_command
+    return run_update(
+           ^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 818, in run_update
+    provider = resolve_provider(provider_name, model, repo_path=repo_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/helpers.py", line 648, in resolve_provider
+    return get_provider(provider_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/registry.py", line 159, in get_provider
+    return cls(**kwargs)
+           ^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/gemini.py", line 223, in __init__
+    raise ProviderError(
+repowise.core.providers.llm.base.ProviderError: [gemini] No API key found. Pass api_key= or set GEMINI_API_KEY / GOOGLE_API_KEY env var.
+
+--- post-commit hook fired at Mon Jul 20 19:42:20 IST 2026 for HEAD 24bede8fdc7ca4832b5c2762e064127372b46d1e ---
+repowise update · portfolio-redesign
+819a1d0d..24bede8f
+46 changed · 39 modified, 6 added, 1 deleted
+    modified  .claude/CLAUDE.md
+    modified  .repowise/.augment-session.json
+       added  .repowise/.augment-warned
+    modified  .repowise/.update.log
+    modified  .repowise/.update.pending
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/serve.lock.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+       added  .repowise/wiki.db-shm
+  +36 more (use -v to list all)
+2026-07-20 19:42:22 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio/.claude/worktrees/portfolio-redesign submodules_skipped=0
+2026-07-20 19:42:22 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-20 19:42:22 [info     ] parse_cache_used               hits=66 misses=0
+2026-07-20 19:42:22 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-20 19:42:22 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.02, 'yaml': 0.0}
+2026-07-20 19:42:22 [info     ] type_use edges emitted         per_language={'typescript': 4}
+2026-07-20 19:42:22 [info     ] Heritage edges resolved        total=0
+2026-07-20 19:42:22 [info     ] Call edges resolved            total=221
+2026-07-20 19:42:22 [info     ] Graph built                    edge_types={'defines': 374, 'imports': 137, 'calls': 221, 'has_method': 46} edges=778 file_nodes=85 symbol_nodes=374
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-20 19:42:22 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-20 19:42:23 [debug    ] repo_commit_index_built        commits_parsed=165 files_with_history=46 indexable_files=46
+2026-07-20 19:42:24 [debug    ] co_change_computed             commit_limit=2000 commits=165 files_with_entropy=63 files_with_partners=31 min_count=2 pairs_above_threshold=215 pairs_considered=800 tracked_files=66
+2026-07-20 19:42:24 [info     ] Co-change edges added          count=128
+2026-07-20 19:42:24 [info     ] betweenness_reused_from_cache  kind=file nodes=86
+2026-07-20 19:42:24 [info     ] betweenness_reused_from_cache  kind=symbol nodes=374
+2026-07-20 19:42:24 [info     ] file_communities_detected      algorithm=louvain communities=35 prod_files=86 test_files=0 total_files=86
+2026-07-20 19:42:24 [info     ] symbol_communities_detected    communities=189 connected=197 total_symbols=374
+2026-07-20 19:42:24 [info     ] execution_flows_traced         candidates_scored=33 deduplicated=0 traced=27
+Pages to regenerate: 47
+2026-07-20 19:42:24 [debug    ] duplication_token_cache        hits=64 misses=0
+2026-07-20 19:42:24 [debug    ] health_duplication_limits      degenerate_buckets=0 files_considered=66 files_tokenized=37 skipped_minified=2 skipped_token_cap=0 skipped_unreadable=0 timed_out=False total_windows=53776 window_budget_hit=False
+Health analysis (partial): 45 files, 123 findings
+Dead code findings (partial): 6
+Knowledge graph refreshed: 5 layers, 12 tour steps
+Warning: Provider 'gemini' requires environment variables: GEMINI_API_KEY, 
+GOOGLE_API_KEY
+Traceback (most recent call last):
+  File "/opt/homebrew/bin/repowise", line 6, in <module>
+    sys.exit(cli())
+             ^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1462, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1383, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/_instrumented_group.py", line 63, in invoke
+    return super().invoke(ctx)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1850, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 1246, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/click/core.py", line 814, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 294, in update_command
+    return run_update(
+           ^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/commands/update_cmd/command.py", line 818, in run_update
+    provider = resolve_provider(provider_name, model, repo_path=repo_path)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/cli/helpers.py", line 648, in resolve_provider
+    return get_provider(provider_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/registry.py", line 159, in get_provider
+    return cls(**kwargs)
+           ^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/repowise/core/providers/llm/gemini.py", line 223, in __init__
+    raise ProviderError(
+repowise.core.providers.llm.base.ProviderError: [gemini] No API key found. Pass api_key= or set GEMINI_API_KEY / GOOGLE_API_KEY env var.

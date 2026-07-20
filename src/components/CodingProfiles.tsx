@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useInView } from "@/lib/motion";
-import { useRef, useState, useEffect, useCallback, type Ref } from "react";
-import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, BarChart2, type LucideIcon } from "lucide-react";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, BarChart2 } from "lucide-react";
 
 const CODOLIO_USERNAME = "Preetham_02";
 
@@ -34,7 +34,7 @@ interface PlatformProfile {
     badgeList: BadgeStat[];
   } | null;
   certificateStats?: {
-    certificates: unknown[];
+    certificates: any[];
   } | null;
   dailyActivityStatsResponse?: {
     maxStreak: number | null;
@@ -44,7 +44,7 @@ interface PlatformProfile {
     topicWiseDistribution: Record<string, number> | null;
   } | null;
   contestActivityStats?: {
-    contestActivityList: unknown[];
+    contestActivityList: any[];
   } | null;
 }
 
@@ -60,7 +60,7 @@ interface CodolioAPIResponse {
 /* ─── Platform Styling & Icons ─── */
 const PLATFORM_CONFIG: Record<
   string,
-  { name: string; icon: LucideIcon; color: string; bgGradient: string }
+  { name: string; icon: any; color: string; bgGradient: string }
 > = {
   leetcode: {
     name: "LeetCode",
@@ -155,7 +155,7 @@ function ProfileSkeleton() {
 }
 
 export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<any>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   // Defer the Codolio API call until the section approaches the viewport
   const shouldFetch = useInView(sectionRef, { once: true, margin: "600px" });
@@ -331,7 +331,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                       </span>
                     </div>
                     <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center">
-                      <span className="text-xs text-gray-500 mb-0.5 truncate w-full px-1">
+                      <span className="text-xs text-gray-500 mb-0.5 whitespace-normal break-words leading-[1.1] flex items-center justify-center text-center min-h-[1.5rem] w-full px-1">
                         {profile.platform === "hackerrank" && topBadge ? topBadge.name : (profile.platform === "tuf" ? "Max Streak" : "Rating")}
                       </span>
                       <span className={`text-xl font-black ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
@@ -419,11 +419,8 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
   );
 
   if (isEmbedded) {
-    // Same ref used for the <section> below (mutually exclusive on
-    // `isEmbedded`); the cast narrows the shared HTMLElement ref type, which
-    // is safe since only one of the two branches ever mounts.
     return (
-      <div ref={sectionRef as Ref<HTMLDivElement>} className="w-full relative z-10 mt-8">
+      <div ref={sectionRef} className="w-full relative z-10 mt-8">
         {innerContent}
       </div>
     );
@@ -436,7 +433,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle at 70% 30%, rgba(201,151,74,0.05), transparent 45%), radial-gradient(circle at 25% 75%, rgba(201,151,74,0.05), transparent 45%)",
+            "radial-gradient(circle at 70% 30%, rgba(99,102,241,0.05), transparent 45%), radial-gradient(circle at 25% 75%, rgba(6,182,212,0.05), transparent 45%)",
         }}
       />
 

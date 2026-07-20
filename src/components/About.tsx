@@ -10,35 +10,32 @@ const features = [
   {
     id: 0,
     icon: Code,
-    title: "Multimodal & Agent Systems",
+    title: "AI & Autonomous Systems Innovator",
     description: (
       <>
-        I build AI that <span className="text-blue-400 font-semibold">acts, not just answers</span> — vision-language
-        pipelines and autonomous agents that reason over real-world data and make decisions without a human in the loop.
+        I build intelligent pipelines that <span className="text-blue-400 font-semibold">act, not just answer</span>. From self-healing data security models at Matters.AI to empathic GenAI companions, I push the boundaries of autonomous technology.
       </>
     ),
-    color: "#d3a662",
+    color: "#60a5fa",
   },
   {
     id: 1,
     icon: Rocket,
-    title: "Competitive Problem Solver",
+    title: "Performance-Driven Engineer",
     description: (
       <>
-        <span className="text-yellow-400 font-semibold">CodeChef 4★, top 0.8%</span> of 2M+ coders. Codeforces
-        Specialist, top 20%. 1,000+ problems solved — the same rigor I bring to production systems.
+        Ranked in the <span className="text-yellow-400 font-semibold">top 0.8% on CodeChef (4★)</span> and a Codeforces Specialist. I bring elite algorithmic rigor to production code, ensuring highly optimized, scalable, and resilient architectures.
       </>
     ),
-    color: "#d3a662",
+    color: "#c084fc",
   },
   {
     id: 2,
     icon: Globe,
-    title: "Community Builder",
+    title: "Strategic Tech Leader",
     description: (
       <>
-        Led initiatives reaching <span className="text-teal-400 font-semibold">4,000+ students</span>, managing
-        budgets and logistics for large-scale campus operations.
+        Led initiatives reaching <span className="text-teal-400 font-semibold">4,000+ students</span> as a Student Senator and drove strategic campus adoption for Perplexity. I bridge the gap between complex technology and large-scale user impact.
       </>
     ),
     color: "#34d399",
@@ -46,11 +43,10 @@ const features = [
   {
     id: 3,
     icon: BookOpen,
-    title: "Agent Systems Architect",
+    title: "Multi-Agent Orchestrator",
     description: (
       <>
-        Designing <span className="text-amber-400 font-semibold">multi-agent orchestration</span> for trading and
-        logistics — systems that coordinate, not just execute.
+        Architecting <span className="text-amber-400 font-semibold">complex, event-driven platforms</span>. From automated financial trading swarms to logistical AI agents, I design systems where multiple intelligent components coordinate seamlessly.
       </>
     ),
     color: "#fbbf24",
@@ -58,9 +54,9 @@ const features = [
 ];
 
 const stats = [
-  { value: "4000+", label: "Students Influenced", color: "text-purple-400", icon: Users },
-  { value: "20%", label: "Memory Reduction", color: "text-yellow-400", icon: Zap },
-  { value: "350+", label: "Participants Led", color: "text-emerald-400", icon: Target },
+  { value: "95%", label: "AI Model Accuracy", color: "text-purple-400", accent: "#c084fc", icon: Target },
+  { value: "99%", label: "Global Coder Percentile", color: "text-yellow-400", accent: "#facc15", icon: Zap },
+  { value: "4000+", label: "Students Empowered", color: "text-emerald-400", accent: "#34d399", icon: Users },
 ];
 
 function AnimatedCounter({ value }: { value: string }) {
@@ -120,10 +116,11 @@ function PillarCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="h-full"
     >
       <InteractiveCard
         accent={feature.color}
-        className="card-hairline rounded-3xl p-6 md:p-8 transition-colors duration-500 group/pillar"
+        className="card-hairline rounded-3xl p-6 md:p-8 transition-colors duration-500 group/pillar h-full flex flex-col justify-center"
         style={{ borderColor: inView ? `${feature.color}40` : undefined }}
       >
         <div className="flex items-start gap-4 relative z-3">
@@ -147,88 +144,65 @@ function PillarCard({
 
 export default function About() {
   const [activeId, setActiveId] = useState(0);
-  const activeFeature = features.find((f) => f.id === activeId) || features[0];
-  const ActiveIcon = activeFeature.icon;
 
   return (
-    <section id="about" className="relative w-full py-20 md:py-32">
+    <section id="about" className="relative w-full py-12 md:py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* LEFT — sticky intro + live feature */}
-          <div className="lg:sticky lg:top-32 lg:self-start space-y-8">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <InViewClass>
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-10 md:mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="flex flex-col items-center w-full"
+          >
+            <InViewClass>
+              <div className="flex justify-center w-full mb-3">
                 <SectionKicker num="01" label="Who I Am" />
+              </div>
 
-                <h2 className="text-display text-4xl md:text-5xl lg:text-6xl text-white mb-6">
-                  <span className="line-mask">
-                    <span className="line-rise">
-                      About <span className="text-gradient-iris">Me</span>
-                    </span>
+              <h2 className="text-display text-4xl md:text-5xl lg:text-6xl text-white mb-4">
+                <span className="line-mask">
+                  <span className="line-rise">
+                    About <span className="text-gradient-iris">Me</span>
                   </span>
-                </h2>
-              </InViewClass>
+                </span>
+              </h2>
+            </InViewClass>
 
-              <div className="space-y-5 mb-8 text-gray-300 max-w-prose font-sans">
-                <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">
-                  I build AI systems that <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">act</span>,
-                  {" "}not just <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">answer</span>
-                </h3>
-                <p className="text-base md:text-lg leading-relaxed">
-                  Autonomous agents, multimodal pipelines, and infrastructure engineered for real efficiency gains —
-                  I ship systems that reason and decide, not just respond.
-                </p>
-              </div>
+            <div className="space-y-3 mb-8 text-gray-300 w-full" style={{ fontFamily: "var(--font-inter)" }}>
+              <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">
+                I build AI systems that <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">act</span>,
+                {" "}not just <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">answer</span>
+              </h3>
+            </div>
 
-              {/* Live feature card — updates as pillars scroll past on the right */}
-              <motion.div
-                key={activeId}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35 }}
-                className="p-6 rounded-2xl card-hairline relative overflow-hidden mb-8 hidden lg:block"
-              >
-                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: activeFeature.color }} />
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-white/5 shrink-0">
-                    <ActiveIcon size={24} style={{ color: activeFeature.color }} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+              {stats.map((stat, i) => (
+                <InteractiveCard
+                  key={i}
+                  accent={stat.accent}
+                  className="min-w-0 text-center p-6 rounded-2xl card-hairline bg-white/5 transition-all duration-300 group hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
+                >
+                  <div className="mb-3 flex justify-center text-gray-300 transition-transform duration-300 group-hover:scale-125 group-hover:text-white">
+                    <stat.icon size={22} className={stat.color} />
                   </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-white mb-2">{activeFeature.title}</h4>
-                    <div className="text-gray-300 text-sm leading-relaxed">{activeFeature.description}</div>
-                  </div>
-                </div>
-              </motion.div>
+                  <h4 className="text-3xl md:text-4xl font-bold text-white mb-2 transition-transform duration-300 group-hover:scale-105">
+                    <AnimatedCounter value={stat.value} />
+                  </h4>
+                  <p className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${stat.color} opacity-80 group-hover:opacity-100 transition-opacity duration-300`}>
+                    {stat.label}
+                  </p>
+                </InteractiveCard>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
-              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                {stats.map((stat, i) => (
-                  <div key={i} className="min-w-0 text-center p-3 rounded-xl card-hairline">
-                    <div className="mb-2 flex justify-center text-gray-300">
-                      <stat.icon size={18} />
-                    </div>
-                    <h4 className="text-xl sm:text-2xl font-bold text-white mb-1">
-                      <AnimatedCounter value={stat.value} />
-                    </h4>
-                    <p className={`text-[10px] md:text-xs font-medium uppercase tracking-wider ${stat.color}`}>
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* RIGHT — pillar cards, drive the sticky feature above */}
-          <div className="space-y-5 md:space-y-6">
-            {features.map((feature, i) => (
-              <PillarCard key={feature.id} feature={feature} index={i} onActive={setActiveId} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {features.map((feature, i) => (
+            <PillarCard key={feature.id} feature={feature} index={i} onActive={setActiveId} />
+          ))}
         </div>
       </div>
     </section>

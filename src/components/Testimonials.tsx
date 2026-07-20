@@ -412,42 +412,6 @@ function MarqueeRow({
   );
 }
 
-/* ── Live counter badge ── */
-function CounterBadge({ count, isInView }: { count: number; isInView: boolean }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    if (!isInView) return;
-    let frame: number;
-    const start = Date.now();
-    const tick = () => {
-      const t = Math.min((Date.now() - start) / 1200, 1);
-      setDisplay(Math.round(count * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [isInView, count]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.85, y: 10 }}
-      animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
-      transition={{ delay: 0.4, duration: 0.5, type: "spring" }}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 text-sm text-gray-300 mb-6"
-      style={{ background: "rgba(255,255,255,0.04)" }}
-    >
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-      </span>
-      <MessageCircle size={13} className="text-gray-500" />
-      <span>
-        <span className="font-bold text-white">{display}</span> voices from the community
-      </span>
-    </motion.div>
-  );
-}
-
 /* ── Drifting orb background ── */
 function DriftingOrbs() {
   return (
@@ -535,7 +499,7 @@ export default function Testimonials() {
               Words from collaborators, mentors, and peers who have seen the work up close.
             </motion.p>
 
-            <CounterBadge count={testimonials.length} isInView={isInView} />
+
 
             {/* Floating sparkles row */}
             <motion.div

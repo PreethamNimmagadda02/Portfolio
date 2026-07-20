@@ -24,7 +24,7 @@ export const skillsData: SkillItem[] = [
   { name: "Redis", category: "DB" },
   { name: "AWS S3", category: "Cloud" },
   { name: "Next.js", category: "Web" },
-  { name: "Antigravity", category: "AI" },
+  { name: "Antigravity IDE", category: "AI" },
   { name: "Postman", category: "Tools" },
   { name: "Python", category: "Lang" },
   { name: "Three.js", category: "Web" },
@@ -69,6 +69,11 @@ export const skillsData: SkillItem[] = [
   { name: "Gemma", category: "AI" },
   { name: "GitHub Actions", category: "DevOps" },
   { name: "Jira", category: "Tools" },
+  { name: "Temporal", category: "Automation" },
+  { name: "Exo", category: "AI" },
+  { name: "RepoWise", category: "Tools" },
+  { name: "OpenWiki", category: "Tools" },
+  { name: "Graphify", category: "Tools" },
 ];
 
 export const categoryColors: Record<string, string> = {
