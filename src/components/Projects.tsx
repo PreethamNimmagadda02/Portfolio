@@ -42,18 +42,13 @@ function ProjectHoverLabel({ x, y }: { x: MotionValue<number>; y: MotionValue<nu
   return (
     <motion.span
       aria-hidden
-      // `bg-primary`/`text-primary-foreground` resolve to invalid CSS here:
-      // `--primary`/`--primary-foreground` in globals.css are raw "H S% L%"
-      // triplets (the shadcn/ui convention), but the `@theme inline` block
-      // aliases `--color-primary` straight to that raw value instead of
-      // wrapping it in `hsl(...)` — so `background-color: var(--color-primary)`
-      // is an invalid declaration and silently no-ops (confirmed via computed
-      // style: transparent bg, inherited white text). This is a pre-existing,
-      // site-wide issue (also affects `selection:bg-primary` in page.tsx), out
-      // of scope to fix here, so the pill reaches the same amber/near-black
-      // tokens directly via `hsl(var(--...))` instead of the broken utilities.
-      style={{ left: springX, top: springY, backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest opacity-0 transition-opacity duration-200 group-hover/row:opacity-100"
+      // `bg-primary`/`text-primary-foreground` now resolve correctly: the
+      // `@theme inline` block in globals.css wraps `--color-primary` in
+      // `hsl(...)` (Task 17 fix), so the manual `hsl(var(--primary))` inline
+      // style that used to work around the broken mapping is no longer
+      // needed — using the Tailwind utilities directly instead.
+      style={{ left: springX, top: springY }}
+      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary px-4 py-2 text-xs font-mono uppercase tracking-widest text-primary-foreground opacity-0 transition-opacity duration-200 group-hover/row:opacity-100"
     >
       View Project ↗
     </motion.span>
