@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "@/lib/motion";
-import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, User, MessageSquare, Loader2 } from "lucide-react";
+import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, User, MessageSquare, Loader2, type LucideIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import emailjs from '@emailjs/browser';
 import React from "react";
@@ -83,7 +83,7 @@ function FloatingInput({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   error?: string;
   required?: boolean;
 }) {
@@ -106,7 +106,7 @@ function FloatingInput({
         <motion.div
           className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
           animate={{
-            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#9ca3af",
+            color: isFocused ? "#c9974a" : error ? "#ef4444" : "#9ca3af",
             scale: isFocused ? 1.1 : 1
           }}
           transition={{ duration: 0.2 }}
@@ -209,7 +209,7 @@ function FloatingTextarea({
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   error?: string;
   required?: boolean;
   maxLength?: number;
@@ -236,7 +236,7 @@ function FloatingTextarea({
         <motion.div
           className="absolute left-4 top-4 pointer-events-none"
           animate={{
-            color: isFocused ? "#a855f7" : error ? "#ef4444" : "#9ca3af",
+            color: isFocused ? "#c9974a" : error ? "#ef4444" : "#9ca3af",
             scale: isFocused ? 1.1 : 1
           }}
           transition={{ duration: 0.2 }}
@@ -323,7 +323,7 @@ function ContactCard({
   gradient,
   accent,
 }: {
-  icon: any,
+  icon: LucideIcon,
   label: string,
   value: string,
   href?: string,
@@ -481,7 +481,7 @@ export default function Contact() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle at 25% 50%, rgba(168,85,247,0.08), transparent 45%), radial-gradient(circle at 75% 50%, rgba(59,130,246,0.08), transparent 45%)",
+            "radial-gradient(circle at 25% 50%, rgba(201,151,74,0.08), transparent 45%), radial-gradient(circle at 75% 50%, rgba(201,151,74,0.08), transparent 45%)",
         }}
       />
 
@@ -639,7 +639,7 @@ export default function Contact() {
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(168, 85, 247, 0.4)" }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px -10px rgba(201, 151, 74, 0.4)" }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full px-8 py-4 rounded-xl bg-linear-to-r from-purple-600 to-blue-600 text-white font-bold transition-all flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
                 >

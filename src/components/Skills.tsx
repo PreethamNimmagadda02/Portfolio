@@ -124,11 +124,16 @@ export default function Skills() {
   const [shuffledSkills, setShuffledSkills] = useState(skillsData);
 
   useEffect(() => {
+    // `Math.random()` must not run during render (it would differ between
+    // server and client and produce a hydration mismatch), so the shuffle
+    // is deliberately deferred to this mount-only effect and committed via
+    // a direct setState here.
     const shuffled = [...skillsData];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShuffledSkills(shuffled);
   }, []);
 

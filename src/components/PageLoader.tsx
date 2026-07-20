@@ -26,7 +26,7 @@ function makeStars(count: number): Star[] {
         y: rand() * 100,
         delay: rand() * 2,
         duration: 2 + rand() * 2,
-        color: i % 4 === 0 ? "#a855f7" : i % 4 === 1 ? "#6366f1" : i % 4 === 2 ? "#818cf8" : "#ffffff",
+        color: i % 4 === 0 ? "#c9974a" : i % 4 === 1 ? "#c9974a" : i % 4 === 2 ? "#d3a662" : "#ffffff",
     }));
 }
 

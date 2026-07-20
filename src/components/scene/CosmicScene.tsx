@@ -223,8 +223,8 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
       uScroll: { value: 0 },
       uVelocity: { value: 0 },
       uMouse: { value: new THREE.Vector2(0, 0) },
-      uColorA: { value: new THREE.Vector3(...hexToVec3("#8b5cf6")) },
-      uColorB: { value: new THREE.Vector3(...hexToVec3("#3b82f6")) },
+      uColorA: { value: new THREE.Vector3(...hexToVec3("#c9974a")) },
+      uColorB: { value: new THREE.Vector3(...hexToVec3("#c9974a")) },
       uColorC: { value: new THREE.Vector3(...hexToVec3("#05010d")) },
     }),
     []
@@ -355,10 +355,10 @@ const starsFragment = /* glsl */ `
 `;
 
 const STAR_PALETTE = [
-  new THREE.Color("#a78bfa"),
-  new THREE.Color("#818cf8"),
-  new THREE.Color("#f472b6"),
-  new THREE.Color("#67e8f9"),
+  new THREE.Color("#d3a662"),
+  new THREE.Color("#d3a662"),
+  new THREE.Color("#d3a662"),
+  new THREE.Color("#e2bd85"),
   new THREE.Color("#ffffff"),
 ];
 
@@ -391,7 +391,7 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
       uMouse: { value: new THREE.Vector2(0, 0) },
       uScroll: { value: 0 },
       uVelocity: { value: 0 },
-      uColorMod: { value: new THREE.Color("#818cf8") },
+      uColorMod: { value: new THREE.Color("#d3a662") },
       uModMix: { value: 0.0 },
     }),
     []
@@ -646,13 +646,13 @@ function FocusCore({ scroll, pointer }: { scroll: ScrollState; pointer: PointerS
   const orbUniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor: { value: new THREE.Color("#8b5cf6") },
+      uColor: { value: new THREE.Color("#c9974a") },
       uWeight: { value: 1 },
     }),
     []
   );
-  const shaftUniforms1 = useMemo(() => ({ uColor: { value: new THREE.Color("#8b5cf6") }, uOpacity: { value: 0 } }), []);
-  const shaftUniforms2 = useMemo(() => ({ uColor: { value: new THREE.Color("#22d3ee") }, uOpacity: { value: 0 } }), []);
+  const shaftUniforms1 = useMemo(() => ({ uColor: { value: new THREE.Color("#c9974a") }, uOpacity: { value: 0 } }), []);
+  const shaftUniforms2 = useMemo(() => ({ uColor: { value: new THREE.Color("#d3a662") }, uOpacity: { value: 0 } }), []);
   const tintColor = useMemo(() => new THREE.Color(), []);
 
   useFrame((state) => {
@@ -775,13 +775,13 @@ function FocusCore({ scroll, pointer }: { scroll: ScrollState; pointer: PointerS
       {/* Faint sacred-geometry cage around the orb */}
       <mesh ref={shellRef} scale={1.35}>
         <icosahedronGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#a78bfa" wireframe transparent opacity={0.09} />
+        <meshBasicMaterial color="#d3a662" wireframe transparent opacity={0.09} />
       </mesh>
       {/* Compact halo sprite — soft radial falloff, ~1/3 the old bubble */}
       <sprite ref={spriteRef} scale={[2.6, 2.6, 1]}>
         <spriteMaterial
           map={haloTexture}
-          color="#8b5cf6"
+          color="#c9974a"
           transparent
           opacity={0.32}
           depthWrite={false}
@@ -791,7 +791,7 @@ function FocusCore({ scroll, pointer }: { scroll: ScrollState; pointer: PointerS
       {/* Signal ripple ring (experience/activity chapters) */}
       <mesh ref={ringRef} rotation={[Math.PI / 2.4, 0, 0]}>
         <torusGeometry args={[1, 0.012, 8, 64]} />
-        <meshBasicMaterial color="#67e8f9" transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color="#e2bd85" transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
     </group>
   );
@@ -917,7 +917,7 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       </points>
       <lineSegments ref={lineRef}>
         <primitive object={lineGeometry} attach="geometry" />
-        <lineBasicMaterial color="#a78bfa" transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
+        <lineBasicMaterial color="#d3a662" transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
       </lineSegments>
     </group>
   );
@@ -1059,7 +1059,7 @@ function EnergyRibbons({ scroll }: { scroll: ScrollState }) {
       seeds.map((seed) => ({
         uTime: { value: 0 },
         uVelocity: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
+        uColor: { value: new THREE.Color("#c9974a") },
         uWeight: { value: 0 },
         uSeed: { value: seed },
       })),
@@ -1081,7 +1081,7 @@ function EnergyRibbons({ scroll }: { scroll: ScrollState }) {
     // Ribbons are a hero-only signature flourish — fade in during the hero
     // chapter, fade out everywhere else, continuously as the user scrolls
     const heroWeight = lerp1(chapter.id === "hero" ? 1 : 0, next.id === "hero" ? 1 : 0, blend);
-    matsRef.current.forEach((m, i) => {
+    matsRef.current.forEach((m) => {
       if (!m) return;
       const u = m.uniforms;
       u.uTime.value = t;
@@ -1184,7 +1184,7 @@ function CrystalShards({ scroll }: { scroll: ScrollState }) {
     () =>
       shards.map(() => ({
         uTime: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
+        uColor: { value: new THREE.Color("#c9974a") },
         uWeight: { value: 0 },
       })),
     [shards]
@@ -1307,7 +1307,7 @@ function WarpRings({ scroll }: { scroll: ScrollState }) {
       rings.map((r) => ({
         uTime: { value: 0 },
         uVelocity: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
+        uColor: { value: new THREE.Color("#c9974a") },
         uWeight: { value: 0 },
         uSeed: { value: r.seed },
       })),
@@ -1491,7 +1491,7 @@ export default function CosmicScene() {
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.12), transparent 60%), #030308",
+            "radial-gradient(ellipse at 50% 30%, rgba(201,151,74,0.12), transparent 60%), #030308",
         }}
         aria-hidden
       />

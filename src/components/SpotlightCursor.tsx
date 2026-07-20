@@ -70,8 +70,8 @@ export default function SpotlightCursor() {
         background: `
           radial-gradient(
             600px circle at var(--cx, -100px) var(--cy, -100px),
-            rgba(139, 92, 246, 0.06),
-            rgba(59, 130, 246, 0.03) 40%,
+            rgba(201, 151, 74, 0.06),
+            rgba(201, 151, 74, 0.03) 40%,
             transparent 70%
           )
         `,
@@ -88,8 +88,8 @@ export default function SpotlightCursor() {
           background: `
             radial-gradient(
               200px circle at var(--cx, -100px) var(--cy, -100px),
-              rgba(168, 85, 247, 0.08),
-              rgba(236, 72, 153, 0.03) 50%,
+              rgba(201, 151, 74, 0.08),
+              rgba(201, 151, 74, 0.03) 50%,
               transparent 70%
             )
           `,

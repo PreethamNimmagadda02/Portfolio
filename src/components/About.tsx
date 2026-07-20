@@ -17,7 +17,7 @@ const features = [
         pipelines and autonomous agents that reason over real-world data and make decisions without a human in the loop.
       </>
     ),
-    color: "#60a5fa",
+    color: "#d3a662",
   },
   {
     id: 1,
@@ -29,7 +29,7 @@ const features = [
         Specialist, top 20%. 1,000+ problems solved — the same rigor I bring to production systems.
       </>
     ),
-    color: "#c084fc",
+    color: "#d3a662",
   },
   {
     id: 2,

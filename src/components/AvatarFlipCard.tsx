@@ -49,7 +49,7 @@ export default function AvatarFlipCard() {
         className="absolute -inset-10 border border-blue-500/20 rounded-full pointer-events-none hidden md:block animate-spin-slow"
         style={{ animationDuration: '15s', animationDirection: 'reverse' }}
       >
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(201,151,74,0.8)]" />
       </div>
 
       {/* Floating particles - Desktop Only - simplified single rotation */}
@@ -157,7 +157,7 @@ export default function AvatarFlipCard() {
           </div>
 
           {/* Clean Grid Background */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(201,151,74,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(201,151,74,0.03)_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none" />
 
           {/* Content Container */}
           <div className="absolute inset-0 p-6 flex flex-col z-10 font-sans">
@@ -197,7 +197,7 @@ export default function AvatarFlipCard() {
                 <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1">Vision</div>
                 <div className="text-sm font-medium text-white border-l-2 border-purple-500 pl-3 py-0.5">
                   Engineering Intelligence From First Principles
-                  <span className="block text-xs text-gray-300 font-normal mt-0.5 italic">"Forging intuition from logic"</span>
+                  <span className="block text-xs text-gray-300 font-normal mt-0.5 italic">&ldquo;Forging intuition from logic&rdquo;</span>
                 </div>
               </div>
             </div>

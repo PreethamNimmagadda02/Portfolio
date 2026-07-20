@@ -5,6 +5,7 @@ import { Sparkles, ChevronDown } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { smoothScrollTo } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useMediaQuery } from "@/lib/viewport-store";
 
 // Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
 import AvatarFlipCard from "./AvatarFlipCard";
@@ -74,8 +75,13 @@ function RoleRotator() {
           setDisplayed(displayed.slice(0, -1));
         }, 40);
       } else {
-        setIsDeleting(false);
-        setRoleIndex((prev) => (prev + 1) % ROLES.length);
+        // Deferred (not called synchronously in the effect body) to match
+        // the sibling branches above and satisfy react-hooks/set-state-in-effect;
+        // 0ms keeps the role transition feeling instantaneous.
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+          setRoleIndex((prev) => (prev + 1) % ROLES.length);
+        }, 0);
       }
     }
 
@@ -339,17 +345,20 @@ export default function Hero() {
 
   // Hydration fix & Mobile detection
   const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Shared media-query store (useSyncExternalStore-backed) instead of local
+  // state + a manual resize listener — reads the live match synchronously
+  // on the client, and satisfies react-hooks/set-state-in-effect since no
+  // effect is needed to keep it in sync.
+  const isMobile = useMediaQuery("(max-width: 1023px)", false);
   const loaderDone = useLoaderDone();
 
   useEffect(() => {
+    // One-time hydration-safety flag: `mounted` gates children that must
+    // render identically on server and first client paint (avoids a
+    // hydration mismatch), then flips true post-hydration. Deliberately a
+    // direct setState in this mount-only effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
   }, []);
 
   return (
@@ -462,21 +471,21 @@ export default function Hero() {
                 value="10,000+"
                 label={<><span className="text-pink-400 font-bold">Hours</span> of Coding</>}
                 delay={1.2}
-                gradient="from-[#a855f7] via-[#ec4899] to-[#fb923c]"
+                gradient="from-[#c9974a] via-[#c9974a] to-[#fb923c]"
                 loaderDone={loaderDone}
               />
               <AnimatedStat
                 value="1,000+"
                 label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
                 delay={1}
-                gradient="from-[#3b82f6] via-[#2dd4bf] to-[#4ade80]"
+                gradient="from-[#c9974a] via-[#d3a662] to-[#4ade80]"
                 loaderDone={loaderDone}
               />
               <AnimatedStat
                 value="5+"
                 label={<><span className="text-orange-400 font-bold">Products</span> Built</>}
                 delay={1.4}
-                gradient="from-[#f43f5e] via-[#f59e0b] to-[#fbbf24]"
+                gradient="from-[#c9974a] via-[#f59e0b] to-[#fbbf24]"
                 loaderDone={loaderDone}
               />
             </>

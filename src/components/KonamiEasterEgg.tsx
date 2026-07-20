@@ -22,7 +22,7 @@ function makeParticles(count: number) {
             size: 1 + Math.random() * 2.5,
             speed: 0.6 + Math.random() * 1.2,
             delay: Math.random() * 0.4,
-            color: ["#a855f7", "#6366f1", "#ec4899", "#3b82f6", "#ffffff"][i % 5],
+            color: ["#c9974a", "#c9974a", "#c9974a", "#c9974a", "#ffffff"][i % 5],
         };
     });
 }
@@ -51,7 +51,7 @@ function makeOrbitals(count: number) {
         radiusY: 55 + Math.random() * 15,
         size: 2 + Math.random() * 2,
         duration: 2 + Math.random() * 1.5,
-        color: ["#a855f7", "#ec4899", "#6366f1", "#3b82f6", "#c084fc"][i % 5],
+        color: ["#c9974a", "#c9974a", "#c9974a", "#c9974a", "#d3a662"][i % 5],
     }));
 }
 
@@ -77,8 +77,8 @@ function MatrixColumn({ x, speed, delay, chars, fontSize, opacity }: {
                     key={i}
                     className="leading-tight"
                     style={{
-                        color: i === 0 ? "#ffffff" : `rgba(168, 85, 247, ${1 - i * 0.06})`,
-                        textShadow: i === 0 ? "0 0 12px #a855f7" : "none",
+                        color: i === 0 ? "#ffffff" : `rgba(201, 151, 74, ${1 - i * 0.06})`,
+                        textShadow: i === 0 ? "0 0 12px #c9974a" : "none",
                     }}
                 >
                     {char}
@@ -294,7 +294,7 @@ export default function KonamiEasterEgg() {
                     <motion.div
                         className="absolute inset-0"
                         style={{
-                            background: "radial-gradient(circle at 50% 50%, rgba(139,92,246,0.15) 0%, rgba(99,102,241,0.08) 30%, transparent 60%)",
+                            background: "radial-gradient(circle at 50% 50%, rgba(201,151,74,0.15) 0%, rgba(201,151,74,0.08) 30%, transparent 60%)",
                         }}
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={isExiting
@@ -404,7 +404,7 @@ export default function KonamiEasterEgg() {
                                     <motion.div
                                         className="absolute -inset-8 rounded-3xl"
                                         style={{
-                                            background: "conic-gradient(from 0deg, transparent, rgba(139,92,246,0.6), rgba(236,72,153,0.4), transparent, rgba(99,102,241,0.5), transparent)",
+                                            background: "conic-gradient(from 0deg, transparent, rgba(201,151,74,0.6), rgba(201,151,74,0.4), transparent, rgba(201,151,74,0.5), transparent)",
                                             filter: "blur(20px)",
                                         }}
                                         animate={{ rotate: 360 }}
@@ -415,7 +415,7 @@ export default function KonamiEasterEgg() {
                                     <motion.div
                                         className="absolute -inset-4 rounded-2xl"
                                         style={{
-                                            background: "radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)",
+                                            background: "radial-gradient(circle, rgba(201,151,74,0.3) 0%, transparent 70%)",
                                         }}
                                         animate={{
                                             opacity: [0.3, 0.8, 0.3],
@@ -430,11 +430,10 @@ export default function KonamiEasterEgg() {
                                     ))}
 
                                     {/* The PN badge */}
-                                    <div className="relative w-24 h-24 rounded-2xl bg-linear-to-br from-purple-500 via-pink-500 to-indigo-500 p-[2px] shadow-[0_0_80px_rgba(139,92,246,0.5)]">
+                                    <div className="relative w-24 h-24 rounded-2xl bg-linear-to-br from-purple-500 via-pink-500 to-indigo-500 p-[2px] shadow-[0_0_80px_rgba(201,151,74,0.5)]">
                                         <div className="w-full h-full rounded-[14px] bg-[#030014] flex items-center justify-center">
                                             <span
-                                                className="text-3xl font-black tracking-tight bg-linear-to-b from-white to-gray-300 bg-clip-text text-transparent"
-                                                style={{ fontFamily: "var(--font-space-grotesk)" }}
+                                                className="font-display text-3xl font-black tracking-tight bg-linear-to-b from-white to-gray-300 bg-clip-text text-transparent"
                                             >
                                                 PN
                                             </span>

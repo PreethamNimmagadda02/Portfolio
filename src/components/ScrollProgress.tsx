@@ -16,9 +16,9 @@ export default function ScrollProgress() {
       style={{
         scaleX,
         background:
-          "linear-gradient(90deg, #7c3aed, #a855f7, #ec4899, #3b82f6)",
+          "linear-gradient(90deg, #ad7f3c, #c9974a, #c9974a, #c9974a)",
         boxShadow:
-          "0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)",
+          "0 0 10px rgba(201, 151, 74, 0.5), 0 0 20px rgba(201, 151, 74, 0.3)",
       }}
     />
   );

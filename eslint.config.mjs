@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // next-pwa writes its service worker + workbox runtime into public/ at
+    // build time. They're generated, minified vendor output, not authored
+    // source, and were never meant to be linted.
+    "public/sw.js",
+    "public/workbox-*.js",
   ]),
 ]);
 

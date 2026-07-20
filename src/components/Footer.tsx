@@ -87,7 +87,7 @@ export default function Footer() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 700px 260px at 50% 0%, rgba(168,85,247,0.08), transparent 70%), radial-gradient(ellipse 400px 200px at 100% 100%, rgba(59,130,246,0.05), transparent 70%)",
+              "radial-gradient(ellipse 700px 260px at 50% 0%, rgba(201,151,74,0.08), transparent 70%), radial-gradient(ellipse 400px 200px at 100% 100%, rgba(201,151,74,0.05), transparent 70%)",
           }}
         />
 

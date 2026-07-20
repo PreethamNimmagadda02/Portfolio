@@ -45,8 +45,8 @@ const experiences: ExperienceData[] = [
     type: "work",
     skills: ["VideoRAG", "Vision-Language Models", "Empathic AI"],
     highlight: "Architected an AI Companion",
-    color: "#3b82f6",
-    accent: "#06b6d4",
+    color: "#c9974a",
+    accent: "#c9974a",
   },
   {
     id: 2,
@@ -71,8 +71,8 @@ const experiences: ExperienceData[] = [
     type: "work",
     skills: ["AI Architecture", "System Optimization", "Scalable Tech"],
     highlight: "20% Efficiency Gain",
-    color: "#8b5cf6",
-    accent: "#a78bfa",
+    color: "#c9974a",
+    accent: "#d3a662",
   },
   {
     id: 4,
@@ -84,8 +84,8 @@ const experiences: ExperienceData[] = [
     type: "organization",
     skills: ["Operations Management", "Conflict Resolution", "Community Building"],
     highlight: "Led 1,800+ Residents",
-    color: "#ec4899",
-    accent: "#f472b6",
+    color: "#c9974a",
+    accent: "#d3a662",
   },
   {
     id: 5,
@@ -246,8 +246,8 @@ export default function Experience() {
             className="absolute left-0 top-1 bottom-12 w-px origin-top"
             style={{
               scaleY: railScale,
-              background: "linear-gradient(180deg, #a78bfa, #60a5fa 40%, #22d3ee 75%, #f472b6)",
-              boxShadow: "0 0 12px rgba(167,139,250,0.5)",
+              background: "linear-gradient(180deg, #d3a662, #d3a662 40%, #d3a662 75%, #d3a662)",
+              boxShadow: "0 0 12px rgba(211,166,98,0.5)",
             }}
           />
           {experiences.map((exp, i) => (

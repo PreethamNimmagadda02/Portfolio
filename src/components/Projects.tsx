@@ -65,8 +65,8 @@ const projects: ProjectData[] = [
     links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     status: "Live",
     icon: GraduationCap,
-    color: "#a855f7",
-    accent: "#ec4899",
+    color: "#c9974a",
+    accent: "#c9974a",
   },
   {
     id: 1,
@@ -80,8 +80,8 @@ const projects: ProjectData[] = [
     },
     status: "Live",
     icon: Briefcase,
-    color: "#14b8a6",
-    accent: "#0f766e",
+    color: "#c9974a",
+    accent: "#8a6530",
   },
   {
     id: 2,
@@ -92,8 +92,8 @@ const projects: ProjectData[] = [
     links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
     icon: Ticket,
-    color: "#3b82f6",
-    accent: "#06b6d4",
+    color: "#c9974a",
+    accent: "#c9974a",
   },
   {
     id: 3,
@@ -122,8 +122,8 @@ const projects: ProjectData[] = [
     },
     status: "Complete",
     icon: Code,
-    color: "#f43f5e",
-    accent: "#e11d48",
+    color: "#c9974a",
+    accent: "#ad7f3c",
   },
   {
     id: 5,
@@ -202,9 +202,9 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
               style={{
-                color: project.status === "Live" ? "#4ade80" : "#60a5fa",
-                borderColor: project.status === "Live" ? "rgba(74,222,128,0.3)" : "rgba(96,165,250,0.3)",
-                backgroundColor: project.status === "Live" ? "rgba(74,222,128,0.08)" : "rgba(96,165,250,0.08)",
+                color: project.status === "Live" ? "#4ade80" : "#d3a662",
+                borderColor: project.status === "Live" ? "rgba(74,222,128,0.3)" : "rgba(211,166,98,0.3)",
+                backgroundColor: project.status === "Live" ? "rgba(74,222,128,0.08)" : "rgba(211,166,98,0.08)",
               }}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${project.status === "Live" ? "bg-green-400 animate-pulse" : "bg-blue-400"}`} />

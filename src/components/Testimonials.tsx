@@ -14,7 +14,7 @@ const testimonials = [
     role: "AI Research Lead, Introspect Labs",
     initials: "RV",
     gradient: "from-blue-500 to-cyan-500",
-    accent: "#06b6d4",
+    accent: "#c9974a",
     tag: "AI Systems",
   },
   {
@@ -23,7 +23,7 @@ const testimonials = [
     role: "Fellow Developer, IIT (ISM)",
     initials: "AS",
     gradient: "from-purple-500 to-pink-500",
-    accent: "#a855f7",
+    accent: "#c9974a",
     tag: "Product",
   },
   {
@@ -50,7 +50,7 @@ const testimonials = [
     role: "Event Coordinator, IIT (ISM)",
     initials: "SP",
     gradient: "from-rose-500 to-pink-500",
-    accent: "#f43f5e",
+    accent: "#c9974a",
     tag: "AI Agents",
   },
   {
@@ -59,7 +59,7 @@ const testimonials = [
     role: "FinTech Developer",
     initials: "KN",
     gradient: "from-indigo-500 to-blue-500",
-    accent: "#6366f1",
+    accent: "#c9974a",
     tag: "FinTech",
   },
   {
@@ -68,7 +68,7 @@ const testimonials = [
     role: "NLP Engineer, Language AI Startup",
     initials: "MI",
     gradient: "from-teal-500 to-emerald-500",
-    accent: "#14b8a6",
+    accent: "#c9974a",
     tag: "NLP",
   },
   {
@@ -77,7 +77,7 @@ const testimonials = [
     role: "CTO, Early-Stage Startup",
     initials: "RG",
     gradient: "from-sky-500 to-blue-500",
-    accent: "#0ea5e9",
+    accent: "#c9974a",
     tag: "DevOps",
   },
   {
@@ -86,7 +86,7 @@ const testimonials = [
     role: "Software Engineer, Google",
     initials: "DK",
     gradient: "from-violet-500 to-purple-500",
-    accent: "#8b5cf6",
+    accent: "#c9974a",
     tag: "Mentorship",
   },
   {
@@ -104,7 +104,7 @@ const testimonials = [
     role: "Hackathon Organizer, MLH",
     initials: "NS",
     gradient: "from-fuchsia-500 to-pink-500",
-    accent: "#d946ef",
+    accent: "#c9974a",
     tag: "Hackathon",
   },
   {
@@ -487,7 +487,7 @@ export default function Testimonials() {
 
   const row1 = useMemo(() => [...testimonials, ...testimonials], []);
   const rotated4 = useMemo(() => [...testimonials.slice(4), ...testimonials.slice(0, 4)], []);
-  const row2 = useMemo(() => [...rotated4, ...rotated4], []);
+  const row2 = useMemo(() => [...rotated4, ...rotated4], [rotated4]);
 
   return (
     <section

@@ -163,7 +163,7 @@
   /* ── Visible keyboard focus indicator (a11y) ──
      Only shows for keyboard nav, never on mouse click. */
   :focus-visible {
-    outline: 2px solid rgba(167, 139, 250, 0.9);
+    outline: 2px solid rgba(211, 166, 98, 0.9);
     outline-offset: 2px;
     /* No border-radius override — the outline follows each element's own
        radius, so pills get pill-shaped rings instead of boxy corners. */
@@ -188,7 +188,7 @@
     z-index: 200;
     padding: 0.75rem 1.25rem;
     border-radius: 0.75rem;
-    background: rgba(139, 92, 246, 0.95);
+    background: rgba(201, 151, 74, 0.95);
     color: #fff;
     font-weight: 600;
     transition: top 0.2s ease;
@@ -209,19 +209,19 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3);
+    background: rgba(201, 151, 74, 0.3);
     border-radius: 10px;
     transition: background 0.3s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.5);
+    background: rgba(201, 151, 74, 0.5);
   }
 
   /* Firefox scrollbar styling */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(255, 255, 255, 0.03);
+    scrollbar-color: rgba(201, 151, 74, 0.3) rgba(255, 255, 255, 0.03);
   }
 }
 
@@ -241,7 +241,12 @@
 }
 
 body {
-  font-family: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* `--font-space-grotesk` was never defined anywhere in this codebase (the
+     pre-redesign sans font) — this rule silently fell back past it straight
+     to the system-font stack, so body copy was never actually rendering in
+     Geist Sans. Fixed to reference the font that's actually loaded in
+     layout.tsx (`GeistSans.variable`). */
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow-x: hidden;
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -262,7 +267,7 @@ h6 {
 h1 {
   font-weight: 800;
   letter-spacing: -0.03em;
-  text-shadow: 0 0 80px rgba(139, 92, 246, 0.3);
+  text-shadow: 0 0 80px rgba(201, 151, 74, 0.3);
 }
 
 /* Pulse glow — opacity-only on a pseudo layer (see .pulse-glow-layer).
@@ -273,7 +278,7 @@ h1 {
   inset: -2px;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.45), transparent 70%);
+  background: radial-gradient(closest-side, rgba(201, 151, 74, 0.45), transparent 70%);
   z-index: -1;
   opacity: 0.6;
   animation: pulse-glow 2s ease-in-out infinite;
@@ -612,7 +617,7 @@ h1 {
   border-radius: 999px;
   opacity: 0;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9));
-  box-shadow: 0 0 12px 2px rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 12px 2px rgba(211, 166, 98, 0.6);
   pointer-events: none;
 }
 

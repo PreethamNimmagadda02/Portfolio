@@ -420,9 +420,9 @@ export default function GitHubStats() {
       if (aggregatedLangs.length === 0) {
         // Fallback if repos failed due to rate limits
         setLanguages([
-          { name: "TypeScript", percentage: 50, color: "#3178c6" },
-          { name: "JavaScript", percentage: 40, color: "#f1e05a" },
-          { name: "Python", percentage: 10, color: "#3572A5" },
+          { name: "TypeScript", percentage: 50, color: LANG_COLORS.TypeScript },
+          { name: "JavaScript", percentage: 40, color: LANG_COLORS.JavaScript },
+          { name: "Python", percentage: 10, color: LANG_COLORS.Python },
         ]);
       } else {
         setLanguages(aggregatedLangs);
@@ -439,10 +439,10 @@ export default function GitHubStats() {
         activeDays: 245,
       });
       setLanguages([
-        { name: "TypeScript", percentage: 42, color: "#3178c6" },
-        { name: "JavaScript", percentage: 25, color: "#f1e05a" },
-        { name: "Python", percentage: 17, color: "#3572A5" },
-        { name: "Other", percentage: 16, color: "#8b5cf6" },
+        { name: "TypeScript", percentage: 42, color: LANG_COLORS.TypeScript },
+        { name: "JavaScript", percentage: 25, color: LANG_COLORS.JavaScript },
+        { name: "Python", percentage: 17, color: LANG_COLORS.Python },
+        { name: "Other", percentage: 16, color: LANG_COLORS.Other },
       ]);
     } finally {
       setLoading(false);
@@ -507,7 +507,7 @@ export default function GitHubStats() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle at 25% 30%, rgba(168,85,247,0.06), transparent 45%), radial-gradient(circle at 75% 70%, rgba(59,130,246,0.05), transparent 45%)",
+            "radial-gradient(circle at 25% 30%, rgba(201,151,74,0.06), transparent 45%), radial-gradient(circle at 75% 70%, rgba(201,151,74,0.05), transparent 45%)",
         }}
       />
 

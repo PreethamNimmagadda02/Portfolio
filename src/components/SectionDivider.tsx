@@ -15,8 +15,8 @@ interface SectionDividerProps {
 
 export default function SectionDivider({
   variant = "wave",
-  colorFrom = "rgba(139, 92, 246, 0.15)",
-  colorTo = "rgba(59, 130, 246, 0.1)",
+  colorFrom = "rgba(201, 151, 74, 0.15)",
+  colorTo = "rgba(201, 151, 74, 0.1)",
   flip = false,
 }: SectionDividerProps) {
   const ref = useRef<HTMLDivElement>(null);

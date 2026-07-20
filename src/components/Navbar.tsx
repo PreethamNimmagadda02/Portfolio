@@ -52,8 +52,8 @@ function NavParticle({ index }: { index: number }) {
     height: s.height,
     borderRadius: "50%",
     background: index % 2 === 0
-      ? "rgba(139, 92, 246, 0.6)"
-      : "rgba(59, 130, 246, 0.5)",
+      ? "rgba(201, 151, 74, 0.6)"
+      : "rgba(201, 151, 74, 0.5)",
     left: s.left,
     top: s.top,
     animation: s.animation,
@@ -235,7 +235,7 @@ export default function Navbar() {
           className={cn(
             "relative rounded-full transition-all duration-700 overflow-hidden will-change-transform",
             scrolled
-              ? "px-3 sm:px-4 py-2 bg-black/95 border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
+              ? "px-3 sm:px-4 py-2 bg-black/95 border border-white/15 shadow-[0_8px_40px_rgba(201,151,74,0.2),0_0_80px_rgba(201,151,74,0.06)]"
               : "px-4 sm:px-6 py-3 bg-black/50 border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
           )}
         >
@@ -244,7 +244,7 @@ export default function Navbar() {
             className="pointer-events-none absolute inset-0 rounded-full z-0 transition-opacity duration-500"
             style={{
               opacity: "var(--spot-opacity, 0)",
-              background: `radial-gradient(circle 200px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(139,92,246,0.18), rgba(59,130,246,0.06) 50%, transparent 100%)`,
+              background: `radial-gradient(circle 200px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(201,151,74,0.18), rgba(201,151,74,0.06) 50%, transparent 100%)`,
             }}
           />
 
@@ -253,7 +253,7 @@ export default function Navbar() {
             className="pointer-events-none absolute inset-0 rounded-full z-0 transition-opacity duration-500"
             style={{
               opacity: "var(--spot-opacity, 0)",
-              background: `radial-gradient(circle 140px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(139,92,246,0.4), transparent 70%)`,
+              background: `radial-gradient(circle 140px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(201,151,74,0.4), transparent 70%)`,
               mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
               WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
               maskComposite: "exclude",
@@ -344,9 +344,9 @@ export default function Navbar() {
                         layoutId="activeNav"
                         className="absolute inset-0 rounded-full"
                         style={{
-                          background: "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.15))",
-                          border: "1px solid rgba(139,92,246,0.4)",
-                          boxShadow: "0 0 16px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.3)",
+                          background: "linear-gradient(135deg, rgba(201,151,74,0.3), rgba(201,151,74,0.15))",
+                          border: "1px solid rgba(201,151,74,0.4)",
+                          boxShadow: "0 0 16px rgba(201,151,74,0.2), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.3)",
                         }}
                         transition={{ type: "spring", stiffness: 350, damping: 28 }}
                       />
@@ -355,8 +355,8 @@ export default function Navbar() {
                       className={cn(
                         "relative z-10 inline-block transition-all duration-200",
                         isActive
-                          ? "text-white drop-shadow-[0_0_10px_rgba(139,92,246,0.6)]"
-                          : "text-gray-300 group-hover/link:text-white group-hover/link:-translate-y-[2px] group-hover/link:drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]"
+                          ? "text-white drop-shadow-[0_0_10px_rgba(201,151,74,0.6)]"
+                          : "text-gray-300 group-hover/link:text-white group-hover/link:-translate-y-[2px] group-hover/link:drop-shadow-[0_0_6px_rgba(201,151,74,0.3)]"
                       )}
                     >
                       {link.name}
@@ -393,8 +393,8 @@ export default function Navbar() {
                 )}
                 style={{
                   boxShadow: activeSection === "contact"
-                    ? "0 0 30px rgba(139,92,246,0.55), 0 0 60px rgba(139,92,246,0.15), inset 0 1px 0 rgba(255,255,255,0.2)"
-                    : "0 4px 16px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+                    ? "0 0 30px rgba(201,151,74,0.55), 0 0 60px rgba(201,151,74,0.15), inset 0 1px 0 rgba(255,255,255,0.2)"
+                    : "0 4px 16px rgba(201,151,74,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
                 }}
               >
                 {/* Button shimmer */}

@@ -22,7 +22,7 @@ const achievements: Achievement[] = [
     description: "Reached 1450 rating, outperforming 80% of global competitive programmers.",
     stat: "Top 20%",
     icon: Code,
-    color: "#22d3ee",
+    color: "#d3a662",
   },
   {
     id: 1,
@@ -46,7 +46,7 @@ const achievements: Achievement[] = [
     description: "Across Codeforces, CodeChef, and HackerRank — depth across every major judge.",
     stat: "1000+",
     icon: Flame,
-    color: "#f472b6",
+    color: "#d3a662",
   },
 ];
 
