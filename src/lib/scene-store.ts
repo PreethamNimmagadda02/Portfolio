@@ -83,9 +83,12 @@ let activeCategories = new Set<string>();
 const listeners = new Set<() => void>();
 
 export function toggleSkillCategory(cat: string) {
-  const next = new Set(activeCategories);
-  if (next.has(cat)) next.delete(cat);
-  else next.add(cat);
+  const next = new Set<string>();
+  // If it's not already the only active category, select it (exclusive)
+  // Otherwise, it gets toggled off (leaving next empty)
+  if (!activeCategories.has(cat)) {
+    next.add(cat);
+  }
   activeCategories = next;
   for (const l of listeners) l();
 }
