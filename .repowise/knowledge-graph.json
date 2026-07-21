@@ -3,7 +3,7 @@
   "project": {
     "name": "Portfolio",
     "is_monorepo": false,
-    "total_files": 65,
+    "total_files": 67,
     "entry_points": [],
     "tech_stack": [
       {
@@ -44,8 +44,8 @@
       "symbolCount": 0,
       "lineCount": 23,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 8,
+      "pagerank": 0.007472,
+      "communityId": 7,
       "tags": [
         "low_signal_summary"
       ],
@@ -59,8 +59,8 @@
       "symbolCount": 0,
       "lineCount": 6,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 9,
+      "pagerank": 0.007472,
+      "communityId": 8,
       "tags": [
         "low_signal_summary"
       ],
@@ -74,8 +74,8 @@
       "symbolCount": 0,
       "lineCount": 188,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 10,
+      "pagerank": 0.007472,
+      "communityId": 9,
       "tags": [],
       "summary": "Repository instructions and context for AI coding agents.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -88,8 +88,8 @@
       "symbolCount": 0,
       "lineCount": 16,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 11,
+      "pagerank": 0.007472,
+      "communityId": 10,
       "tags": [
         "config",
         "low_signal_summary"
@@ -104,8 +104,8 @@
       "symbolCount": 0,
       "lineCount": 21,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 12,
+      "pagerank": 0.007472,
+      "communityId": 11,
       "tags": [
         "config",
         "ci"
@@ -120,8 +120,8 @@
       "symbolCount": 0,
       "lineCount": 37,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 13,
+      "pagerank": 0.007472,
+      "communityId": 12,
       "tags": [
         "config",
         "ci"
@@ -136,8 +136,8 @@
       "symbolCount": 0,
       "lineCount": 8,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 14,
+      "pagerank": 0.007472,
+      "communityId": 13,
       "tags": [
         "config",
         "low_signal_summary"
@@ -152,8 +152,8 @@
       "symbolCount": 0,
       "lineCount": 76,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 15,
+      "pagerank": 0.007472,
+      "communityId": 14,
       "tags": [],
       "summary": "Repository instructions and context for AI coding agents."
     },
@@ -165,10 +165,42 @@
       "symbolCount": 0,
       "lineCount": 65,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 16,
+      "pagerank": 0.007472,
+      "communityId": 15,
       "tags": [],
       "summary": "Project overview and entry point for new readers."
+    },
+    {
+      "id": "file:docs/superpowers/plans/2026-07-19-portfolio-redesign.md",
+      "type": "document",
+      "filePath": "docs/superpowers/plans/2026-07-19-portfolio-redesign.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 1585,
+      "complexity": "complex",
+      "pagerank": 0.007472,
+      "communityId": 16,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: 2026-07-19-portfolio-redesign.md.",
+      "primaryOwner": "PreethamNimmagadda02"
+    },
+    {
+      "id": "file:docs/superpowers/specs/2026-07-19-portfolio-redesign-design.md",
+      "type": "document",
+      "filePath": "docs/superpowers/specs/2026-07-19-portfolio-redesign-design.md",
+      "language": "markdown",
+      "symbolCount": 0,
+      "lineCount": 291,
+      "complexity": "moderate",
+      "pagerank": 0.007472,
+      "communityId": 17,
+      "tags": [
+        "low_signal_summary"
+      ],
+      "summary": "Documentation: 2026-07-19-portfolio-redesign-design.md.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:eslint.config.mjs",
@@ -178,8 +210,8 @@
       "symbolCount": 0,
       "lineCount": 11,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 4,
+      "pagerank": 0.007472,
+      "communityId": 3,
       "tags": [],
       "summary": "Application module eslint.config."
     },
@@ -191,8 +223,8 @@
       "symbolCount": 0,
       "lineCount": 27,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 17,
+      "pagerank": 0.007472,
+      "communityId": 18,
       "tags": [
         "config",
         "low_signal_summary"
@@ -207,8 +239,8 @@
       "symbolCount": 1,
       "lineCount": 45,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 5,
+      "pagerank": 0.007472,
+      "communityId": 4,
       "tags": [],
       "summary": "Application module next.config (1 symbols)."
     },
@@ -220,8 +252,8 @@
       "symbolCount": 0,
       "lineCount": 3,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 18,
+      "pagerank": 0.007472,
+      "communityId": 19,
       "tags": [
         "config",
         "low_signal_summary"
@@ -236,8 +268,8 @@
       "symbolCount": 0,
       "lineCount": 298,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 19,
+      "pagerank": 0.007472,
+      "communityId": 20,
       "tags": [
         "low_signal_summary"
       ],
@@ -251,8 +283,8 @@
       "symbolCount": 0,
       "lineCount": 278,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 20,
+      "pagerank": 0.007472,
+      "communityId": 21,
       "tags": [
         "low_signal_summary"
       ],
@@ -266,8 +298,8 @@
       "symbolCount": 0,
       "lineCount": 364,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 21,
+      "pagerank": 0.007472,
+      "communityId": 22,
       "tags": [
         "low_signal_summary"
       ],
@@ -281,8 +313,8 @@
       "symbolCount": 0,
       "lineCount": 346,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 22,
+      "pagerank": 0.007472,
+      "communityId": 23,
       "tags": [
         "low_signal_summary"
       ],
@@ -296,8 +328,8 @@
       "symbolCount": 0,
       "lineCount": 295,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 23,
+      "pagerank": 0.007472,
+      "communityId": 24,
       "tags": [
         "low_signal_summary"
       ],
@@ -311,8 +343,8 @@
       "symbolCount": 0,
       "lineCount": 341,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 24,
+      "pagerank": 0.007472,
+      "communityId": 25,
       "tags": [
         "low_signal_summary"
       ],
@@ -326,8 +358,8 @@
       "symbolCount": 0,
       "lineCount": 316,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 25,
+      "pagerank": 0.007472,
+      "communityId": 26,
       "tags": [
         "low_signal_summary"
       ],
@@ -341,8 +373,8 @@
       "symbolCount": 0,
       "lineCount": 22,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 26,
+      "pagerank": 0.007472,
+      "communityId": 27,
       "tags": [
         "config"
       ],
@@ -356,8 +388,8 @@
       "symbolCount": 1,
       "lineCount": 2,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 27,
+      "pagerank": 0.007472,
+      "communityId": 28,
       "tags": [],
       "summary": "Application module postcss.config (1 symbols)."
     },
@@ -369,8 +401,8 @@
       "symbolCount": 0,
       "lineCount": 12,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 28,
+      "pagerank": 0.007472,
+      "communityId": 29,
       "tags": [
         "config",
         "low_signal_summary"
@@ -385,11 +417,10 @@
       "symbolCount": 1,
       "lineCount": 226,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 29,
+      "pagerank": 0.007472,
+      "communityId": 30,
       "tags": [],
-      "summary": "Application module sw defining a.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "Application module sw defining a."
     },
     {
       "id": "file:public/workbox-4754cb34.js",
@@ -399,8 +430,8 @@
       "symbolCount": 81,
       "lineCount": 589,
       "complexity": "complex",
-      "pagerank": 0.007578,
-      "communityId": 30,
+      "pagerank": 0.007472,
+      "communityId": 31,
       "tags": [],
       "summary": "Application module workbox-4754cb34 defining e, s, constructor."
     },
@@ -409,13 +440,14 @@
       "type": "file",
       "filePath": "src/app/layout.tsx",
       "language": "typescript",
-      "symbolCount": 4,
-      "lineCount": 147,
+      "symbolCount": 5,
+      "lineCount": 153,
       "complexity": "moderate",
-      "pagerank": 0.007578,
+      "pagerank": 0.007472,
       "communityId": 0,
       "tags": [],
-      "summary": "Application module layout defining RootLayout."
+      "summary": "Application module layout defining RootLayout.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/app/page.tsx",
@@ -425,8 +457,8 @@
       "symbolCount": 2,
       "lineCount": 111,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 3,
+      "pagerank": 0.007472,
+      "communityId": 1,
       "tags": [],
       "summary": "Application module page defining SectionSkeleton, Home."
     },
@@ -438,8 +470,8 @@
       "symbolCount": 2,
       "lineCount": 8,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 5,
+      "pagerank": 0.007472,
+      "communityId": 4,
       "tags": [],
       "summary": "Application module robots defining robots."
     },
@@ -451,8 +483,8 @@
       "symbolCount": 2,
       "lineCount": 25,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 5,
+      "pagerank": 0.007472,
+      "communityId": 4,
       "tags": [],
       "summary": "Application module sitemap defining sitemap."
     },
@@ -462,10 +494,10 @@
       "filePath": "src/components/About.tsx",
       "language": "typescript",
       "symbolCount": 5,
-      "lineCount": 222,
+      "lineCount": 202,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 1,
+      "pagerank": 0.007472,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module About defining AnimatedCounter, PillarCard, About.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -476,10 +508,10 @@
       "filePath": "src/components/Achievements.tsx",
       "language": "typescript",
       "symbolCount": 5,
-      "lineCount": 145,
+      "lineCount": 146,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 1,
+      "pagerank": 0.007472,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module Achievements defining Achievement, StatNumber, AchievementCard.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -492,11 +524,10 @@
       "symbolCount": 2,
       "lineCount": 278,
       "complexity": "moderate",
-      "pagerank": 0.008596,
+      "pagerank": 0.008475,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module AvatarFlipCard defining AvatarFlipCard.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module AvatarFlipCard defining AvatarFlipCard."
     },
     {
       "id": "file:src/components/CodingProfiles.tsx",
@@ -504,10 +535,10 @@
       "filePath": "src/components/CodingProfiles.tsx",
       "language": "typescript",
       "symbolCount": 11,
-      "lineCount": 454,
+      "lineCount": 482,
       "complexity": "moderate",
-      "pagerank": 0.008652,
-      "communityId": 1,
+      "pagerank": 0.00853,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module CodingProfiles defining PlatformUserStats, PlatformQuestionStats, BadgeStat.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -518,10 +549,10 @@
       "filePath": "src/components/Contact.tsx",
       "language": "typescript",
       "symbolCount": 7,
-      "lineCount": 639,
+      "lineCount": 640,
       "complexity": "complex",
-      "pagerank": 0.008383,
-      "communityId": 1,
+      "pagerank": 0.008265,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module Contact defining Toast, FloatingInput, FloatingTextarea.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -534,11 +565,10 @@
       "symbolCount": 6,
       "lineCount": 245,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 1,
+      "pagerank": 0.007472,
+      "communityId": 2,
       "tags": [],
-      "summary": "UI module Experience defining ExperienceData, getPosition, AnimatedPlanet.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module Experience defining ExperienceData, getPosition, AnimatedPlanet."
     },
     {
       "id": "file:src/components/Footer.tsx",
@@ -546,9 +576,9 @@
       "filePath": "src/components/Footer.tsx",
       "language": "typescript",
       "symbolCount": 4,
-      "lineCount": 291,
+      "lineCount": 298,
       "complexity": "moderate",
-      "pagerank": 0.008115,
+      "pagerank": 0.008049,
       "communityId": 0,
       "tags": [],
       "summary": "UI module Footer defining LocalTime, Footer.",
@@ -560,10 +590,10 @@
       "filePath": "src/components/GitHubStats.tsx",
       "language": "typescript",
       "symbolCount": 16,
-      "lineCount": 759,
+      "lineCount": 760,
       "complexity": "complex",
-      "pagerank": 0.007578,
-      "communityId": 1,
+      "pagerank": 0.007472,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module GitHubStats defining ContributionDay, ContributionsResponse, GitHubRepo.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -574,9 +604,9 @@
       "filePath": "src/components/Hero.tsx",
       "language": "typescript",
       "symbolCount": 11,
-      "lineCount": 495,
+      "lineCount": 469,
       "complexity": "moderate",
-      "pagerank": 0.008383,
+      "pagerank": 0.008265,
       "communityId": 0,
       "tags": [],
       "summary": "UI module Hero defining useLoaderDone, RoleRotator, CurrentlyBuilding.",
@@ -590,11 +620,10 @@
       "symbolCount": 2,
       "lineCount": 109,
       "complexity": "moderate",
-      "pagerank": 0.013704,
-      "communityId": 1,
+      "pagerank": 0.013511,
+      "communityId": 2,
       "tags": [],
-      "summary": "UI module InteractiveCard defining InteractiveCardProps, InteractiveCard.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module InteractiveCard defining InteractiveCardProps, InteractiveCard."
     },
     {
       "id": "file:src/components/KonamiEasterEgg.tsx",
@@ -604,7 +633,7 @@
       "symbolCount": 10,
       "lineCount": 558,
       "complexity": "complex",
-      "pagerank": 0.008115,
+      "pagerank": 0.008049,
       "communityId": 0,
       "tags": [],
       "summary": "UI module KonamiEasterEgg defining makeParticles, makeMatrixColumns, makeOrbitals."
@@ -617,7 +646,7 @@
       "symbolCount": 2,
       "lineCount": 39,
       "complexity": "simple",
-      "pagerank": 0.010819,
+      "pagerank": 0.010674,
       "communityId": 0,
       "tags": [],
       "summary": "UI module MagneticButton defining MagneticButtonProps, MagneticButton."
@@ -630,11 +659,10 @@
       "symbolCount": 5,
       "lineCount": 521,
       "complexity": "complex",
-      "pagerank": 0.008115,
+      "pagerank": 0.008049,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module Navbar defining NavParticleStyle, makeNavParticleStyle, NavParticle.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module Navbar defining NavParticleStyle, makeNavParticleStyle, NavParticle."
     },
     {
       "id": "file:src/components/NoiseBackground.tsx",
@@ -644,11 +672,10 @@
       "symbolCount": 1,
       "lineCount": 18,
       "complexity": "simple",
-      "pagerank": 0.008383,
-      "communityId": 3,
+      "pagerank": 0.008265,
+      "communityId": 1,
       "tags": [],
-      "summary": "UI module NoiseBackground defining NoiseBackground.",
-      "primaryOwner": "PreethamNimmagadda02"
+      "summary": "UI module NoiseBackground defining NoiseBackground."
     },
     {
       "id": "file:src/components/PageLoader.tsx",
@@ -658,10 +685,11 @@
       "symbolCount": 3,
       "lineCount": 263,
       "complexity": "moderate",
-      "pagerank": 0.008115,
+      "pagerank": 0.008049,
       "communityId": 0,
       "tags": [],
-      "summary": "UI module PageLoader defining Star, makeStars, PageLoader."
+      "summary": "UI module PageLoader defining Star, makeStars, PageLoader.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/PerformanceProvider.tsx",
@@ -671,8 +699,8 @@
       "symbolCount": 1,
       "lineCount": 6,
       "complexity": "simple",
-      "pagerank": 0.008115,
-      "communityId": 7,
+      "pagerank": 0.008049,
+      "communityId": 6,
       "tags": [],
       "summary": "UI module PerformanceProvider defining PerformanceProvider."
     },
@@ -682,9 +710,9 @@
       "filePath": "src/components/Projects.tsx",
       "language": "typescript",
       "symbolCount": 4,
-      "lineCount": 251,
+      "lineCount": 266,
       "complexity": "moderate",
-      "pagerank": 0.007578,
+      "pagerank": 0.007472,
       "communityId": 0,
       "tags": [],
       "summary": "UI module Projects defining ProjectData, getPosition, AnimatedPlanet.",
@@ -698,8 +726,8 @@
       "symbolCount": 3,
       "lineCount": 72,
       "complexity": "simple",
-      "pagerank": 0.019515,
-      "communityId": 1,
+      "pagerank": 0.019029,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module Reveal defining InViewClass, RiseWords, SectionKicker."
     },
@@ -711,7 +739,7 @@
       "symbolCount": 1,
       "lineCount": 15,
       "complexity": "simple",
-      "pagerank": 0.008115,
+      "pagerank": 0.008049,
       "communityId": 0,
       "tags": [],
       "summary": "UI module ScrollProgress defining ScrollProgress."
@@ -724,8 +752,8 @@
       "symbolCount": 2,
       "lineCount": 32,
       "complexity": "simple",
-      "pagerank": 0.008383,
-      "communityId": 3,
+      "pagerank": 0.008265,
+      "communityId": 1,
       "tags": [],
       "summary": "UI module ScrollReveal defining ScrollRevealProps, ScrollReveal."
     },
@@ -737,8 +765,8 @@
       "symbolCount": 3,
       "lineCount": 89,
       "complexity": "simple",
-      "pagerank": 0.008383,
-      "communityId": 3,
+      "pagerank": 0.008265,
+      "communityId": 2,
       "tags": [],
       "summary": "UI module SectionDivider defining SectionDividerProps, SectionDivider."
     },
@@ -747,13 +775,14 @@
       "type": "file",
       "filePath": "src/components/Skills.tsx",
       "language": "typescript",
-      "symbolCount": 4,
-      "lineCount": 189,
+      "symbolCount": 5,
+      "lineCount": 250,
       "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 2,
+      "pagerank": 0.007472,
+      "communityId": 1,
       "tags": [],
-      "summary": "UI module Skills defining AnimatedCounter, CategoryChip, SkillTag."
+      "summary": "UI module Skills defining AnimatedCounter, CategoryChip, SkillTag.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/SmoothScroll.tsx",
@@ -761,12 +790,13 @@
       "filePath": "src/components/SmoothScroll.tsx",
       "language": "typescript",
       "symbolCount": 1,
-      "lineCount": 37,
+      "lineCount": 33,
       "complexity": "simple",
-      "pagerank": 0.008115,
-      "communityId": 6,
+      "pagerank": 0.008049,
+      "communityId": 5,
       "tags": [],
-      "summary": "UI module SmoothScroll defining SmoothScroll."
+      "summary": "UI module SmoothScroll defining SmoothScroll.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/SpotlightCursor.tsx",
@@ -776,8 +806,8 @@
       "symbolCount": 1,
       "lineCount": 80,
       "complexity": "simple",
-      "pagerank": 0.008115,
-      "communityId": 2,
+      "pagerank": 0.007472,
+      "communityId": 1,
       "tags": [],
       "summary": "UI module SpotlightCursor defining SpotlightCursor."
     },
@@ -786,13 +816,14 @@
       "type": "file",
       "filePath": "src/components/Testimonials.tsx",
       "language": "typescript",
-      "symbolCount": 4,
-      "lineCount": 300,
-      "complexity": "moderate",
-      "pagerank": 0.007578,
-      "communityId": 1,
+      "symbolCount": 9,
+      "lineCount": 503,
+      "complexity": "complex",
+      "pagerank": 0.007472,
+      "communityId": 2,
       "tags": [],
-      "summary": "UI module Testimonials defining TestimonialCard, MobileCarousel, Testimonials."
+      "summary": "UI module Testimonials defining TestimonialCard, MobileCarousel, Testimonials.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/components/ThemeToggle.tsx",
@@ -802,7 +833,7 @@
       "symbolCount": 4,
       "lineCount": 109,
       "complexity": "moderate",
-      "pagerank": 0.009494,
+      "pagerank": 0.009417,
       "communityId": 0,
       "tags": [],
       "summary": "UI module ThemeToggle defining useTheme, ThemeProvider, ThemeToggle."
@@ -813,10 +844,10 @@
       "filePath": "src/components/scene/CosmicScene.tsx",
       "language": "typescript",
       "symbolCount": 32,
-      "lineCount": 1397,
+      "lineCount": 1426,
       "complexity": "complex",
-      "pagerank": 0.007578,
-      "communityId": 2,
+      "pagerank": 0.007472,
+      "communityId": 1,
       "tags": [],
       "summary": "UI module CosmicScene defining AuroraNebula, GPUStars, ShootingStar.",
       "primaryOwner": "PreethamNimmagadda02"
@@ -829,8 +860,8 @@
       "symbolCount": 2,
       "lineCount": 17,
       "complexity": "simple",
-      "pagerank": 0.01274,
-      "communityId": 2,
+      "pagerank": 0.012411,
+      "communityId": 1,
       "tags": [],
       "summary": "Application module use-mobile defining useIsMobile."
     },
@@ -842,8 +873,8 @@
       "symbolCount": 1,
       "lineCount": 8,
       "complexity": "simple",
-      "pagerank": 0.010117,
-      "communityId": 2,
+      "pagerank": 0.009975,
+      "communityId": 1,
       "tags": [],
       "summary": "Application module use-reduced-motion defining useReducedMotion."
     },
@@ -855,7 +886,7 @@
       "symbolCount": 0,
       "lineCount": 24,
       "complexity": "simple",
-      "pagerank": 0.054545,
+      "pagerank": 0.053732,
       "communityId": 0,
       "tags": [],
       "summary": "Service module motion."
@@ -868,8 +899,8 @@
       "symbolCount": 3,
       "lineCount": 64,
       "complexity": "simple",
-      "pagerank": 0.014476,
-      "communityId": 7,
+      "pagerank": 0.014313,
+      "communityId": 6,
       "tags": [],
       "summary": "Service module performance-monitoring defining log, usePerformanceMonitoring."
     },
@@ -879,12 +910,13 @@
       "filePath": "src/lib/scene-store.ts",
       "language": "typescript",
       "symbolCount": 11,
-      "lineCount": 127,
+      "lineCount": 130,
       "complexity": "moderate",
-      "pagerank": 0.009582,
-      "communityId": 2,
+      "pagerank": 0.009236,
+      "communityId": 1,
       "tags": [],
-      "summary": "Service module scene-store defining SceneChapter, hexToVec3, lerp3."
+      "summary": "Service module scene-store defining SceneChapter, hexToVec3, lerp3.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/lib/skills-data.ts",
@@ -892,12 +924,13 @@
       "filePath": "src/lib/skills-data.ts",
       "language": "typescript",
       "symbolCount": 5,
-      "lineCount": 51,
+      "lineCount": 95,
       "complexity": "moderate",
-      "pagerank": 0.009582,
-      "communityId": 2,
+      "pagerank": 0.009236,
+      "communityId": 1,
       "tags": [],
-      "summary": "Service module skills-data defining SkillItem, getCategoryColor."
+      "summary": "Service module skills-data defining SkillItem, getCategoryColor.",
+      "primaryOwner": "PreethamNimmagadda02"
     },
     {
       "id": "file:src/lib/utils.ts",
@@ -907,7 +940,7 @@
       "symbolCount": 9,
       "lineCount": 67,
       "complexity": "moderate",
-      "pagerank": 0.026318,
+      "pagerank": 0.025887,
       "communityId": 0,
       "tags": [],
       "summary": "Service module utils defining cn, seededRandom, markSceneWarmed."
@@ -920,8 +953,8 @@
       "symbolCount": 27,
       "lineCount": 231,
       "complexity": "complex",
-      "pagerank": 0.034711,
-      "communityId": 2,
+      "pagerank": 0.033946,
+      "communityId": 1,
       "tags": [],
       "summary": "Service module viewport-store defining PointerState, handlePointerMove, ensurePointerListener."
     },
@@ -933,8 +966,8 @@
       "symbolCount": 0,
       "lineCount": 16,
       "complexity": "simple",
-      "pagerank": 0.007578,
-      "communityId": 32,
+      "pagerank": 0.007472,
+      "communityId": 33,
       "tags": [
         "config"
       ],
@@ -1281,13 +1314,6 @@
     {
       "source": "file:src/app/layout.tsx",
       "target": "file:src/components/SmoothScroll.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 1.0
-    },
-    {
-      "source": "file:src/app/layout.tsx",
-      "target": "file:src/components/SpotlightCursor.tsx",
       "type": "imports",
       "direction": "forward",
       "weight": 1.0
@@ -1938,6 +1964,13 @@
     },
     {
       "source": "file:src/components/Skills.tsx",
+      "target": "file:external:lucide-react",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/components/Skills.tsx",
       "target": "file:external:react",
       "type": "imports",
       "direction": "forward",
@@ -2347,7 +2380,7 @@
     {
       "id": "layer:ui",
       "name": "Interactive Visual Components",
-      "description": "A collection of reusable React components designed for dynamic user interface elements and animated visual effects.",
+      "description": "A collection of reusable React components designed for dynamic animations and interactive user interface elements.",
       "nodeIds": [
         "file:openwiki/components/structure.md",
         "file:src/components/About.tsx",
@@ -2383,8 +2416,8 @@
     },
     {
       "id": "layer:application",
-      "name": "Project Configuration Environment",
-      "description": "A set of environment settings, build configurations, and utility hooks that define the project's operational foundation.",
+      "name": "Project Infrastructure Configuration",
+      "description": "The foundational environment settings, build configurations, and custom hooks required to manage the application lifecycle.",
       "nodeIds": [
         "file:.mcp.json",
         "file:CLAUDE.md",
@@ -2418,7 +2451,7 @@
     {
       "id": "layer:config",
       "name": "Automation and Workflow Rules",
-      "description": "Infrastructure files and CI/CD definitions that govern project automation, deployment pipelines, and agent-based workflows.",
+      "description": "Standardized operational procedures and CI/CD pipelines governing automated deployment and agent-based development workflows.",
       "nodeIds": [
         "file:.agents/rules/graphify.md",
         "file:.agents/workflows/graphify.md",
@@ -2433,7 +2466,7 @@
     {
       "id": "layer:service",
       "name": "Core Application Utilities",
-      "description": "Shared logic modules providing state management, performance monitoring, and data handling for the application.",
+      "description": "Shared logic and state management helpers that provide performance monitoring, animation primitives, and data access for the frontend.",
       "nodeIds": [
         "file:src/lib/motion.ts",
         "file:src/lib/performance-monitoring.ts",
@@ -2443,6 +2476,17 @@
         "file:src/lib/viewport-store.ts"
       ],
       "display_order": 3,
+      "order_basis": "imports"
+    },
+    {
+      "id": "layer:docs-tooling",
+      "name": "Design Specification Documentation",
+      "description": "Strategic planning documents and technical design specifications for the portfolio redesign project.",
+      "nodeIds": [
+        "file:docs/superpowers/plans/2026-07-19-portfolio-redesign.md",
+        "file:docs/superpowers/specs/2026-07-19-portfolio-redesign-design.md"
+      ],
+      "display_order": 4,
       "order_basis": "imports"
     }
   ],
@@ -2455,8 +2499,7 @@
       "depth": 0,
       "kind": "overview",
       "reason": "Start here for the end-to-end picture before diving into the code.",
-      "layer_id": "layer:application",
-      "wikiPageIds": []
+      "layer_id": "layer:application"
     },
     {
       "order": 2,
@@ -2466,8 +2509,7 @@
       "depth": 0,
       "kind": "code",
       "reason": "The walk's anchor \u2014 its imports fan out the widest in a repo with no single entry point.",
-      "layer_id": "layer:application",
-      "wikiPageIds": []
+      "layer_id": "layer:application"
     },
     {
       "order": 3,
@@ -2477,8 +2519,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:service",
-      "wikiPageIds": []
+      "layer_id": "layer:service"
     },
     {
       "order": 4,
@@ -2488,8 +2529,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 5,
@@ -2499,8 +2539,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 6,
@@ -2510,8 +2549,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 7,
@@ -2521,8 +2559,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 8,
@@ -2532,8 +2569,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 9,
@@ -2543,8 +2579,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 10,
@@ -2554,8 +2589,7 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 11,
@@ -2565,19 +2599,17 @@
       "depth": 1,
       "kind": "code",
       "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "layer_id": "layer:ui"
     },
     {
       "order": 12,
-      "target_path": "src/components/SpotlightCursor.tsx",
+      "target_path": "src/lib/utils.ts",
       "page_type": "file_page",
-      "title": "SpotlightCursor.tsx",
-      "depth": 1,
+      "title": "utils.ts",
+      "depth": 2,
       "kind": "code",
-      "reason": "Directly imported by the anchor above; a core collaborator.",
-      "layer_id": "layer:ui",
-      "wikiPageIds": []
+      "reason": "Reached 2 imports deep \u2014 a supporting building block.",
+      "layer_id": "layer:service"
     }
   ],
   "modules": [
