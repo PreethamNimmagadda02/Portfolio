@@ -41,7 +41,7 @@ export default function PageLoader() {
         //  - every scene has reported ready ("scene-warmed" events), or
         //  - MAX_WAIT elapses (slow devices / a scene failing to mount).
         // MIN_SHOWN keeps the branding from flashing on very fast machines.
-        const MIN_SHOWN = 1500;
+        const MIN_SHOWN = 2200;
         const MAX_WAIT = 5000;
         const start = performance.now();
         let done = false;
