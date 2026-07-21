@@ -9,7 +9,12 @@ export interface SkillItem {
 }
 
 export const skillsData: SkillItem[] = [
-  { name: "Prisma", category: "DB" },
+  { name: "Winston", category: "Tools" },
+  { name: "CubeAPM", category: "Tools" },
+  { name: "AWS Lambda", category: "Cloud" },
+  { name: "AWS CloudWatch", category: "Cloud" },
+  { name: "Drizzle", category: "Web" },
+  { name: "Prisma", category: "Web" },
   { name: "Ollama", category: "AI" },
   { name: "Git/GitHub", category: "Tools" },
   { name: "AWS EC2", category: "Cloud" },
@@ -31,7 +36,7 @@ export const skillsData: SkillItem[] = [
   { name: "Capacitor", category: "Web" },
   { name: "PostgreSQL", category: "DB" },
   { name: "Context Engineering", category: "AI" },
-  { name: "Vite", category: "Tools" },
+  { name: "Vite", category: "Web" },
   { name: "AWS EKS", category: "Cloud" },
   { name: "JavaScript", category: "Lang" },
   { name: "Framer Motion", category: "Web" },
@@ -58,7 +63,7 @@ export const skillsData: SkillItem[] = [
   { name: "LangChain", category: "AI" },
   { name: "Kubernetes", category: "DevOps" },
   { name: "VideoRAG", category: "AI" },
-  { name: "SQL", category: "DB" },
+  { name: "SQL", category: "Lang" },
   { name: "AWS RDS", category: "Cloud" },
   { name: "Express.js", category: "Web" },
   { name: "n8n", category: "AI" },
