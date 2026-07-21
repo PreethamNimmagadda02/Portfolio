@@ -157,8 +157,7 @@ function ProfileSkeleton() {
 export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const sectionRef = useRef<any>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  // Defer the Codolio API call until the section approaches the viewport
-  const shouldFetch = useInView(sectionRef, { once: true, margin: "600px" });
+  const shouldFetch = isEmbedded ? true : useInView(sectionRef, { once: true, margin: "1000px" });
 
   const [profiles, setProfiles] = useState<PlatformProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,6 +167,21 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
     try {
       setLoading(true);
       setError(null);
+
+      const cacheKey = "codolio_stats_cache_v2";
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Date.now() - parsed.timestamp < 1000 * 60 * 60 * 12) {
+            setProfiles(parsed.profiles);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn("Failed to parse cached Codolio stats", e);
+        }
+      }
 
       const res = await fetch(
         `https://api.codolio.com/profile?userKey=${CODOLIO_USERNAME}`
@@ -198,6 +212,11 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
       });
 
       setProfiles(sorted);
+      
+      localStorage.setItem(cacheKey, JSON.stringify({
+        timestamp: Date.now(),
+        profiles: sorted
+      }));
     } catch (err) {
       console.error("Codolio fetch error:", err);
       setError("Failed to load live coding stats. Showing latest snapshot.");

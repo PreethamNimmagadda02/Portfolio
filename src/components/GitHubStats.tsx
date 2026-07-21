@@ -67,23 +67,20 @@ async function fetchContributions(): Promise<ContributionsResponse> {
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 12);
   const prevYear = sixMonthsAgo.getFullYear();
 
-  // Fetch current year
-  const res = await fetch(
-    `https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${currentYear}`
-  );
-  if (!res.ok) throw new Error("Failed to fetch contributions");
-  const data: ContributionsResponse = await res.json();
+  const fetchCurrent = fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${currentYear}`);
+  const fetchPrev = prevYear < currentYear
+    ? fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${prevYear}`)
+    : Promise.resolve(null);
 
-  // If 6-month window crosses into previous year, fetch that too
-  if (prevYear < currentYear) {
-    const resPrev = await fetch(
-      `https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${prevYear}`
-    );
-    if (resPrev.ok) {
-      const prevData: ContributionsResponse = await resPrev.json();
-      data.contributions = [...prevData.contributions, ...data.contributions];
-      data.total = { ...prevData.total, ...data.total };
-    }
+  const [resCurrent, resPrev] = await Promise.all([fetchCurrent, fetchPrev]);
+
+  if (!resCurrent.ok) throw new Error("Failed to fetch contributions");
+  const data: ContributionsResponse = await resCurrent.json();
+
+  if (resPrev && resPrev.ok) {
+    const prevData: ContributionsResponse = await resPrev.json();
+    data.contributions = [...prevData.contributions, ...data.contributions];
+    data.total = { ...prevData.total, ...data.total };
   }
 
   return data;
@@ -371,7 +368,7 @@ export default function GitHubStats() {
   // Defer the 4 GitHub API calls until the section approaches the viewport —
   // previously they fired at page load, competing with critical resources
   // and burning unauthenticated rate limit on every visit.
-  const shouldFetch = useInView(sectionRef, { once: true, margin: "600px" });
+  const shouldFetch = useInView(sectionRef, { once: true, margin: "1000px" });
 
   const [stats, setStats] = useState<StatsData | null>(null);
   const [languages, setLanguages] = useState<LanguageData[]>([]);
@@ -384,6 +381,23 @@ export default function GitHubStats() {
     try {
       setLoading(true);
       setError(null);
+
+      const cacheKey = "github_stats_cache_v2";
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Date.now() - parsed.timestamp < 1000 * 60 * 60 * 12) {
+            setStats(parsed.stats);
+            setLanguages(parsed.languages);
+            setContributions(parsed.contributions);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn("Failed to parse cached GitHub stats", e);
+        }
+      }
 
       const [contribData, repos, profile] = await Promise.all([
         fetchContributions(),
@@ -408,25 +422,36 @@ export default function GitHubStats() {
 
       const activeDays = filtered.filter((c) => c.count > 0).length;
       const latestRepo = repos.length > 0 ? repos[0].name : "N/A";
-
-      setStats({
+      
+      const newStats = {
         totalContributions,
         repoCount: profile.public_repos,
         latestRepo,
         activeDays,
-      });
+      };
+
+      setStats(newStats);
 
       const aggregatedLangs = aggregateLanguages(repos);
+      let finalLangs = aggregatedLangs;
       if (aggregatedLangs.length === 0) {
         // Fallback if repos failed due to rate limits
-        setLanguages([
+        finalLangs = [
           { name: "TypeScript", percentage: 50, color: "#3178c6" },
           { name: "JavaScript", percentage: 40, color: "#f1e05a" },
           { name: "Python", percentage: 10, color: "#3572A5" },
-        ]);
+        ];
+        setLanguages(finalLangs);
       } else {
-        setLanguages(aggregatedLangs);
+        setLanguages(finalLangs);
       }
+
+      localStorage.setItem(cacheKey, JSON.stringify({
+        timestamp: Date.now(),
+        stats: newStats,
+        languages: finalLangs,
+        contributions: filtered
+      }));
     } catch (err) {
       console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.", err);
       setError("API Rate Limit Exceeded. Showing cached snapshot.");

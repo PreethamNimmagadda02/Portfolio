@@ -578,3 +578,106 @@ Projects/Portfolio/.vscode/extensions.json)
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
+
+--- post-commit hook fired at Tue Jul 21 13:49:16 IST 2026 for HEAD 03b4563dab7318bff5b5f3cc6bec2f34590327ed ---
+repowise update · Portfolio
+70e1ca6a..03b4563d
+5 changed · 5 modified
+    modified  .claude/CLAUDE.md
+    modified  .repowise/.update.log
+    modified  .repowise/knowledge-graph.json
+    modified  .repowise/state.json
+    modified  .repowise/wiki.db
+2026-07-21 13:49:17 [info     ] FileTraverser initialised      extra_exclude_patterns=0 include_nested_repos=False max_file_size_kb=500 repo_root=/Users/preethamnimmagadda/Documents/My Projects/Portfolio submodules_skipped=0
+2026-07-21 13:49:17 [debug    ] Skipping nested git repo       path=.claude/worktrees/portfolio-redesign
+2026-07-21 13:49:17 [debug    ] Skipping oversized file        path=public/og-image.png size_kb=1055
+2026-07-21 13:49:17 [info     ] parse_cache_used               hits=66 misses=1
+2026-07-21 13:49:17 [info     ] tsconfig_resolver_ready        configs=1
+2026-07-21 13:49:17 [info     ] import_resolution_per_language seconds={'json': 0.0, 'markdown': 0.0, 'javascript': 0.0, 'typescript': 0.01, 'yaml': 0.0}
+2026-07-21 13:49:17 [info     ] type_use edges emitted         per_language={'typescript': 3}
+2026-07-21 13:49:17 [info     ] Heritage edges resolved        total=0
+2026-07-21 13:49:17 [info     ] Call edges resolved            total=221
+2026-07-21 13:49:17 [info     ] Graph built                    edge_types={'defines': 376, 'imports': 136, 'calls': 221, 'has_method': 46} edges=779 file_nodes=83 symbol_nodes=376
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=c
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=jvm
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=php
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=ruby
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=xaml
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=scala
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=1 extractor=node_package
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=python_dynamic_import
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=django_settings
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=swift
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=pytest_conftest
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=dotnet
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=spring
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=rust
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=luau
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=cpp
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=go
+2026-07-21 13:49:17 [debug    ] dynamic_hints                  count=0 extractor=alpine
+Dynamic hint edges added: 1
+2026-07-21 13:49:17 [debug    ] repo_commit_index_built        commits_parsed=151 files_with_history=5 indexable_files=5
+2026-07-21 13:49:18 [debug    ] co_change_computed             commit_limit=2000 commits=151 files_with_entropy=63 files_with_partners=28 min_count=2 pairs_above_threshold=177 pairs_considered=782 tracked_files=67
+2026-07-21 13:49:18 [info     ] Co-change edges added          count=101
+2026-07-21 13:49:18 [info     ] betweenness_reused_from_cache  kind=file nodes=84
+2026-07-21 13:49:18 [info     ] betweenness_reused_from_cache  kind=symbol nodes=376
+2026-07-21 13:49:18 [info     ] file_communities_detected      algorithm=louvain communities=34 prod_files=84 test_files=0 total_files=84
+2026-07-21 13:49:18 [info     ] symbol_communities_detected    communities=190 connected=198 total_symbols=376
+2026-07-21 13:49:18 [info     ] execution_flows_traced         candidates_scored=31 deduplicated=0 traced=26
+Pages to regenerate: 5
+2026-07-21 13:49:18 [debug    ] duplication_incremental_splice changed=1 deleted=0 pairs=7625 touched_buckets=0
+Health analysis (partial): 5 files, 0 findings
+2026-07-21 13:49:18 [info     ] decision_extractor.scanning_inline_markers total_files=5
+2026-07-21 13:49:18 [info     ] session_mining.done            pending_backlog=0 promoted=0 staged=0 structured=0
+2026-07-21 13:49:18 [info     ] kg_context_loaded              layers=5 nodes=67
+2026-07-21 13:49:18 [info     ] page_selection.complete        budget=1 counts={'api_contract': 0, 'symbol_spotlight': 0, 'file_page': 0, 'scc_page': 0, 'module_page': 0, 'repo_overview': 1, 'architecture_diagram': 1, 'infra_page': 0} coverage_pct=0.2
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=layer_page target_path=layer:ui
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=layer_page target_path=layer:application
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=layer_page target_path=layer:config
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=layer_page target_path=layer:service
+2026-07-21 13:49:19 [debug    ] gemini.generate.start          max_tokens=20000 model=gemini-3.1-flash-lite-preview request_id=33117125-d887-4916-959e-658a80df17ea
+2026-07-21 13:49:19 [debug    ] gemini.generate.start          max_tokens=20000 model=gemini-3.1-flash-lite-preview request_id=fe831757-6ff5-4d11-a97b-d73705aae077
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=onboarding target_path=onboarding/guided_tour
+2026-07-21 13:49:19 [debug    ] onboarding.gate_skipped        slot=getting_started
+2026-07-21 13:49:19 [debug    ] gemini.generate.start          max_tokens=20000 model=gemini-3.1-flash-lite-preview request_id=72a543eb-25ee-4619-9ad2-1f86b9aef2b5
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=onboarding target_path=onboarding/key_concepts
+2026-07-21 13:49:19 [debug    ] page_cache.persistent_hit      page_type=onboarding target_path=onboarding/how_it_works
+2026-07-21 13:49:19 [debug    ] onboarding.gate_skipped        slot=development_guide
+2026-07-21 13:49:19 [debug    ] onboarding.gate_skipped        slot=active_landscape
+Warning: there are non-text parts in the response: ['thought_signature'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2026-07-21 13:49:23 [debug    ] gemini.generate.done           input_tokens=690 output_tokens=467 request_id=33117125-d887-4916-959e-658a80df17ea
+2026-07-21 13:49:23 [debug    ] cost_tracker.record            cost_usd=0.00019185 file_path=None input_tokens=690 model=gemini-3.1-flash-lite-preview operation=doc_generation output_tokens=467
+Warning: there are non-text parts in the response: ['thought_signature'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2026-07-21 13:49:23 [debug    ] gemini.generate.done           input_tokens=670 output_tokens=506 request_id=72a543eb-25ee-4619-9ad2-1f86b9aef2b5
+2026-07-21 13:49:23 [debug    ] cost_tracker.record            cost_usd=0.00020204999999999998 file_path=None input_tokens=670 model=gemini-3.1-flash-lite-preview operation=doc_generation output_tokens=506
+Warning: there are non-text parts in the response: ['thought_signature'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2026-07-21 13:49:24 [debug    ] gemini.generate.done           input_tokens=1989 output_tokens=764 request_id=fe831757-6ff5-4d11-a97b-d73705aae077
+2026-07-21 13:49:24 [debug    ] cost_tracker.record            cost_usd=0.000378375 file_path=None input_tokens=1989 model=gemini-3.1-flash-lite-preview operation=doc_generation output_tokens=764
+2026-07-21 13:49:25 [info     ] mermaid_safety.applied         pages_changed=1
+2026-07-21 13:49:25 [info     ] wiki_links.resolved            pages=10 pages_with_backlinks=1 total_forward_links=50
+2026-07-21 13:49:25 [info     ] related_pages.attached         pages_with_related=0 total_entries=0
+2026-07-21 13:49:25 [info     ] kg_enrichment.tour_wiki_links  steps_with_links=0 total_steps=12
+2026-07-21 13:49:25 [info     ] Generation complete            model=gemini-3.1-flash-lite-preview provider=gemini total_pages=10
+  Generating pages... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10/6 0:00:01 $0.001
+2026-07-21 13:49:25 [info     ] related_pages.attached         pages_with_related=31 total_entries=123
+2026-07-21 13:49:25 [debug    ] repo_commit_index_built        commits_parsed=1 files_with_history=0 indexable_files=0
+  ✓ VS Code MCP configured (/Users/preethamnimmagadda/Documents/My 
+Projects/Portfolio/.vscode/mcp.json)
+  ✓ VS Code extension recommended (/Users/preethamnimmagadda/Documents/My 
+Projects/Portfolio/.vscode/extensions.json)
+
+╭────────────────────── {^ ^}  repowise update complete ───────────────────────╮
+│                                                                              │
+│   Pages updated           10                                                 │
+│   Total tokens            5,086                                              │
+│   Provider                gemini / gemini-3.1-flash-lite-preview             │
+│   Cost                    $0.001                                             │
+│   Elapsed                 8.6s                                               │
+│                                                                              │
+│   What's next:                                                               │
+│   repowise serve               browse the updated wiki at localhost:3000     │
+│   repowise search <query>      search the wiki                               │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
