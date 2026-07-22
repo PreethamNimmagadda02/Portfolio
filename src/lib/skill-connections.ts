@@ -27,7 +27,6 @@ const ALIASES: Record<string, string> = {
   TypeScript: "Typescript",
   OpenAI: "OpenAI API",
   "GPT API": "OpenAI API",
-  "Node JS": "Node.js",
 };
 
 export function isCanonicalSkill(name: string): boolean {
@@ -61,7 +60,7 @@ for (const exp of experiences) {
   }
 }
 for (const skill of skillsData) {
-  addUsage(skill.name, { kind: "ecosystem", id: "skills-sphere", title: "Technical Ecosystem" });
+  addUsage(skill.name, { kind: "ecosystem", id: "skills-grid", title: "Technical Ecosystem" });
 }
 for (const proj of projects) {
   for (const skill of proj.ecosystemSkills) {

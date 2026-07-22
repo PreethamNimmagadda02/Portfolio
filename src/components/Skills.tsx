@@ -207,7 +207,7 @@ export default function Skills() {
             layout (rather than just dimming them in place) so a narrow
             filter reflows into a small, unmissable cluster instead of
             leaving a few faint matches scattered across a full-size grid. */}
-        <motion.div layout className="card-hairline rounded-3xl p-4 sm:p-5 md:p-6 mb-6">
+        <motion.div layout id="skills-grid" data-skill-scope className="card-hairline rounded-3xl p-4 sm:p-5 md:p-6 mb-6">
           <motion.div layout className="flex flex-wrap justify-center gap-2 md:gap-2.5">
             <AnimatePresence mode="popLayout">
               {shuffledSkills

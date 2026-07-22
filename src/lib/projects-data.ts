@@ -42,7 +42,7 @@ export const projects: ProjectData[] = [
     title: "CareerOps",
     description:
       "A fully automated command center for your job search — discovering the right roles, scoring your fit with AI, and managing the entire application pipeline from end to end.",
-    tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI"],
+    tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI", "AWS EC2"],
     ecosystemSkills: ["Typescript", "Playwright", "PostgreSQL", "Next.js", "OpenAI API", "AWS EC2"],
     links: {
       demo: "http://careerops-alb-328156002.ap-southeast-2.elb.amazonaws.com/",
