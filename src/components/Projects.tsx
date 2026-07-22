@@ -7,6 +7,8 @@ import MagneticButton from "./MagneticButton";
 import { InViewClass, SectionKicker } from "./Reveal";
 import type { CSSProperties } from "react";
 import { projects, type ProjectData } from "@/lib/projects-data";
+import SkillToken from "./SkillToken";
+import { resolveCanonical } from "@/lib/skill-connections";
 
 function ProjectRow({ project, index }: { project: ProjectData; index: number }) {
   const Icon = project.icon;
@@ -79,21 +81,7 @@ function ProjectRow({ project, index }: { project: ProjectData; index: number })
 
           <div className="flex flex-wrap gap-2 mb-6">
             {project.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-300 cursor-default hover:text-white"
-                style={{ color: project.accent, borderColor: `${project.accent}30`, backgroundColor: `${project.accent}0a` }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = project.accent;
-                  e.currentTarget.style.borderColor = project.accent;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = `${project.accent}0a`;
-                  e.currentTarget.style.borderColor = `${project.accent}30`;
-                }}
-              >
-                {tag}
-              </span>
+              <SkillToken key={tag} canonical={resolveCanonical(tag)} label={tag} color={project.accent} />
             ))}
           </div>
 
