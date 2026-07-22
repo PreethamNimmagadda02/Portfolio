@@ -32,7 +32,7 @@ import {
 } from "@/lib/viewport-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { getSceneState, hexToVec3, lerp3 } from "@/lib/scene-store";
-import { getActiveSkillCategories } from "@/lib/scene-store";
+import { getActiveSkillCategories, getFocusedSkill } from "@/lib/scene-store";
 import { skillsData, getCategoryColor } from "@/lib/skills-data";
 import { markSceneWarmed, seededRandom } from "@/lib/utils";
 
@@ -869,7 +869,8 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
     }
 
     const activeCats = getActiveSkillCategories();
-    const anyFilter = activeCats.size > 0;
+    const focused = getFocusedSkill();
+    const anyFilter = focused !== null || activeCats.size > 0;
     if (pointsRef.current) {
       const mat = pointsRef.current.material as THREE.PointsMaterial;
       mat.opacity = weight * 0.9;
@@ -884,7 +885,9 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       /* eslint-disable react-hooks/immutability */
       const colorAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
       for (let i = 0; i < skillsData.length; i++) {
-        const match = !anyFilter || activeCats.has(skillsData[i].category);
+        const match = focused
+          ? skillsData[i].name === focused
+          : !anyFilter || activeCats.has(skillsData[i].category);
         const base = colorArray[i];
         const target = match ? 1 : 0.08;
         const idx = i * 3;
