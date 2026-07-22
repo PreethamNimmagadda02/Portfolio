@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeToggle";
 import PageLoader from "@/components/PageLoader";
 import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
+import SkillNavigator from "@/components/SkillNavigator";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -174,6 +175,7 @@ export default function RootLayout({
                   {children}
                 </main>
                 <Footer />
+                <SkillNavigator />
               </SmoothScroll>
             </ThemeProvider>
           </PerformanceProvider>
