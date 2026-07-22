@@ -765,3 +765,17 @@ h1 {
   animation: cellIn 0.25s ease-out both;
   animation-delay: var(--d, 0ms);
 }
+
+/* One-shot pulse the SkillNavigator applies to a card when it scrolls to it. */
+@keyframes skill-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.0); }
+  30%  { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55), 0 0 40px -6px rgba(139, 92, 246, 0.7); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.0); }
+}
+.skill-pulse {
+  animation: skill-pulse 1.2s ease-out;
+  border-radius: 1rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-pulse { animation: none; }
+}
