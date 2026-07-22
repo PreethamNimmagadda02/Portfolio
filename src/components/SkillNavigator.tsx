@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "@/lib/motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useFocusedSkill, setFocusedSkill } from "@/lib/scene-store";
@@ -25,6 +25,7 @@ function collectScopes(skill: string): HTMLElement[] {
 }
 
 function pulse(el: HTMLElement) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   el.classList.remove("skill-pulse");
   // Force reflow so re-adding the class restarts the animation.
   void el.offsetWidth;
@@ -41,14 +42,12 @@ export default function SkillNavigator() {
     ? getCategoryColor(skillsData.find((s) => s.name === focused)?.category ?? "")
     : "#8b5cf6";
 
-  // Reset the cursor whenever the focused skill changes.
-  const prevFocused = useRef<string | null>(null);
-  useEffect(() => {
-    if (focused !== prevFocused.current) {
-      prevFocused.current = focused;
-      setCursor(0);
-    }
-  }, [focused]);
+  // Reset the cursor whenever the focused skill changes (adjust state during render).
+  const [prevFocused, setPrevFocused] = useState(focused);
+  if (focused !== prevFocused) {
+    setPrevFocused(focused);
+    setCursor(0);
+  }
 
   // Esc clears focus.
   useEffect(() => {
