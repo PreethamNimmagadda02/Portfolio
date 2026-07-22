@@ -105,3 +105,36 @@ function subscribe(cb: () => void) {
 export function useActiveSkillCategories(): Set<string> {
   return useSyncExternalStore(subscribe, getActiveSkillCategories, () => new Set<string>());
 }
+
+// -----------------------------------------------------------------------------
+// Focused skill — a single canonical skill name (must match skillsData[].name)
+// shared across the Skills, Projects, and Experience sections plus the
+// constellation. Selecting a skill anywhere highlights every matching token
+// everywhere and drives the SkillNavigator. Parallel to the category filter
+// above, but a scalar rather than a Set.
+// -----------------------------------------------------------------------------
+let focusedSkill: string | null = null;
+const focusListeners = new Set<() => void>();
+
+export function setFocusedSkill(name: string | null) {
+  if (focusedSkill === name) return;
+  focusedSkill = name;
+  for (const l of focusListeners) l();
+}
+
+export function toggleFocusedSkill(name: string) {
+  setFocusedSkill(focusedSkill === name ? null : name);
+}
+
+export function getFocusedSkill() {
+  return focusedSkill;
+}
+
+function subscribeFocus(cb: () => void) {
+  focusListeners.add(cb);
+  return () => focusListeners.delete(cb);
+}
+
+export function useFocusedSkill(): string | null {
+  return useSyncExternalStore(subscribeFocus, getFocusedSkill, () => null);
+}
