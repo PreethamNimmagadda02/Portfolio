@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "@/lib/motion";
 import { Brain, Globe, Database, Cloud, Boxes, Terminal, Wrench, Workflow, Sparkles, LayoutGrid, type LucideIcon } from "lucide-react";
 import { skillsData, categoryColors, categoryLabels } from "@/lib/skills-data";
-import { toggleSkillCategory, useActiveSkillCategories } from "@/lib/scene-store";
+import { toggleSkillCategory, useActiveSkillCategories, useFocusedSkill, toggleFocusedSkill } from "@/lib/scene-store";
 import { InViewClass, SectionKicker } from "./Reveal";
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -95,25 +95,35 @@ function CategoryChip({
 
 function SkillTag({ name, category, emphasized }: { name: string; category: string; emphasized: boolean }) {
   const color = categoryColors[category];
+  const focused = useFocusedSkill();
+  const isMatch = focused === name;
+  const dimmed = focused !== null && !isMatch;
+  const lit = emphasized || isMatch;
   return (
-    <motion.div
+    <motion.button
+      type="button"
       layout
+      data-skill={name}
+      aria-pressed={isMatch}
+      title={isMatch ? `Clear ${name}` : `Show where I used ${name}`}
+      onClick={() => toggleFocusedSkill(name)}
       initial={{ opacity: 0, y: 12, scale: 0.85 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15 } }}
       transition={{ duration: 0.3, layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
       whileHover={{ scale: 1.05, y: -2, boxShadow: `0 10px 28px -10px ${color}90` }}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-colors duration-300"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-colors duration-300 cursor-pointer"
       style={{
-        borderColor: emphasized ? `${color}80` : `${color}30`,
-        backgroundColor: emphasized ? `${color}22` : `${color}0a`,
-        boxShadow: emphasized ? `0 0 20px -6px ${color}` : "0 0 0px transparent",
+        borderColor: lit ? `${color}80` : `${color}30`,
+        backgroundColor: lit ? `${color}22` : `${color}0a`,
+        boxShadow: isMatch ? `0 0 20px -4px ${color}` : lit ? `0 0 20px -6px ${color}` : "0 0 0px transparent",
+        opacity: dimmed ? 0.3 : 1,
       }}
     >
       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }} />
-      <span className={`text-sm whitespace-nowrap ${emphasized ? "text-white font-semibold" : "text-gray-200 font-medium"}`}>{name}</span>
-    </motion.div>
+      <span className={`text-sm whitespace-nowrap ${lit ? "text-white font-semibold" : "text-gray-200 font-medium"}`}>{name}</span>
+    </motion.button>
   );
 }
 
