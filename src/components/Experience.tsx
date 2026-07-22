@@ -6,6 +6,7 @@ import { Briefcase, Calendar, Award, Trophy, Star, Zap, LucideIcon } from "lucid
 import InteractiveCard from "./InteractiveCard";
 import { InViewClass, SectionKicker } from "./Reveal";
 import { experiences, type ExperienceData, type ExperienceType } from "@/lib/experience-data";
+import SkillToken from "./SkillToken";
 
 const typeIcons: Record<ExperienceType, LucideIcon> = {
   work: Briefcase,
@@ -101,6 +102,17 @@ function TimelineEntry({ data, index }: { data: ExperienceData; index: number })
             </span>
           ))}
         </div>
+
+        {data.ecosystemSkills.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-white/5">
+            <span className="block text-[10px] uppercase tracking-widest text-gray-500 mb-2">Built with</span>
+            <div className="flex flex-wrap gap-1.5">
+              {data.ecosystemSkills.map((skill) => (
+                <SkillToken key={skill} canonical={skill} label={skill} color={data.color} />
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </InteractiveCard>
     </motion.div>
