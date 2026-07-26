@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3001",
+    "prebuild": "node scripts/fetch-loc.mjs",
     "build": "next build --webpack",
+    "fetch-loc": "SKIP_LOC_FETCH=0 node scripts/fetch-loc.mjs",
     "start": "next start --webpack",
     "lint": "eslint"
   },

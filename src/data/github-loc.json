@@ -1,0 +1,19 @@
+{
+  "username": "PreethamNimmagadda02",
+  "linesAdded": 401050,
+  "linesDeleted": 183664,
+  "reposCounted": 11,
+  "reposTotal": 12,
+  "linesAddedUnfiltered": 4086840,
+  "excluded": [
+    {
+      "repo": "Agentic-VS-Code",
+      "added": 3685790,
+      "reason": "vendors the microsoft/vscode + cline source trees"
+    }
+  ],
+  "excludedRepos": [
+    "Agentic-VS-Code"
+  ],
+  "generatedAt": "2026-07-26T17:58:59.089Z"
+}

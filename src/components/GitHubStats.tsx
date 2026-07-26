@@ -2,12 +2,35 @@
 
 import { motion, useInView, AnimatePresence } from "@/lib/motion";
 import { useRef, useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
-import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, Zap, ExternalLink } from "lucide-react";
+import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, FileCode2, ExternalLink, type LucideIcon } from "lucide-react";
 import CodingProfiles from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { InViewClass, SectionKicker } from "./Reveal";
+import bakedLoc from "@/data/github-loc.json";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
+
+/* ─── Lines-written config ───
+ * GitHub has no lifetime-LOC endpoint; /stats/contributors is the only source
+ * for authored line counts and costs one request per repo, which is most of
+ * the 60/hr unauthenticated budget. So the browser tries live and falls back
+ * to the figure `scripts/fetch-loc.mjs` bakes in at build time with CI's token.
+ *
+ * The baked file also carries the repo exclusion list it derived (vendored
+ * third-party trees, committed-then-deleted node_modules). Reusing it here
+ * keeps the live number consistent with the fallback instead of reporting a
+ * millions-of-lines figure that isn't authored work.
+ */
+const LOC_EXCLUDED = new Set(
+  (bakedLoc.excludedRepos ?? []).map((r) => r.toLowerCase())
+);
+/** Bounds the request burst against the unauthenticated rate limit. */
+const LOC_REPO_LIMIT = 18;
+const LOC_CONCURRENCY = 4;
+const LOC_CACHE_KEY = "github_loc_cache_v1";
+// 24h — lines-written changes slowly, so this refetches less often than the
+// other stats caches (12h) to save on the per-repo request burst.
+const LOC_CACHE_TTL_MS = 1000 * 60 * 60 * 24;
 
 /* ─── Known language colors (GitHub linguist) ─── */
 const LANG_COLORS: Record<string, string> = {
@@ -49,7 +72,6 @@ interface GitHubRepo {
 interface StatsData {
   totalContributions: number;
   repoCount: number;
-  latestRepo: string;
   activeDays: number;
 }
 
@@ -57,6 +79,19 @@ interface LanguageData {
   name: string;
   percentage: number;
   color: string;
+}
+
+interface StatCard {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  gradient: string;
+  suffix: string;
+  href: string;
+  /** Overrides the default type scale when the number needs more room. */
+  valueClass?: string;
+  /** Tooltip text — used to disclose how a derived figure was measured. */
+  hint?: string;
 }
 
 /* ─── Data fetching ─── */
@@ -106,6 +141,86 @@ async function fetchUserProfile(): Promise<{ public_repos: number }> {
   } catch {
     return { public_repos: 12 };
   }
+}
+
+/**
+ * Additions/deletions this user authored in one repo.
+ * Returns "ratelimited" so the caller can abort the whole burst rather than
+ * spend the remaining budget on requests that will also fail.
+ */
+async function fetchRepoAuthoredLines(
+  repo: string
+): Promise<{ added: number; deleted: number } | "ratelimited" | null> {
+  const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${repo}/stats/contributors`;
+
+  // Two passes: GitHub answers 202 with an empty body while it builds the
+  // stats cache, and usually has it ready a beat later.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(url);
+    } catch {
+      return null;
+    }
+
+    if (res.status === 202) {
+      await new Promise((r) => setTimeout(r, 1500));
+      continue;
+    }
+    if (res.status === 403 || res.status === 429) return "ratelimited";
+    if (res.status === 204) return { added: 0, deleted: 0 };
+    if (!res.ok) return null;
+
+    const body = await res.json().catch(() => null);
+    if (!Array.isArray(body)) return null;
+
+    const mine = body.find(
+      (c) => c?.author?.login?.toLowerCase() === GITHUB_USERNAME.toLowerCase()
+    );
+    if (!mine || !Array.isArray(mine.weeks)) return { added: 0, deleted: 0 };
+
+    return mine.weeks.reduce(
+      (acc: { added: number; deleted: number }, w: { a?: number; d?: number }) => ({
+        added: acc.added + (w.a || 0),
+        deleted: acc.deleted + (w.d || 0),
+      }),
+      { added: 0, deleted: 0 }
+    );
+  }
+  return null;
+}
+
+/**
+ * Live lines-written total, or null when it can't be trusted — the caller
+ * then keeps the build-time figure. A partial sum is worse than a stale one:
+ * it renders as a confidently wrong, much smaller number.
+ */
+async function fetchLinesWritten(repos: GitHubRepo[]): Promise<number | null> {
+  const targets = repos
+    .filter((r) => !r.fork && !LOC_EXCLUDED.has(r.name.toLowerCase()))
+    .sort((a, b) => b.size - a.size)
+    .slice(0, LOC_REPO_LIMIT)
+    .map((r) => r.name);
+
+  if (targets.length === 0) return null;
+
+  let added = 0;
+  let resolved = 0;
+
+  for (let i = 0; i < targets.length; i += LOC_CONCURRENCY) {
+    const batch = await Promise.all(
+      targets.slice(i, i + LOC_CONCURRENCY).map(fetchRepoAuthoredLines)
+    );
+    if (batch.includes("ratelimited")) return null;
+    for (const r of batch) {
+      if (!r || r === "ratelimited") continue;
+      added += r.added;
+      resolved++;
+    }
+  }
+
+  if (resolved < Math.ceil(targets.length * 0.75)) return null;
+  return added;
 }
 
 /* ─── Language aggregation (by repo count) ─── */
@@ -165,9 +280,15 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
   const [displayValue, setDisplayValue] = useState(0);
+  // Tween from whatever is already on screen rather than from 0. `value` can
+  // change after the first run — the lines-written card renders a build-time
+  // figure immediately and swaps in the live one once it lands — and
+  // restarting from 0 reads as a glitch.
+  const fromRef = useRef(0);
 
   useEffect(() => {
     if (!isInView) return;
+    const from = fromRef.current;
     const duration = 2000;
     const start = Date.now();
     let frameId: number;
@@ -175,9 +296,14 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
       const elapsed = Date.now() - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(Math.floor(value * eased));
+      const next = Math.floor(from + (value - from) * eased);
+      setDisplayValue(next);
+      fromRef.current = next;
       if (progress < 1) frameId = requestAnimationFrame(animate);
-      else setDisplayValue(value);
+      else {
+        setDisplayValue(value);
+        fromRef.current = value;
+      }
     };
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
@@ -295,7 +421,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
         </div>
         <div className="flex w-full justify-between">
           {/* Day labels — hidden on mobile (unreadable at 9px, steals width) */}
-          <div className="hidden sm:flex flex-col justify-between mr-2 py-[2px]">
+          <div className="hidden sm:flex flex-col justify-between mr-2 py-0.5">
             {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
               <span
                 key={i}
@@ -306,9 +432,9 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             ))}
           </div>
           {/* Weeks */}
-          <div className="flex flex-1 justify-between gap-[2px] sm:gap-1">
+          <div className="flex flex-1 justify-between gap-0.5 sm:gap-1">
             {heatmapGrid.map((week, wk) => (
-              <div key={wk} className="flex flex-col justify-between gap-[2px] sm:gap-1 flex-1">
+              <div key={wk} className="flex flex-col justify-between gap-0.5 sm:gap-1 flex-1">
                 {Array.from({ length: 7 }).map((_, dy) => {
                   const day = dy < week.length ? week[dy] : null;
                   if (!day) {
@@ -373,16 +499,56 @@ export default function GitHubStats() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [languages, setLanguages] = useState<LanguageData[]>([]);
   const [contributions, setContributions] = useState<ContributionDay[]>([]);
+  // Seeded with the build-time figure so the card always shows a real number,
+  // then upgraded in place if the live per-repo fetch succeeds.
+  const [linesAdded, setLinesAdded] = useState(bakedLoc.linesAdded);
+  const [linesAreLive, setLinesAreLive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"github" | "competitive">("github");
+
+  const hydrateLines = useCallback(async (repos: GitHubRepo[]) => {
+    const live = await fetchLinesWritten(repos);
+    if (live === null || live <= 0) return;
+    setLinesAdded(live);
+    setLinesAreLive(true);
+    try {
+      localStorage.setItem(
+        LOC_CACHE_KEY,
+        JSON.stringify({ timestamp: Date.now(), linesAdded: live })
+      );
+    } catch (e) {
+      console.warn("Failed to cache lines-written total", e);
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const cacheKey = "github_stats_cache_v2";
+      // Read the lines cache before the early return below, so a stats-cache
+      // hit still gets the last live figure instead of the build-time one.
+      const cachedLoc = localStorage.getItem(LOC_CACHE_KEY);
+      let locWasCached = false;
+      if (cachedLoc) {
+        try {
+          const parsed = JSON.parse(cachedLoc);
+          if (
+            Date.now() - parsed.timestamp < LOC_CACHE_TTL_MS &&
+            typeof parsed.linesAdded === "number" &&
+            parsed.linesAdded > 0
+          ) {
+            setLinesAdded(parsed.linesAdded);
+            setLinesAreLive(true);
+            locWasCached = true;
+          }
+        } catch (e) {
+          console.warn("Failed to parse cached lines-written total", e);
+        }
+      }
+
+      const cacheKey = "github_stats_cache_v3";
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         try {
@@ -421,16 +587,18 @@ export default function GitHubStats() {
       setContributions(filtered);
 
       const activeDays = filtered.filter((c) => c.count > 0).length;
-      const latestRepo = repos.length > 0 ? repos[0].name : "N/A";
-      
+
       const newStats = {
         totalContributions,
         repoCount: profile.public_repos,
-        latestRepo,
         activeDays,
       };
 
       setStats(newStats);
+
+      // Unawaited: this is one request per repo and can take many seconds,
+      // while the card already has the build-time number to show.
+      if (!locWasCached && repos.length > 0) void hydrateLines(repos);
 
       const aggregatedLangs = aggregateLanguages(repos);
       let finalLangs = aggregatedLangs;
@@ -460,7 +628,6 @@ export default function GitHubStats() {
       setStats({
         totalContributions: 1257,
         repoCount: 12,
-        latestRepo: "portfolio",
         activeDays: 245,
       });
       setLanguages([
@@ -472,18 +639,14 @@ export default function GitHubStats() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hydrateLines]);
 
   useEffect(() => {
     if (shouldFetch) fetchData();
   }, [shouldFetch, fetchData]);
 
-  const statCards = useMemo(() => {
+  const statCards = useMemo<StatCard[]>(() => {
     if (!stats) return [];
-    
-    const repoLink = stats.latestRepo && stats.latestRepo !== "portfolio" 
-        ? `https://github.com/${GITHUB_USERNAME}/${stats.latestRepo}`
-        : `https://github.com/${GITHUB_USERNAME}`;
 
     return [
       {
@@ -511,16 +674,26 @@ export default function GitHubStats() {
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
       },
       {
-        label: "Latest Commit",
-        value: stats.latestRepo,
-        isText: true,
-        icon: Zap,
+        label: "Lines Written",
+        value: linesAdded,
+        icon: FileCode2,
         gradient: "from-blue-400 to-cyan-400",
         suffix: "",
-        href: repoLink,
+        href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
+        // Seven digits need more room than the four- and five-digit cards.
+        valueClass: "text-2xl sm:text-3xl md:text-4xl",
+        hint: linesAreLive
+          ? `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, live from the GitHub API`
+          : `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, as of ${new Date(
+            bakedLoc.generatedAt
+          ).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}`,
       },
-    ];
-  }, [stats]);
+    ].sort((a, b) => b.value - a.value);
+  }, [stats, linesAdded, linesAreLive]);
 
   return (
     <section
@@ -641,6 +814,7 @@ export default function GitHubStats() {
                       href={stat.href}
                       target="_blank"
                       rel="noopener noreferrer"
+                      title={stat.hint}
                       key={stat.label}
                       initial={{ opacity: 0, y: 20, scale: 0.9 }}
                       animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
@@ -659,17 +833,8 @@ export default function GitHubStats() {
                             className="text-gray-300 group-hover:text-white transition-colors"
                           />
                         </div>
-                        <div className={`text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-linear-to-r ${stat.gradient} drop-shadow-sm`}>
-                          {stat.isText ? (
-                               <span
-                                 className="block text-2xl md:text-3xl mx-auto text-center wrap-break-word"
-                                 title={String(stat.value)}
-                               >
-                              {stat.value}
-                            </span>
-                          ) : (
-                            <AnimatedCounter value={Number(stat.value)} suffix={stat.suffix} />
-                          )}
+                        <div className={`${stat.valueClass ?? "text-3xl md:text-4xl"} font-black bg-clip-text text-transparent bg-linear-to-r ${stat.gradient} drop-shadow-sm tabular-nums`}>
+                          <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                         </div>
                         <p className="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest group-hover:text-white transition-colors">
                           {stat.label}
