@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "3D System & Performance Patterns"
+openwiki_generated: true
+---
+
 # 3D System & Performance Patterns
 
 **This page explains how Three.js is integrated, how viewport-aware rendering and scene warm-up work, and performance optimization strategies.**

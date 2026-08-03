@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Component Architecture & Patterns"
+openwiki_generated: true
+---
+
 # Component Architecture & Patterns
 
 **This page explains how components are organized, key patterns, hooks, and utilities for working with the component tree.**

@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Content & Data Structure"
+openwiki_generated: true
+---
+
 # Content & Data Structure
 
 **This page explains where content lives, how to update it, and the data structures for projects, experience, skills, and achievements.**

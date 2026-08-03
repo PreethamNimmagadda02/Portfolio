@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Operations & Deployment"
+openwiki_generated: true
+---
+
 # Operations & Deployment
 
 **This page explains how to build, deploy, and operate the portfolio in production. Covers the build process, Firebase setup, GitHub Actions CI/CD, PWA configuration, and troubleshooting.**

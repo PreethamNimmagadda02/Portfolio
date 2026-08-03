@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Development Guide"
+openwiki_generated: true
+---
+
 # Development Guide
 
 **Quick reference for local development, debugging, and common tasks.**

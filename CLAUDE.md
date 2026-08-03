@@ -61,3 +61,13 @@ No test framework is configured.
 - Static build outputs to `out/`
 - Firebase Hosting serves from `out/` with aggressive caching (1 year for static assets, 7 days for HTML)
 - CI/CD: `.github/workflows/deploy.yml` — Node 22, build with secrets, deploy to Firebase on push to main
+
+<!-- OPENWIKI:START -->
+
+## OpenWiki
+
+This repository uses OpenWiki for recurring code documentation. Start with `openwiki/quickstart.md`, then follow its links to architecture, workflows, domain concepts, operations, integrations, testing guidance, and source maps.
+
+The scheduled OpenWiki GitHub Actions workflow refreshes the repository wiki. Do not hand-edit generated OpenWiki pages unless explicitly asked; prefer updating source code/docs and letting OpenWiki regenerate.
+
+<!-- OPENWIKI:END -->

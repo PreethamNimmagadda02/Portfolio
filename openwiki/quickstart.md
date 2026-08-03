@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Preetham Nimmagadda | Modern Portfolio — OpenWiki Quickstart"
+openwiki_generated: true
+---
+
 # Preetham Nimmagadda | Modern Portfolio — OpenWiki Quickstart
 
 **Live Site:** https://preethamnimmagaddaportfolio.web.app

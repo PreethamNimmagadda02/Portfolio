@@ -1,3 +1,9 @@
+---
+type: "Reference"
+title: "Architecture Overview"
+openwiki_generated: true
+---
+
 # Architecture Overview
 
 **This page explains the technology stack, rendering strategy, and high-level design of the portfolio.**

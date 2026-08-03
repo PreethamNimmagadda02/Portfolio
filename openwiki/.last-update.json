@@ -1,6 +1,8 @@
 {
-  "updatedAt": "2026-07-04T20:39:39.899Z",
-  "command": "init",
-  "gitHead": "a92295458f739aaa276d9b9c498db4de9c9668fa",
-  "model": "claude-haiku-4-5"
+  "updatedAt": "2026-08-03T11:12:00.111Z",
+  "command": "update",
+  "gitHead": "b60adf50a6108592b3ca8ecf9ab5208a5e0fbe53",
+  "model": "claude-haiku-4-5",
+  "status": "complete",
+  "language": "en"
 }
