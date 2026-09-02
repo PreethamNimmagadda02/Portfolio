@@ -32,7 +32,7 @@ const entries: ExperienceEntry[] = [
     group: "Industry",
     role: "Machine Learning Intern",
     company: "Matters.AI",
-    period: "Mar 2026 to Sept 2026",
+    period: "Mar 2026 to Aug 2026",
     description:
       "Built the AI copilot that finds data exposures in real time and remediates them automatically, turning data security from passive monitoring into a self-healing defense layer.",
     type: "work",
@@ -44,7 +44,7 @@ const entries: ExperienceEntry[] = [
     group: "Industry",
     role: "Generative AI Intern",
     company: "Introspect Labs",
-    period: "Jan 2026 to Mar 2026",
+    period: "Dec 2025 to Mar 2026",
     description:
       "Built a multimodal & multilingual AI companion powered by VideoRAG that processes 100+ hours of video with 95% accuracy. Designed its empathic core for real-time adaptive responses, boosting retention by 40%.",
     type: "work",
