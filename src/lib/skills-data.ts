@@ -1,5 +1,5 @@
 /**
- * Shared skills dataset — read by both the DOM Skills section (chips, grid)
+ * Shared skills dataset, read by both the DOM Skills section (filter rail, index)
  * and the CosmicScene constellation flourish, so the two stay in sync
  * without duplicating the list.
  */
@@ -79,17 +79,29 @@ export const skillsData: SkillItem[] = [
   { name: "RepoWise", category: "Tools" },
   { name: "OpenWiki", category: "Tools" },
   { name: "Graphify", category: "Tools" },
+  { name: "TanStack Query", category: "Web" },
+  { name: "i18next", category: "Web" },
+  { name: "Zod", category: "Web" },
+  { name: "Workbox", category: "Web" },
+  { name: "Firestore", category: "DB" },
+  { name: "Firebase Functions", category: "Cloud" },
+  { name: "Firebase Messaging", category: "Cloud" },
+  { name: "Cloud Monitoring", category: "Cloud" },
+  { name: "Vitest", category: "Tools" },
+  { name: "Pino", category: "Tools" },
 ];
 
+// Distinguishable tones inside the gold and ivory family only. The page has
+// exactly one hue (gold) plus obsidian and ivory neutrals.
 export const categoryColors: Record<string, string> = {
-  AI: "#ec4899",
-  Web: "#06b6d4",
-  DB: "#8b5cf6",
-  Cloud: "#3b82f6",
-  DevOps: "#f59e0b",
-  Lang: "#22c55e",
-  Tools: "#64748b",
-  Automation: "#f97316",
+  AI: "#C9A961",
+  Web: "#EBD9A8",
+  DB: "#A8874A",
+  Cloud: "#D9BE7C",
+  DevOps: "#7A6134",
+  Lang: "#F2ECE0",
+  Tools: "#B8AE9C",
+  Automation: "#857D70",
 };
 
 export const categoryLabels: Record<string, string> = {

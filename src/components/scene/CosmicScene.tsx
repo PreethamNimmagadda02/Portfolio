@@ -1,21 +1,28 @@
 "use client";
 
 /**
- * CosmicScene — the single persistent WebGL background for the entire page.
+ * CosmicScene: the single persistent WebGL background for the entire page.
  *
- * Replaces what used to be 6 independent section canvases (About3D,
- * Experience, SkillsMarquee, Projects, Achievements3D, ParticleField) plus 7
- * SectionDivider3D mount/unmount canvases. One canvas, one GL context, one
- * render loop — driven entirely by document scroll progress via
- * `getSceneState()` (see `@/lib/scene-store`).
+ * One canvas, one GL context, one render loop, driven entirely by document
+ * scroll progress via `getSceneState()` (see `@/lib/scene-store`).
  *
- * Design constraints (see CLAUDE.md redesign plan):
+ * Obsidian and Aurum direction: every chapter shares one gold family. The
+ * cloud is at full intensity behind the hero portrait, dissolves to nothing
+ * before About finishes, leaves only a faint gold star chart during Skills,
+ * and returns low behind the contact letter. In the two live chapters the
+ * gas heats with scroll velocity (colorB warms toward colorA and the
+ * highlight brightens), cooling within about a second of the hand stopping.
+ * The middle of the page is pure obsidian and type: every focus object hides
+ * itself once its smoothed presence drops below a small threshold, so the
+ * middle 80% of the page renders the canvas at near-zero GPU cost.
+ *
+ * Design constraints:
  *  - No MeshTransmissionMaterial, no EffectComposer/Bloom, no HDR Environment,
- *    no drei <Html>. Glow is faked with toneMapped={false} emissives and
- *    additive blending — visually rich, essentially free.
+ *    no drei <Html>. Glow is faked with additive blending; every additive
+ *    opacity is held low so the gold never pushes toward orange.
  *  - dpr capped, antialias off (shader edges are already soft), frameloop
  *    pauses when the tab is hidden.
- *  - Everything reads scroll/pointer from the shared viewport-store — zero
+ *  - Everything reads scroll/pointer from the shared viewport-store: zero
  *    extra window listeners.
  */
 
@@ -36,8 +43,48 @@ import { getActiveSkillCategories } from "@/lib/scene-store";
 import { skillsData, getCategoryColor } from "@/lib/skills-data";
 import { markSceneWarmed, seededRandom } from "@/lib/utils";
 
+/** Foundation tokens as WebGL uniform seeds (the only hex literals allowed here). */
+const AURUM_100 = "#EBD9A8";
+const AURUM_300 = "#C9A961";
+const AURUM_500 = "#7A6134";
+const OBSIDIAN_0 = "#0C0A08";
+const IVORY_100 = "#F2ECE0";
+const IVORY_200 = "#B8AE9C";
+const AURUM_200 = "#D9BE7C";
+
+/**
+ * Weight for a layer that belongs to exactly one chapter: 1 inside it, 0
+ * elsewhere, carried across the chapter cross-fade so it dissolves on the way
+ * out instead of popping.
+ *
+ * Chapter intensity alone is not enough for anything with an edge. The nebula
+ * and the starfield can follow intensity, because gold light behind the
+ * contact letter reads as ambience; geometry cannot, because it crossed the
+ * form fields and read as debris over the copy.
+ */
+function chapterWeight(
+  chapter: { id: string },
+  next: { id: string },
+  blend: number,
+  id: string
+): number {
+  return lerp1(chapter.id === id ? 1 : 0, next.id === id ? 1 : 0, blend);
+}
+
+/**
+ * The sculptural flourishes: the focus core, its light shafts, the ribbons,
+ * the shards and the warp rings. All of them belong to the hero alone.
+ */
+function heroOrnament(
+  chapter: { id: string },
+  next: { id: string },
+  blend: number
+): number {
+  return chapterWeight(chapter, next, blend, "hero");
+}
+
 // -----------------------------------------------------------------------------
-// Aurora Nebula — single fullscreen-ish plane, domain-warped FBM shader.
+// Aurora Nebula: single fullscreen-ish plane, domain-warped FBM shader.
 // -----------------------------------------------------------------------------
 const nebulaVertex = /* glsl */ `
   uniform float uTime;
@@ -86,7 +133,7 @@ const nebulaVertex = /* glsl */ `
   void main() {
     vUv = uv;
 
-    // Amplitude grows with scroll velocity — the surface visibly heaves as
+    // Amplitude grows with scroll velocity: the surface visibly heaves as
     // you move, on top of its constant slow breathing.
     float amp = 1.1 + uVelocity * 1.4;
     float h = heightAt(uv);
@@ -97,7 +144,7 @@ const nebulaVertex = /* glsl */ `
     vec3 tangentX = vec3(1.0, 0.0, (hx - h) * amp / e);
     vec3 tangentY = vec3(0.0, 1.0, (hy - h) * amp / e);
     // normalMatrix (inverse-transpose of modelView) keeps lighting correct
-    // under this mesh's non-uniform viewport-scale — a raw object-space
+    // under this mesh's non-uniform viewport-scale; a raw object-space
     // normal would skew under stretch.
     vNormal = normalize(normalMatrix * normalize(cross(tangentX, tangentY)));
     vHeight = h;
@@ -114,6 +161,7 @@ const nebulaFragment = /* glsl */ `
   uniform float uTime;
   uniform float uScroll;
   uniform float uVelocity;
+  uniform float uIntensity;
   uniform vec2 uMouse;
   uniform vec3 uColorA;
   uniform vec3 uColorB;
@@ -146,11 +194,11 @@ const nebulaFragment = /* glsl */ `
     vec2 uv = vUv;
     float t = uTime * 0.035;
 
-    // Scroll velocity swells the domain warp — the gas "stirs" while you
-    // move and settles when you stop.
+    // Scroll velocity swells the domain warp: the gas stirs while you move
+    // and settles when you stop.
     float stir = 1.0 + uVelocity * 0.9;
 
-    // Swirling vortex warp — coordinates spiral around a slowly drifting
+    // Swirling vortex warp: coordinates spiral around a slowly drifting
     // center instead of sliding in a straight line, so the gas visibly
     // churns rather than reading as a flat plane sliding under a tilt.
     vec2 swirlCenter = vec2(0.5 + sin(t * 0.3) * 0.06, 0.45 + cos(t * 0.24) * 0.05);
@@ -168,8 +216,7 @@ const nebulaFragment = /* glsl */ `
     col = mix(col, uColorA, smoothstep(0.35, 0.85, f) * (0.5 + uVelocity * 0.18));
     col = mix(col, uColorB, smoothstep(0.5, 1.0, q.x * f) * 0.4);
 
-    // Aurora ribbons — traveling color curtains riding the swirl, the
-    // classic aurora-borealis look instead of a static gradient blob.
+    // Aurora ribbons: traveling color curtains riding the swirl.
     float ribbon = sin(swirlUv.x * 7.0 + f * 4.0 - t * 3.0) * 0.5 + 0.5;
     ribbon = pow(ribbon, 4.0) * smoothstep(0.2, 0.8, f);
     vec3 ribbonColor = mix(uColorA, uColorB, sin(t * 0.4) * 0.5 + 0.5);
@@ -178,37 +225,36 @@ const nebulaFragment = /* glsl */ `
     float d = distance(uv, vec2(0.5 + uMouse.x * 0.02, 0.45 - uMouse.y * 0.02));
     col *= smoothstep(0.95, 0.25, d);
 
-    // Pointer-follow glow — a soft light source that lives inside the gas
+    // Pointer-follow glow: a soft light source that lives inside the gas.
     vec2 mousePos = vec2(0.5, 0.5) + uMouse * vec2(0.28, 0.2);
     float mGlow = smoothstep(0.45, 0.0, distance(uv, mousePos));
     col += uColorA * mGlow * 0.2 * (0.6 + 0.4 * f);
 
     col *= 0.8 + 0.22 * sin(uTime * 0.24);
 
-    // Relief shading from the displaced surface's normal — ridges catch a
-    // fixed key light, valleys fall into shadow, selling real volume instead
-    // of a flat gradient.
+    // Relief shading from the displaced surface's normal: ridges catch a
+    // fixed key light, valleys fall into shadow.
     vec3 lightDir = normalize(vec3(0.4, 0.6, 1.0));
     vec3 viewDir = normalize(vViewDir);
     float ndl = clamp(dot(vNormal, lightDir), 0.0, 1.0);
     col *= 0.55 + 0.75 * ndl;
     col += uColorB * smoothstep(0.65, 1.0, vHeight) * 0.1;
 
-    // Glossy specular glint + Fresnel rim — the pair that reads as polished
-    // volume rather than flat matte paint; premium 3D surfaces almost always
-    // carry both.
+    // Specular glint + Fresnel rim, the pair that reads as polished volume
+    // rather than flat matte paint.
     vec3 halfDir = normalize(lightDir + viewDir);
     float spec = pow(clamp(dot(vNormal, halfDir), 0.0, 1.0), 28.0);
     float fresnel = pow(1.0 - clamp(dot(vNormal, viewDir), 0.0, 1.0), 2.5);
     col += vec3(1.0, 0.97, 0.92) * spec * 0.4;
     col += uColorA * fresnel * 0.22;
 
-    // Mild saturation lift — richer, more deliberate color grading instead
-    // of a flat/washed palette.
+    // Mild saturation lift for deliberate color grading.
     float luma = dot(col, vec3(0.299, 0.587, 0.114));
     col = mix(vec3(luma), col, 1.18);
 
-    gl_FragColor = vec4(col, 1.0) * 0.52;
+    // Chapter intensity gates the whole cloud: 1 in hero and contact, 0 in
+    // the middle of the page.
+    gl_FragColor = vec4(col, 1.0) * 0.52 * uIntensity;
   }
 `;
 
@@ -222,10 +268,11 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uVelocity: { value: 0 },
+      uIntensity: { value: 0 },
       uMouse: { value: new THREE.Vector2(0, 0) },
-      uColorA: { value: new THREE.Vector3(...hexToVec3("#8b5cf6")) },
-      uColorB: { value: new THREE.Vector3(...hexToVec3("#3b82f6")) },
-      uColorC: { value: new THREE.Vector3(...hexToVec3("#05010d")) },
+      uColorA: { value: new THREE.Vector3(...hexToVec3(AURUM_300)) },
+      uColorB: { value: new THREE.Vector3(...hexToVec3(AURUM_500)) },
+      uColorC: { value: new THREE.Vector3(...hexToVec3(OBSIDIAN_0)) },
     }),
     []
   );
@@ -240,10 +287,23 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
     const vNorm = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
     u.uVelocity.value += (vNorm - u.uVelocity.value) * 0.08;
 
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    const b = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
+    const { chapter, next, blend, intensity } = getSceneState(scroll.progress);
+    u.uIntensity.value += (intensity - u.uIntensity.value) * 0.06;
+    const currentIntensity = u.uIntensity.value;
+
+    // Velocity heat, gated by intensity so it exists only in the hero and
+    // contact chapters: the umber body warms toward the gold highlight and
+    // the highlight itself brightens while the hand moves. The 0.06 colour
+    // lerp below plus the store's velocity decay cool it within about a
+    // second of the hand stopping.
+    const heat = vNorm * currentIntensity;
+    const a0 = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
+    const b0 = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
     const c = lerp3(hexToVec3(chapter.colorC), hexToVec3(next.colorC), blend);
+    const b = lerp3(b0, a0, heat * 0.6);
+    const lift = 1 + heat * 0.25;
+    const a: [number, number, number] = [a0[0] * lift, a0[1] * lift, a0[2] * lift];
+
     const uA = u.uColorA.value as THREE.Vector3;
     const uB = u.uColorB.value as THREE.Vector3;
     const uC = u.uColorC.value as THREE.Vector3;
@@ -252,11 +312,13 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
     uC.set(uC.x + (c[0] - uC.x) * 0.06, uC.y + (c[1] - uC.y) * 0.06, uC.z + (c[2] - uC.z) * 0.06);
     u.uScroll.value = scroll.progress;
 
-    // A faint pointer-driven tilt — just enough residual parallax to sell
-    // the displaced surface's depth. The swirl + ribbons above now carry
-    // the actual dynamism, so this stays subtle rather than being the
-    // primary motion (a rigid whole-object rotation reads as mechanical).
     if (meshRef.current) {
+      // Skip the fullscreen draw entirely once the cloud has faded out.
+      meshRef.current.visible = currentIntensity >= 0.01;
+
+      // A faint pointer-driven tilt: just enough residual parallax to sell
+      // the displaced surface's depth. The swirl and ribbons carry the actual
+      // dynamism, so this stays subtle.
       const wobble = state.clock.elapsedTime * 0.06;
       const targetRotX = pointer.ny * 0.04 + Math.sin(wobble) * 0.015;
       const targetRotY = -pointer.nx * 0.05 + Math.cos(wobble * 0.85) * 0.015;
@@ -281,7 +343,8 @@ function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: Scro
 }
 
 // -----------------------------------------------------------------------------
-// GPU Starfield — all motion computed in the vertex shader, zero CPU writes.
+// GPU Starfield: all motion computed in the vertex shader, zero CPU writes.
+// Retinted to ivory so the field reads as faint warm dust, not a night sky.
 // -----------------------------------------------------------------------------
 const starsVertex = /* glsl */ `
   uniform float uTime;
@@ -305,11 +368,11 @@ const starsVertex = /* glsl */ `
     float depth = (pos.z + 6.0) / 12.0;
     pos.x += uMouse.x * depth * 1.1;
     pos.y += uMouse.y * depth * 0.7 + uScroll * depth * 4.0;
-    // Warp-speed feel: while scrolling, near stars trail vertically
+    // While scrolling, near stars trail vertically
     pos.y -= uVelocity * depth * 0.9;
 
-    // Pointer gravity — stars near the cursor are gently pushed away and
-    // flare brighter, like a passing gravitational disturbance in the field.
+    // Pointer gravity: stars near the cursor are gently pushed away and
+    // flare brighter, like a passing disturbance in the field.
     vec2 mouseWorld = uMouse * vec2(9.0, 6.0);
     vec2 toStar = pos.xy - mouseWorld;
     float distToMouse = length(toStar);
@@ -321,7 +384,7 @@ const starsVertex = /* glsl */ `
     vTwinkle = 0.55 + 0.45 * sin(uTime * (1.2 + aPhase * 2.0) + aPhase * 40.0);
     vStretch = clamp(abs(uVelocity) * (0.4 + depth), 0.0, 1.0);
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-    // Stars grow slightly + brighten under motion and pointer proximity
+    // Stars grow slightly and brighten under motion and pointer proximity
     gl_PointSize = aSize * vTwinkle * (160.0 / -mv.z) * (1.0 + vStretch * 1.6 + vGravity * 1.2);
     gl_Position = projectionMatrix * mv;
   }
@@ -330,6 +393,7 @@ const starsVertex = /* glsl */ `
 const starsFragment = /* glsl */ `
   uniform vec3 uColorMod;
   uniform float uModMix;
+  uniform float uIntensity;
   varying vec3 vColor;
   varying float vTwinkle;
   varying float vStretch;
@@ -337,30 +401,28 @@ const starsFragment = /* glsl */ `
   varying float vDepth;
   void main() {
     vec2 c = gl_PointCoord - 0.5;
-    // Elongate the sprite vertically while scrolling → motion streaks
+    // Elongate the sprite vertically while scrolling: motion streaks
     c.y /= (1.0 + vStretch * 2.2);
     float d = length(c);
     float alpha = smoothstep(0.5, 0.05, d);
     float core = smoothstep(0.18, 0.0, d) * 0.9;
-    // Per-star base color crossfaded toward the chapter's accent tint.
-    // uModMix is held low (~0.35) so the original palette still reads —
-    // the chapter tint is an ambient wash, not a recolor.
+    // Per-star base color crossfaded toward the chapter's umber tint.
+    // uModMix is held low (0.2) so the ivory palette still reads; the tint
+    // is an ambient wash, not a recolor.
     vec3 base = mix(vColor, uColorMod * (0.7 + core + vStretch * 0.35), uModMix);
-    // Depth fog — distant stars (low vDepth) fall back into the void,
-    // near ones stay crisp. Sells real spatial depth instead of a flat field.
+    // Depth fog: distant stars (low vDepth) fall back into the void, near
+    // ones stay crisp.
     float fog = mix(0.35, 1.0, vDepth);
     vec3 col = base * vTwinkle * fog + vec3(1.0) * vGravity * 0.5;
-    gl_FragColor = vec4(col, alpha * vTwinkle * (0.5 + fog * 0.5));
+    // Mid-page the field settles to faint warm dust; it brightens with the
+    // nebula in the hero and contact chapters.
+    float presence = 0.35 + 0.65 * uIntensity;
+    gl_FragColor = vec4(col, alpha * vTwinkle * (0.5 + fog * 0.5) * presence);
   }
 `;
 
-const STAR_PALETTE = [
-  new THREE.Color("#a78bfa"),
-  new THREE.Color("#818cf8"),
-  new THREE.Color("#f472b6"),
-  new THREE.Color("#67e8f9"),
-  new THREE.Color("#ffffff"),
-];
+// Two ivory tones and one pale gold: the field reads as dust on paper.
+const STAR_PALETTE = [new THREE.Color(IVORY_200), new THREE.Color(IVORY_100), new THREE.Color(AURUM_200)];
 
 function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: ScrollState; count: number }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
@@ -391,7 +453,8 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
       uMouse: { value: new THREE.Vector2(0, 0) },
       uScroll: { value: 0 },
       uVelocity: { value: 0 },
-      uColorMod: { value: new THREE.Color("#818cf8") },
+      uIntensity: { value: 0 },
+      uColorMod: { value: new THREE.Color(AURUM_500) },
       uModMix: { value: 0.0 },
     }),
     []
@@ -405,17 +468,17 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
     u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.05;
     u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.05;
     u.uScroll.value += (scroll.progress - u.uScroll.value) * 0.05;
-    // Signed velocity, soft-capped — drives streaks in the vertex shader
+    // Signed velocity, soft-capped: drives streaks in the vertex shader
     const v = Math.max(-1, Math.min(1, scroll.velocity * 0.5));
     u.uVelocity.value += (v - u.uVelocity.value) * 0.1;
-    // Dynamically retint stars toward the current chapter's accent (colorB).
-    // Held at ~0.32 mix so the palette shift is felt without erasing the
-    // original per-star colors — the field breathes hue as you scroll.
-    const { chapter, next, blend } = getSceneState(scroll.progress);
+    // Gentle retint toward the chapter's colorB (umber) at a low mix, and
+    // the nebula's intensity lifts the field in the two live chapters.
+    const { chapter, next, blend, intensity } = getSceneState(scroll.progress);
     const b = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
     tintColor.setRGB(b[0], b[1], b[2]);
     (u.uColorMod.value as THREE.Color).lerp(tintColor, 0.04);
-    u.uModMix.value += (0.32 - u.uModMix.value) * 0.05;
+    u.uModMix.value += (0.2 - u.uModMix.value) * 0.05;
+    u.uIntensity.value += (intensity - u.uIntensity.value) * 0.06;
   });
 
   return (
@@ -440,85 +503,170 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
 }
 
 // -----------------------------------------------------------------------------
-// Shooting stars — rare meteor comets with a fading trail (desktop only)
+// Guilloche field: the hero's centrepiece.
+//
+// Rose-engine engraving, the interference pattern a guilloche lathe cuts into
+// banknotes, share certificates and watch dials. Three rosette families at
+// different petal counts are summed, and every integer contour of each field
+// is drawn as a single gold hairline, which is the same drawn-line language
+// the rest of the page is built from.
+//
+// This replaces the earlier focus orb and its wireframe cage. Those were solid
+// geometry with a lit rim: it aliased into a visibly stepped edge against the
+// obsidian ground, and it put a bright mass directly behind the hero subtext.
+// An engraving has no silhouette at all. Its density is authored rather than
+// lit, so it can be thinned to nothing across the text column and the copy
+// always sits on clean ground.
 // -----------------------------------------------------------------------------
-const cometVertex = /* glsl */ `
+const guillocheVertex = /* glsl */ `
   varying vec2 vUv;
   void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
-const cometFragment = /* glsl */ `
+
+const guillocheFragment = /* glsl */ `
+  precision highp float;
+
+  uniform float uTime;
   uniform float uOpacity;
+  uniform float uReveal;
+  uniform float uAspect;
+  uniform vec2  uCenter;
+  uniform vec2  uMouse;
+  uniform vec2  uClearDir;
+  uniform vec2  uClearRange;
+  uniform vec3  uGold;
+  uniform vec3  uHigh;
   varying vec2 vUv;
+
+  /* One rose-engine family. The contours of r * (1 + depth * cos(n * theta))
+     are the nested rosettes the lathe traces: n sets the petal count, depth
+     how far the lobes swing. */
+  float rose(vec2 p, float petals, float depth, float phase) {
+    float r = length(p);
+    float a = atan(p.y, p.x);
+    return r * (1.0 + depth * cos(petals * a + phase));
+  }
+
+  /* One hairline on every integer contour of f, held to about a pixel at any
+     scale by measuring the field's own screen-space gradient. Where that
+     gradient runs past half a period the lines can no longer be resolved, so
+     the family fades out rather than aliasing into moire: this is what keeps
+     the dense centre and the far field clean. */
+  float hairline(float f, float spacing) {
+    float g = f / spacing;
+    float w = fwidth(g);
+    float d = abs(fract(g + 0.5) - 0.5);
+    float line = 1.0 - smoothstep(0.0, w * 1.15, d);
+    return line * (1.0 - smoothstep(0.22, 0.55, w));
+  }
+
   void main() {
-    // Bright core at the head (uv.x near 1), fading tail toward uv.x = 0
-    float trail = pow(vUv.x, 2.2);
-    float thickness = smoothstep(0.5, 0.0, abs(vUv.y - 0.5) * 2.0);
-    float head = smoothstep(0.85, 1.0, vUv.x);
-    vec3 col = mix(vec3(0.55, 0.4, 1.0), vec3(1.0), head);
-    float alpha = trail * thickness * uOpacity;
-    gl_FragColor = vec4(col, alpha);
+    vec2 p = vUv - (uCenter + uMouse * 0.010);
+    p.x *= uAspect;
+    float r = length(p);
+
+    /* Petal counts kept coprime so the three families never settle into one
+       repeating star. Each drifts at its own rate, two of them against the
+       others, which is what makes the interference move without anything
+       appearing to spin. */
+    float ink =
+        hairline(rose(p, 7.0,  0.125, uTime * 0.043), 0.0165) * 0.58
+      + hairline(rose(p, 13.0, 0.085, 1.7 - uTime * 0.031), 0.0255) * 0.42
+      + hairline(rose(p, 29.0, 0.042, 3.1 + uTime * 0.019), 0.0415) * 0.28;
+
+    /* An engraved medallion: clear at the very centre, full through the band
+       around it, gone before the frame edge. */
+    ink *= smoothstep(0.02, 0.13, r) * smoothstep(1.30, 0.34, r);
+
+    /* The cut. Rings appear outward from the rosette's eye the way a lathe
+       lays them down, once, as the hero settles. */
+    ink *= smoothstep(0.0, 0.16, uReveal * 1.45 - r);
+
+    /* The reading area. Density falls to a twentieth across whichever side
+       the copy occupies, so the headline and subtext never sit on pattern. */
+    float t = dot(vUv, uClearDir);
+    ink *= mix(0.05, 1.0, smoothstep(uClearRange.x, uClearRange.y, t));
+
+    vec3 col = mix(uGold, uHigh, smoothstep(0.55, 0.06, r));
+    float a = ink * uOpacity;
+    gl_FragColor = vec4(col * a, a);
   }
 `;
 
-function ShootingStar({ seed }: { seed: number }) {
-  const ref = useRef<THREE.Mesh>(null);
+/* Plane dimensions in world units. The rosette has to stay circular in world
+   space, so the shader corrects uv by the plane's own aspect, not the
+   viewport's. Sized to cover the frame at every viewport with room for the
+   camera's chapter drift. */
+const GUILLOCHE_W = 22;
+const GUILLOCHE_H = 13;
+
+/** Peak ink. Hairlines this fine have to read as light, not as line. */
+const GUILLOCHE_INK = 0.72;
+
+/** Seconds the cut takes to travel out from the eye, and its held beat before. */
+const GUILLOCHE_CUT = 2.4;
+const GUILLOCHE_CUT_DELAY = 0.25;
+
+function GuillocheField({
+  pointer,
+  scroll,
+  isMobile,
+}: {
+  pointer: PointerState;
+  scroll: ScrollState;
+  isMobile: boolean;
+}) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
-  const cometUniforms = useMemo(() => ({ uOpacity: { value: 0 } }), []);
-  const state = useRef({
-    active: false,
-    nextLaunch: 2 + seed * 7,
-    progress: 0,
-    start: new THREE.Vector3(),
-    dir: new THREE.Vector3(),
-  });
 
-  useFrame((s, delta) => {
-    const mesh = ref.current;
-    if (!mesh) return;
-    const st = state.current;
-    const t = s.clock.elapsedTime;
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uOpacity: { value: 0 },
+      uReveal: { value: 0 },
+      uAspect: { value: GUILLOCHE_W / GUILLOCHE_H },
+      // Desktop: right of centre and a little high, so the rosette radiates
+      // from behind the portrait plate the way an engraved vignette sits on a
+      // certificate. Mobile stacks the portrait above the copy, so the centre
+      // moves up and the clear side becomes the bottom rather than the left.
+      uCenter: { value: new THREE.Vector2(isMobile ? 0.52 : 0.68, isMobile ? 0.66 : 0.54) },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uClearDir: { value: new THREE.Vector2(isMobile ? 0 : 1, isMobile ? 1 : 0) },
+      uClearRange: { value: new THREE.Vector2(isMobile ? 0.3 : 0.16, isMobile ? 0.72 : 0.58) },
+      uGold: { value: new THREE.Vector3(...hexToVec3(AURUM_300)) },
+      uHigh: { value: new THREE.Vector3(...hexToVec3(AURUM_100)) },
+    }),
+    [isMobile]
+  );
 
-    if (!st.active) {
-      mesh.visible = false;
-      if (t > st.nextLaunch) {
-        st.active = true;
-        st.progress = 0;
-        st.start.set((Math.random() - 0.3) * 18, 4 + Math.random() * 4, -4 - Math.random() * 3);
-        const angle = Math.PI * (1.1 + Math.random() * 0.25);
-        st.dir.set(Math.cos(angle), Math.sin(angle), 0).normalize();
-        mesh.position.copy(st.start);
-        mesh.rotation.z = Math.atan2(st.dir.y, st.dir.x);
-      }
-      return;
-    }
+  useFrame((state) => {
+    if (!matRef.current) return;
+    const u = matRef.current.uniforms;
+    const elapsed = state.clock.elapsedTime;
+    u.uTime.value = elapsed;
+    u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.03;
+    u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.03;
 
-    st.progress += delta * 0.9;
-    const dist = st.progress * 16;
-    mesh.position.copy(st.start).addScaledVector(st.dir, dist);
-    mesh.visible = true;
+    // The cut runs once, from the scene's own first frame. The canvas mounts
+    // on main-thread idle, which is close enough to the hero's entrance that
+    // the two read as one movement without coupling to the loader's event.
+    u.uReveal.value = Math.min(1, Math.max(0, (elapsed - GUILLOCHE_CUT_DELAY) / GUILLOCHE_CUT));
 
-    if (matRef.current) {
-      matRef.current.uniforms.uOpacity.value =
-        Math.min(st.progress * 8, 1) * Math.max(1 - st.progress, 0) * 0.9;
-    }
-
-    if (st.progress >= 1) {
-      st.active = false;
-      st.nextLaunch = t + 4 + Math.random() * 10;
-    }
+    const { chapter, next, blend } = getSceneState(scroll.progress);
+    const target = heroOrnament(chapter, next, blend) * GUILLOCHE_INK;
+    u.uOpacity.value += (target - u.uOpacity.value) * 0.05;
   });
 
   return (
-    <mesh ref={ref} visible={false}>
-      <planeGeometry args={[2.4, 0.05]} />
+    <mesh position={[0, 0, -0.5]}>
+      <planeGeometry args={[GUILLOCHE_W, GUILLOCHE_H]} />
       <shaderMaterial
         ref={matRef}
-        vertexShader={cometVertex}
-        fragmentShader={cometFragment}
-        uniforms={cometUniforms}
+        vertexShader={guillocheVertex}
+        fragmentShader={guillocheFragment}
+        uniforms={uniforms}
         transparent
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -526,294 +674,62 @@ function ShootingStar({ seed }: { seed: number }) {
     </mesh>
   );
 }
-
-// -----------------------------------------------------------------------------
-// Focus Core — the throughline object. A fresnel "energy orb": dark glassy
-// body, chapter-tinted rim glow, slow-swimming noise surface — all computed
-// in one fragment shader (1 draw call). Pushed deep behind the content so it
-// reads as an ambient presence rather than a foreground element.
-// -----------------------------------------------------------------------------
-const orbVertex = /* glsl */ `
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying vec3 vPos;
-  void main() {
-    vNormal = normalMatrix * normal;
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vView = -mv.xyz;
-    vPos = position;
-    gl_Position = projectionMatrix * mv;
-  }
-`;
-
-const orbFragment = /* glsl */ `
-  uniform float uTime;
-  uniform vec3 uColor;
-  uniform float uWeight;
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying vec3 vPos;
-
-  // Cheap 3D value noise (2 octaves) — enough for a living surface
-  float hash3(vec3 p) {
-    return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453123);
-  }
-  float noise3(vec3 p) {
-    vec3 i = floor(p);
-    vec3 f = fract(p);
-    vec3 u = f * f * (3.0 - 2.0 * f);
-    return mix(
-      mix(mix(hash3(i), hash3(i + vec3(1,0,0)), u.x),
-          mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), u.x), u.y),
-      mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), u.x),
-          mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), u.x), u.y),
-      u.z);
-  }
-
-  void main() {
-    vec3 n = normalize(vNormal);
-    vec3 v = normalize(vView);
-    float fres = pow(1.0 - abs(dot(n, v)), 2.4);
-
-    // Swimming plasma bands under the surface
-    float swim = noise3(vPos * 2.2 + vec3(uTime * 0.12, -uTime * 0.08, uTime * 0.05));
-    swim += 0.5 * noise3(vPos * 4.6 - vec3(0.0, uTime * 0.16, 0.0));
-
-    vec3 body = uColor * (0.06 + swim * 0.14);
-    vec3 rim = uColor * fres * (1.1 + 0.25 * sin(uTime * 1.1)) + vec3(1.0) * fres * fres * 0.35;
-    vec3 col = body + rim;
-
-    float alpha = (0.18 + fres * 0.82) * uWeight;
-    gl_FragColor = vec4(col, alpha);
-  }
-`;
-
-/** Small procedural radial-falloff sprite texture for the orb's halo. */
-function makeHaloTexture(): THREE.Texture {
-  const size = 128;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, "rgba(255,255,255,0.55)");
-  g.addColorStop(0.25, "rgba(255,255,255,0.18)");
-  g.addColorStop(0.6, "rgba(255,255,255,0.05)");
-  g.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
-  return tex;
-}
-
-// Cinematic light shafts radiating from behind the orb — the classic
-// "god ray" look. A thin elongated plane with a soft radial falloff along
-// its width and a fade-in/out along its length, additive blended. Two
-// counter-rotating shafts read as a slow searchlight sweep behind the core.
-const shaftVertex = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-const shaftFragment = /* glsl */ `
-  uniform vec3 uColor;
-  uniform float uOpacity;
-  varying vec2 vUv;
-  void main() {
-    float d = abs(vUv.y - 0.5) * 2.0;
-    float shaft = smoothstep(1.0, 0.0, d);
-    float lengthFade = smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.55, vUv.x);
-    float alpha = shaft * shaft * lengthFade * uOpacity;
-    gl_FragColor = vec4(uColor, alpha);
-  }
-`;
-
-function FocusCore({ scroll, pointer }: { scroll: ScrollState; pointer: PointerState }) {
-  const shellRef = useRef<THREE.Mesh>(null);
-  const orbMatRef = useRef<THREE.ShaderMaterial>(null);
-  const groupRef = useRef<THREE.Group>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
-  const spriteRef = useRef<THREE.Sprite>(null);
-  const shaftGroupRef = useRef<THREE.Group>(null);
-  const shaftMat1Ref = useRef<THREE.ShaderMaterial>(null);
-  const shaftMat2Ref = useRef<THREE.ShaderMaterial>(null);
-  const lean = useRef({ x: 0, y: 0 });
-
-  const haloTexture = useMemo(() => makeHaloTexture(), []);
-  const orbUniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uColor: { value: new THREE.Color("#8b5cf6") },
-      uWeight: { value: 1 },
-    }),
-    []
-  );
-  const shaftUniforms1 = useMemo(() => ({ uColor: { value: new THREE.Color("#8b5cf6") }, uOpacity: { value: 0 } }), []);
-  const shaftUniforms2 = useMemo(() => ({ uColor: { value: new THREE.Color("#22d3ee") }, uOpacity: { value: 0 } }), []);
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-
-    // The core leans gently toward the cursor — a living presence that
-    // notices you, without ever fully chasing the pointer.
-    lean.current.x += (pointer.nx * 0.5 - lean.current.x) * 0.02;
-    lean.current.y += (pointer.ny * 0.3 - lean.current.y) * 0.02;
-
-    if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.07;
-      groupRef.current.rotation.x = Math.sin(t * 0.1) * 0.08;
-      // Gentle drift so the orb isn't perfectly static across the whole page
-      const driftX = Math.sin(t * 0.05) * 0.7 + lean.current.x;
-      const driftY = Math.cos(t * 0.07) * 0.35 + lean.current.y;
-      groupRef.current.position.set(driftX, driftY, -3);
-      // Breathing
-      const s = 0.8 + Math.sin(t * 0.5) * 0.02;
-      groupRef.current.scale.setScalar(s);
-    }
-
-    // Weight the orb down while the constellation flourish takes over
-    const coreWeight =
-      1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-
-    // Chapter-tinted orb color, eased
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    tintColor.setRGB(a[0], a[1], a[2]);
-    if (orbMatRef.current) {
-      const u = orbMatRef.current.uniforms;
-      u.uTime.value = t;
-      (u.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-      u.uWeight.value += (coreWeight - u.uWeight.value) * 0.06;
-    }
-
-    if (shellRef.current) {
-      shellRef.current.rotation.y = -t * 0.05;
-      shellRef.current.rotation.z = t * 0.02;
-      const mat = shellRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.09 * coreWeight;
-      mat.color.lerp(tintColor, 0.03);
-    }
-
-    if (spriteRef.current) {
-      const mat = spriteRef.current.material as THREE.SpriteMaterial;
-      mat.opacity = (0.32 + Math.sin(t * 0.8) * 0.06) * coreWeight;
-      mat.color.lerp(tintColor, 0.03);
-    }
-
-    const signalWeight = lerp1(chapter.focus === "signal" ? 1 : 0, next.focus === "signal" ? 1 : 0, blend);
-    if (ringRef.current) {
-      const cycle = (t % 3) / 3;
-      const s = 1 + cycle * 1.8;
-      ringRef.current.scale.setScalar(s);
-      const mat = ringRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = signalWeight * 0.3 * (1 - cycle);
-    }
-
-    // Light shafts — slow counter-rotating sweep behind the orb
-    if (shaftGroupRef.current) {
-      shaftGroupRef.current.children[0].rotation.z = t * 0.05;
-      shaftGroupRef.current.children[1].rotation.z = -t * 0.035 + Math.PI / 3;
-    }
-    const bC = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
-    if (shaftMat1Ref.current) {
-      (shaftMat1Ref.current.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.02);
-      shaftMat1Ref.current.uniforms.uOpacity.value += (coreWeight * 0.16 - shaftMat1Ref.current.uniforms.uOpacity.value) * 0.04;
-    }
-    if (shaftMat2Ref.current) {
-      const bTint = new THREE.Color(bC[0], bC[1], bC[2]);
-      (shaftMat2Ref.current.uniforms.uColor.value as THREE.Color).lerp(bTint, 0.02);
-      shaftMat2Ref.current.uniforms.uOpacity.value += (coreWeight * 0.12 - shaftMat2Ref.current.uniforms.uOpacity.value) * 0.04;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Cinematic light shafts — behind the orb (negative z), additive */}
-      <group ref={shaftGroupRef} position={[0, 0, -0.3]}>
-        <mesh>
-          <planeGeometry args={[7, 1.1]} />
-          <shaderMaterial
-            ref={shaftMat1Ref}
-            vertexShader={shaftVertex}
-            fragmentShader={shaftFragment}
-            uniforms={shaftUniforms1}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-        <mesh>
-          <planeGeometry args={[5.5, 0.8]} />
-          <shaderMaterial
-            ref={shaftMat2Ref}
-            vertexShader={shaftVertex}
-            fragmentShader={shaftFragment}
-            uniforms={shaftUniforms2}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      </group>
-      {/* Energy orb — fresnel rim + swimming plasma */}
-      <mesh>
-        <sphereGeometry args={[0.85, 48, 48]} />
-        <shaderMaterial
-          ref={orbMatRef}
-          vertexShader={orbVertex}
-          fragmentShader={orbFragment}
-          uniforms={orbUniforms}
-          transparent
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      {/* Faint sacred-geometry cage around the orb */}
-      <mesh ref={shellRef} scale={1.35}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#a78bfa" wireframe transparent opacity={0.09} />
-      </mesh>
-      {/* Compact halo sprite — soft radial falloff, ~1/3 the old bubble */}
-      <sprite ref={spriteRef} scale={[2.6, 2.6, 1]}>
-        <spriteMaterial
-          map={haloTexture}
-          color="#8b5cf6"
-          transparent
-          opacity={0.32}
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </sprite>
-      {/* Signal ripple ring (experience/activity chapters) */}
-      <mesh ref={ringRef} rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[1, 0.012, 8, 64]} />
-        <meshBasicMaterial color="#67e8f9" transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-    </group>
-  );
-}
-
 function lerp1(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
 // -----------------------------------------------------------------------------
-// Skills Constellation — 30 static category-colored points + faint connecting
-// web, visible only during the Skills chapter. Reads the shared filter store
-// imperatively each frame (cheap: 30 items) so chip clicks in the DOM Skills
-// section dim non-matching points without any prop drilling.
+// Skills Constellation: static category-toned points plus a faint connecting
+// web, a gold star chart visible only during the Skills chapter at the base
+// opacity the chapter table sets (0.12). Reads the shared filter store
+// imperatively each frame (cheap: a few dozen items) so toggling a category
+// in the DOM Skills section lifts the matching points to 0.6 without any
+// prop drilling.
 // -----------------------------------------------------------------------------
+const CONSTELLATION_REST = 0.12;
+const CONSTELLATION_LIFT = 0.6;
+const CONSTELLATION_DIM = 0.06;
+
+/* Near-still. A field of points turning slowly reads as celestial
+   cartography; the same field spun at a visible rate reads as a product demo,
+   which is the one register this page cannot afford. */
+const CONSTELLATION_DRIFT = 0.012;
+
+/**
+ * Soft round sprite for the star points. An unmapped pointsMaterial draws
+ * hard squares, which read as pixels rather than as stars, and squares are
+ * exactly the wrong shape on a page whose every other edge is a drawn rule.
+ * Built once on first use and shared: one 64px canvas for the whole field.
+ */
+let starSprite: THREE.Texture | null = null;
+
+function makeStarTexture(): THREE.Texture {
+  if (starSprite) return starSprite;
+  const size = 64;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.35, "rgba(255,255,255,0.55)");
+  g.addColorStop(0.7, "rgba(255,255,255,0.12)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  starSprite = tex;
+  return tex;
+}
+
 function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
   const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
-  const lineRef = useRef<THREE.LineSegments>(null);
-  const tmpColor = useMemo(() => new THREE.Color(), []);
+  const base = useRef(0);
+  const sprite = useMemo(() => makeStarTexture(), []);
 
-  const { positions, colorArray, lineGeometry } = useMemo(() => {
+  const { positions, colorArray } = useMemo(() => {
     const n = skillsData.length;
     const positions = new Float32Array(n * 3);
     const colorArray: THREE.Color[] = [];
@@ -827,44 +743,33 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       colorArray.push(new THREE.Color(getCategoryColor(skillsData[i].category)));
     }
 
-    const linePositions: number[] = [];
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        const dx = positions[i * 3] - positions[j * 3];
-        const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-        const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist < 1.05) {
-          linePositions.push(
-            positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
-            positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]
-          );
-        }
-      }
-    }
-    const lineGeo = new THREE.BufferGeometry();
-    lineGeo.setAttribute("position", new THREE.Float32BufferAttribute(linePositions, 3));
-
-    return { positions, colorArray, lineGeometry: lineGeo };
+    return { positions, colorArray };
   }, []);
 
+  // Vertex colours start at the rest brightness so nothing flashes on mount.
   const colorsAttr = useMemo(() => {
     const arr = new Float32Array(colorArray.length * 3);
     colorArray.forEach((c, i) => {
-      arr[i * 3] = c.r;
-      arr[i * 3 + 1] = c.g;
-      arr[i * 3 + 2] = c.b;
+      arr[i * 3] = c.r * CONSTELLATION_REST;
+      arr[i * 3 + 1] = c.g * CONSTELLATION_REST;
+      arr[i * 3 + 2] = c.b * CONSTELLATION_REST;
     });
     return arr;
   }, [colorArray]);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const weight = lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
+    const { chapter, next, blend, constellationOpacity } = getSceneState(scroll.progress);
+    // Pinned to Skills. Chapter intensity alone let the field bleed a long way
+    // up into Experience, where a lit sphere sat behind the role dossier.
+    const target = constellationOpacity * chapterWeight(chapter, next, blend, "skills");
+    base.current += (target - base.current) * 0.06;
+    // Normalised chapter presence: 1 inside Skills, easing to 0 either side.
+    const weight = Math.min(base.current / CONSTELLATION_REST, 1);
 
     if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.06;
+      groupRef.current.visible = base.current > 0.002;
+      groupRef.current.rotation.y = t * CONSTELLATION_DRIFT;
       groupRef.current.scale.setScalar(0.85 + weight * 0.25);
     }
 
@@ -872,65 +777,63 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
     const anyFilter = activeCats.size > 0;
     if (pointsRef.current) {
       const mat = pointsRef.current.material as THREE.PointsMaterial;
-      mat.opacity = weight * 0.9;
-      mat.size = 0.05 + weight * 0.03;
+      // Brightness lives in the vertex colour (fragment output is clamped to
+      // [0, 1] before additive blending, so a per-point lift above the base
+      // opacity has to come from the colour, not the material opacity). At
+      // rest a point therefore renders at exactly constellationOpacity.
+      mat.opacity = weight;
+      mat.size = 0.062 + weight * 0.036;
 
-      // Per-skill response: stars matching the active filter stay at full
-      // brightness, everything else fades toward the background — a real
-      // highlight of the selection rather than one flat global dim.
+      // Per-skill response: points matching the active filter lift to 0.6,
+      // everything else settles toward the dim floor, so the selection reads
+      // as a highlight rather than one flat global dim.
       // In-place mutation of a persistent typed array (+ needsUpdate below)
-      // is the standard r3f pattern for per-frame vertex-color updates —
+      // is the standard r3f pattern for per-frame vertex-color updates;
       // recreating the Float32Array every frame would defeat the point.
       /* eslint-disable react-hooks/immutability */
       const colorAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
       for (let i = 0; i < skillsData.length; i++) {
-        const match = !anyFilter || activeCats.has(skillsData[i].category);
-        const base = colorArray[i];
-        const target = match ? 1 : 0.08;
+        const match = activeCats.has(skillsData[i].category);
+        const baseColor = colorArray[i];
+        const target = anyFilter ? (match ? CONSTELLATION_LIFT : CONSTELLATION_DIM) : CONSTELLATION_REST;
         const idx = i * 3;
-        colorsAttr[idx] += (base.r * target - colorsAttr[idx]) * 0.08;
-        colorsAttr[idx + 1] += (base.g * target - colorsAttr[idx + 1]) * 0.08;
-        colorsAttr[idx + 2] += (base.b * target - colorsAttr[idx + 2]) * 0.08;
+        colorsAttr[idx] += (baseColor.r * target - colorsAttr[idx]) * 0.08;
+        colorsAttr[idx + 1] += (baseColor.g * target - colorsAttr[idx + 1]) * 0.08;
+        colorsAttr[idx + 2] += (baseColor.b * target - colorsAttr[idx + 2]) * 0.08;
       }
       /* eslint-enable react-hooks/immutability */
       colorAttr.needsUpdate = true;
     }
-    if (lineRef.current) {
-      const mat = lineRef.current.material as THREE.LineBasicMaterial;
-      mat.opacity = weight * 0.12;
-      // Tint the connecting web to the active chapter accent — visible
-      // crossfade as Skills morphs into Projects with different palettes
-      const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-      tmpColor.setRGB(a[0], a[1], a[2]);
-      mat.color.lerp(tmpColor, 0.05);
-    }
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={false}>
       <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
           <bufferAttribute attach="attributes-color" args={[colorsAttr, 3]} />
         </bufferGeometry>
-        <pointsMaterial size={0.06} vertexColors transparent opacity={0} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
+        <pointsMaterial
+          map={sprite}
+          size={0.075}
+          vertexColors
+          transparent
+          opacity={0}
+          sizeAttenuation
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </points>
-      <lineSegments ref={lineRef}>
-        <primitive object={lineGeometry} attach="geometry" />
-        <lineBasicMaterial color="#a78bfa" transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </lineSegments>
     </group>
   );
 }
 
 // -----------------------------------------------------------------------------
-// Ember particles — small warm flourish for the Achievements chapter
+// Ember particles: a small gold flourish weighted to the flame-focus chapter.
 // -----------------------------------------------------------------------------
 function Embers({ scroll }: { scroll: ScrollState }) {
   const pointsRef = useRef<THREE.Points>(null);
   const count = 24;
-  const flameColor = useMemo(() => new THREE.Color("#fbbf24"), []);
-  const tmpColor = useMemo(() => new THREE.Color(), []);
   const { positions, phases } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const phases = new Float32Array(count);
@@ -949,436 +852,30 @@ function Embers({ scroll }: { scroll: ScrollState }) {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     const { chapter, next, blend } = getSceneState(scroll.progress);
-    const weight = lerp1(chapter.focus === "flame" ? 1 : 0, next.focus === "flame" ? 1 : 0, blend);
+    const weight = chapterWeight(chapter, next, blend, "achievements");
     if (pointsRef.current) {
+      pointsRef.current.visible = weight > 0.01;
       pointsRef.current.rotation.y = t * 0.1;
       const mat = pointsRef.current.material as THREE.PointsMaterial;
-      mat.opacity = weight * 0.7;
-      // Harmonize the ember hue with the active chapter — warm flourish
-      // stays warm but leans slightly toward each chapter's colorA accent
-      const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-      tmpColor.setRGB(a[0], a[1], a[2]);
-      mat.color.lerp(tmpColor, 0.03);
-      mat.color.lerp(flameColor, 0.04); // pull back toward gold
+      mat.opacity = weight * 0.35;
     }
   });
 
   return (
-    <points ref={pointsRef}>
+    <points ref={pointsRef} visible={false}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         <bufferAttribute attach="attributes-aPhase" args={[phases, 1]} />
       </bufferGeometry>
-      <pointsMaterial size={0.05} color="#fbbf24" transparent opacity={0} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
+      <pointsMaterial size={0.05} color={AURUM_300} transparent opacity={0} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
     </points>
   );
 }
 
 // -----------------------------------------------------------------------------
-
-
-// -----------------------------------------------------------------------------
-// Energy Ribbons — flowing sine-wave trails orbiting the focus orb. A custom
-// curve geometry ribbon with a shader that animates a luminance wave along its
-// length, reacting to scroll velocity (faster scroll = brighter/faster pulse).
-// Reads as elegant "ribbon light" wrapping the orb — premium ornament without
-// competing with foreground content.
-// -----------------------------------------------------------------------------
-const ribbonVertex = /* glsl */ `
-  uniform float uTime;
-  uniform float uVelocity;
-  uniform float uSeed;
-  attribute float u;
-  varying float vU;
-  void main() {
-    vU = u;
-    vec3 pos = position;
-    // Subtle breathing along the ribbon
-    pos += normal * sin(uTime * 0.8 + u * 6.2831 + uSeed) * 0.04;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-  }
-`;
-
-const ribbonFragment = /* glsl */ `
-  uniform float uTime;
-  uniform float uVelocity;
-  uniform vec3 uColor;
-  uniform float uWeight;
-  uniform float uSeed;
-  varying float vU;
-  void main() {
-    // A traveling light pulse along the ribbon length (two waves, second is dimmer)
-    float wave1 = sin((vU - uTime * 0.18) * 6.2831 * 2.0 + uSeed);
-    float wave2 = sin((vU - uTime * 0.12) * 6.2831 * 1.0 + uSeed * 1.7) * 0.4;
-    float pulse = 0.5 + 0.5 * (wave1 + wave2);
-    // Edge fade so the ribbon has no visible seam
-    float edge = smoothstep(0.0, 0.08, vU) * smoothstep(1.0, 0.92, vU);
-    float lum = (0.18 + 0.82 * pulse) * edge;
-    // Scroll velocity brightens and speeds the pulse
-    float bright = lum * (0.7 + uVelocity * 0.6);
-    vec3 col = uColor * bright;
-    gl_FragColor = vec4(col, edge * uWeight * (0.35 + 0.65 * pulse));
-  }
-`;
-
-function EnergyRibbons({ scroll }: { scroll: ScrollState }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const matsRef = useRef<THREE.ShaderMaterial[]>([]);
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
-  // Build three ribbon-shaped TubeGeometries along sine-perturbed curves.
-  // Each ribbon is a thin tube around a CatmullRom curve — one draw call, GPU
-  // animation drives the luminance, motion is just group rotation.
-  const { geometries, seeds } = useMemo(() => {
-    const geos: THREE.TubeGeometry[] = [];
-    const seedList: number[] = [];
-    for (let k = 0; k < 3; k++) {
-      const turns = 5;
-      const pts: THREE.Vector3[] = [];
-      const segments = 200;
-      for (let i = 0; i <= segments; i++) {
-        const t = (i / segments) * Math.PI * 2 * turns;
-        const r = 1.15 + 0.18 * Math.sin(t * 0.5 + k * 1.7);
-        pts.push(
-          new THREE.Vector3(
-            Math.cos(t) * r,
-            Math.sin(t) * r * 0.55 + 0.25 * Math.sin(t * 0.3 + k * 2.1),
-            Math.sin(t * 0.8 + k * 1.3) * 0.42
-          )
-        );
-      }
-      const curve = new THREE.CatmullRomCurve3(pts);
-      geos.push(new THREE.TubeGeometry(curve, segments, 0.018, 6, true));
-      seedList.push(k * 1.9 + 0.3);
-    }
-    return { geometries: geos, seeds: seedList };
-  }, []);
-
-  const uniforms = useMemo(
-    () =>
-      seeds.map((seed) => ({
-        uTime: { value: 0 },
-        uVelocity: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
-        uWeight: { value: 0 },
-        uSeed: { value: seed },
-      })),
-    [seeds]
-  );
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    tintColor.setRGB(a[0], a[1], a[2]);
-
-    if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.1;
-      groupRef.current.rotation.x = Math.sin(t * 0.08) * 0.14;
-      groupRef.current.rotation.z = Math.cos(t * 0.06) * 0.06;
-    }
-    const v = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
-    matsRef.current.forEach((m, i) => {
-      if (!m) return;
-      const u = m.uniforms;
-      u.uTime.value = t;
-      u.uVelocity.value += (v - u.uVelocity.value) * 0.08;
-      (u.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-      // Ribbons ride alongside the orb's "core" weight — visible and breathing
-      // except during the constellation chapter when they fade out
-      const w =
-        1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-      u.uWeight.value += (w * 0.7 + 0.15 - u.uWeight.value) * 0.04;
-    });
-  });
-
-  return (
-    <group ref={groupRef}>
-      {geometries.map((geo, i) => (
-        <mesh key={i} geometry={geo}>
-          <shaderMaterial
-            ref={(m) => {
-              if (m) matsRef.current[i] = m;
-            }}
-            vertexShader={ribbonVertex}
-            fragmentShader={ribbonFragment}
-            uniforms={uniforms[i]}
-            transparent
-            depthWrite={false}
-            side={THREE.DoubleSide}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Crystal Shards — a handful of slowly tumbling faceted low-poly meshes with
-// a fresnel rim-light shader. Reads as floating jewelry around the orb — the
-// premium "wow" depth moment without competing for attention (no bloom, no
-// HDR, all glow fake-emulated with toneMapped=false additive).
-// -----------------------------------------------------------------------------
-const shardVertex = /* glsl */ `
-  varying vec3 vNormal;
-  varying vec3 vView;
-  void main() {
-    vNormal = normalMatrix * normal;
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vView = -mv.xyz;
-    gl_Position = projectionMatrix * mv;
-  }
-`;
-const shardFragment = /* glsl */ `
-  uniform vec3 uColor;
-  uniform float uTime;
-  uniform float uWeight;
-  varying vec3 vNormal;
-  varying vec3 vView;
-  void main() {
-    vec3 n = normalize(vNormal);
-    vec3 v = normalize(vView);
-    float fres = pow(1.0 - max(dot(n, v), 0.0), 1.6);
-    // A subtle inner shimmer — brightness pulses gently, no hard specular
-    float shimmer = 0.4 + 0.6 * sin(uTime * 0.6 + vNormal.x * 4.0 + vNormal.y * 2.0);
-    vec3 col = uColor * (0.18 + shimmer * 0.28) + uColor * fres * 1.05 + vec3(1.0) * fres * fres * 0.18;
-    float a = (0.18 + fres * 0.82) * uWeight;
-    gl_FragColor = vec4(col, a);
-  }
-`;
-
-function CrystalShards({ scroll }: { scroll: ScrollState }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const meshRefs = useRef<THREE.Mesh[]>([]);
-  const matsRef = useRef<THREE.ShaderMaterial[]>([]);
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
-  // 5 shard placements on a slow orbit
-  const shards = useMemo(() => {
-    const rand = seededRandom(2024);
-    return new Array(5).fill(0).map(() => ({
-      orbitR: 2.1 + rand() * 0.6,
-      orbitY: (rand() - 0.5) * 0.9,
-      speed: (0.04 + rand() * 0.06) * (rand() > 0.5 ? 1 : -1),
-      phase: rand() * Math.PI * 2,
-      spin: {
-        x: (rand() - 0.5) * 0.6,
-        y: (rand() - 0.5) * 0.6,
-        z: (rand() - 0.5) * 0.4,
-      },
-      geoIndex: Math.floor(rand() * 3),
-      size: 0.16 + rand() * 0.12,
-    }));
-  }, []);
-
-  const geometries = useMemo(
-    () => [
-      new THREE.OctahedronGeometry(1, 0),
-      new THREE.TetrahedronGeometry(1, 0),
-      new THREE.IcosahedronGeometry(1, 0),
-    ],
-    []
-  );
-
-  const uniforms = useMemo(
-    () =>
-      shards.map(() => ({
-        uTime: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
-        uWeight: { value: 0 },
-      })),
-    [shards]
-  );
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    tintColor.setRGB(a[0], a[1], a[2]);
-
-    // Slightly reduce shard presence during constellation chapter
-    const w =
-      1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-
-    shards.forEach((s, i) => {
-      const mesh = meshRefs.current[i];
-      if (mesh) {
-        const angle = t * s.speed + s.phase;
-        mesh.position.set(
-          Math.cos(angle) * s.orbitR,
-          s.orbitY + Math.sin(t * 0.2 + s.phase) * 0.18,
-          Math.sin(angle) * s.orbitR * 0.5
-        );
-        mesh.rotation.x = t * s.spin.x;
-        mesh.rotation.y = t * s.spin.y;
-        mesh.rotation.z = t * s.spin.z;
-        const pulse = 1 + Math.sin(t * 0.8 + s.phase) * 0.06;
-        mesh.scale.setScalar(s.size * pulse);
-      }
-      const m = matsRef.current[i];
-      if (m) {
-        m.uniforms.uTime.value = t;
-        (m.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-        m.uniforms.uWeight.value += (w * 0.55 - m.uniforms.uWeight.value) * 0.04;
-      }
-    });
-
-    if (groupRef.current) groupRef.current.rotation.y = t * 0.02;
-  });
-
-  return (
-    <group ref={groupRef}>
-      {shards.map((s, i) => (
-        <mesh
-          key={i}
-          ref={(m) => {
-            if (m) meshRefs.current[i] = m;
-          }}
-          geometry={geometries[s.geoIndex]}
-        >
-          <shaderMaterial
-            ref={(m) => {
-              if (m) matsRef.current[i] = m;
-            }}
-            vertexShader={shardVertex}
-            fragmentShader={shardFragment}
-            uniforms={uniforms[i]}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Warp Rings — three thin tilted rings around the orb that pulse outward when
-// the visitor scrolls and contract when at rest. A scroll-velocity "engine"
-// feel; the reactive motion makes the background feel alive and responsive.
-// Each ring is a torus with shader-driven radial glow that expands with scroll.
-// -----------------------------------------------------------------------------
-const warpRingVertex = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-const warpRingFragment = /* glsl */ `
-  uniform float uTime;
-  uniform float uVelocity;
-  uniform vec3 uColor;
-  uniform float uWeight;
-  uniform float uSeed;
-  varying vec2 vUv;
-  void main() {
-    // A traveling wave around the ring's circumference
-    float wave = sin((vUv.x - uTime * 0.3 + uSeed) * 6.2831 * 3.0);
-    // Brightness swells with scroll velocity
-    float bright = (0.35 + 0.65 * (0.5 + 0.5 * wave)) * (0.5 + uVelocity * 1.0);
-    vec3 col = uColor * bright;
-    gl_FragColor = vec4(col, uWeight * (0.18 + uVelocity * 0.4));
-  }
-`;
-
-function WarpRings({ scroll }: { scroll: ScrollState }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const matsRef = useRef<THREE.ShaderMaterial[]>([]);
-  const meshRefs = useRef<THREE.Mesh[]>([]);
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
-  const rings = useMemo(
-    () =>
-      new Array(3).fill(0).map((_, i) => ({
-        radius: 1.45 + i * 0.28,
-        tube: 0.008,
-        tiltX: 1.1 + i * 0.35,
-        tiltY: 0.4 + i * 0.5,
-        tiltZ: i * 0.25,
-        seed: i * 1.7,
-      })),
-    []
-  );
-
-  const uniforms = useMemo(
-    () =>
-      rings.map((r) => ({
-        uTime: { value: 0 },
-        uVelocity: { value: 0 },
-        uColor: { value: new THREE.Color("#8b5cf6") },
-        uWeight: { value: 0 },
-        uSeed: { value: r.seed },
-      })),
-    [rings]
-  );
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const a = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    tintColor.setRGB(a[0], a[1], a[2]);
-
-    const v = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
-
-    if (groupRef.current) {
-      groupRef.current.rotation.z = t * 0.04;
-      groupRef.current.rotation.x = Math.sin(t * 0.1) * 0.05;
-    }
-
-    rings.forEach((r, i) => {
-      const mesh = meshRefs.current[i];
-      if (mesh) {
-        // Scroll-velocity pulses the ring outward and contracts at rest
-        const s = 1 + v * 0.22 + Math.sin(t * 0.7 + i) * 0.04;
-        mesh.scale.setScalar(s);
-      }
-      const m = matsRef.current[i];
-      if (m) {
-        m.uniforms.uTime.value = t;
-        m.uniforms.uVelocity.value += (v - m.uniforms.uVelocity.value) * 0.1;
-        (m.uniforms.uColor.value as THREE.Color).lerp(tintColor, 0.03);
-        const w =
-          1 - lerp1(chapter.focus === "constellation" ? 1 : 0, next.focus === "constellation" ? 1 : 0, blend);
-        m.uniforms.uWeight.value += (w * 0.7 - m.uniforms.uWeight.value) * 0.04;
-      }
-    });
-  });
-
-  return (
-    <group ref={groupRef}>
-      {rings.map((r, i) => (
-        <mesh
-          key={i}
-          ref={(m) => {
-            if (m) meshRefs.current[i] = m;
-          }}
-          rotation={[r.tiltX, r.tiltY, r.tiltZ]}
-        >
-          <torusGeometry args={[r.radius, r.tube, 8, 96]} />
-          <shaderMaterial
-            ref={(m) => {
-              if (m) matsRef.current[i] = m;
-            }}
-            vertexShader={warpRingVertex}
-            fragmentShader={warpRingFragment}
-            uniforms={uniforms[i]}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Adaptive quality — watches real frame time and steps the renderer's pixel
-// ratio down (1.5 → 1.25 → 1) when the GPU can't hold 60fps, and back up when
-// there's headroom. Guarantees buttery scrolling on weak/integrated GPUs.
+// Adaptive quality: watches real frame time and steps the renderer's pixel
+// ratio down (1.5 to 1.25 to 1) when the GPU can't hold 60fps, and back up
+// when there's headroom. Keeps scrolling smooth on weak or integrated GPUs.
 // -----------------------------------------------------------------------------
 function AdaptiveQuality({ maxDpr }: { maxDpr: number }) {
   const { gl } = useThree();
@@ -1419,9 +916,9 @@ function AdaptiveQuality({ maxDpr }: { maxDpr: number }) {
 }
 
 // -----------------------------------------------------------------------------
-// Camera rig — reads scroll each frame, lerps toward the current chapter's
+// Camera rig: reads scroll each frame, lerps toward the current chapter's
 // waypoint. Purely additive to mouse parallax so the page never feels like
-// it's "flying" — motion stays subtle behind the foreground content.
+// it's flying; motion stays subtle behind the foreground content.
 // -----------------------------------------------------------------------------
 function CameraRig({ pointer, scroll }: { pointer: PointerState; scroll: ScrollState }) {
   const { camera } = useThree();
@@ -1452,19 +949,8 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
       <CameraRig pointer={pointer} scroll={scroll} />
       <AdaptiveQuality maxDpr={isMobile ? 1 : 1.5} />
       <AuroraNebula pointer={pointer} scroll={scroll} />
-      <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 200 : 600} />
-
-      {!isMobile && (
-        <>
-          <ShootingStar seed={0.1} />
-          <ShootingStar seed={0.5} />
-          <ShootingStar seed={0.9} />
-        </>
-      )}
-      <FocusCore scroll={scroll} pointer={pointer} />
-      {!isMobile && <EnergyRibbons scroll={scroll} />}
-      {!isMobile && <CrystalShards scroll={scroll} />}
-      {!isMobile && <WarpRings scroll={scroll} />}
+      <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 120 : 360} />
+      <GuillocheField pointer={pointer} scroll={scroll} isMobile={isMobile} />
       {!isMobile && <SkillsConstellation scroll={scroll} />}
       {!isMobile && <Embers scroll={scroll} />}
     </>
@@ -1478,20 +964,21 @@ export default function CosmicScene() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Small delay lets the hero paint first; the background then fades in —
-    // avoids competing with the initial interactivity critical path.
+    // Small delay lets the hero paint first; the background then fades in,
+    // avoiding competition with the initial interactivity critical path.
     const t = setTimeout(() => setReady(true), 50);
     return () => clearTimeout(t);
   }, []);
 
   if (prefersReducedMotion) {
-    // Static, cheap fallback: a fixed gradient instead of any canvas.
+    // Static, cheap fallback: a fixed gold gradient on obsidian instead of
+    // any canvas, placed where the hero lobe would sit.
     return (
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.12), transparent 60%), #030308",
+            "radial-gradient(60% 45% at 78% 30%, rgba(201,169,97,0.10), transparent 70%), #0C0A08",
         }}
         aria-hidden
       />
@@ -1502,7 +989,7 @@ export default function CosmicScene() {
     <div className="gpu-layer fixed inset-0 z-0 pointer-events-none">
       {ready && (
         <Canvas
-          camera={{ position: [0, 0, 6.5], fov: 55 }}
+          camera={{ position: [0.9, 0.3, 6.5], fov: 55 }}
           gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
           dpr={[1, isMobile ? 1 : 1.5]}
           style={{ background: "transparent" }}
@@ -1514,9 +1001,9 @@ export default function CosmicScene() {
           </Suspense>
         </Canvas>
       )}
-      {/* Cinematic vignette — a static CSS radial-gradient overlay, zero GPU
-          cost. Darkens the frame edges for a deep-space keynote look and
-          doubles as a free readability aid for the content sitting on top. */}
+      {/* Vignette: a static CSS radial-gradient overlay, zero GPU cost.
+          Darkens the frame edges and doubles as a readability aid for the
+          content sitting on top. */}
       <div className="cosmic-vignette" aria-hidden />
     </div>
   );

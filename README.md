@@ -8,11 +8,11 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
 
 ## 🚀 Key Features
 
-- **Modern UI/UX:** Built with a "dark mode" first aesthetic, glassmorphism effects, and smooth transitions.
-- **Interactive Animations:** Powered by `framer-motion` for complex scroll animations, floating elements, and parallax effects.
-- **3D Elements:** Integrated `three.js` and `@react-three/fiber` for immersive 3D experiences.
+- **Editorial identity:** a single committed dark theme in obsidian and gold, set in Bodoni Moda (display), Geist (body) and Geist Mono (numerals), with hairline rules and zero border radius.
+- **Deliberate motion:** `framer-motion` reveals, a shared plate-lift heading, per-character ledger numerals and a loader-to-headline match cut, all with reduced-motion fallbacks.
+- **One WebGL canvas:** a gold nebula built with `three.js` and `@react-three/fiber`, full intensity only in the hero and contact chapters.
 - **Progressive Web App (PWA):** Fully installable as a native-like app on mobile and desktop devices.
-- **Responsive Design:** Mobile-first approach ensuring a seamless experience across all screen sizes.
+- **Responsive Design:** Mobile-first layout with explicit collapses below 768px on every section.
 - **Performance Optimized:** Server-side rendered with Next.js 16 for blazing fast load times and SEO.
 
 ## 🛠️ Tech Stack
@@ -20,8 +20,10 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
 - **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Typography:** Bodoni Moda, Geist and Geist Mono via `next/font/google`
 - **Animations:** [Framer Motion](https://www.framer.com/motion/)
-- **Icons:** [Lucide React](https://lucide.dev/)
+- **Icons:** [Phosphor Icons](https://phosphoricons.com/) (`@phosphor-icons/react`, light weight)
+- **Theme:** single dark theme, tokens in `src/app/globals.css` (`@theme inline`)
 - **3D:** [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 - **PWA:** [next-pwa](https://www.npmjs.com/package/next-pwa)
 - **Deployment:** Firebase Hosting

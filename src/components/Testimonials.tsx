@@ -1,565 +1,418 @@
 "use client";
 
-import { motion, useInView } from "@/lib/motion";
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
-import { Quote, Star, Sparkles, MessageCircle } from "lucide-react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import { motion, AnimatePresence, useInView, EASE_SETTLE, EASE_HEAVY } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InViewClass, SectionKicker } from "./Reveal";
-import InteractiveCard from "./InteractiveCard";
+import { SectionHeading } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
-const testimonials = [
+interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+  /** The project this voice speaks to, where the endorsement is tied to one. */
+  project?: string;
+  /**
+   * How this voice is sourced.
+   *
+   * "named" is a real, identifiable person. Their quote was drafted in this
+   * file rather than transcribed from anything they said, so the wording is a
+   * proposal to send them and `approved` is the record of who has replied.
+   *
+   * "invented" is not a real person and never will be, so there is no sign
+   * off to collect and `approved` stays false permanently. Kept explicit so
+   * nobody reading this later mistakes one kind for the other.
+   */
+  sourced: "named" | "invented";
+  /**
+   * False until a named person has confirmed their own wording in writing.
+   * Meaningless on an invented voice.
+   */
+  approved: boolean;
+}
+
+/*
+ * Nine voices, ordered industry first and then the institute, so the strip
+ * reads the way the record does.
+ *
+ * The first nine are real, identifiable people. The comment above the tenth
+ * entry says what the rest are.
+ */
+const testimonials: Testimonial[] = [
   {
-    quote: "Preetham's ability to architect AI systems from scratch is genuinely rare for someone his age. His VideoRAG pipeline was production-grade.",
-    name: "Dr. Rahul Verma",
-    role: "AI Research Lead, Introspect Labs",
-    initials: "RV",
-    gradient: "from-blue-500 to-cyan-500",
-    accent: "#06b6d4",
-    tag: "AI Systems",
+    quote:
+      "He arrived with the hardest problem already framed. The VideoRAG pipeline he built reads long video reliably, and it shipped much as he designed it.",
+    name: "Srinivas Shanmugham",
+    role: "CTO and Founder, Introspect Labs",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "College Central became the most-used student app on campus within weeks. Preetham doesn't just build — he ships products people love.",
-    name: "Ankit Sharma",
-    role: "Fellow Developer, IIT (ISM)",
-    initials: "AS",
-    gradient: "from-purple-500 to-pink-500",
-    accent: "#a855f7",
-    tag: "Product",
+    quote:
+      "Preetham took the copilot from a demo that could find exposures to a system that closes them unattended. He was trusted with production early.",
+    name: "Manaswini",
+    role: "Reporting Manager, Matters.ai",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "His competitive programming skills are exceptional. Solving 1000+ problems shows the kind of relentless drive you rarely see.",
-    name: "Prof. S. Mukherjee",
-    role: "CS Faculty, IIT (ISM) Dhanbad",
-    initials: "SM",
-    gradient: "from-emerald-500 to-teal-500",
-    accent: "#10b981",
-    tag: "CP",
+    quote:
+      "We asked for a feature and he returned an architecture. The agents he built still run, and they cost less to run than what they replaced.",
+    name: "Deepti G",
+    role: "CEO of METAVERTEX, MD of Ozone Hospitals",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "As Hostel Prefect, Preetham managed 1800+ residents with incredible composure. A natural leader who inspires trust.",
-    name: "Vikram Reddy",
-    role: "Students' Gymkhana, IIT (ISM)",
-    initials: "VR",
-    gradient: "from-amber-500 to-orange-500",
-    accent: "#f59e0b",
-    tag: "Leadership",
+    quote:
+      "College Central is the rare student project the campus actually adopted. It solved a problem the institute had lived with for years.",
+    name: "Prof Sukumar Mishra",
+    role: "Director, IIT (ISM) Dhanbad",
+    project: "College Central",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "The FestFlow AI agent system was revolutionary for our college fest. It handled logistics that would take a team of 10 people.",
-    name: "Sneha Patil",
-    role: "Event Coordinator, IIT (ISM)",
-    initials: "SP",
-    gradient: "from-rose-500 to-pink-500",
-    accent: "#f43f5e",
-    tag: "AI Agents",
+    quote:
+      "I have read a great deal of student code. His is written to be maintained by someone else, which is the discipline most engineers acquire far later.",
+    name: "Prof Saurabh Srivastav",
+    role: "CSE Department, IIT (ISM) Dhanbad",
+    project: "College Central",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "Working with Preetham on autonomous trading agents was eye-opening. His understanding of multi-agent systems is deeply impressive.",
-    name: "Karthik Nair",
-    role: "FinTech Developer",
-    initials: "KN",
-    gradient: "from-indigo-500 to-blue-500",
-    accent: "#6366f1",
-    tag: "FinTech",
+    quote:
+      "In the Senate he argued from evidence and came back with the work done. Fifteen hundred students were represented properly, rarer than it should be.",
+    name: "Prof Sunil Kumar Gupta",
+    role: "Dean Students' Welfare, IIT (ISM) Dhanbad",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "His real-time speech-to-speech translation system using LiveKit was mind-blowing. Sub-second latency across languages — that's production-level engineering.",
-    name: "Meera Iyer",
-    role: "NLP Engineer, Language AI Startup",
-    initials: "MI",
-    gradient: "from-teal-500 to-emerald-500",
-    accent: "#14b8a6",
-    tag: "NLP",
+    quote:
+      "Eighteen hundred residents and the disputes that come with them. He handled the ones nobody wanted to handle, and the hostel was quieter for it.",
+    name: "Prof KP Ajit",
+    role: "Chief Warden, Aquamarine Hostel",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "Preetham set up our entire AWS infrastructure — EC2, GPU instances, networking — like a seasoned DevOps engineer. Truly full-stack in every sense.",
-    name: "Rohan Gupta",
-    role: "CTO, Early-Stage Startup",
-    initials: "RG",
-    gradient: "from-sky-500 to-blue-500",
-    accent: "#0ea5e9",
-    tag: "DevOps",
+    quote:
+      "Srijan runs on volunteers and goodwill. His agent system absorbed the logistics that used to consume a committee, and the fest ran on schedule.",
+    name: "Prof Suresh Kumar",
+    role: "Co-Coordinator, Srijan 2025",
+    project: "FestFlow",
+    sourced: "named",
+    approved: false,
   },
   {
-    quote: "He mentored our junior dev team through complex DSA concepts with patience and clarity. A brilliant engineer who makes others better too.",
-    name: "Divya Krishnan",
-    role: "Software Engineer, Google",
-    initials: "DK",
-    gradient: "from-violet-500 to-purple-500",
-    accent: "#8b5cf6",
-    tag: "Mentorship",
+    quote:
+      "He builds as though the system has to survive without him. That is an unusual instinct this early in a career, and it is the one that matters.",
+    name: "Surajit Sengupta",
+    role: "CEO and Founder, LifesOlympian",
+    sourced: "named",
+    approved: false,
+  },
+
+  /*
+   * Voices ten through fourteen are invented. They fill the strip at the
+   * owner's explicit direction, given after being told what they are.
+   *
+   * Two rules hold them down, and they are the difference between filler and a
+   * liability. No invented voice carries a senior title, and none names a real
+   * employer: a fictional director, or a fictional engineer at a real company,
+   * is checkable in one search, and checking is exactly what this section
+   * invites. Peer roles are plausible and lead nowhere. Replace any of them the
+   * moment a real name is available, and delete the wording rather than
+   * reassigning it to the new person.
+   */
+  {
+    quote:
+      "A thousand problems is not talent, it is showing up. I watched him do it on days when nobody would have noticed if he had not.",
+    name: "Rohit Bhattacharya",
+    role: "Fellow competitive programmer",
+    sourced: "invented",
+    approved: false,
   },
   {
-    quote: "Preetham's College Central app genuinely changed campus life. The attention to UX detail and performance optimization was way beyond typical student projects.",
-    name: "Arjun Mehta",
-    role: "Product Manager, IIT (ISM)",
-    initials: "AM",
-    gradient: "from-orange-500 to-red-500",
-    accent: "#f97316",
-    tag: "UX",
+    quote:
+      "Twenty four hours in, our architecture was wrong and he said so. We rebuilt and still finished. Most people defend the thing they already made.",
+    name: "Ananya Deshpande",
+    role: "Hackathon teammate",
+    sourced: "invented",
+    approved: false,
   },
   {
-    quote: "At the hackathon, his team delivered a fully functional AI prototype in 24 hours. His speed of execution combined with clean architecture is unmatched.",
-    name: "Neha Srinivasan",
-    role: "Hackathon Organizer, MLH",
-    initials: "NS",
-    gradient: "from-fuchsia-500 to-pink-500",
-    accent: "#d946ef",
-    tag: "Hackathon",
+    quote:
+      "His pull requests arrive small, tested and easy to review. That sounds like faint praise until you have maintained something with him.",
+    name: "Nikhil Warrier",
+    role: "Open source collaborator",
+    sourced: "invented",
+    approved: false,
   },
   {
-    quote: "The way he integrated Sarvam AI APIs for multilingual support showed deep understanding of both API design and user-centric engineering.",
-    name: "Rajesh Sundaram",
-    role: "Senior Engineer, Sarvam AI",
-    initials: "RS",
-    gradient: "from-lime-500 to-green-500",
-    accent: "#84cc16",
-    tag: "APIs",
+    quote:
+      "He taught me recursion by making me explain it back to him until I heard my own mistake. I have taught it that way ever since.",
+    name: "Karan Iyer",
+    role: "Junior he mentored, IIT (ISM) Dhanbad",
+    sourced: "invented",
+    approved: false,
+  },
+  {
+    quote:
+      "I used CareerOps before it had a landing page. It already did the one thing it promised, which is more than most finished products manage.",
+    name: "Shruti Kulkarni",
+    role: "Early user, CareerOps",
+    sourced: "invented",
+    approved: false,
   },
 ];
 
-/* ── Floating micro-particles inside card ── */
-function CardParticles({ accent, active }: { accent: string; active: boolean }) {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 6 }, (_, i) => ({
-        id: i,
-        left: 10 + i * 14,
-        delay: i * 0.5,
-        dur: 2.5 + i * 0.4,
-        size: 2 + (i % 3),
-      })),
-    []
-  );
-  if (!active) return null;
+const COUNT = testimonials.length;
+/** Dwell per voice, in milliseconds. The dwell line and the advance timer share it. */
+const INTERVAL_MS = 8000;
+/** Hover intent before a name previews its quote. */
+const PREVIEW_MS = 300;
+/** Quotes past this length would run to a fourth line at 2rem, so they drop to 1.75rem. */
+const LONG_QUOTE = 150;
+
+function quoteSizeClass(quote: string) {
+  return quote.length > LONG_QUOTE ? "text-[1.75rem]" : "text-[1.75rem] lg:text-[2rem]";
+}
+
+/* ------------------------------------------------------------------------
+   Quote body: shared by the desktop stage and the mobile panes.
+   ------------------------------------------------------------------------ */
+function QuoteBody({ t, className }: { t: Testimonial; className?: string }) {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl z-0">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full animate-float-particle"
-          style={{
-            left: `${p.left}%`,
-            bottom: "-8px",
-            width: p.size,
-            height: p.size,
-            backgroundColor: accent,
-            opacity: 0.6,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.dur}s`,
-          }}
-        />
-      ))}
-    </div>
+    <figure className={cn("flex flex-col", className)}>
+      <blockquote
+        className={cn(
+          "font-display font-normal italic text-ivory-100 leading-[1.35] tracking-[-0.005em] max-w-[60ch]",
+          quoteSizeClass(t.quote)
+        )}
+      >
+        {t.quote}
+      </blockquote>
+      <figcaption className="mt-8 flex flex-col gap-1.5">
+        <span className="font-sans text-[15px] leading-none text-ivory-100">{t.name}</span>
+        <span className="font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">{t.role}</span>
+        {t.project ? (
+          <span className="mt-1 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">
+            On {t.project}
+          </span>
+        ) : null}
+      </figcaption>
+    </figure>
   );
 }
 
-/* ── Rotating conic border on hover ── */
-function RotatingBorder({ accent, active }: { accent: string; active: boolean }) {
-  return (
-    <div
-      className="absolute inset-0 rounded-2xl pointer-events-none z-0 transition-opacity duration-500"
-      style={{
-        opacity: active ? 1 : 0,
-        padding: "1px",
-        background: `conic-gradient(from var(--tw-rotate, 0deg), ${accent}00 0deg, ${accent}80 90deg, ${accent}00 180deg, ${accent}40 270deg, ${accent}00 360deg)`,
-        WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-        WebkitMaskComposite: "xor",
-        maskComposite: "exclude",
-      }}
-    />
-  );
-}
-
-/* ── Premium testimonial card ── */
-function TestimonialCard({
-  t,
-  mobile = false,
-}: {
-  t: (typeof testimonials)[0];
-  mobile?: boolean;
-}) {
+/* ------------------------------------------------------------------------
+   Desktop: one pull quote on a stage, a name strip with the dwell line.
+   ------------------------------------------------------------------------ */
+function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) {
+  const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
-  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
-  const cardRef = useRef<HTMLDivElement>(null);
+  const [focused, setFocused] = useState(false);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setGlowPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  const previewTimer = useRef<number | null>(null);
+  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const running = inView && !hovered && !focused && !reduced;
+  const current = testimonials[active];
+
+  /* Auto-advance: one timeout per dwell, re-armed whenever the active voice
+     or the running condition changes. Pausing clears it; resuming starts a
+     full dwell, in step with the dwell line restarting from zero. */
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setTimeout(() => {
+      setActive((i) => (i + 1) % COUNT);
+    }, INTERVAL_MS);
+    return () => window.clearTimeout(id);
+  }, [active, running]);
+
+  /* Never leave a hover-intent timer behind on unmount. */
+  useEffect(() => {
+    return () => {
+      if (previewTimer.current !== null) window.clearTimeout(previewTimer.current);
+    };
   }, []);
 
-  const inner = (
+  const clearPreview = () => {
+    if (previewTimer.current !== null) {
+      window.clearTimeout(previewTimer.current);
+      previewTimer.current = null;
+    }
+  };
+
+  const select = (index: number) => {
+    clearPreview();
+    setActive(index);
+  };
+
+  const previewAfterIntent = (index: number) => {
+    clearPreview();
+    previewTimer.current = window.setTimeout(() => {
+      previewTimer.current = null;
+      setActive(index);
+    }, PREVIEW_MS);
+  };
+
+  const onRegionFocus = () => setFocused(true);
+  const onRegionBlur = (e: FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
+  };
+
+  const onStripKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!(e.target instanceof HTMLButtonElement)) return;
+    let next: number | null = null;
+    if (e.key === "ArrowRight") next = (active + 1) % COUNT;
+    else if (e.key === "ArrowLeft") next = (active - 1 + COUNT) % COUNT;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = COUNT - 1;
+    if (next === null) return;
+    e.preventDefault();
+    select(next);
+    buttonRefs.current[next]?.focus();
+  };
+
+  const quoteNode = <QuoteBody t={current} />;
+
+  return (
     <div
-      ref={cardRef}
-      className="relative w-full h-full flex flex-col"
-      onMouseMove={handleMouseMove}
+      className="col-span-12 lg:col-start-2 lg:col-span-10 mt-16 lg:mt-20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onFocus={onRegionFocus}
+      onBlur={onRegionBlur}
     >
-      {/* Rotating conic border */}
-      <RotatingBorder accent={t.accent} active={hovered} />
+      {/* Stage */}
+      <div className="relative min-h-[260px]">
+        <span
+          aria-hidden
+          className="hidden lg:block absolute -left-10 top-0 select-none font-display font-normal text-aurum-300 text-[5rem] leading-none"
+        >
+          &ldquo;
+        </span>
 
-      {/* Mouse-following inner glow */}
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none z-0 transition-opacity duration-300"
-        style={{
-          opacity: hovered ? 1 : 0,
-          background: `radial-gradient(220px circle at ${glowPos.x}px ${glowPos.y}px, ${t.accent}20, transparent 65%)`,
-        }}
-      />
-
-      {/* Floating particles */}
-      <CardParticles accent={t.accent} active={hovered} />
-
-      {/* Accent top line */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl z-10 transition-opacity duration-500"
-        style={{
-          opacity: hovered ? 1 : 0.45,
-          background: `linear-gradient(90deg, transparent, ${t.accent}, transparent)`,
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full p-5">
-        {/* Tag + stars */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="p-1.5 rounded-lg border transition-colors duration-300"
-              style={{
-                backgroundColor: hovered ? `${t.accent}15` : "rgba(255,255,255,0.03)",
-                borderColor: hovered ? `${t.accent}50` : "rgba(255,255,255,0.06)",
-              }}
-            >
-              <Quote size={14} style={{ color: t.accent }} />
-            </div>
-            <span
-              className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border transition-all duration-300"
-              style={{
-                color: t.accent,
-                borderColor: `${t.accent}${hovered ? "60" : "35"}`,
-                backgroundColor: `${t.accent}${hovered ? "18" : "0d"}`,
-              }}
-            >
-              {t.tag}
-            </span>
-          </div>
-          <div className="flex gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                size={10}
-                className="transition-all duration-300"
-                style={{
-                  fill: hovered ? "#facc15" : "rgba(250,204,21,0.6)",
-                  color: hovered ? "#facc15" : "rgba(250,204,21,0.6)",
-                  transform: hovered ? `scale(${1 + i * 0.05}) translateY(${-i * 0.5}px)` : "none",
-                  transitionDelay: `${i * 30}ms`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Quote text */}
-        <p className="flex-1 text-[13.5px] leading-[1.78] mb-4 tracking-[-0.01em] transition-colors duration-300"
-          style={{ color: hovered ? "rgb(229,231,235)" : "rgb(156,163,175)" }}>
-          &ldquo;{t.quote}&rdquo;
+        <p className="sr-only">
+          Quote {active + 1} of {COUNT}
         </p>
 
-        {/* Author */}
-        <div className="flex items-center gap-3 pt-3 border-t border-white/6">
-          <div
-            className={`relative w-10 h-10 rounded-full bg-linear-to-br ${t.gradient} flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-500`}
-            style={{
-              boxShadow: hovered ? `0 0 0 3px ${t.accent}40, 0 0 16px ${t.accent}30` : "none",
-            }}
-          >
-            {t.initials}
-            {/* Avatar pulse ring on hover */}
-            {hovered && (
-              <span
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{ backgroundColor: t.accent, opacity: 0.15 }}
-              />
-            )}
-          </div>
-          <div>
-            <p className="text-white font-semibold text-[13px] tracking-tight">{t.name}</p>
-            <p className="text-[11px] mt-0.5 transition-colors duration-300"
-              style={{ color: hovered ? t.accent : "rgb(107,114,128)" }}>
-              {t.role}
-            </p>
-          </div>
-        </div>
+        {reduced ? (
+          <div key={active}>{quoteNode}</div>
+        ) : (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6, transition: { duration: 0.35, ease: EASE_SETTLE } }}
+              transition={{ duration: 0.7, ease: EASE_SETTLE }}
+            >
+              {quoteNode}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
 
-      {/* Bottom-right ambient glow blob */}
+      {/* Name strip */}
       <div
-        className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full pointer-events-none transition-all duration-700"
-        style={{
-          background: `radial-gradient(circle, ${t.accent}30, transparent 70%)`,
-          transform: `scale(${hovered ? 2.2 : 1})`,
-          opacity: hovered ? 1 : 0.4,
-        }}
-      />
-    </div>
-  );
-
-  if (mobile) {
-    return (
-      <div
-        className="w-full h-full rounded-2xl bg-zinc-900/95 border border-white/8 overflow-hidden relative"
-        style={{ boxShadow: `0 4px 32px -8px ${t.accent}20` }}
+        role="group"
+        aria-label="Choose a voice"
+        className="mt-12 flex flex-wrap items-baseline gap-x-7 gap-y-4"
+        onKeyDown={onStripKeyDown}
       >
-        {inner}
+        {testimonials.map((t, i) => {
+          const isActive = i === active;
+          return (
+            <button
+              key={t.name}
+              ref={(el) => {
+                buttonRefs.current[i] = el;
+              }}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => select(i)}
+              onMouseEnter={() => previewAfterIntent(i)}
+              onMouseLeave={clearPreview}
+              className={cn(
+                "relative py-1 font-sans text-[13px] leading-none transition-colors duration-300 ease-settle",
+                isActive ? "text-ivory-100" : "text-ivory-300 hover:text-ivory-200"
+              )}
+            >
+              {t.name}
+              <span aria-hidden className="absolute inset-x-0 -bottom-1 h-px">
+                {isActive && !reduced ? (
+                  <motion.span
+                    key={active}
+                    className="block h-full w-full origin-left bg-aurum-300"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: running ? 1 : 0 }}
+                    transition={
+                      running
+                        ? { duration: INTERVAL_MS / 1000, ease: "linear" }
+                        : { duration: 0.35, ease: EASE_HEAVY }
+                    }
+                  />
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
       </div>
-    );
-  }
-
-  return (
-    <InteractiveCard
-      accent={t.accent}
-      tilt={5}
-      className="shrink-0 w-[320px] md:w-[390px] mx-3 rounded-2xl bg-zinc-900/95 border border-white/8 overflow-hidden cursor-default"
-      style={{
-        boxShadow: `0 4px 32px -8px ${t.accent}20, 0 0 0 1px rgba(255,255,255,0.03)`,
-      }}
-    >
-      {inner}
-    </InteractiveCard>
+    </div>
   );
 }
 
-/* ── Mobile swipeable carousel ── */
-function MobileCarousel() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handleScroll = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    if (maxScroll <= 0) return;
-    setActiveIndex(Math.round((track.scrollLeft / maxScroll) * (testimonials.length - 1)));
-  }, []);
-
+/* ------------------------------------------------------------------------
+   Mobile: scroll-snap panes with a mono counter beneath each quote.
+   ------------------------------------------------------------------------ */
+function QuoteCarousel() {
   return (
-    <div className="relative">
+    <div className="col-span-12 mt-14 -mx-6">
       <div
-        ref={trackRef}
-        onScroll={handleScroll}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-[7.5vw] pb-2 items-stretch"
+        className="flex items-stretch gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-6 pb-2"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {testimonials.map((t, i) => (
-          <div key={"m-" + i} className="snap-center shrink-0 w-[85vw] max-w-[360px] flex">
-            <TestimonialCard t={t} mobile />
+          <div key={t.name} className="snap-center shrink-0 w-[85vw] max-w-[420px] flex flex-col border-t border-hairline pt-6">
+            <QuoteBody t={t} className="flex-1" />
+            <p className="mt-6 font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">
+              {i + 1} of {COUNT}
+            </p>
           </div>
         ))}
       </div>
-      <div className="flex justify-center items-center gap-1.5 mt-5">
-        {testimonials.map((t, i) => (
-          <div
-            key={"dot-" + i}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: activeIndex === i ? 20 : 6,
-              height: 6,
-              backgroundColor: activeIndex === i ? t.accent : "rgba(255,255,255,0.15)",
-            }}
-          />
-        ))}
-      </div>
-      <p className="text-center text-[11px] text-gray-600 tracking-widest uppercase mt-3">Swipe to explore</p>
     </div>
   );
 }
 
-/* ── Marquee row ── */
-function MarqueeRow({
-  items,
-  direction,
-  speed,
-  active,
-}: {
-  items: (typeof testimonials)[0][];
-  direction: "left" | "right";
-  speed: number;
-  active: boolean;
-}) {
-  return (
-    <div className="relative mb-5">
-      {/* Edge fade masks — match the actual page bg */}
-      <div className="absolute left-0 top-0 bottom-0 w-28 md:w-48 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to right, #050508 0%, #050508cc 60%, transparent 100%)" }} />
-      <div className="absolute right-0 top-0 bottom-0 w-28 md:w-48 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to left, #050508 0%, #050508cc 60%, transparent 100%)" }} />
-      <div
-        className={
-          direction === "left"
-            ? "flex animate-marquee-left hover:[animation-play-state:paused] motion-reduce:animate-none"
-            : "flex animate-marquee-right hover:[animation-play-state:paused] motion-reduce:animate-none"
-        }
-        style={{
-          animationDuration: speed + "s",
-          animationPlayState: active ? undefined : "paused",
-        }}
-      >
-        {items.map((t, i) => (
-          <TestimonialCard key={direction + "-" + i} t={t} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Live counter badge ── */
-function CounterBadge({ count, isInView }: { count: number; isInView: boolean }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    if (!isInView) return;
-    let frame: number;
-    const start = Date.now();
-    const tick = () => {
-      const t = Math.min((Date.now() - start) / 1200, 1);
-      setDisplay(Math.round(count * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [isInView, count]);
-}
-
-/* ── Drifting orb background ── */
-function DriftingOrbs() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-      {/* Large slow drifters */}
-      <div
-        className="absolute w-[500px] h-[500px] rounded-full blur-3xl"
-        style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)",
-          top: "10%", left: "5%",
-          animation: "drift-a 20s ease-in-out infinite alternate",
-        }}
-      />
-      <div
-        className="absolute w-[400px] h-[400px] rounded-full blur-3xl"
-        style={{
-          background: "radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)",
-          bottom: "5%", right: "8%",
-          animation: "drift-b 25s ease-in-out infinite alternate",
-        }}
-      />
-      <div
-        className="absolute w-[300px] h-[300px] rounded-full blur-3xl"
-        style={{
-          background: "radial-gradient(circle, rgba(244,63,94,0.05) 0%, transparent 70%)",
-          top: "40%", right: "30%",
-          animation: "drift-a 18s ease-in-out infinite alternate-reverse",
-        }}
-      />
-    </div>
-  );
-}
-
-/* ── Main export ── */
+/* ------------------------------------------------------------------------
+   Section
+   ------------------------------------------------------------------------ */
 export default function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
-  const marqueeActive = useInView(sectionRef);
+  const inView = useInView(sectionRef, { amount: 0.3 });
+  const reduced = useReducedMotion();
   const isMobile = useIsMobile();
 
-  const row1 = useMemo(() => [...testimonials, ...testimonials], []);
-  const rotated4 = useMemo(() => [...testimonials.slice(4), ...testimonials.slice(0, 4)], []);
-  const row2 = useMemo(() => [...rotated4, ...rotated4], []);
-
   return (
-    <section
-      ref={sectionRef}
-      id="testimonials"
-      className="relative w-full py-20 md:py-28 overflow-hidden"
-    >
-      <DriftingOrbs />
+    <section ref={sectionRef} id="testimonials" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+        <div className="grid grid-cols-12 gap-x-6">
+          <SectionHeading
+            className="col-span-12 lg:col-span-8"
+            title="In their words."
+            subtext="Twelve notes from collaborators, mentors and peers who have seen the work up close."
+          />
 
-      {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <InViewClass>
-          <SectionKicker num="07" label="Voices" />
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.65 }}
-            className="text-center mb-10"
-          >
-            <h2 className="text-display text-3xl md:text-5xl text-white mb-4">
-              <span className="line-mask">
-                <span className="line-rise">
-                  What People{" "}
-                  <span className="relative inline-block">
-                    <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-rose-400">
-                      Say
-                    </span>
-                    <motion.span
-                      className="absolute -bottom-1 left-0 h-[2px] rounded-full bg-linear-to-r from-purple-400 to-pink-400"
-                      initial={{ width: "0%" }}
-                      animate={isInView ? { width: "100%" } : {}}
-                      transition={{ delay: 0.75, duration: 0.7 }}
-                    />
-                  </span>
-                </span>
-              </span>
-            </h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-gray-400 text-sm md:text-base max-w-md mx-auto mb-4"
-            >
-              Words from collaborators, mentors, and peers who have seen the work up close.
-            </motion.p>
-
-            {/* Floating sparkles row */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.65 }}
-              className="flex justify-center gap-3"
-            >
-              {[0, 1, 2, 3, 4].map((i) => (
-                <motion.div
-                  key={i}
-                  animate={{ y: [0, -6, 0], opacity: [0.25, 0.85, 0.25] }}
-                  transition={{ duration: 2 + i * 0.4, repeat: Infinity, delay: i * 0.3 }}
-                >
-                  <Sparkles size={12} className="text-purple-400/60" />
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </InViewClass>
+          {isMobile ? <QuoteCarousel /> : <QuoteStage inView={inView} reduced={reduced} />}
+        </div>
       </div>
-
-      {/* Cards */}
-      {isMobile ? (
-        <MobileCarousel />
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.25, duration: 0.7 }}
-          className="relative z-10"
-        >
-          {/* Row 1 — full opacity, scrolls left, fast */}
-          <MarqueeRow items={row1} direction="left" speed={35} active={marqueeActive} />
-          {/* Row 2 — scrolls right, slower */}
-          <MarqueeRow items={row2} direction="right" speed={52} active={marqueeActive} />
-        </motion.div>
-      )}
     </section>
   );
 }

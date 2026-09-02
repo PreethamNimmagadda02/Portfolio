@@ -1,254 +1,168 @@
 "use client";
 
-import { Github, Linkedin, Mail, ArrowUp, MapPin } from "lucide-react";
+import type { MouseEvent, ReactNode } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "@/lib/motion";
-import MagneticButton from "./MagneticButton";
-import { useState, useEffect, useRef } from "react";
-import { smoothScrollTo } from "@/lib/utils";
+import { ArrowUp, EnvelopeSimple, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
+import { motion, EASE_SETTLE } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { cn, smoothScrollTo } from "@/lib/utils";
 
-const socialLinks = [
-  { icon: Github, href: "https://github.com/PreethamNimmagadda02", label: "GitHub", gradient: "from-gray-500 to-gray-700" },
-  { icon: Linkedin, href: "https://linkedin.com/in/preethamnimmagadda", label: "LinkedIn", gradient: "from-blue-500 to-cyan-500" },
-  { icon: Mail, href: "mailto:preethamnimmagadda@gmail.com", label: "Email", gradient: "from-purple-500 to-pink-500" },
-];
-
-const navLinks = [
+const NAV_LINKS = [
   { label: "Home", id: "home" },
   { label: "About", id: "about" },
   { label: "Experience", id: "experience" },
   { label: "Projects", id: "projects" },
   { label: "Achievements", id: "achievements" },
-  { label: "Contact", id: "contact" },
-];
+  // One label per intent: contact is "Get in touch" in the hero, the nav and
+  // here, never "Contact" in one place and something else in another.
+  { label: "Get in touch", id: "contact" },
+] as const;
 
-// Live local time (IST) — small premium touch
-function LocalTime() {
-  const [time, setTime] = useState("");
+const CONNECT_LINKS = [
+  { label: "GitHub", href: "https://github.com/PreethamNimmagadda02", Icon: GithubLogo, external: true },
+  { label: "LinkedIn", href: "https://linkedin.com/in/preethamnimmagadda", Icon: LinkedinLogo, external: true },
+  { label: "Email", href: "mailto:preethamnimmagadda@gmail.com", Icon: EnvelopeSimple, external: false },
+] as const;
 
-  useEffect(() => {
-    const update = () => {
-      setTime(
-        new Date().toLocaleTimeString("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })
-      );
-    };
-    update();
-    const interval = setInterval(update, 30_000);
-    return () => clearInterval(interval);
-  }, []);
+/* Every footer link: Geist 14px ivory-200, ivory-100 on hover, and a 12px
+   hairline-gold dash that slides in from the left gutter over 300ms with the
+   heavy curve. The dash lives outside the text box so nothing shifts. */
+const LINK =
+  "group relative inline-flex items-center gap-2 font-sans text-[14px] leading-none text-ivory-200 transition-colors duration-300 ease-heavy hover:text-ivory-100";
 
-  if (!time) return null;
+const DASH =
+  "pointer-events-none absolute top-1/2 -left-5 h-px w-3 origin-left scale-x-0 bg-hairline-gold transition-transform duration-300 ease-heavy group-hover:scale-x-100";
 
+function Dash() {
+  return <span aria-hidden className={DASH} />;
+}
+
+/* Fade in once with a 10px rise over 800ms; opacity only under reduced motion. */
+function Rise({
+  children,
+  className,
+  delay = 0,
+  reduced,
+  as: Tag = "div",
+  ariaLabel,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  reduced: boolean;
+  as?: "div" | "nav";
+  ariaLabel?: string;
+}) {
+  const M = Tag === "nav" ? motion.nav : motion.div;
   return (
-    <span className="inline-flex items-center gap-1.5 text-gray-300 text-xs md:text-sm tabular-nums">
-      <MapPin size={12} className="text-purple-400/70" />
-      India · {time} IST
-    </span>
+    <M
+      aria-label={ariaLabel}
+      className={className}
+      initial={{ opacity: 0, y: reduced ? 0 : 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: reduced ? 0.2 : 0.8, ease: EASE_SETTLE, delay: reduced ? 0 : delay }}
+    >
+      {children}
+    </M>
   );
 }
 
+/**
+ * Colophon. One hairline, a 12-column grid (brand, links, connect), a second
+ * hairline, then the copyright and a back-to-top control. No clock, no
+ * watermark, no badges: the record above has already made the argument.
+ */
 export default function Footer() {
-  const footerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: footerRef,
-    offset: ["start end", "end end"],
-  });
+  const reduced = useReducedMotion();
+  const year = new Date().getFullYear();
 
-  // Giant watermark name tilts up & rises into view as the footer is revealed.
-  const watermarkY = useTransform(scrollYProgress, [0, 1], [70, -10]);
-  const watermarkRotateX = useTransform(scrollYProgress, [0, 1], [38, 0]);
-  const watermarkOpacity = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     smoothScrollTo(id);
   };
 
-  const scrollToTop = () => {
-    smoothScrollTo(0);
-  };
-
   return (
-    <footer ref={footerRef} className="relative z-10 overflow-hidden">
-      {/* Animated gradient hairline */}
-      <div className="relative h-px w-full">
-        <div className="absolute inset-0 bg-linear-to-r from-transparent via-purple-500/60 to-transparent" />
-        <div className="absolute inset-0 animate-shimmer" />
-      </div>
-
-      <div className="relative bg-black/50 perspective-[1000px]">
-        {/* Background glows — cheap gradients, no backdrop blur */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 700px 260px at 50% 0%, rgba(168,85,247,0.08), transparent 70%), radial-gradient(ellipse 400px 200px at 100% 100%, rgba(59,130,246,0.05), transparent 70%)",
-          }}
-        />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-8 md:pt-12 pb-4 md:pb-6">
-          {/* ── Top grid: brand / nav / connect ── */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6">
-            {/* Brand */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, type: "spring" as const, stiffness: 100 }}
-              className="md:col-span-5 text-center md:text-left"
+    <footer className="relative z-10 border-t border-hairline bg-obsidian-0 text-ivory-100">
+      <div className="mx-auto max-w-[1280px] px-6 py-16 lg:px-10 lg:py-20">
+        <div className="grid grid-cols-12 gap-y-10 lg:gap-x-8">
+          {/* Brand */}
+          <Rise reduced={reduced} className="col-span-12 lg:col-span-5">
+            <Link
+              href="/"
+              className="inline-block font-display font-medium text-[24px] leading-tight tracking-[-0.005em] text-ivory-100"
             >
-              <Link href="/" className="text-2xl md:text-3xl font-black tracking-tighter group">
-                <span className="bg-clip-text text-transparent bg-linear-to-r from-white to-gray-200 group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Preetham</span>
-                <span className="text-purple-400 group-hover:text-white transition-colors"> Nimmagadda</span>
-              </Link>
-              <p className="text-gray-300 text-sm mt-3 max-w-sm mx-auto md:mx-0 leading-relaxed">
-                AI Engineer building <span className="text-purple-300">autonomous agents</span> and{" "}
-                <span className="text-blue-300">systems that act on their own</span>.
-              </p>
-
-              {/* Availability badge */}
-              <a
-                href="#contact"
-                onClick={(e) => handleNavClick(e, "contact")}
-                className="mt-5 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-400/40 hover:bg-emerald-500/10 transition-colors group cursor-pointer"
-              >
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                <span className="text-xs font-medium text-emerald-300/90 group-hover:text-emerald-200 transition-colors">
-                  Available for opportunities
-                </span>
-              </a>
-            </motion.div>
-
-            {/* Navigate */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ delay: 0.1, duration: 0.6, type: "spring" as const, stiffness: 100 }}
-              className="md:col-span-3 flex flex-col items-center"
-            >
-              <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-gray-300 mb-4 text-center">
-                Navigate
-              </h3>
-              <nav className="grid grid-cols-3 md:grid-cols-[max-content_max-content] gap-x-2 md:gap-x-20 gap-y-3 justify-items-center md:justify-items-start w-fit">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.id}
-                    href={`#${link.id}`}
-                    onClick={(e) => handleNavClick(e, link.id)}
-                    className="group relative inline-flex items-center text-base text-gray-300 hover:text-white transition-colors"
-                  >
-                    <span className="absolute left-0 hidden md:block w-3 h-px bg-linear-to-r from-purple-400 to-pink-400 transition-all duration-300 opacity-0 scale-x-0 origin-left group-hover:opacity-100 group-hover:scale-x-100" />
-                    <span className="transition-transform duration-300 group-hover:translate-x-5">
-                      {link.label}
-                    </span>
-                  </a>
-                ))}
-              </nav>
-            </motion.div>
-
-            {/* Connect */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ delay: 0.2, duration: 0.6, type: "spring" as const, stiffness: 100 }}
-              className="md:col-span-4 flex flex-col items-center md:items-end gap-4"
-            >
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-300 md:self-end">
-                Connect
-              </h3>
-              <div className="flex items-center gap-3 md:gap-4">
-                {socialLinks.map((social) => (
-                  <MagneticButton key={social.label} strength={0.3}>
-                    <motion.div
-                      className="relative"
-                      initial="rest"
-                      whileHover="hover"
-                      variants={{ rest: { scale: 1 }, hover: { scale: 1.1 } }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                    >
-                      {/* Animated gradient border — inherits hover/rest state
-                          from the parent; the background-position tween only
-                          ticks while actually hovered, not forever. */}
-                      <motion.div
-                        className={`absolute -inset-px bg-linear-to-r ${social.gradient} rounded-full blur-sm`}
-                        variants={{
-                          rest: { opacity: 0 },
-                          hover: {
-                            opacity: 1,
-                            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                            transition: { backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.3 } },
-                          },
-                        }}
-                        style={{ backgroundSize: "200% 200%" }}
-                      />
-                      <Link
-                        href={social.href}
-                        target="_blank"
-                        className="relative flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-zinc-900/90 border border-white/20 text-white transition-all duration-300 hover:border-white/40 hover:bg-zinc-800/90"
-                        aria-label={social.label}
-                      >
-                        <social.icon size={18} className="md:w-[22px] md:h-[22px]" />
-                      </Link>
-                    </motion.div>
-                  </MagneticButton>
-                ))}
-              </div>
-              <LocalTime />
-            </motion.div>
-          </div>
-
-          {/* ── Bottom bar ── */}
-          <motion.div
-            className="mt-6 md:mt-10 pt-4 md:pt-5 border-t border-white/5 flex flex-col-reverse md:flex-row justify-between items-center gap-4"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <p className="text-gray-300 text-xs md:text-sm text-center md:text-left">
-              © {new Date().getFullYear()} Preetham Nimmagadda. All rights reserved.
+              Preetham Nimmagadda
+            </Link>
+            <p className="mt-4 max-w-[42ch] font-sans text-[15px] leading-[1.6] text-ivory-200">
+              AI engineer. I build systems that act on their own judgment, and I stay accountable
+              for what they do. Autonomy is not a demo.
             </p>
+          </Rise>
 
-            <motion.button
-              onClick={scrollToTop}
-              whileHover={{ scale: 1.1, y: -2 }}
-              whileTap={{ scale: 0.9 }}
-              className="group flex items-center gap-2 text-xs md:text-sm text-gray-300 hover:text-purple-400 transition-colors"
-            >
-              <span>Back to Top</span>
-              <div className="p-1.5 md:p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 group-hover:shadow-[0_0_16px_rgba(139,92,246,0.25)] transition-all">
-                <ArrowUp size={12} className="text-gray-300 group-hover:text-purple-400 md:w-4 md:h-4 group-hover:-translate-y-0.5 transition-transform" />
-              </div>
-            </motion.button>
-          </motion.div>
-        </div>
-
-        {/* Giant watermark name — a dedicated clipped strip below the bottom
-            bar, cropped to roughly half the letterforms so the name peeks up
-            from the edge rather than reading fully, and can never collide
-            with the copyright row above it. */}
-        <div className="relative h-10 sm:h-12 md:h-16 overflow-hidden" aria-hidden>
-          <motion.div
-            style={{
-              y: watermarkY,
-              rotateX: watermarkRotateX,
-              opacity: watermarkOpacity,
-              transformStyle: "preserve-3d",
-              transformOrigin: "top",
-              WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
-            }}
-            className="absolute inset-x-0 top-0 text-center font-black tracking-tighter select-none pointer-events-none text-[14vw] md:text-[8rem] leading-none text-white/6"
+          {/* Links */}
+          <Rise
+            reduced={reduced}
+            delay={0.08}
+            as="nav"
+            ariaLabel="Footer"
+            className="col-span-12 lg:col-span-3 lg:col-start-7"
           >
-            PREETHAM
-          </motion.div>
+            <ul className="flex flex-col items-start gap-2.5">
+              {NAV_LINKS.map((link) => (
+                <li key={link.id}>
+                  <a href={`#${link.id}`} onClick={(e) => handleNavClick(e, link.id)} className={LINK}>
+                    <Dash />
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Rise>
+
+          {/* Connect */}
+          <Rise reduced={reduced} delay={0.16} className="col-span-12 lg:col-span-3 lg:text-right">
+            <ul className="flex flex-col items-start gap-2.5 lg:items-end">
+              {CONNECT_LINKS.map(({ label, href, Icon, external }) => (
+                <li key={label}>
+                  <a
+                    href={href}
+                    className={LINK}
+                    {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    <Dash />
+                    <Icon size={16} weight="light" aria-hidden className="shrink-0" />
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Rise>
         </div>
+
+        {/* Bottom row */}
+        <Rise
+          reduced={reduced}
+          delay={0.24}
+          className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-6"
+        >
+          <p className="ledger font-mono text-[12px] leading-none text-ivory-300">
+            &copy; {year} Preetham Nimmagadda
+          </p>
+          <button
+            type="button"
+            onClick={() => smoothScrollTo(0)}
+            className={cn(LINK, "cursor-pointer")}
+          >
+            Back to top
+            <ArrowUp
+              size={14}
+              weight="light"
+              aria-hidden
+              className="shrink-0 transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5"
+            />
+          </button>
+        </Rise>
       </div>
     </footer>
   );

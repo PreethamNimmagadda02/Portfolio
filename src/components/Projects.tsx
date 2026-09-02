@@ -1,76 +1,73 @@
 "use client";
 
-import { motion } from "@/lib/motion";
-import {
-  ExternalLink,
-  Github,
-  GraduationCap,
-  Ticket,
-  TrendingUp,
-  Bot,
-  Code,
-  Briefcase,
-  LucideIcon,
-} from "lucide-react";
-import Link from "next/link";
-import MagneticButton from "./MagneticButton";
-import { InViewClass, SectionKicker } from "./Reveal";
-import type { CSSProperties } from "react";
+/**
+ * Projects: the selected-work dossier.
+ *
+ * Six rows, one open at a time. Each header is a button (aria-expanded,
+ * aria-controls) and each panel a region whose height is animated by the
+ * foundation's .grid-accordion class (grid-template-rows 0fr to 1fr), so no
+ * height is ever measured. Inside an open panel the copy fades in and the
+ * live product's screenshot wipes in from the left behind a hairline frame.
+ */
+
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { ArrowUpRight, GithubLogo, Plus, X } from "@phosphor-icons/react";
+import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useSheen } from "@/hooks/use-sheen";
+import { SectionHeading, TextButton } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import shotsJson from "@/data/project-shots.json";
+
+/* Public paths to the committed screenshots, keyed by project slug. The map
+   may be empty or partial: rows without a key render no image column. */
+const shots = shotsJson as Record<string, string>;
+
+type ProjectStatus = "Live" | "Complete";
 
 interface ProjectData {
-  id: number;
+  slug: string;
   title: string;
   description: string;
   tags: string[];
   links: { demo: string; repo: string };
-  status: string;
-  icon: LucideIcon;
-  color: string;
-  accent: string;
+  status: ProjectStatus;
 }
 
 const projects: ProjectData[] = [
   {
-    id: 0,
+    slug: "college-central",
     title: "College Central",
     description:
-      "The digital backbone of IIT (ISM) Dhanbad — one platform for academic records, campus navigation, and event coordination, used daily by the student body.",
+      "One platform for academic records, campus navigation and event coordination at IIT (ISM) Dhanbad, used daily by the student body.",
     tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
     links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     status: "Live",
-    icon: GraduationCap,
-    color: "#a855f7",
-    accent: "#ec4899",
   },
   {
-    id: 1,
+    slug: "careerops",
     title: "CareerOps",
     description:
-      "A fully automated command center for your job search — discovering the right roles, scoring your fit with AI, and managing the entire application pipeline from end to end.",
-    tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI"],
+      "A fully automated command center for the job search: discovering the right roles, scoring fit with AI, and managing the whole application pipeline end to end.",
+    tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI", "AWS"],
     links: {
       demo: "http://careerops-alb-328156002.ap-southeast-2.elb.amazonaws.com/",
       repo: "https://github.com/PreethamNimmagadda02/CareerOps",
     },
     status: "Live",
-    icon: Briefcase,
-    color: "#14b8a6",
-    accent: "#0f766e",
   },
   {
-    id: 2,
+    slug: "festflow",
     title: "FestFlow",
     description:
-      "Multi-agent AI that turns event requirements into complete logistical plans — scheduling, budgets, and vendor coordination, generated automatically.",
+      "Multi-agent AI that turns event requirements into complete logistical plans. Scheduling, budgets and vendor coordination, generated automatically.",
     tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
     links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
-    icon: Ticket,
-    color: "#3b82f6",
-    accent: "#06b6d4",
   },
   {
-    id: 3,
+    slug: "ai-trading-system",
     title: "AI Trading System",
     description:
       "A swarm of AI agents that reads market signals and executes trading strategies autonomously, in real time.",
@@ -80,185 +77,268 @@ const projects: ProjectData[] = [
       repo: "https://github.com/PreethamNimmagadda02/Automated-Financial-Trading-Strategy-System",
     },
     status: "Complete",
-    icon: TrendingUp,
-    color: "#22c55e",
-    accent: "#10b981",
   },
   {
-    id: 4,
+    slug: "agentic-vs-code",
     title: "Agentic VS Code",
     description:
-      "A custom VS Code build with agentic AI at its core — natural language becomes working code, and routine project work runs itself.",
+      "A custom VS Code build with agentic AI at its core. Natural language becomes working code, and routine project work runs itself.",
     tags: ["Electron", "TypeScript", "Agentic AI", "LLMs"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
       repo: "https://github.com/PreethamNimmagadda02/Agentic-VS-Code",
     },
     status: "Complete",
-    icon: Code,
-    color: "#f43f5e",
-    accent: "#e11d48",
   },
   {
-    id: 5,
+    slug: "slack-ai-data-bot",
     title: "Slack AI Data Bot",
     description:
-      "A Slack assistant that turns plain English into PostgreSQL insights — auto-generated charts, one-click CSV exports, and smart query caching built in.",
+      "A Slack assistant that turns plain English into PostgreSQL insights, with auto-generated charts, one-click CSV exports and smart query caching built in.",
     tags: ["Node.js", "LangChain", "OpenAI", "PostgreSQL", "Slack API", "NLP"],
     links: {
       demo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
       repo: "https://github.com/PreethamNimmagadda02/Slack-AI-Data-Bot",
     },
     status: "Complete",
-    icon: Bot,
-    color: "#eab308",
-    accent: "#f59e0b",
   },
 ];
 
-function ProjectRow({ project, index }: { project: ProjectData; index: number }) {
-  const Icon = project.icon;
-  const reversed = index % 2 === 1;
+const DEFAULT_OPEN = "college-central";
+
+/* Rows rise 12px once, 800ms, staggered 70ms (hierarchy). */
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: EASE_SETTLE, delay: i * 0.07 },
+  }),
+};
+
+/* Panel copy fades in after the grid has begun to open (state). */
+const copyVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.35, delay: 0.2, ease: EASE_SETTLE } },
+};
+
+/* The product is unveiled: a left-to-right wipe behind the frame
+   (storytelling). Both keyframes carry the same units so every
+   intermediate value is valid CSS. */
+const plateVariants: Variants = {
+  hidden: { clipPath: "inset(0 100% 0 0)" },
+  show: { clipPath: "inset(0 0% 0 0)", transition: { duration: 0.9, delay: 0.2, ease: EASE_HEAVY } },
+};
+
+/* On close the copy is gone within the first 230ms but the node stays
+   mounted for the full 650ms grid collapse, so the panel keeps its height
+   while the rows above it settle. */
+const EXIT_SLOW = { opacity: [1, 0, 0], transition: { duration: 0.65, times: [0, 0.35, 1], ease: "linear" as const } };
+const EXIT_FAST = { opacity: 0, transition: { duration: 0.2 } };
+
+interface ProjectRowProps {
+  project: ProjectData;
+  index: number;
+  open: boolean;
+  /** True once the list has scrolled into view; gates the panel reveal. */
+  ready: boolean;
+  reduced: boolean;
+  onToggle: (slug: string) => void;
+}
+
+function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectRowProps) {
+  const { slug, title, description, tags, links, status } = project;
+  const triggerId = `project-${slug}-trigger`;
+  const panelId = `project-${slug}-panel`;
+  const shot = shots[slug];
+  const isLive = status === "Live";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative py-10 md:py-14 border-b border-white/5 last:border-b-0 group/row"
-      style={{ "--proj-color": project.color, "--proj-accent": project.accent } as CSSProperties}
+      variants={rowVariants}
+      custom={index}
+      initial={reduced ? false : "hidden"}
+      animate={ready ? "show" : "hidden"}
+      data-open={open ? "true" : "false"}
+      className={cn(
+        "border-t border-hairline last:border-b",
+        "transition-colors duration-300 ease-[var(--ease-heavy)]",
+        "has-[button:hover]:border-t-hairline-strong data-[open=true]:border-t-hairline-strong"
+      )}
     >
-      {/* Row hover wash — project-tinted, gpu-cheap */}
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-700 pointer-events-none"
-        style={{
-          background: `radial-gradient(600px circle at ${reversed ? "80%" : "20%"} 30%, ${project.color}0a, transparent 70%)`,
-        }}
-      />
-      <div className={`relative flex flex-col md:flex-row gap-6 md:gap-12 items-start ${reversed ? "md:flex-row-reverse" : ""}`}>
-        {/* Index + icon column */}
-        <div className="flex md:flex-col items-center md:items-start gap-4 md:gap-6 md:w-40 shrink-0">
+      <h3>
+        <button
+          type="button"
+          id={triggerId}
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => onToggle(slug)}
+          className="group w-full grid grid-cols-12 items-center h-[72px] lg:h-[88px] text-left"
+        >
+          {/* No text colour utility here: .foil paints the glyphs from a
+              gradient and needs the transparent fill it sets to survive. */}
           <span
-            className="text-5xl md:text-7xl font-black leading-none select-none transition-colors duration-500 text-[color-mix(in_srgb,var(--proj-color)_18%,transparent)] group-hover/row:text-(--proj-color) group-hover/row:drop-shadow-[0_0_20px_var(--proj-color)]"
-            style={{ fontFamily: "var(--font-space-grotesk)" }}
+            className={cn(
+              "col-span-11 sm:col-span-8 lg:col-span-6 pr-4",
+              "font-display font-medium text-[22px] lg:text-[28px] leading-none",
+              "foil transition-transform duration-300 ease-[var(--ease-heavy)] group-hover:translate-x-[6px]"
+            )}
           >
-            {String(index + 1).padStart(2, "0")}
+            {title}
           </span>
-          <div
-            className="p-3 rounded-2xl transition-all duration-500 group-hover/row:scale-110 group-hover/row:shadow-[0_0_28px_-6px_var(--proj-color)]"
-            style={{ backgroundColor: `${project.color}14`, color: project.color }}
+
+          <span
+            className={cn(
+              "sr-only sm:not-sr-only sm:block sm:col-span-3 lg:col-span-2",
+              "font-mono text-[12px] leading-none tabular-nums",
+              isLive ? "text-aurum-300" : "text-ivory-300"
+            )}
           >
-            <Icon size={24} />
-          </div>
-        </div>
+            {status}
+          </span>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <h3
-              className="text-2xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent transition-[background-position] duration-700 ease-out bg-position-[100%_0] group-hover/row:bg-position-[0%_0]"
-              style={{
-                backgroundImage: `linear-gradient(90deg, ${project.color}, ${project.accent} 45%, #fff 55%, #fff)`,
-                backgroundSize: "220% 100%",
-              }}
-            >
-              {project.title}
-            </h3>
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
-              style={{
-                color: project.status === "Live" ? "#4ade80" : "#60a5fa",
-                borderColor: project.status === "Live" ? "rgba(74,222,128,0.3)" : "rgba(96,165,250,0.3)",
-                backgroundColor: project.status === "Live" ? "rgba(74,222,128,0.08)" : "rgba(96,165,250,0.08)",
-              }}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${project.status === "Live" ? "bg-green-400 animate-pulse" : "bg-blue-400"}`} />
-              {project.status}
-            </span>
-          </div>
+          <span className="hidden lg:block lg:col-span-3 font-mono text-[12px] leading-none tabular-nums text-ivory-300">
+            {tags[0]}
+          </span>
 
-          <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-5 max-w-2xl" style={{ fontFamily: "var(--font-inter)" }}>
-            {project.description}
-          </p>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-300 cursor-default hover:text-white"
-                style={{ color: project.accent, borderColor: `${project.accent}30`, backgroundColor: `${project.accent}0a` }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = project.accent;
-                  e.currentTarget.style.borderColor = project.accent;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = `${project.accent}0a`;
-                  e.currentTarget.style.borderColor = `${project.accent}30`;
-                }}
+          <span
+            aria-hidden
+            className="col-span-1 justify-self-end inline-flex text-ivory-200 transition-colors duration-300 group-hover:text-ivory-100"
+          >
+            {reduced ? (
+              open ? (
+                <X size={20} weight="light" />
+              ) : (
+                <Plus size={20} weight="light" />
+              )
+            ) : (
+              <motion.span
+                className="inline-flex"
+                animate={{ rotate: open ? 45 : 0 }}
+                transition={{ duration: 0.4, ease: EASE_HEAVY }}
               >
-                {tag}
-              </span>
-            ))}
-          </div>
+                <Plus size={20} weight="light" />
+              </motion.span>
+            )}
+          </span>
+        </button>
+      </h3>
 
-          <div className="flex items-center gap-5">
-            <MagneticButton strength={0.35} className="inline-block">
-              <Link
-                href={project.links.demo}
-                target="_blank"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:gap-3 transition-all group"
+      {/* The tint bleeds to the container's padding edges while the content
+          stays on the grid; the inner div is the foundation's clipped track. */}
+      <div id={panelId} role="region" aria-labelledby={triggerId} className="grid-accordion -mx-6 lg:-mx-10" data-open={open ? "true" : "false"}>
+        <div className="bg-obsidian-1/60" inert={!open}>
+          <AnimatePresence>
+            {open ? (
+              <motion.div
+                key="panel"
+                exit={reduced ? EXIT_FAST : EXIT_SLOW}
+                className="grid grid-cols-12 gap-x-6 lg:gap-x-10 gap-y-8 px-6 lg:px-10 pt-2 pb-10"
               >
-                Live Demo
-                <ExternalLink size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </Link>
-            </MagneticButton>
-            <MagneticButton strength={0.35} className="inline-block">
-              <Link
-                href={project.links.repo}
-                target="_blank"
-                className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
-              >
-                <Github size={15} />
-                Source
-              </Link>
-            </MagneticButton>
-          </div>
+                <motion.div
+                  variants={copyVariants}
+                  initial="hidden"
+                  animate={ready ? "show" : "hidden"}
+                  transition={reduced ? { duration: 0.2, delay: 0 } : undefined}
+                  className={cn("col-span-12 flex flex-col items-start", shot ? "lg:col-span-6" : "lg:col-span-9")}
+                >
+                  <p className="font-sans text-[17px] leading-[1.6] text-ivory-200 max-w-[52ch]">{description}</p>
+
+                  <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[12px] leading-none tabular-nums text-ivory-300" aria-label="Stack">
+                    {tags.map((tag) => (
+                      <li key={tag}>{tag}</li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+                    {isLive ? (
+                      <TextButton
+                        variant="secondary"
+                        href={links.demo}
+                        className="rule-hover text-aurum-300 hover:text-aurum-200"
+                        icon={<ArrowUpRight size={14} weight="light" />}
+                      >
+                        Open live site
+                      </TextButton>
+                    ) : null}
+                    <TextButton
+                      variant="secondary"
+                      href={links.repo}
+                      className="rule-hover text-aurum-300 hover:text-aurum-200"
+                      icon={<GithubLogo size={14} weight="light" />}
+                    >
+                      View source
+                    </TextButton>
+                  </div>
+                </motion.div>
+
+                {shot ? (
+                  <div className="col-span-12 lg:col-span-6">
+                    {reduced ? (
+                      <ScreenshotPlate src={shot} title={title} />
+                    ) : (
+                      <motion.div variants={plateVariants} initial="hidden" animate={ready ? "show" : "hidden"}>
+                        <ScreenshotPlate src={shot} title={title} />
+                      </motion.div>
+                    )}
+                  </div>
+                ) : null}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>
   );
 }
 
-export default function Projects() {
-  return (
-    <section id="projects" className="relative w-full py-20 md:py-32">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <InViewClass>
-          <SectionKicker num="04" label="Selected Work" />
-          <motion.div initial={{ opacity: 0, y: -10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-4">
-              Portfolio
-            </span>
-          </motion.div>
-          <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
-            <span className="line-mask">
-              <span className="line-rise">
-                Signature{" "}
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400">
-                  Projects
-                </span>
-              </span>
-            </span>
-          </h2>
-          <p className="text-gray-300 text-sm md:text-base mb-6">Five builds that shipped, scaled, and solved real problems.</p>
-        </InViewClass>
+function ScreenshotPlate({ src, title }: { src: string; title: string }) {
+  const sheen = useSheen();
 
-        <div>
-          {projects.map((project, i) => (
-            <ProjectRow key={project.id} project={project} index={i} />
-          ))}
+  return (
+    <div {...sheen} className="sheen relative border border-hairline aspect-[16/10] overflow-hidden">
+      <Image
+        src={src}
+        alt={`Screenshot of ${title}`}
+        width={1600}
+        height={1000}
+        loading="lazy"
+        decoding="async"
+        className="block h-full w-full object-cover"
+      />
+    </div>
+  );
+}
+
+export default function Projects() {
+  const reduced = useReducedMotion();
+  const listRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(listRef, { once: true, amount: 0.1 });
+  const [openSlug, setOpenSlug] = useState<string | null>(DEFAULT_OPEN);
+
+  const toggle = (slug: string) => setOpenSlug((current) => (current === slug ? null : slug));
+
+  return (
+    <section id="projects" aria-labelledby="projects-heading" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+        <div className="grid grid-cols-12 gap-x-6 lg:gap-x-10">
+          <div className="col-span-12 lg:col-span-8">
+            <SectionHeading id="projects-heading" title="Selected work." subtext="Six builds, three of them live." />
+          </div>
+
+          <div ref={listRef} className="col-span-12 mt-16 lg:mt-20">
+            {projects.map((project, i) => (
+              <ProjectRow
+                key={project.slug}
+                project={project}
+                index={i}
+                open={openSlug === project.slug}
+                ready={inView}
+                reduced={reduced}
+                onToggle={toggle}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

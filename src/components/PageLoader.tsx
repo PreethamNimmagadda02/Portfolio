@@ -1,215 +1,235 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "@/lib/motion";
-import { seededRandom, warmedSceneCount, TOTAL_WARMED_SCENES } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, useMotionValue, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { warmedSceneCount, TOTAL_WARMED_SCENES } from "@/lib/utils";
 
-interface Star {
-    id: number;
-    size: number;
-    x: number;
-    y: number;
-    delay: number;
-    duration: number;
-    color: string;
+/* ---------------------------------------------------------------------------
+   Timing, in milliseconds unless noted.
+
+   MIN_SHOWN was 2200ms when the loader covered several WebGL sections warming
+   in parallel. The page now has one persistent CosmicScene and nothing else to
+   wait for, and the match cut into the hero carries the brand moment instead
+   of the loader dwelling on it, so the floor drops to 1400ms. One constant to
+   revert if the owner prefers the longer hold.
+   --------------------------------------------------------------------------- */
+const MIN_SHOWN = 1400;
+const MIN_SHOWN_REDUCED = 600;
+const MAX_WAIT = 5000;
+
+/* The name is pressed across the panel like foil, 150ms after mount. */
+const NAME_DELAY_S = 0.15;
+const NAME_WIPE_S = 0.9;
+
+/* Exit sequence. Stretch and name fade run together; the wipe starts when the
+   stretch lands, and that instant is when loader-done fires. */
+const STRETCH_S = 0.5;
+const NAME_FADE_S = 0.3;
+const WIPE_S = 0.9;
+const LINE_FADE_S = 0.3;
+const REDUCED_FADE_S = 0.2;
+
+/* The drawn line: 240px wide, 1px tall. */
+const TRACK_WIDTH = 240;
+
+/* Time constant (ms) with which the drawn line closes on its target each frame,
+   so real progress reads as a pour rather than a jump. */
+const FILL_TAU = 180;
+
+/* If the fill has not visibly landed this long after finish is called, exit
+   anyway. Only reachable if requestAnimationFrame is throttled to nothing. */
+const FILL_SETTLE_FALLBACK = 600;
+
+type Phase = "loading" | "stretch";
+
+type LoaderWindow = Window & { __loaderDone?: boolean };
+
+/* Flag plus event: components mounted after the event fired can still detect
+   completion via the flag (see useLoaderDone in Hero). */
+function announceLoaderDone() {
+  (window as LoaderWindow).__loaderDone = true;
+  window.dispatchEvent(new Event("loader-done"));
 }
 
-function makeStars(count: number): Star[] {
-    // Seeded PRNG: identical values during prerender and hydration.
-    // (Math.random() here caused hydration mismatches — useState lazy
-    // initializers DO run on the server, contrary to the old comment.)
-    const rand = seededRandom(42);
-    return Array.from({ length: count }, (_, i) => ({
-        id: i,
-        size: rand() * 2 + 0.5,
-        x: rand() * 100,
-        y: rand() * 100,
-        delay: rand() * 2,
-        duration: 2 + rand() * 2,
-        color: i % 4 === 0 ? "#a855f7" : i % 4 === 1 ? "#6366f1" : i % 4 === 2 ? "#818cf8" : "#ffffff",
-    }));
-}
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
+/**
+ * Obsidian panel with the name in Bodoni and a 240px aurum line that fills
+ * with real warm-up progress. On completion the line stretches to the
+ * viewport width, the name fades, loader-done fires, and the panel wipes
+ * upward while the hero contracts the same line into its headline rule.
+ *
+ * Event timing, measured from the moment the fill lands at 1:
+ *   t = 0ms      line begins stretching (500ms, ease settle); name fades (300ms)
+ *   t = 500ms    window.__loaderDone = true, "loader-done" dispatched,
+ *                aria-busy cleared, panel wipe begins (900ms, ease heavy),
+ *                line fades (300ms)
+ *   t = 1400ms   panel unmounts
+ * Reduced motion: no stretch; loader-done fires as the 200ms fade begins.
+ */
 export default function PageLoader() {
-    const [loading, setLoading] = useState(true);
-    // Deterministic star field — same output on server and client.
-    const [stars] = useState<Star[]>(() => makeStars(60));
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(true);
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [stretchFactor, setStretchFactor] = useState(1);
+  const fill = useMotionValue(0);
+  /* The clock survives effect re-runs (a reduced-motion preference change
+     mid-load) so MIN_SHOWN is measured from the real mount. */
+  const startRef = useRef<number | null>(null);
 
-    useEffect(() => {
-        // The loader covers the background warm-up of the 3D sections and
-        // dismisses at whichever comes first:
-        //  - every scene has reported ready ("scene-warmed" events), or
-        //  - MAX_WAIT elapses (slow devices / a scene failing to mount).
-        // MIN_SHOWN keeps the branding from flashing on very fast machines.
-        const MIN_SHOWN = 2200;
-        const MAX_WAIT = 5000;
-        const start = performance.now();
-        let done = false;
-        let minTimer: ReturnType<typeof setTimeout> | undefined;
+  /* Screen readers: the document is busy while the panel is up. */
+  useEffect(() => {
+    if (!shown) return;
+    document.body.setAttribute("aria-busy", "true");
+    return () => {
+      document.body.removeAttribute("aria-busy");
+    };
+  }, [shown]);
 
-        const finish = () => {
-            if (done) return;
-            done = true;
-            setLoading(false);
-            // Flag + event: components that mount after the event fired can
-            // still detect completion via the flag (see useLoaderDone in Hero).
-            (window as unknown as { __loaderDone?: boolean }).__loaderDone = true;
-            window.dispatchEvent(new Event("loader-done"));
-        };
+  /* Loading phase: track progress, hold for MIN_SHOWN, bail at MAX_WAIT. */
+  useEffect(() => {
+    if (phase !== "loading") return;
 
-        const dismiss = () => {
-            const remaining = Math.max(0, MIN_SHOWN - (performance.now() - start));
-            minTimer = setTimeout(finish, remaining);
-        };
+    const start = (startRef.current ??= performance.now());
+    const minShown = reduced ? MIN_SHOWN_REDUCED : MIN_SHOWN;
 
-        const check = () => {
-            if (warmedSceneCount() >= TOTAL_WARMED_SCENES) dismiss();
-        };
+    let raf = 0;
+    let finishing = false;
+    let dismissed = false;
+    let exited = false;
+    let last = performance.now();
+    let current = fill.get();
+    let minTimer: ReturnType<typeof setTimeout> | undefined;
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
 
-        window.addEventListener("scene-warmed", check);
-        check(); // scenes may already be warm (e.g. dev fast-refresh remount)
-        const maxTimer = setTimeout(finish, MAX_WAIT);
+    const beginExit = () => {
+      if (exited) return;
+      exited = true;
+      cancelAnimationFrame(raf);
+      fill.set(1);
+      if (reduced) {
+        /* No stretch: the hero renders its rule in place, so hand over now. */
+        announceLoaderDone();
+        setShown(false);
+        return;
+      }
+      setStretchFactor((window.innerWidth + 4) / TRACK_WIDTH);
+      setPhase("stretch");
+    };
 
-        return () => {
-            window.removeEventListener("scene-warmed", check);
-            clearTimeout(maxTimer);
-            if (minTimer !== undefined) clearTimeout(minTimer);
-        };
-    }, []);
+    const frame = (now: number) => {
+      const dt = Math.min(now - last, 100);
+      last = now;
+      const elapsed = now - start;
+      /* Real progress, with a time-based floor that reaches 1 exactly at
+         MAX_WAIT so the line never stalls on a slow device. */
+      const real = TOTAL_WARMED_SCENES > 0 ? warmedSceneCount() / TOTAL_WARMED_SCENES : 1;
+      const floor = easeOutCubic(Math.min(elapsed / MAX_WAIT, 1));
+      const target = finishing ? 1 : Math.min(1, Math.max(real, floor));
+      current = reduced ? target : current + (target - current) * (1 - Math.exp(-dt / FILL_TAU));
+      fill.set(current);
+      if (finishing && current > 0.995) {
+        beginExit();
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
 
-    return (
-        <AnimatePresence>
-            {loading && (
-                <motion.div
-                    key="loader"
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                    className="fixed inset-0 z-99999 flex items-center justify-center bg-[#030014]"
-                >
-                    {/* Twinkling star field */}
-                    <div className="absolute inset-0 overflow-hidden">
-                        {stars.map((star) => (
-                            <motion.div
-                                key={star.id}
-                                className="absolute rounded-full"
-                                style={{
-                                    width: star.size,
-                                    height: star.size,
-                                    left: `${star.x}%`,
-                                    top: `${star.y}%`,
-                                    background: star.color,
-                                    willChange: "opacity",
-                                }}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: [0, 0.8, 0.2, 0.6, 0] }}
-                                transition={{
-                                    duration: star.duration,
-                                    delay: star.delay,
-                                    ease: "easeInOut",
-                                }}
-                            />
-                        ))}
-                    </div>
+    const finish = () => {
+      if (finishing) return;
+      finishing = true;
+      settleTimer = setTimeout(beginExit, FILL_SETTLE_FALLBACK);
+    };
 
-                    {/* Central branded content */}
-                    <motion.div
-                        className="relative z-10 flex flex-col items-center"
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                        {/* Logo with glow */}
-                        <motion.div
-                            className="relative mb-10"
-                            initial={{ scale: 0.6, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                            {/* Orbiting glow ring */}
-                            <motion.div
-                                className="absolute -inset-8 rounded-3xl"
-                                style={{
-                                    background: "conic-gradient(from 0deg, transparent 0%, rgba(139,92,246,0.5) 25%, transparent 50%, rgba(99,102,241,0.4) 75%, transparent 100%)",
-                                    filter: "blur(20px)",
-                                    willChange: "transform",
-                                }}
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                            />
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      const remaining = Math.max(0, minShown - (performance.now() - start));
+      minTimer = setTimeout(finish, remaining);
+    };
 
-                            {/* Ambient pulse glow */}
-                            <motion.div
-                                className="absolute -inset-12 rounded-full"
-                                style={{
-                                    background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
-                                    willChange: "opacity",
-                                }}
-                                animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.95, 1.05, 0.95] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            />
+    const check = () => {
+      if (warmedSceneCount() >= TOTAL_WARMED_SCENES) dismiss();
+    };
 
-                            {/* Logo card */}
-                            <div className="relative w-[88px] h-[88px] rounded-2xl bg-linear-to-br from-purple-500 via-indigo-500 to-blue-600 p-[1.5px]"
-                                style={{ boxShadow: "0 0 40px rgba(139,92,246,0.3), 0 0 80px rgba(139,92,246,0.1)" }}>
-                                <div className="w-full h-full rounded-[14.5px] bg-[#030014] flex items-center justify-center">
-                                    <motion.span
-                                        className="text-[28px] font-black tracking-tight bg-linear-to-b from-white via-white to-gray-400 bg-clip-text text-transparent select-none"
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                                        style={{ fontFamily: "var(--font-space-grotesk)" }}
-                                    >
-                                        PN
-                                    </motion.span>
-                                </div>
-                            </div>
-                        </motion.div>
+    window.addEventListener("scene-warmed", check);
+    check(); // the scene may already be warm (dev fast-refresh remount)
+    const maxTimer = setTimeout(finish, Math.max(0, MAX_WAIT - (performance.now() - start)));
 
-                        {/* Name */}
-                        <motion.div
-                            className="text-center mb-8 px-4"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                            <p
-                                className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.3em] uppercase whitespace-nowrap bg-linear-to-r from-purple-300 via-white to-indigo-300 bg-clip-text text-transparent"
-                                style={{
-                                    textShadow: "0 0 30px rgba(139,92,246,0.3)",
-                                    fontFamily: "var(--font-space-grotesk)",
-                                }}
-                            >
-                                Preetham Nimmagadda
-                            </p>
-                        </motion.div>
+    return () => {
+      window.removeEventListener("scene-warmed", check);
+      cancelAnimationFrame(raf);
+      clearTimeout(maxTimer);
+      if (minTimer !== undefined) clearTimeout(minTimer);
+      if (settleTimer !== undefined) clearTimeout(settleTimer);
+    };
+  }, [phase, reduced, fill]);
 
-                        {/* Minimal loading bar — fills over ~3s (the typical
-                            all-scenes-warmed time); on slower devices it
-                            holds at 100% until the 5s max dismissal */}
-                        <motion.div
-                            className="w-36 h-[1.5px] rounded-full overflow-hidden"
-                            style={{ background: "rgba(255,255,255,0.04)" }}
-                            initial={{ opacity: 0, scaleX: 0.8 }}
-                            animate={{ opacity: 1, scaleX: 1 }}
-                            transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                            <motion.div
-                                className="h-full rounded-full"
-                                style={{
-                                    background: "linear-gradient(90deg, rgba(139,92,246,0.8), rgba(99,102,241,0.6), rgba(59,130,246,0.8))",
-                                }}
-                                initial={{ width: "0%" }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 3, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                            />
-                        </motion.div>
-                    </motion.div>
+  /* Stretch phase: when the line has covered the viewport, hand over to the
+     hero and let AnimatePresence run the wipe. */
+  useEffect(() => {
+    if (phase !== "stretch") return;
+    const timer = setTimeout(() => {
+      announceLoaderDone();
+      setShown(false);
+    }, STRETCH_S * 1000);
+    return () => clearTimeout(timer);
+  }, [phase]);
 
-                    {/* Subtle radial vignette */}
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(3,0,20,0.8)_100%)] pointer-events-none" />
-                </motion.div>
-            )}
-        </AnimatePresence>
-    );
+  const stretching = phase === "stretch";
+
+  return (
+    <AnimatePresence>
+      {shown && (
+        <motion.div
+          key="loader"
+          className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-obsidian-0"
+          initial={{ clipPath: "inset(0% 0% 0% 0%)", opacity: 1 }}
+          animate={{ clipPath: "inset(0% 0% 0% 0%)", opacity: 1 }}
+          exit={reduced ? { opacity: 0 } : { clipPath: "inset(0% 0% 100% 0%)" }}
+          transition={reduced ? { duration: REDUCED_FADE_S } : { duration: WIPE_S, ease: EASE_HEAVY }}
+        >
+          <div role="status" aria-live="polite" className="sr-only">
+            Loading
+          </div>
+
+          <motion.p
+            className="select-none px-6 text-center font-display font-medium text-[28px] leading-none tracking-[-0.01em] text-ivory-100 lg:text-[36px]"
+            initial={{ clipPath: "inset(0% 100% 0% 0%)", opacity: 1 }}
+            animate={{
+              clipPath: "inset(0% 0% 0% 0%)",
+              opacity: stretching ? 0 : 1,
+            }}
+            transition={
+              reduced
+                ? { duration: 0 }
+                : {
+                    clipPath: { duration: NAME_WIPE_S, ease: EASE_HEAVY, delay: NAME_DELAY_S },
+                    opacity: { duration: NAME_FADE_S, ease: EASE_SETTLE },
+                  }
+            }
+          >
+            Preetham Nimmagadda
+          </motion.p>
+
+          {/* The track sits 24px beneath the name. It stretches from its centre
+              to the viewport width on exit; the gold fill inside grows from the
+              left with progress and is at 1 before the stretch begins. */}
+          <motion.div
+            aria-hidden
+            className="mt-6 h-px w-60 bg-hairline"
+            style={{ transformOrigin: "50% 50%" }}
+            initial={{ scaleX: 1, opacity: 1 }}
+            animate={{ scaleX: stretching ? stretchFactor : 1, opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: LINE_FADE_S } }}
+            transition={{ duration: STRETCH_S, ease: EASE_SETTLE }}
+          >
+            <motion.div className="h-full w-full origin-left bg-aurum-300" style={{ scaleX: fill }} />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }

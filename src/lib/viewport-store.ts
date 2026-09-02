@@ -9,8 +9,8 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
  * visibility, or a media-query result reads it from here instead of attaching
  * its own `window` listener. This collapses what used to be a handful of
  * independent `pointermove` / `scroll` / `visibilitychange` / `matchMedia`
- * handlers (ParticleField, SpotlightCursor, the media hooks, …) down to one
- * of each — keeping the scroll and pointer hot paths cheap and jank-free.
+ * handlers (the scene, the navbar, the media hooks, and so on) down to one
+ * of each, keeping the scroll and pointer hot paths cheap and jank-free.
  *
  * Pointer and scroll are exposed as long-lived mutable objects, not React
  * state: their consumers (WebGL frame loops, spring rAF loops) read them
@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
  */
 
 // -----------------------------------------------------------------------------
-// Pointer — one passive `pointermove` listener, shared normalized + pixel coords
+// Pointer: one passive `pointermove` listener, shared normalized + pixel coords
 // -----------------------------------------------------------------------------
 export interface PointerState {
   /** Normalized X in [-1, 1] (left → right). */
@@ -57,7 +57,7 @@ function ensurePointerListener() {
 
 /**
  * Returns the shared pointer object. The reference is stable for the lifetime
- * of the page — read `.nx` / `.py` etc. inside your frame loop each tick.
+ * of the page; read `.nx` / `.py` etc. inside your frame loop each tick.
  */
 export function usePointer(): PointerState {
   useEffect(ensurePointerListener, []);
@@ -68,7 +68,7 @@ export function usePointer(): PointerState {
  * Registers `callback`, fired on every pointer move with the shared pointer
  * object. Use this when you need to *wake* an idle rAF loop on movement (rather
  * than polling the pointer every frame). Still backed by the single shared
- * `pointermove` window listener — no extra DOM listener is attached.
+ * `pointermove` window listener; no extra DOM listener is attached.
  */
 export function usePointerMove(callback: (p: PointerState) => void): void {
   useEffect(() => {
@@ -82,7 +82,7 @@ export function usePointerMove(callback: (p: PointerState) => void): void {
 }
 
 // -----------------------------------------------------------------------------
-// Scroll — one passive `scroll` listener, coalesced to one read per frame
+// Scroll: one passive `scroll` listener, coalesced to one read per frame
 // -----------------------------------------------------------------------------
 export interface ScrollState {
   /** Scroll progress through the document in [0, 1]. */
@@ -92,7 +92,7 @@ export interface ScrollState {
   /**
    * Smoothed scroll velocity in px/ms, exponentially decayed toward 0 when
    * scrolling stops. Consumers (the WebGL background) read it every frame to
-   * make the scene react to motion — star stretch, nebula swell, etc.
+   * make the scene react to motion: star stretch, nebula swell, etc.
    * Positive = scrolling down.
    */
   velocity: number;
@@ -108,7 +108,7 @@ let velocityDecayRaf = 0;
 
 function decayVelocity() {
   // Ease velocity back to zero once scroll events stop arriving. Runs a short
-  // self-terminating rAF chain — no permanent loop.
+  // self-terminating rAF chain, no permanent loop.
   scroll.velocity *= 0.9;
   if (Math.abs(scroll.velocity) > 0.001) {
     velocityDecayRaf = requestAnimationFrame(decayVelocity);
@@ -139,7 +139,7 @@ function readScroll() {
 }
 
 function handleScroll() {
-  // Coalesce bursts of scroll events into a single read on the next frame —
+  // Coalesce bursts of scroll events into a single read on the next frame;
   // the raw event can fire far more often than the display refreshes.
   if (!scrollQueued) {
     scrollQueued = true;
@@ -148,7 +148,7 @@ function handleScroll() {
 }
 
 /**
- * Returns the shared scroll object. The reference is stable — read `.progress`
+ * Returns the shared scroll object. The reference is stable; read `.progress`
  * / `.y` inside your frame loop each tick.
  */
 export function useScrollTracker(): ScrollState {
@@ -171,7 +171,7 @@ export function useScrollTracker(): ScrollState {
 }
 
 // -----------------------------------------------------------------------------
-// Tab visibility — one `visibilitychange` listener, reactive
+// Tab visibility: one `visibilitychange` listener, reactive
 // -----------------------------------------------------------------------------
 function subscribeVisibility(callback: () => void) {
   if (typeof document === "undefined") return () => {};
@@ -189,12 +189,12 @@ export function useDocumentVisible(): boolean {
 }
 
 // -----------------------------------------------------------------------------
-// Idle gate — defer non-critical work until the main thread is quiet
+// Idle gate: defer non-critical work until the main thread is quiet
 // -----------------------------------------------------------------------------
 /**
  * Flips to `true` once the browser is idle (or after `timeout` ms as a floor).
- * Used to keep heavy, non-critical mounts — e.g. the fixed WebGL background and
- * its ~800 KB three.js chunk — off the initial interactivity critical path so
+ * Used to keep heavy, non-critical mounts (e.g. the fixed WebGL background and
+ * its ~800 KB three.js chunk) off the initial interactivity critical path so
  * the hero becomes interactive first.
  */
 export function useIdle(timeout = 1500): boolean {
@@ -220,7 +220,7 @@ export function useIdle(timeout = 1500): boolean {
 }
 
 // -----------------------------------------------------------------------------
-// Media queries — one shared MediaQueryList per query string
+// Media queries: one shared MediaQueryList per query string
 // -----------------------------------------------------------------------------
 const mediaQueryCache = new Map<string, MediaQueryList>();
 

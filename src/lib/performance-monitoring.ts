@@ -10,7 +10,7 @@ function log(msg: string) {
 
 /**
  * Measures Core Web Vitals (FCP, LCP, CLS, TTFB) and logs them in development.
- * In production this is a no-op — no console pollution for real users.
+ * In production this is a no-op: no console pollution for real users.
  */
 export function usePerformanceMonitoring() {
   useEffect(() => {
@@ -22,7 +22,7 @@ export function usePerformanceMonitoring() {
       if (entry) log(`[Perf] FCP: ${Math.round(entry.startTime)}ms`);
     });
 
-    // LCP — update on each new candidate, final value is what matters
+    // LCP: update on each new candidate, final value is what matters
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       if (entries.length > 0) {
@@ -31,7 +31,7 @@ export function usePerformanceMonitoring() {
       }
     });
 
-    // CLS — accumulate all non-input-triggered shifts
+    // CLS: accumulate all non-input-triggered shifts
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {

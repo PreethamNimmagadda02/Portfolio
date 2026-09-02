@@ -1,258 +1,318 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useSpring } from "@/lib/motion";
-import { Briefcase, Calendar, Award, Trophy, Star, Zap, LucideIcon } from "lucide-react";
-import InteractiveCard from "./InteractiveCard";
-import { InViewClass, SectionKicker } from "./Reveal";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Briefcase, Buildings, Gavel, Users, type Icon } from "@phosphor-icons/react";
+import { AnimatePresence, motion, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { SectionHeading } from "@/components/ui";
+
+/* ------------------------------------------------------------------------
+   Record
+   ------------------------------------------------------------------------ */
 
 type ExperienceType = "work" | "community" | "achievement" | "organization";
+type ExperienceGroup = "Industry" | "Campus";
 
-interface ExperienceData {
+interface ExperienceEntry {
   id: number;
+  group: ExperienceGroup;
   role: string;
   company: string;
+  /** Written with "to": the start year is read from the first four digits. */
   period: string;
   description: string;
   type: ExperienceType;
   skills: string[];
   highlight: string;
-  color: string;
-  accent: string;
 }
 
-const experiences: ExperienceData[] = [
+const entries: ExperienceEntry[] = [
   {
     id: 0,
+    group: "Industry",
     role: "Machine Learning Intern",
     company: "Matters.AI",
-    period: "Mar 2026 — Present",
+    period: "Mar 2026 to Sept 2026",
     description:
-      "Building the AI copilot that finds data exposures in real time and remediates them automatically — turning data security from passive monitoring into a self-healing defense layer.",
+      "Built the AI copilot that finds data exposures in real time and remediates them automatically, turning data security from passive monitoring into a self-healing defense layer.",
     type: "work",
     skills: ["Autonomous AI", "DSPM", "ML Engineering", "Data Security"],
-    highlight: "Autonomous AI Copilot",
-    color: "#ef4444",
-    accent: "#f87171",
+    highlight: "Autonomous AI copilot",
   },
   {
     id: 1,
+    group: "Industry",
     role: "Generative AI Intern",
     company: "Introspect Labs",
-    period: "Jan 2026 — Mar 2026",
+    period: "Jan 2026 to Mar 2026",
     description:
       "Built a multimodal & multilingual AI companion powered by VideoRAG that processes 100+ hours of video with 95% accuracy. Designed its empathic core for real-time adaptive responses, boosting retention by 40%.",
     type: "work",
     skills: ["VideoRAG", "Vision-Language Models", "Empathic AI"],
-    highlight: "Architected an AI Companion",
-    color: "#3b82f6",
-    accent: "#06b6d4",
-  },
-  {
-    id: 2,
-    role: "Campus Ambassador",
-    company: "Perplexity",
-    period: "Sept 2025 — Nov 2025",
-    description:
-      "Led campus adoption for Perplexity — built the partnerships and campaigns that drove real user growth across the university.",
-    type: "community",
-    skills: ["Growth Hacking", "Strategic Partnerships", "Brand Strategy"],
-    highlight: "20+ Strategic Leads",
-    color: "#22c55e",
-    accent: "#10b981",
+    highlight: "Architected an AI companion",
   },
   {
     id: 3,
+    group: "Industry",
     role: "Software Developer Intern",
     company: "METAVERTEX",
-    period: "June 2025 — July 2025",
+    period: "June 2025 to July 2025",
     description:
       "Architected autonomous AI agents reducing system resource load by 20%. Engineered performance optimizations that boosted SEO visibility by 10%.",
     type: "work",
     skills: ["AI Architecture", "System Optimization", "Scalable Tech"],
-    highlight: "20% Efficiency Gain",
-    color: "#8b5cf6",
-    accent: "#a78bfa",
+    highlight: "20% efficiency gain",
+  },
+  {
+    id: 2,
+    group: "Campus",
+    role: "Campus Ambassador",
+    company: "Perplexity",
+    period: "Sept 2025 to Nov 2025",
+    description:
+      "Led campus adoption for Perplexity: built the partnerships and campaigns that drove real user growth across the university.",
+    type: "community",
+    skills: ["Growth Hacking", "Strategic Partnerships", "Brand Strategy"],
+    highlight: "20+ strategic leads",
   },
   {
     id: 4,
+    group: "Campus",
     role: "Hostel Prefect",
     company: "Hostel Executive Committee",
-    period: "Sept 2024 — Sept 2025",
+    period: "Sept 2024 to Sept 2025",
     description:
       "Managed operations for 1,800+ residents. Implemented conflict resolution protocols reducing disputes by 30% and boosted community engagement by 40%.",
     type: "organization",
     skills: ["Operations Management", "Conflict Resolution", "Community Building"],
-    highlight: "Led 1,800+ Residents",
-    color: "#ec4899",
-    accent: "#f472b6",
+    highlight: "Led 1,800+ residents",
   },
   {
     id: 5,
+    group: "Campus",
     role: "Student Senator",
     company: "Students' Gymkhana, IIT (ISM)",
-    period: "March 2024 — March 2025",
+    period: "March 2024 to March 2025",
     description:
       "Elected representative for 1,500+ peers. Facilitated policy changes and infrastructure improvements, enhancing student satisfaction and campus life quality.",
     type: "achievement",
     skills: ["Strategic Leadership", "Policy Advocacy", "Governance"],
-    highlight: "Elected Representative",
-    color: "#f59e0b",
-    accent: "#f97316",
+    highlight: "Elected representative",
   },
 ];
 
-const typeIcons: Record<ExperienceType, LucideIcon> = {
+const GROUPS: ExperienceGroup[] = ["Industry", "Campus"];
+
+const typeIcons: Record<ExperienceType, Icon> = {
   work: Briefcase,
-  community: Award,
-  achievement: Trophy,
-  organization: Star,
+  community: Users,
+  organization: Buildings,
+  achievement: Gavel,
 };
 
-function TimelineEntry({ data, index }: { data: ExperienceData; index: number }) {
-  const Icon = typeIcons[data.type];
+/** The start year of a period written as "Mon YYYY to ...". */
+function startYear(period: string): string {
+  return period.match(/\d{4}/)?.[0] ?? period;
+}
 
+/* ------------------------------------------------------------------------
+   Sticky year dossier (left column, lg and up)
+   The column duplicates facts already present in the entries, so it is
+   hidden from assistive technology.
+   ------------------------------------------------------------------------ */
+
+function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: boolean }) {
+  const year = startYear(entry.period);
+  const yearIn = reduced ? { duration: 0 } : { duration: 0.7, ease: EASE_HEAVY };
+  const yearOut = reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_HEAVY };
+  const fade = reduced ? { duration: 0 } : { duration: 0.4, ease: EASE_SETTLE };
+
+  // A sticky box detaches once its bottom edge reaches the bottom of its
+  // parent, so the box's own height is travel the dossier loses at the end of
+  // the section: a tall one let go of the last two entries while they were
+  // still on screen. The anchor is therefore zero-height and the dossier hangs
+  // out of it, which buys the full travel; the section's own bottom padding
+  // absorbs the overhang.
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: (index % 3) * 0.05 }}
-      className="relative pl-10 md:pl-14 pb-12 last:pb-0 group"
-    >
-      {/* Node — lights up with a one-shot ripple when the entry reveals */}
-      <InViewClass as="span" className="absolute left-[-5px] top-1 block" amount={0.5}>
-        <span
-          className="block w-3 h-3 rounded-full border-2 transition-shadow duration-700 in-[.in-view]:shadow-[0_0_14px_2px_var(--node-glow)]"
-          style={{ borderColor: data.color, backgroundColor: "#030308", "--node-glow": `${data.color}80` } as React.CSSProperties}
-        />
-        <span
-          className="absolute inset-[-6px] rounded-full border opacity-0 in-[.in-view]:animate-ping in-[.in-view]:opacity-40"
-          style={{ borderColor: data.color, animationIterationCount: 2, animationDuration: "1.4s" }}
-        />
-      </InViewClass>
-
-      <InteractiveCard
-        accent={data.color}
-        tilt={1.5}
-        className="card-hairline rounded-2xl p-5 md:p-7 transition-[border-color,box-shadow] duration-500 hover:border-white/20 hover:shadow-[0_18px_50px_-24px_var(--ic-accent)]"
-      >
-        <div className="relative z-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="p-2 rounded-lg"
-              style={{ backgroundColor: `${data.color}18`, color: data.color }}
+    <div className="sticky top-[128px] h-0" aria-hidden>
+      <div className="flex flex-col">
+        {/* The numeral mask: outgoing year slides up and out while the next rises in. */}
+        <div className="relative h-[5rem] overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={year}
+              className="ledger block font-display font-normal text-[5rem] leading-none text-ivory-100"
+              initial={{ y: "100%" }}
+              animate={{ y: 0, transition: yearIn }}
+              exit={{ y: "-100%", transition: yearOut }}
             >
-              <Icon size={18} />
-            </div>
-            <div>
-              <h3 className="text-base md:text-lg font-bold text-white leading-tight">{data.company}</h3>
-              <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-0.5">
-                <Calendar size={11} />
-                <span>{data.period}</span>
-              </div>
-            </div>
-          </div>
-          <span
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0"
-            style={{ color: data.color, borderColor: `${data.color}40`, backgroundColor: `${data.color}0f` }}
-          >
-            <Zap size={12} />
-            {data.highlight}
-          </span>
+              {year}
+            </motion.span>
+          </AnimatePresence>
         </div>
 
-        <h4 className="text-xl md:text-2xl font-black mb-2" style={{ color: data.color }}>
-          {data.role}
-        </h4>
-
-        <p className="text-sm md:text-[15px] text-gray-300 leading-relaxed mb-4" style={{ fontFamily: "var(--font-inter)" }}>
-          {data.description}
-        </p>
-
-        <div className="flex flex-wrap gap-1.5">
-          {data.skills.map((skill) => (
-            <span
-              key={skill}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors duration-300 cursor-default hover:text-white"
-              style={{
-                color: data.accent,
-                borderColor: `${data.accent}25`,
-                backgroundColor: `${data.accent}08`,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = data.accent;
-                e.currentTarget.style.borderColor = data.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = `${data.accent}08`;
-                e.currentTarget.style.borderColor = `${data.accent}25`;
-              }}
+        <div className="relative mt-5">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={entry.id}
+              className="flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: fade }}
+              exit={{ opacity: 0, transition: fade }}
             >
-              {skill}
-            </span>
-          ))}
+              <span className="ledger font-mono text-[13px] leading-none text-ivory-300">{entry.period}</span>
+              <span className="mt-6 font-display font-medium text-[28px] leading-[1.15] text-ivory-100">
+                {entry.company}
+              </span>
+              <span className="mt-2 font-sans text-[15px] leading-[1.5] text-ivory-200">{entry.role}</span>
+            </motion.div>
+          </AnimatePresence>
         </div>
-        </div>
-      </InteractiveCard>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
-export default function Experience() {
-  const railRef = useRef<HTMLDivElement>(null);
-  // The gradient rail draws itself as the timeline scrolls through the viewport
-  const { scrollYProgress } = useScroll({
-    target: railRef,
-    offset: ["start 0.8", "end 0.55"],
-  });
-  const railScale = useSpring(scrollYProgress, { stiffness: 90, damping: 28, restDelta: 0.001 });
+/* ------------------------------------------------------------------------
+   Entry (right column). No card: type, role, metadata, highlight, prose,
+   and the skills under a hairline that strengthens on hover.
+   ------------------------------------------------------------------------ */
+
+function Entry({
+  entry,
+  reduced,
+  register,
+}: {
+  entry: ExperienceEntry;
+  reduced: boolean;
+  register: (el: HTMLElement | null) => void;
+}) {
+  const Icon = typeIcons[entry.type];
 
   return (
-    <section id="experience" className="relative w-full py-20 md:py-32">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <InViewClass>
-          <SectionKicker num="02" label="Journey" />
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-14 md:mb-20"
-          >
-            <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
-              <span className="line-mask">
-                <span className="line-rise">
-                  Experiences &{" "}
-                  <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-300 via-blue-400 to-cyan-400">
-                    Ventures
-                  </span>
-                </span>
-              </span>
-            </h2>
-            <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto">
-              A timeline of roles, ventures, and the moments that shaped them.
-            </p>
-          </motion.div>
-        </InViewClass>
+    <motion.article
+      ref={register}
+      data-entry={entry.id}
+      className="group"
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      whileInView={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: reduced ? 0.2 : 0.9, ease: EASE_SETTLE }}
+    >
+      {/* Mobile only: the period sits above the role, where the sticky column would have said it. */}
+      <p className="ledger mb-3 font-mono text-[13px] leading-none text-ivory-300 lg:hidden">{entry.period}</p>
 
-        <div ref={railRef} className="relative">
-          {/* Base rail */}
-          <div className="absolute left-0 top-1 bottom-12 w-px bg-white/10" aria-hidden />
-          {/* Scroll-drawn gradient rail */}
-          <motion.div
-            aria-hidden
-            className="absolute left-0 top-1 bottom-12 w-px origin-top"
-            style={{
-              scaleY: railScale,
-              background: "linear-gradient(180deg, #a78bfa, #60a5fa 40%, #22d3ee 75%, #f472b6)",
-              boxShadow: "0 0 12px rgba(167,139,250,0.5)",
-            }}
-          />
-          {experiences.map((exp, i) => (
-            <TimelineEntry key={exp.id} data={exp} index={i} />
-          ))}
+      <div className="flex items-center gap-3">
+        <Icon size={18} weight="light" className="shrink-0 text-ivory-300" aria-hidden />
+        <h4 className="font-display font-medium text-[22px] leading-[1.15] text-ivory-100 lg:text-[28px]">
+          {entry.role}
+        </h4>
+      </div>
+
+      <p className="ledger mt-3 font-mono text-[13px] leading-none text-ivory-300">
+        {entry.company}
+        <span className="hidden lg:inline">
+          <span aria-hidden> &middot; </span>
+          <span className="sr-only">, </span>
+          {entry.period}
+        </span>
+      </p>
+
+      <p className="mt-4 font-mono text-[12px] leading-none text-aurum-300">{entry.highlight}</p>
+
+      <p className="mt-5 max-w-[58ch] font-sans text-[16px] leading-[1.65] text-ivory-200">{entry.description}</p>
+
+      <ul
+        aria-label="Skills"
+        className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-hairline pt-4 transition-colors duration-300 ease-[var(--ease-heavy)] group-hover:border-hairline-strong"
+      >
+        {entry.skills.map((skill) => (
+          <li key={skill} className="font-mono text-[12px] leading-none text-ivory-300">
+            {skill}
+          </li>
+        ))}
+      </ul>
+    </motion.article>
+  );
+}
+
+function GroupLabel({ children }: { children: ReactNode }) {
+  return (
+    <h3 className="border-t border-hairline pt-4 font-sans font-medium text-[13px] leading-none text-ivory-200">
+      {children}
+    </h3>
+  );
+}
+
+/* ------------------------------------------------------------------------
+   Section
+   ------------------------------------------------------------------------ */
+
+export default function Experience() {
+  const reduced = useReducedMotion();
+  const [active, setActive] = useState(0);
+  const nodes = useRef<Map<number, HTMLElement>>(new Map());
+
+  // One observer for all six entries. An entry is a candidate once half of it
+  // is visible; the topmost candidate is the chapter the reader is in. When
+  // no entry qualifies (a tall gap, or between groups) the last chapter holds.
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const visible = new Set<number>();
+    const observer = new IntersectionObserver(
+      (records) => {
+        for (const record of records) {
+          const id = Number((record.target as HTMLElement).dataset.entry);
+          if (record.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        }
+        if (visible.size === 0) return;
+        let next = Number.POSITIVE_INFINITY;
+        for (const id of visible) {
+          const index = entries.findIndex((e) => e.id === id);
+          if (index < next) next = index;
+        }
+        if (Number.isFinite(next)) setActive(next);
+      },
+      { threshold: 0.5 }
+    );
+    for (const el of nodes.current.values()) observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const register = (el: HTMLElement | null) => {
+    const id = Number(el?.dataset.entry);
+    if (el) nodes.current.set(id, el);
+  };
+
+  return (
+    <section id="experience" aria-labelledby="experience-heading" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+        <div className="grid grid-cols-12 gap-x-6">
+          <div className="col-span-12 lg:col-span-9">
+            <SectionHeading id="experience-heading" title="Six roles since 2024." />
+          </div>
+        </div>
+
+        <div className="mt-16 grid grid-cols-12 gap-x-6 lg:mt-24">
+          <aside className="hidden lg:col-span-4 lg:block">
+            <YearDossier entry={entries[active]} reduced={reduced} />
+          </aside>
+
+          <div className="col-span-12 flex flex-col gap-y-24 lg:col-span-7 lg:col-start-6">
+            {GROUPS.map((group) => (
+              <div key={group}>
+                <GroupLabel>{group}</GroupLabel>
+                <div className="mt-10 flex flex-col gap-y-16 lg:gap-y-[72px]">
+                  {entries
+                    .filter((entry) => entry.group === group)
+                    .map((entry) => (
+                      <Entry key={entry.id} entry={entry} reduced={reduced} register={register} />
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,11 +1,11 @@
 {
   "name": "Preetham Nimmagadda Portfolio",
   "short_name": "Preetham",
-  "description": "Portfolio of Preetham Nimmagadda, an AI Agent Developer & Full Stack Engineer.",
+  "description": "Portfolio of Preetham Nimmagadda, AI engineer building autonomous systems.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#8b5cf6",
+  "background_color": "#0C0A08",
+  "theme_color": "#C9A961",
   "icons": [
     {
       "src": "/icon-192x192.png",

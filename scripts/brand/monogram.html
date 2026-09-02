@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PN monogram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,700&display=block" rel="stylesheet">
+<style>
+  /* Source of truth for the PN mark used as the favicon, the PWA icon and the
+     iOS home screen icon. Rasterise with any headless browser at the sizes
+     listed in scripts/brand/README.md, using a square viewport: every length
+     here is a share of the canvas, so all sizes are the same drawing.
+
+     No frame, and weight 700 rather than the letterhead's 400: a favicon is
+     drawn at 16 to 32 device pixels, where a Didone's hairlines and a 2px
+     inset border both fall below a single pixel. The earlier framed 400 mark
+     lost the entire N in the browser tab. */
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 100vw; height: 100vh; overflow: hidden;
+    background: #0C0A08;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+    /* Optical size pinned to match the site, which is also what keeps the
+       hairlines of the N above one device pixel at tab sizes. Tracking it
+       to a 60vw type size selects the print master and thins them. */
+    font-optical-sizing: none; font-variation-settings: "opsz" 22;
+    font-weight: 700;
+    font-size: 60vw;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    color: #F2ECE0;
+    /* Cap-height glyphs sit low in the em box; lift them onto the optical centre. */
+    padding-bottom: 3vw;
+    box-sizing: border-box;
+  }
+</style>
+</head>
+<body>
+  <div class="mono">PN</div>
+</body>
+</html>

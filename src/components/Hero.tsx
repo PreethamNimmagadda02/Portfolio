@@ -1,28 +1,26 @@
 "use client";
 
-import { motion, useScroll, useTransform, Variants, useSpring, useInView, MotionValue } from "@/lib/motion";
-import { Sparkles, ChevronDown } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
-import { smoothScrollTo } from "@/lib/utils";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { ArrowDownRight } from "@phosphor-icons/react";
+import { motion, useScroll, useTransform, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { TextButton } from "@/components/ui";
+import PortraitPlate from "./PortraitPlate";
 
-// Eager import for above-the-fold, but AvatarFlipCard is already a separate chunk
-import AvatarFlipCard from "./AvatarFlipCard";
-import MagneticButton from "./MagneticButton";
-
-// Loader-completion hook with safety net: resolves via the "loader-done"
-// event, the global flag (if the event already fired before mount), or a
-// fallback timeout so hero content can never stay hidden forever.
-// Fallback must exceed the PageLoader's 5s hold — otherwise the hero
-// entrance animations play invisibly behind the loader overlay.
-function useLoaderDone(fallbackMs = 7000) {
+/**
+ * Loader-completion hook with a safety net. Resolves via the "loader-done"
+ * event, the global flag (if the event already fired before mount), or a
+ * fallback timeout so the hero can never stay hidden forever. The loader
+ * fires loader-done at the start of its exit wipe and holds at most
+ * MIN_SHOWN 1400ms / MAX_WAIT 5000ms, so 6500ms comfortably outlasts it.
+ */
+function useLoaderDone(fallbackMs = 6500) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     const onDone = () => setDone(true);
     window.addEventListener("loader-done", onDone);
-    // If the loader already finished before this component mounted, resolve
-    // on the next tick; otherwise arm the safety-net timeout.
     const alreadyDone = (window as unknown as { __loaderDone?: boolean }).__loaderDone;
     const fallback = setTimeout(onDone, alreadyDone ? 0 : fallbackMs);
     return () => {
@@ -34,482 +32,222 @@ function useLoaderDone(fallbackMs = 7000) {
   return done;
 }
 
-// Roles to cycle through in the typing rotator
-const ROLES = [
-  "AI Engineer",
-  "Agent Systems Architect",
-  "Full Stack Developer",
-  "Competitive Programmer",
-  "Open Source Builder",
-  "Perpetual Learner",
-];
+/* Entrance clock, in seconds from loader-done. The rule contracts at 0, the
+   eyebrow at 0.15, the headline lines at 0.30 and 0.42 (CSS, see below), the
+   plate at 0.20, the subtext at 0.80, the CTAs at 1.00 and 1.10. */
+const T = {
+  eyebrow: 0.15,
+  plate: 0.2,
+  subtext: 0.8,
+  primary: 1.0,
+  primaryLabel: 1.3,
+  secondary: 1.1,
+} as const;
 
-// Typing role rotator component
-function RoleRotator() {
-  const ref = useRef<HTMLSpanElement>(null);
-  // Pause the typing loop (setState every 40–80ms) while scrolled off-screen
-  const inView = useInView(ref);
-  const prefersReducedMotion = useReducedMotion();
-  const [roleIndex, setRoleIndex] = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+const REDUCED_FADE = { duration: 0.2 } as const;
 
-  useEffect(() => {
-    if (!inView) return;
-    const currentRole = ROLES[roleIndex];
-    let timeout: NodeJS.Timeout;
-
-    if (!isDeleting) {
-      if (displayed.length < currentRole.length) {
-        timeout = setTimeout(() => {
-          setDisplayed(currentRole.slice(0, displayed.length + 1));
-        }, 80);
-      } else {
-        // Pause at full text
-        timeout = setTimeout(() => setIsDeleting(true), 2000);
-      }
-    } else {
-      if (displayed.length > 0) {
-        timeout = setTimeout(() => {
-          setDisplayed(displayed.slice(0, -1));
-        }, 40);
-      } else {
-        setIsDeleting(false);
-        setRoleIndex((prev) => (prev + 1) % ROLES.length);
-      }
-    }
-
-    return () => clearTimeout(timeout);
-  }, [displayed, isDeleting, roleIndex, inView]);
-
-  return (
-    <span ref={ref} className="inline-flex items-center">
-      <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 font-bold">
-        {displayed}
-      </span>
-      <motion.span
-        animate={inView && !prefersReducedMotion ? { opacity: [1, 0] } : { opacity: 1 }}
-        transition={inView && !prefersReducedMotion ? { duration: 0.5, repeat: Infinity, repeatType: "reverse" } : { duration: 0.2 }}
-        className="inline-block w-[3px] h-[1.1em] bg-purple-400 ml-0.5 rounded-full"
-      />
-    </span>
-  );
-}
-
-// Currently Building widget
-function CurrentlyBuilding() {
-  return (
-    <motion.a
-      href="https://www.matters.ai/"
-      target="_blank"
-      rel="noopener noreferrer"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.8, duration: 0.6 }}
-      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-pointer group"
-    >
-      <span className="relative flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-      </span>
-      <span className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
-        Building: <span className="text-white font-semibold text-base group-hover:text-blue-400 transition-colors">Matters.AI</span>
-      </span>
-    </motion.a>
-  );
-}
-
-// Floating badge component — simplified for performance
-function FloatingBadge({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const prefersReducedMotion = useReducedMotion();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{
-        opacity: 1,
-        y: prefersReducedMotion ? 0 : [0, -8, 0],
-      }}
-      transition={{
-        opacity: { delay, duration: 0.6 },
-        y: prefersReducedMotion
-          ? { delay, duration: 0.6 }
-          : { delay: delay + 0.6, duration: 2, repeat: Infinity, ease: "easeInOut" },
-      }}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/10 text-sm text-gray-300"
-    >
-      <Sparkles size={14} className="text-purple-400" aria-hidden />
-      {children}
-    </motion.div>
-  );
-}
-
-// Scroll indicator component
-function ScrollIndicator({ opacity }: { opacity: MotionValue<number> }) {
-  const prefersReducedMotion = useReducedMotion();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.2, duration: 0.6 }}
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      aria-hidden
-    >
-      <motion.div style={{ opacity }} className="flex flex-col items-center gap-2">
-        <span className="text-xs text-gray-500 uppercase tracking-widest">Scroll</span>
-        <motion.div
-          animate={prefersReducedMotion ? { y: 0 } : { y: [0, 8, 0] }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center"
-        >
-          <ChevronDown size={20} className="text-gray-500" />
-          <ChevronDown size={20} className="text-gray-600 -mt-3" />
-        </motion.div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-// Stats counter with count-up animation
-function AnimatedStat({
-  value,
-  label,
-  delay,
-  gradient,
-  loaderDone,
-}: {
-  value: string;
-  label: React.ReactNode;
-  delay: number;
-  gradient: string;
-  loaderDone: boolean;
-}) {
-  const [displayValue, setDisplayValue] = useState("0");
-  // Loader-done is the earliest any stat can start; `delay` (in seconds,
-  // same unit as the surrounding motion transitions) then staggers each
-  // stat's count-up relative to its siblings instead of all three firing
-  // in lockstep.
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    if (!loaderDone) return;
-    const timer = setTimeout(() => setStarted(true), delay * 250);
-    return () => clearTimeout(timer);
-  }, [loaderDone, delay]);
-
-  // Strip commas for parsing, keep suffix like "+"
-  const rawNumeric = value.replace(/,/g, "").match(/[\d.]+/)?.[0] || "0";
-  const suffix = value.replace(/,/g, "").replace(/[\d.]+/, "");
-  const hasComma = value.includes(",");
-
-  useEffect(() => {
-    if (!started) return;
-
-    const target = parseFloat(rawNumeric);
-    const duration = 2000;
-    const start = Date.now();
-
-    let animationFrameId: number;
-    const animate = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-
-      const current = Math.floor(target * eased);
-      // Format with commas if the original value had them
-      const formatted = hasComma ? current.toLocaleString() : current.toString();
-      setDisplayValue(formatted);
-
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        const final = hasComma ? parseFloat(rawNumeric).toLocaleString() : rawNumeric;
-        setDisplayValue(final);
-      }
-    };
-    animate();
-
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [started, rawNumeric, hasComma]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={started ? { opacity: 1, scale: 1 } : {}}
-      transition={{ duration: 0.5, type: "spring" }}
-      className="text-center"
-    >
-      <div className={`text-xl sm:text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-linear-to-r ${gradient}`}>
-        {displayValue}{suffix}
-      </div>
-      <div className="text-sm text-gray-200 mt-1 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{label}</div>
-    </motion.div>
-  );
-}
-
-// Container variants with staggerChildren for sequential reveal
-const containerVariants = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+/** Opacity plus an 8px rise; opacity-only 200ms under reduced motion. */
+function fadeRise(reduced: boolean, delay: number, duration: number): Variants {
+  return {
+    hidden: { opacity: 0, y: reduced ? 0 : 8 },
+    shown: {
+      opacity: 1,
+      y: 0,
+      transition: reduced ? REDUCED_FADE : { delay, duration, ease: EASE_SETTLE },
     },
-  },
-};
+  };
+}
 
-// Letter animation variants - Classy Fade Reveal (no blur filter for perf)
-const letterVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 10,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut",
+/** Opacity only. */
+function fade(reduced: boolean, delay: number, duration: number): Variants {
+  return {
+    hidden: { opacity: 0 },
+    shown: {
+      opacity: 1,
+      transition: reduced ? REDUCED_FADE : { delay, duration, ease: EASE_SETTLE },
     },
-  },
-};
-
-// AnimatedWord component — waits for loader to finish before revealing
-function AnimatedWord({
-  word,
-  className,
-  isOutline = false,
-  reverse = false,
-  ready,
-}: {
-  word: string;
-  className?: string;
-  isOutline?: boolean;
-  reverse?: boolean;
-  ready: boolean;
-}) {
-  const isGradient = className?.includes("bg-clip-text");
-  const letters = reverse ? word.split("").reverse() : word.split("");
-
-  return (
-    <motion.span
-      className={`inline-flex px-1 perspective-[1000px] ${!isGradient && !isOutline ? className : ""} ${reverse ? "flex-row-reverse" : ""}`}
-      variants={containerVariants}
-      initial="hidden"
-      animate={ready ? "visible" : "hidden"}
-    >
-      {letters.map((letter, i) => (
-        <motion.span
-          key={i}
-          variants={letterVariants}
-          className={`inline-block pr-3 -mr-3 pb-1 -mb-1 ${isGradient ? className : ""} ${isOutline ? "text-transparent [-webkit-text-stroke:2px_rgba(255,255,255,0.9)]" : ""}`}
-          style={letter === " " ? { marginRight: "0.25em" } : undefined}
-        >
-          {letter}
-        </motion.span>
-      ))}
-    </motion.span>
-  );
+  };
 }
 
 export default function Hero() {
-  const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"], // Hero starts at the top, so "start start" is appropriate
-  });
-
-  // Re-enable physics spring on the normalized progress
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  // Parallax values
-  // Reset parallax values to map the normalized [0, 1] spring progress
-  const yLeft = useTransform(smoothProgress, [0, 1], [0, 200]);
-  const yRight = useTransform(smoothProgress, [0, 1], [0, -200]);
-  const yCenter = useTransform(smoothProgress, [0, 1], [0, 80]);
-  const opacity = useTransform(smoothProgress, [0, 0.5], [1, 0]);
-
-  // Derived transforms for background effects - outside render cycle
-
-  // Hydration fix & Mobile detection
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const ruleRef = useRef<HTMLSpanElement>(null);
   const loaderDone = useLoaderDone();
+  const reduced = useReducedMotion();
+  const isMobile = useIsMobile();
 
+  /* Scroll parallax: the text sinks and fades while the plate lifts off the
+     page. MotionValues go straight to style, so no React renders per frame. */
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const plateY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const parallax = !reduced && !isMobile;
+
+  /* Match cut. At loader-done the hero's rule stands in for the loader's
+     full-width gold line: it is measured once, placed over the whole viewport
+     with translateX and scaleX, and contracts to the headline's own width over
+     700ms on the heavy ease. Transform only; one layout read, no state. */
   useEffect(() => {
-    setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
+    if (!loaderDone || reduced) return;
+    const el = ruleRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const animation = el.animate(
+      [
+        { transform: `translateX(${-rect.left}px) scaleX(${window.innerWidth / rect.width})` },
+        { transform: "translateX(0px) scaleX(1)" },
+      ],
+      { duration: 700, easing: `cubic-bezier(${EASE_HEAVY.join(", ")})`, fill: "forwards" }
+    );
+    animation.onfinish = () => animation.cancel();
+    return () => animation.cancel();
+  }, [loaderDone, reduced]);
+
+  const state = loaderDone ? "shown" : "hidden";
+
+  const eyebrowVariants = fadeRise(reduced, T.eyebrow, 0.5);
+  const subtextVariants = fadeRise(reduced, T.subtext, 0.7);
+  const secondaryVariants = fade(reduced, T.secondary, 0.5);
+  const primaryLabelVariants = fade(reduced, T.primaryLabel, 0.3);
+  /* The rule is transform-driven by the effect above; Framer only owns its
+     opacity, which flips at loader-done (or fades 200ms under reduced motion). */
+  const ruleVariants = fade(reduced, 0, 0);
+
+  const primaryVariants: Variants = {
+    hidden: { opacity: reduced ? 0 : 1, scaleX: reduced ? 1 : 0 },
+    shown: {
+      opacity: 1,
+      scaleX: 1,
+      transition: reduced ? REDUCED_FADE : { delay: T.primary, duration: 0.45, ease: EASE_HEAVY },
+    },
+  };
+
+  const plateVariants: Variants = {
+    hidden: {
+      opacity: reduced ? 0 : 1,
+      clipPath: reduced ? "inset(0px 0px 0% 0px)" : "inset(0px 0px 100% 0px)",
+    },
+    shown: {
+      opacity: 1,
+      clipPath: "inset(0px 0px 0% 0px)",
+      transition: reduced ? REDUCED_FADE : { delay: T.plate, duration: 1.4, ease: EASE_HEAVY },
+    },
+  };
 
   return (
     <section
-      ref={containerRef}
+      ref={sectionRef}
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-24 md:pt-40 md:pb-24"
+      className="relative flex min-h-[100dvh] items-center pt-20 pb-16 lg:pt-24"
     >
-      {/* Legibility scrim — cheap radial gradient, keeps hero text readable
-          over the light shafts + pointer-reactive starfield without any
-          blur or backdrop-filter cost. */}
+      {/* Static gold light behind the plate; stands in until the scene mounts
+          and remains the only glow under reduced motion. */}
       <div
         aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(2,2,8,0.35), transparent 70%)" }}
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 45% at 78% 30%, color-mix(in srgb, var(--color-aurum-300) 10%, transparent), transparent 70%)",
+        }}
       />
-      <div
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center"
-      >
-        <div className="flex flex-col lg:flex-row items-center justify-center lg:items-center w-full mt-8 lg:mt-0 relative z-10">
 
-          {/* Left Side - Text */}
-          <motion.div
-            style={{ y: isMobile ? 0 : yLeft, opacity }}
-            className="flex flex-col flex-1 w-full items-center lg:items-end text-center lg:text-right order-2 lg:order-1 relative z-10"
+      <div className="relative mx-auto grid w-full max-w-[1280px] grid-cols-12 items-start gap-x-6 px-6 lg:px-10">
+        {/* Text block */}
+        <motion.div
+          style={{ y: parallax ? textY : 0, opacity: parallax ? textOpacity : 1 }}
+          className="order-2 col-span-12 flex flex-col items-start md:order-1 md:col-span-6 lg:col-span-7"
+        >
+          <motion.span
+            variants={eyebrowVariants}
+            initial="hidden"
+            animate={state}
+            className="eyebrow mb-4"
           >
+            AUTONOMOUS SYSTEMS · IIT (ISM) DHANBAD
+          </motion.span>
+
+          {/* Plate lift: each line rises out of its own mask once the wrapper
+              gains .in-view at loader-done; the rule beneath is the match cut. */}
+          <div className={loaderDone ? "in-view max-w-full" : "max-w-full"}>
             <h1
-              aria-label="Redefining AI Security"
-              className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4 text-display text-4xl sm:text-6xl md:text-7xl lg:text-[6.5rem] xl:text-[7.5rem] drop-shadow-2xl"
+              aria-label="AI that acts, not just answers."
+              className="font-display font-normal text-ivory-100 text-[2.5rem] leading-[1.06] tracking-[-0.01em] lg:text-[clamp(3.5rem,6.2vw,5.25rem)] lg:leading-[1.04]"
             >
-              <AnimatedWord
-                word="REDEFINING"
-                className="bg-clip-text text-transparent hero-sheen bg-linear-to-r from-white via-cyan-300 to-blue-400"
-                ready={loaderDone}
-              />
+              <span className="line-mask -mb-2" aria-hidden>
+                <span className="line-rise" style={{ "--rise-delay": "300ms" } as CSSProperties}>
+                  AI that <em className="italic font-normal">acts</em>,
+                </span>
+              </span>
+              <span className="line-mask" aria-hidden>
+                <span className="line-rise" style={{ "--rise-delay": "420ms" } as CSSProperties}>
+                  not just answers.
+                </span>
+              </span>
             </h1>
-          </motion.div>
-
-          {/* Center Avatar - Dead Center */}
-          <motion.div
-            style={{ y: isMobile ? 0 : yCenter }}
-            className="relative z-20 my-4 lg:my-0 order-1 lg:order-2 flex flex-col items-center flex-none px-4 lg:px-12"
-          >
-            {/* Badge - Absolute Positioned */}
-            <motion.div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 lg:mb-12 whitespace-nowrap"
-              initial={{ opacity: 0, y: -20 }}
-              animate={loaderDone ? { opacity: 1, y: 0 } : undefined}
-              transition={{ delay: 0.2 }}
-            >
-              <FloatingBadge delay={0.3}>
-                Architecting Autonomous Defense Systems
-              </FloatingBadge>
-            </motion.div>
-
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={loaderDone ? { scale: 1, rotate: 0 } : undefined}
-              transition={{ duration: 0.8, type: "spring" }}
-            >
-              <AvatarFlipCard />
-            </motion.div>
-          </motion.div>
-
-          {/* Right Side - Text */}
-          <motion.div
-            style={{ y: isMobile ? 0 : yRight, opacity }}
-            className="flex flex-col flex-1 w-full items-center lg:items-start text-center lg:text-left order-3 relative z-10"
-          >
-            <p
+            <motion.span
+              ref={ruleRef}
               aria-hidden
-              className="text-display text-4xl sm:text-6xl md:text-7xl lg:text-[6.5rem] xl:text-[7.5rem] mt-2 lg:mt-0 drop-shadow-2xl"
-            >
-              <AnimatedWord
-                word="AI SECURITY"
-                className="bg-clip-text text-transparent hero-sheen bg-linear-to-r from-white via-cyan-300 to-purple-400"
-                ready={loaderDone}
-              />
-            </p>
-          </motion.div>
-        </div>
+              variants={ruleVariants}
+              initial="hidden"
+              animate={state}
+              className="block h-px w-full origin-left bg-hairline-gold"
+            />
+          </div>
 
+          <motion.p
+            variants={subtextVariants}
+            initial="hidden"
+            animate={state}
+            className="mt-8 max-w-[52ch] font-sans text-[15px] leading-[1.6] text-ivory-200 md:text-[17px] md:leading-[1.65]"
+          >
+            Most of the field is still demonstrating what AI could do. I ship systems that already
+            do it: exposures found and closed unattended, agents that carry work to the end. Built at
+            Matters.AI, Introspect Labs and IIT (ISM) Dhanbad.
+          </motion.p>
 
-        {/* Stats Row */}
-        <motion.div
-          className="flex flex-wrap justify-center gap-6 md:gap-16 mt-12 px-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          {mounted && (
-            <>
-              <AnimatedStat
-                value="10,000+"
-                label={<><span className="text-pink-400 font-bold">Hours</span> of Coding</>}
-                delay={1.2}
-                gradient="from-[#a855f7] via-[#ec4899] to-[#fb923c]"
-                loaderDone={loaderDone}
-              />
-              <AnimatedStat
-                value="1,000+"
-                label={<><span className="text-cyan-400 font-bold">Problems</span> Solved</>}
-                delay={1}
-                gradient="from-[#3b82f6] via-[#2dd4bf] to-[#4ade80]"
-                loaderDone={loaderDone}
-              />
-              <AnimatedStat
-                value="5+"
-                label={<><span className="text-orange-400 font-bold">Products</span> Built</>}
-                delay={1.4}
-                gradient="from-[#f43f5e] via-[#f59e0b] to-[#fbbf24]"
-                loaderDone={loaderDone}
-              />
-            </>
-          )}
-        </motion.div>
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            {/* The border draws (scaleX) before the label and icon fade in. */}
+            <motion.div variants={primaryVariants} initial="hidden" animate={state} className="origin-left">
+              <TextButton
+                variant="primary"
+                href="#projects"
+                icon={
+                  <motion.span variants={primaryLabelVariants} className="inline-flex">
+                    <ArrowDownRight size={16} weight="light" />
+                  </motion.span>
+                }
+              >
+                <motion.span variants={primaryLabelVariants} className="inline-block">
+                  View selected work
+                </motion.span>
+              </TextButton>
+            </motion.div>
 
-        {/* Role Rotator */}
-        <motion.div
-          className="flex justify-center mt-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4 }}
-        >
-          <div className="text-lg sm:text-xl md:text-2xl font-medium text-gray-300" style={{ fontFamily: "var(--font-inter)" }}>
-            Roles: <RoleRotator />
+            <motion.div variants={secondaryVariants} initial="hidden" animate={state}>
+              <TextButton variant="secondary" href="#contact">
+                Start a conversation
+              </TextButton>
+            </motion.div>
           </div>
         </motion.div>
 
-        {/* Currently Building Widget + Available Badge */}
-        <div className="flex flex-wrap justify-center items-center gap-3 mt-5">
-          {mounted && <CurrentlyBuilding />}
-          {mounted && (
-            <MagneticButton strength={0.25}>
-              <motion.a
-                href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
-                  smoothScrollTo("contact");
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.0, duration: 0.6 }}
-                className="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full cursor-pointer group"
-              >
-                {/* Animated gradient border + opacity-only pulse layer */}
-                <span className="absolute inset-0 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-blue-500 opacity-60 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
-                <span className="pulse-glow-layer" />
-                <span className="absolute inset-px rounded-full bg-black/90 backdrop-blur-sm" />
-
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                <span className="relative text-sm text-gray-300 font-medium group-hover:text-white transition-colors">
-                  Open to <span className="text-white font-semibold">Opportunities</span>
-                </span>
-              </motion.a>
-            </MagneticButton>
-          )}
-        </div>
+        {/* Portrait plate */}
+        <motion.div
+          style={{ y: parallax ? plateY : 0 }}
+          className="order-1 col-span-12 mb-8 md:order-2 md:col-span-6 md:mb-0 lg:col-span-5 lg:col-start-8"
+        >
+          {/* The clip wrapper carries 8px of padding (and a matching negative
+              margin) so its settled clip-path never trims the figure's focus ring. */}
+          <motion.div variants={plateVariants} initial="hidden" animate={state} className="-m-2 p-2">
+            <PortraitPlate />
+          </motion.div>
+        </motion.div>
       </div>
-
-      {/* Scroll Indicator */}
-      <ScrollIndicator opacity={opacity} />
-    </section >
+    </section>
   );
 }

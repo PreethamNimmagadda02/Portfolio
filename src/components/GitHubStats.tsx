@@ -1,16 +1,16 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "@/lib/motion";
+import { motion, useInView, AnimatePresence, EASE_HEAVY } from "@/lib/motion";
 import { useRef, useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
-import { Github, GitCommit, Flame, Code2, GitBranch, Loader2, AlertCircle, Activity, FileCode2, ExternalLink, type LucideIcon } from "lucide-react";
-import CodingProfiles from "./CodingProfiles";
+import CodingProfiles, { LiveDataNotice, LIVE_DATA_ERROR } from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InViewClass, SectionKicker } from "./Reveal";
+import { SectionHeading, LedgerNumber } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import bakedLoc from "@/data/github-loc.json";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
 
-/* ─── Lines-written config ───
+/* Lines-written config.
  * GitHub has no lifetime-LOC endpoint; /stats/contributors is the only source
  * for authored line counts and costs one request per repo, which is most of
  * the 60/hr unauthenticated budget. So the browser tries live and falls back
@@ -28,28 +28,11 @@ const LOC_EXCLUDED = new Set(
 const LOC_REPO_LIMIT = 18;
 const LOC_CONCURRENCY = 4;
 const LOC_CACHE_KEY = "github_loc_cache_v1";
-// 24h — lines-written changes slowly, so this refetches less often than the
+// 24h: lines-written changes slowly, so this refetches less often than the
 // other stats caches (12h) to save on the per-repo request burst.
 const LOC_CACHE_TTL_MS = 1000 * 60 * 60 * 24;
 
-/* ─── Known language colors (GitHub linguist) ─── */
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f1e05a",
-  Python: "#3572A5",
-  "C++": "#f34b7d",
-  C: "#555555",
-  Java: "#b07219",
-  Go: "#00ADD8",
-  Rust: "#dea584",
-  HTML: "#e34c26",
-  CSS: "#563d7c",
-  Shell: "#89e051",
-  Dockerfile: "#384d54",
-  Other: "#8b5cf6",
-};
-
-/* ─── Types ─── */
+/* Types */
 interface ContributionDay {
   date: string;
   count: number;
@@ -78,23 +61,17 @@ interface StatsData {
 interface LanguageData {
   name: string;
   percentage: number;
-  color: string;
 }
 
-interface StatCard {
+interface Figure {
   label: string;
   value: number;
-  icon: LucideIcon;
-  gradient: string;
-  suffix: string;
   href: string;
-  /** Overrides the default type scale when the number needs more room. */
-  valueClass?: string;
-  /** Tooltip text — used to disclose how a derived figure was measured. */
+  /** Tooltip text, used to disclose how a derived figure was measured. */
   hint?: string;
 }
 
-/* ─── Data fetching ─── */
+/* Data fetching */
 async function fetchContributions(): Promise<ContributionsResponse> {
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -191,9 +168,9 @@ async function fetchRepoAuthoredLines(
 }
 
 /**
- * Live lines-written total, or null when it can't be trusted — the caller
- * then keeps the build-time figure. A partial sum is worse than a stale one:
- * it renders as a confidently wrong, much smaller number.
+ * Live lines-written total, or null when it can't be trusted, in which case
+ * the caller keeps the build-time figure. A partial sum is worse than a stale
+ * one: it renders as a confidently wrong, much smaller number.
  */
 async function fetchLinesWritten(repos: GitHubRepo[]): Promise<number | null> {
   const targets = repos
@@ -223,7 +200,7 @@ async function fetchLinesWritten(repos: GitHubRepo[]): Promise<number | null> {
   return added;
 }
 
-/* ─── Language aggregation (by repo count) ─── */
+/* Language aggregation (by repo count) */
 function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
   const counts: Record<string, number> = {};
   let total = 0;
@@ -246,14 +223,12 @@ function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
   const languages: LanguageData[] = sorted.map(([name, count]) => ({
     name,
     percentage: Math.round((count / total) * 100),
-    color: LANG_COLORS[name] || LANG_COLORS.Other,
   }));
 
   if (otherCount > 0) {
     languages.push({
       name: "Other",
       percentage: Math.round((otherCount / total) * 100),
-      color: LANG_COLORS.Other,
     });
   }
 
@@ -266,70 +241,37 @@ function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
   return languages;
 }
 
-/* ─── Cell colors for heatmap ─── */
-const cellColors = [
-  "rgba(255,255,255,0.04)",
-  "rgba(139, 92, 246, 0.4)",
-  "rgba(168, 85, 247, 0.7)",
-  "rgba(192, 132, 252, 0.9)",
-  "rgba(216, 180, 254, 1)",
+/* Heatmap ramp: level 0 is the highest obsidian surface, 1 to 4 climb the
+   gold ramp from pressed umber to the highlight. Read from the theme tokens
+   so the ramp and the rest of the page can never drift apart. */
+const CELL_COLORS = [
+  "var(--color-obsidian-2)",
+  "var(--color-aurum-400)",
+  "var(--color-aurum-300)",
+  "var(--color-aurum-200)",
+  "var(--color-aurum-100)",
 ];
 
-/* ─── Animated counter ─── */
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
-  const [displayValue, setDisplayValue] = useState(0);
-  // Tween from whatever is already on screen rather than from 0. `value` can
-  // change after the first run — the lines-written card renders a build-time
-  // figure immediately and swaps in the live one once it lands — and
-  // restarting from 0 reads as a glitch.
-  const fromRef = useRef(0);
+/* Language distribution: one ink, six alphas. Ivory-100 is rgb(242,236,224). */
+const LANG_ALPHAS = [1, 0.7, 0.5, 0.35, 0.25, 0.15];
+const langInk = (i: number) => `rgba(242, 236, 224, ${LANG_ALPHAS[Math.min(i, LANG_ALPHAS.length - 1)]})`;
 
-  useEffect(() => {
-    if (!isInView) return;
-    const from = fromRef.current;
-    const duration = 2000;
-    const start = Date.now();
-    let frameId: number;
-    const animate = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const next = Math.floor(from + (value - from) * eased);
-      setDisplayValue(next);
-      fromRef.current = next;
-      if (progress < 1) frameId = requestAnimationFrame(animate);
-      else {
-        setDisplayValue(value);
-        fromRef.current = value;
-      }
-    };
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [isInView, value]);
+const TODAY_RING: CSSProperties = { boxShadow: "inset 0 0 0 1px var(--color-ivory-100)" };
 
-  return (
-    <span ref={ref}>
-      {displayValue.toLocaleString()}
-      {suffix}
-    </span>
-  );
-}
-
-/* ─── Contribution Heatmap ─── */
+/* Contribution heatmap */
 function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
   const isMobile = useIsMobile();
-  // 12 months of weekly columns is ~1px per cell at 320px wide.
+  // 12 months of weekly columns is about 1px per cell at 320px wide.
   // Mobile shows the last 6 months so cells stay visible and tappable.
   const monthsBack = isMobile ? 6 : 12;
 
   // Build a weekly grid from data up to today
-  const heatmapGrid = useMemo(() => {
+  const { heatmapGrid, todayKey } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayKey = today.toISOString().split("T")[0];
 
     const rangeStart = new Date(today);
     rangeStart.setMonth(rangeStart.getMonth() - monthsBack);
@@ -338,7 +280,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
     rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
     rangeStart.setHours(0, 0, 0, 0);
 
-    // Build date→data map
+    // Build date to data map
     const dateMap = new Map<string, { level: number; count: number }>();
     for (const d of data) {
       dateMap.set(d.date, { level: d.level, count: d.count });
@@ -365,7 +307,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
       weeks.push(currentWeek);
     }
 
-    return weeks;
+    return { heatmapGrid: weeks, todayKey };
   }, [data, monthsBack]);
 
   // Compute month labels for the window
@@ -399,11 +341,16 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
     return months;
   }, [monthsBack]);
 
+  // Ink drying left to right: each column lands 12ms after the last, each row
+  // 3ms after the one above, capped so the last cell finishes under 900ms
+  // (650ms delay plus the 250ms cell-in keyframe).
+  const cellDelay = (wk: number, dy: number) => Math.min(wk * 12 + dy * 3, 650);
+
   return (
-    <div ref={ref} className="w-full pb-2">
-      <div className="w-full flex flex-col">
-        {/* Month labels — sparser on mobile to avoid collisions */}
-        <div className="flex mb-1 ml-0 sm:ml-8 relative w-full" style={{ height: 16 }}>
+    <div ref={ref} className="w-full">
+      <div className="flex w-full flex-col">
+        {/* Month labels, sparser on mobile to avoid collisions */}
+        <div className="relative mb-2 ml-0 w-full sm:ml-9" style={{ height: 14 }}>
           {monthLabels
             .filter((_, i) => !isMobile || i % 2 === 0)
             .map((m, i) => {
@@ -411,7 +358,7 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
               return (
                 <span
                   key={`${m.label}-${i}`}
-                  className="text-[10px] text-gray-500 font-medium absolute transform -translate-x-1/2"
+                  className="ledger absolute -translate-x-1/2 font-mono text-[11px] leading-none text-ivory-300"
                   style={{ left: `${leftPercent}%` }}
                 >
                   {m.label}
@@ -419,38 +366,37 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
               );
             })}
         </div>
-        <div className="flex w-full justify-between">
-          {/* Day labels — hidden on mobile (unreadable at 9px, steals width) */}
-          <div className="hidden sm:flex flex-col justify-between mr-2 py-0.5">
+        <div className="flex w-full">
+          {/* Weekday labels, hidden on mobile (unreadable at that size, steals width) */}
+          <div className="mr-3 hidden w-6 flex-col justify-between sm:flex">
             {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
-              <span
-                key={i}
-                className="text-[9px] text-gray-600 font-medium flex items-center h-[11px]"
-              >
+              <span key={i} className="flex flex-1 items-center font-mono text-[11px] leading-none text-ivory-300">
                 {d}
               </span>
             ))}
           </div>
           {/* Weeks */}
-          <div className="flex flex-1 justify-between gap-0.5 sm:gap-1">
+          <div className="flex flex-1 gap-[3px]">
             {heatmapGrid.map((week, wk) => (
-              <div key={wk} className="flex flex-col justify-between gap-0.5 sm:gap-1 flex-1">
+              <div key={wk} className="flex flex-1 flex-col gap-[3px]">
                 {Array.from({ length: 7 }).map((_, dy) => {
                   const day = dy < week.length ? week[dy] : null;
                   if (!day) {
-                    return <div key={dy} className="w-full aspect-square" />;
+                    return <div key={dy} className="aspect-square w-full" />;
                   }
+                  const isToday = day.date === todayKey;
                   return (
                     <div
                       key={dy}
                       title={`${day.count} contributions on ${day.date}`}
-                      className={
-                        "w-full aspect-square rounded-[3px] hover:ring-2 hover:ring-white/50 transition-all cursor-crosshair z-10 hover:z-20 hover:scale-125" +
-                        (isInView ? " cell-in" : " opacity-0")
-                      }
+                      className={cn(
+                        "aspect-square w-full cursor-crosshair transition-opacity duration-300 hover:opacity-70",
+                        isInView ? "cell-in" : "opacity-0"
+                      )}
                       style={{
-                        backgroundColor: cellColors[Math.min(day.level, 4)],
-                        "--d": `${(wk * 5 + dy * 5) % 600}ms`,
+                        backgroundColor: CELL_COLORS[Math.min(day.level, 4)],
+                        "--d": `${cellDelay(wk, dy)}ms`,
+                        ...(isToday ? TODAY_RING : null),
                       } as CSSProperties}
                     />
                   );
@@ -460,46 +406,71 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
           </div>
         </div>
         {/* Legend */}
-        <div className="flex items-center justify-end gap-2 mt-4">
-          <span className="text-[10px] text-gray-500 font-medium mr-1">Less</span>
-          {cellColors.slice(0, 5).map((c, i) => (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-[3px]"
-              style={{ backgroundColor: c }}
-            />
+        <div className="mt-5 flex items-center justify-end gap-[3px]">
+          <span className="mr-2 font-mono text-[11px] leading-none text-ivory-300">Less</span>
+          {CELL_COLORS.map((c, i) => (
+            <span key={i} aria-hidden className="size-3" style={{ backgroundColor: c }} />
           ))}
-          <span className="text-[10px] text-gray-500 font-medium ml-1">More</span>
+          <span className="ml-2 font-mono text-[11px] leading-none text-ivory-300">More</span>
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Loading skeleton for stat cards ─── */
-function StatSkeleton() {
+/* Figure row: the ledger of four. Hairline rules divide the cells; on
+   mobile the row folds to 2x2 with a rule between the two rows. */
+function figureCellClass(i: number) {
+  return cn(
+    "group flex flex-col gap-4 py-8 lg:py-10",
+    // Mobile 2x2: a vertical rule between the two columns, a horizontal one between the rows.
+    i % 2 === 0 ? "pl-0 pr-5" : "border-l border-hairline pl-5 pr-0",
+    i >= 2 && "border-t border-hairline lg:border-t-0",
+    // Desktop row of four: rules between every cell, symmetric gutters, flush outer edges.
+    i === 2 && "lg:border-l lg:border-hairline",
+    i === 0 ? "lg:pl-0" : "lg:pl-8",
+    i === 3 ? "lg:pr-0" : "lg:pr-8"
+  );
+}
+
+function FigureSkeleton() {
   return (
-    <div className="relative p-4 md:p-5 rounded-2xl bg-zinc-900/90 border border-white/10 text-center animate-pulse">
-      <div className="w-6 h-6 mx-auto mb-2 rounded bg-white/10" />
-      <div className="h-8 w-20 mx-auto rounded bg-white/10 mb-2" />
-      <div className="h-3 w-16 mx-auto rounded bg-white/10" />
+    <div className="grid grid-cols-2 border-y border-hairline lg:grid-cols-4" aria-busy="true" aria-label="Loading GitHub figures">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className={figureCellClass(i)}>
+          <span className="breathe block h-[2.5rem] w-[5.5ch] bg-obsidian-2 lg:h-[3.5rem]" />
+          <span className="breathe block h-3 w-24 bg-obsidian-2" />
+        </div>
+      ))}
     </div>
   );
 }
 
-/* ─── Main Component ─── */
+const PLATE_TRANSITION = { duration: 0.35, ease: EASE_HEAVY };
+
+const TAB_COPY = {
+  github: {
+    title: "Twelve months of commits, live.",
+    subtext: "Read from GitHub as this page loads, not typed in. Every figure here can be checked.",
+  },
+  competitive: {
+    title: "Ratings from five platforms, live.",
+    subtext: "Current ratings and rankings, read directly from each platform.",
+  },
+} as const;
+
+/* Main component */
 export default function GitHubStats() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  // Defer the 4 GitHub API calls until the section approaches the viewport —
-  // previously they fired at page load, competing with critical resources
+  // Defer the GitHub API calls until the section approaches the viewport.
+  // Previously they fired at page load, competing with critical resources
   // and burning unauthenticated rate limit on every visit.
   const shouldFetch = useInView(sectionRef, { once: true, margin: "1000px" });
 
   const [stats, setStats] = useState<StatsData | null>(null);
   const [languages, setLanguages] = useState<LanguageData[]>([]);
   const [contributions, setContributions] = useState<ContributionDay[]>([]);
-  // Seeded with the build-time figure so the card always shows a real number,
+  // Seeded with the build-time figure so the figure always shows a real number,
   // then upgraded in place if the live per-repo fetch succeeds.
   const [linesAdded, setLinesAdded] = useState(bakedLoc.linesAdded);
   const [linesAreLive, setLinesAreLive] = useState(false);
@@ -571,11 +542,6 @@ export default function GitHubStats() {
         fetchUserProfile(),
       ]);
 
-      // Calculate stats
-      const totalContributions = Object.values(contribData.total).reduce(
-        (sum, v) => sum + v,
-        0
-      );
       // Filter contributions to last 1 year up to today
       const today = new Date();
       const oneYearAgo = new Date(today);
@@ -586,6 +552,10 @@ export default function GitHubStats() {
       });
       setContributions(filtered);
 
+      // Both figures are computed from the same twelve-month window the
+      // headline claims. The API's `total` map is keyed by calendar year and
+      // sums two of them, which would overstate the period.
+      const totalContributions = filtered.reduce((sum, c) => sum + c.count, 0);
       const activeDays = filtered.filter((c) => c.count > 0).length;
 
       const newStats = {
@@ -597,7 +567,7 @@ export default function GitHubStats() {
       setStats(newStats);
 
       // Unawaited: this is one request per repo and can take many seconds,
-      // while the card already has the build-time number to show.
+      // while the figure already has the build-time number to show.
       if (!locWasCached && repos.length > 0) void hydrateLines(repos);
 
       const aggregatedLangs = aggregateLanguages(repos);
@@ -605,9 +575,9 @@ export default function GitHubStats() {
       if (aggregatedLangs.length === 0) {
         // Fallback if repos failed due to rate limits
         finalLangs = [
-          { name: "TypeScript", percentage: 50, color: "#3178c6" },
-          { name: "JavaScript", percentage: 40, color: "#f1e05a" },
-          { name: "Python", percentage: 10, color: "#3572A5" },
+          { name: "TypeScript", percentage: 50 },
+          { name: "JavaScript", percentage: 40 },
+          { name: "Python", percentage: 10 },
         ];
         setLanguages(finalLangs);
       } else {
@@ -622,7 +592,7 @@ export default function GitHubStats() {
       }));
     } catch (err) {
       console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.", err);
-      setError("API Rate Limit Exceeded. Showing cached snapshot.");
+      setError(LIVE_DATA_ERROR);
 
       // Fallback data
       setStats({
@@ -631,10 +601,10 @@ export default function GitHubStats() {
         activeDays: 245,
       });
       setLanguages([
-        { name: "TypeScript", percentage: 42, color: "#3178c6" },
-        { name: "JavaScript", percentage: 25, color: "#f1e05a" },
-        { name: "Python", percentage: 17, color: "#3572A5" },
-        { name: "Other", percentage: 16, color: "#8b5cf6" },
+        { name: "TypeScript", percentage: 42 },
+        { name: "JavaScript", percentage: 25 },
+        { name: "Python", percentage: 17 },
+        { name: "Other", percentage: 16 },
       ]);
     } finally {
       setLoading(false);
@@ -645,43 +615,29 @@ export default function GitHubStats() {
     if (shouldFetch) fetchData();
   }, [shouldFetch, fetchData]);
 
-  const statCards = useMemo<StatCard[]>(() => {
+  const figures = useMemo<Figure[]>(() => {
     if (!stats) return [];
 
     return [
       {
         label: "Contributions",
         value: stats.totalContributions,
-        icon: GitCommit,
-        gradient: "from-purple-400 to-pink-400",
-        suffix: "",
         href: `https://github.com/${GITHUB_USERNAME}`,
       },
       {
-        label: "Active Days",
+        label: "Active days",
         value: stats.activeDays,
-        icon: Flame,
-        gradient: "from-yellow-400 to-amber-400",
-        suffix: "",
         href: `https://github.com/${GITHUB_USERNAME}`,
       },
       {
         label: "Repositories",
         value: stats.repoCount,
-        icon: GitBranch,
-        gradient: "from-orange-400 to-red-400",
-        suffix: "",
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
       },
       {
-        label: "Lines Written",
+        label: "Lines written",
         value: linesAdded,
-        icon: FileCode2,
-        gradient: "from-blue-400 to-cyan-400",
-        suffix: "",
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
-        // Seven digits need more room than the four- and five-digit cards.
-        valueClass: "text-2xl sm:text-3xl md:text-4xl",
         hint: linesAreLive
           ? `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, live from the GitHub API`
           : `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, as of ${new Date(
@@ -695,262 +651,157 @@ export default function GitHubStats() {
     ].sort((a, b) => b.value - a.value);
   }, [stats, linesAdded, linesAreLive]);
 
+  const copy = TAB_COPY[activeTab];
+
   return (
     <section
       ref={sectionRef}
       id="github-stats"
-      className="relative w-full py-10 md:py-14 overflow-visible"
+      className="relative w-full py-32 lg:py-40"
     >
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle at 25% 30%, rgba(168,85,247,0.06), transparent 45%), radial-gradient(circle at 75% 70%, rgba(59,130,246,0.05), transparent 45%)",
-        }}
-      />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-6"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-2"
-          >
-            <Activity size={16} />
-            <span>Coding Activity</span>
-            {loading && (
-              <Loader2 size={14} className="animate-spin text-purple-300" />
-            )}
-          </motion.span>
-          <InViewClass as="div">
-            <SectionKicker num="05" label="Activity" />
-            <h2 className="text-display text-3xl md:text-4xl text-white mb-1">
-              <span className="line-mask">
-                <span className="line-rise">
-                  {activeTab === "github" ? (
-                    <>GitHub <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-blue-400">Activity</span></>
-                  ) : (
-                    <>Competitive <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">Programming</span></>
-                  )}
-                </span>
-              </span>
-            </h2>
-          </InViewClass>
-          <p className="text-gray-400 text-sm max-w-lg mx-auto">
-            {activeTab === "github"
-              ? "A year of commits and contribution streaks, pulled live from GitHub."
-              : "Live ratings and rankings, pulled directly from each platform."}
-          </p>
-
-          {error && activeTab === "github" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs"
-            >
-              <AlertCircle size={12} />
-              {error}
-            </motion.div>
-          )}
-
-          {/* Toggle Button */}
-          <div className="flex justify-center mt-4 relative z-20">
-            <div className="bg-black/70 p-1.5 rounded-full border border-white/10 flex items-center relative shadow-xl">
-              {(["github", "competitive"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  aria-pressed={activeTab === tab}
-                  aria-label={tab === "github" ? "Show GitHub stats" : "Show competitive programming stats"}
-                  className={`relative px-4 sm:px-6 py-2.5 rounded-full flex items-center gap-2 text-xs sm:text-sm font-bold transition-all z-10 ${activeTab === tab ? "text-white" : "text-gray-300 hover:text-white"
-                    }`}
-                >
-                  {activeTab === tab && (
-                    <motion.div
-                      layoutId="active-tab-indicator"
-                      className="absolute inset-0 bg-white/10 rounded-full z-[-1] border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    />
-                  )}
-                  {tab === "github" ? (
-                    <><Github size={16} /> GitHub</>
-                  ) : (
-                    <><Code2 size={16} /> Competitive</>
-                  )}
-                </button>
-              ))}
-            </div>
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+        {/* Header: eyebrow, headline and subtext in columns 1 to 8 */}
+        <div className="grid grid-cols-12 gap-x-6">
+          <div className="col-span-12 lg:col-span-8">
+            <SectionHeading
+              eyebrow="LIVE FROM GITHUB AND CODOLIO"
+              title={copy.title}
+              subtext={copy.subtext}
+            />
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
+        {/* Tab switch: two mono text toggles sharing one hairline indicator */}
+        <div role="group" aria-label="Activity source" className="mt-14 flex items-end gap-10 border-b border-hairline lg:mt-16">
+          {(["github", "competitive"] as const).map((tab) => {
+            const active = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                aria-pressed={active}
+                className={cn(
+                  "ledger relative pb-4 font-mono text-[13px] leading-none tracking-[0.01em] transition-colors duration-300 ease-[var(--ease-heavy)]",
+                  active ? "text-ivory-100" : "text-ivory-300 hover:text-ivory-200"
+                )}
+              >
+                {tab === "github" ? "GitHub" : "Competitive"}
+                {active && (
+                  <motion.span
+                    layoutId="active-tab-indicator"
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-px h-px bg-aurum-300"
+                    transition={{ duration: 0.45, ease: EASE_HEAVY }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
           {activeTab === "github" && (
             <motion.div
               key="github-tab"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              id="activity-plate-github"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={PLATE_TRANSITION}
+              className="mt-12"
             >
-              {/* Stat Cards */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8"
-              >
-                {loading
-                  ? Array.from({ length: 4 }).map((_, i) => (
-                    <StatSkeleton key={i} />
-                  ))
-                  : statCards.map((stat, i) => (
-                    <motion.a
-                      href={stat.href}
+              {error && <LiveDataNotice message={error} className="mb-6" />}
+
+              {/* Figure row */}
+              {loading ? (
+                <FigureSkeleton />
+              ) : (
+                <div className="grid grid-cols-2 border-y border-hairline lg:grid-cols-4">
+                  {figures.map((figure, i) => (
+                    <a
+                      key={figure.label}
+                      href={figure.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={stat.hint}
-                      key={stat.label}
-                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                      transition={{
-                        delay: 0.15 + i * 0.1,
-                        duration: 0.5,
-                        type: "spring",
-                      }}
-                      className="relative group block cursor-pointer"
+                      title={figure.hint}
+                      className={figureCellClass(i)}
                     >
-                      <div className={`absolute -inset-px bg-linear-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500`} />
-                      <div className="relative p-4 sm:p-5 md:p-6 rounded-2xl bg-zinc-900/95 border border-white/10 group-hover:border-transparent transition-all text-center h-full flex flex-col items-center justify-center shadow-2xl">
-                        <div className={`p-3 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform duration-500`}>
-                          <stat.icon
-                            size={24}
-                            className="text-gray-300 group-hover:text-white transition-colors"
-                          />
-                        </div>
-                        <div className={`${stat.valueClass ?? "text-3xl md:text-4xl"} font-black bg-clip-text text-transparent bg-linear-to-r ${stat.gradient} drop-shadow-sm tabular-nums`}>
-                          <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                        </div>
-                        <p className="text-xs text-gray-300 mt-2 font-bold uppercase tracking-widest group-hover:text-white transition-colors">
-                          {stat.label}
-                        </p>
-                      </div>
-                    </motion.a>
+                      <LedgerNumber
+                        value={figure.value.toLocaleString()}
+                        label={`${figure.value.toLocaleString()} ${figure.label.toLowerCase()}`}
+                        className="font-display text-[2.5rem] leading-none text-ivory-100 lg:text-[3.5rem]"
+                      />
+                      <span className="font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
+                        <span className="decoration-hairline-gold underline-offset-[5px] group-hover:underline">
+                          {figure.label}
+                        </span>
+                      </span>
+                    </a>
                   ))}
-              </motion.div>
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Contribution Heatmap */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="lg:col-span-2 relative group flex flex-col"
-                >
-                  <div className="absolute -inset-px bg-linear-to-r from-purple-500/30 via-blue-500/20 to-pink-500/30 rounded-2xl opacity-50 group-hover:opacity-80 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl bg-zinc-900/90 border border-white/10 flex flex-col grow">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Code2 size={18} className="text-purple-400" />
-                        Contribution Graph
-                      </h3>
-                      <a
-                        href={`https://github.com/${GITHUB_USERNAME}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 p-2 -m-2 text-sm text-gray-300 hover:text-purple-400 transition-colors font-medium"
-                      >
-                        <span className="hidden sm:inline">View on GitHub</span>
-                        <span className="sm:hidden">GitHub</span>
-                        <ExternalLink size={14} />
-                      </a>
-                    </div>
-                    <div className="grow flex items-center justify-center">
-                      {loading ? (
-                        <div className="flex items-center justify-center h-32 w-full">
-                          <Loader2
-                            size={24}
-                            className="animate-spin text-purple-400"
-                          />
-                        </div>
-                      ) : contributions.length > 0 ? (
-                        <ContributionHeatmap data={contributions} />
-                      ) : (
-                        <div className="flex items-center justify-center h-32 text-gray-300 text-sm w-full">
-                          No contribution data available
-                        </div>
-                      )}
+              {/* Heatmap */}
+              <div className="mt-16">
+                <p className="mb-6 font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
+                  Contributions by day
+                </p>
+                {loading ? (
+                  <div aria-busy="true" className="flex flex-col gap-[3px]">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <span key={i} className="breathe block h-3 w-full bg-obsidian-2" />
+                    ))}
+                  </div>
+                ) : contributions.length > 0 ? (
+                  <div className="w-full overflow-x-auto no-scrollbar">
+                    <ContributionHeatmap data={contributions} />
+                  </div>
+                ) : (
+                  <p className="font-sans text-[14px] text-ivory-300">No contribution data available</p>
+                )}
+              </div>
+
+              {/* Language distribution */}
+              <div className="mt-16">
+                <p className="mb-6 font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
+                  Languages by repository
+                </p>
+                {loading ? (
+                  <div aria-busy="true">
+                    <span className="breathe block h-[6px] w-full bg-obsidian-2" />
+                    <div className="mt-5 flex gap-6">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <span key={i} className="breathe block h-3 w-20 bg-obsidian-2" />
+                      ))}
                     </div>
                   </div>
-                </motion.div>
-
-                {/* Languages */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, delay: 0.45 }}
-                  className="relative group flex flex-col"
-                >
-                  <div className="absolute -inset-px bg-linear-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl opacity-40 group-hover:opacity-70 blur-sm transition-opacity duration-500" />
-                  <div className="relative p-6 md:p-8 rounded-2xl bg-zinc-900/90 border border-white/10 flex flex-col grow">
-                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                      <Code2 size={18} className="text-blue-400" />
-                      Top Languages
-                    </h3>
-                    <div className="grow flex flex-col justify-center">
-                      {loading ? (
-                        <div className="space-y-4 w-full">
-                          {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="space-y-1.5">
-                              <div className="w-20 h-3 rounded bg-white/10 animate-pulse" />
-                              <div className="h-2.5 rounded-full bg-white/5 animate-pulse" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-4 w-full">
-                          {languages.map((lang, i) => (
-                            <motion.div
-                              key={lang.name}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={isInView ? { opacity: 1, x: 0 } : {}}
-                              transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
-                            >
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="w-2.5 h-2.5 rounded-full shadow-sm"
-                                    style={{ backgroundColor: lang.color }}
-                                  />
-                                  <span className="text-sm text-gray-300 font-semibold">
-                                    {lang.name}
-                                  </span>
-                                </div>
-                                <span className="text-xs text-gray-500 font-bold tabular-nums">
-                                  {lang.percentage}%
-                                </span>
-                              </div>
-                              <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={isInView ? { width: `${lang.percentage}%` } : {}}
-                                  transition={{ delay: 0.6 + i * 0.1, duration: 1, type: "spring", damping: 20 }}
-                                  className="h-full rounded-full"
-                                  style={{ backgroundColor: lang.color }}
-                                />
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      )}
+                ) : (
+                  <div>
+                    <div
+                      role="img"
+                      aria-label={languages.map((l) => `${l.name} ${l.percentage}%`).join(", ")}
+                      className="flex h-[6px] w-full gap-[2px]"
+                    >
+                      {languages.map((lang, i) => (
+                        <span
+                          key={lang.name}
+                          className="block h-full min-w-0"
+                          style={{ width: `${lang.percentage}%`, backgroundColor: langInk(i) }}
+                        />
+                      ))}
                     </div>
+                    <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[12px] leading-none tracking-[0.04em]">
+                      {languages.map((lang, i) => (
+                        <li key={lang.name} className="flex items-center gap-2.5">
+                          <span aria-hidden className="size-2 shrink-0" style={{ backgroundColor: langInk(i) }} />
+                          <span className="text-ivory-200">{lang.name}</span>
+                          <span className="ledger text-ivory-300">{lang.percentage}%</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </motion.div>
+                )}
               </div>
             </motion.div>
           )}
@@ -958,10 +809,12 @@ export default function GitHubStats() {
           {activeTab === "competitive" && (
             <motion.div
               key="competitive-tab"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              id="activity-plate-competitive"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={PLATE_TRANSITION}
+              className="mt-12"
             >
               <CodingProfiles isEmbedded={true} />
             </motion.div>

@@ -3,7 +3,7 @@
  *
  * Re-exports framer-motion's lightweight `m` component aliased as `motion`, so
  * every call site keeps writing `motion.div` while the heavyweight `motion`
- * component — which eagerly bundles every animation feature — is never pulled
+ * component (which eagerly bundles every animation feature) is never pulled
  * into the graph. Features are instead provided once, lazily, by the
  * `<LazyMotion features={domMax}>` wrapper at the app root (see layout.tsx).
  * `domMax` is required because the app uses shared-layout animations
@@ -27,3 +27,21 @@ export {
 } from "framer-motion";
 
 export type { Variants, MotionValue } from "framer-motion";
+
+/* Motion tokens for the Obsidian Aurum system. The CSS twins live in
+   globals.css as --ease-heavy and --ease-settle; keep both in sync. */
+
+/** Masks, rules, panels: symmetric and weighty. */
+export const EASE_HEAVY = [0.7, 0, 0.2, 1] as const;
+
+/** Fades and rises: fast out of the gate, long settle. */
+export const EASE_SETTLE = [0.16, 1, 0.3, 1] as const;
+
+/** Durations in seconds. Feedback is quick; reveals are slow and deliberate. */
+export const DUR = {
+  feedback: 0.3,
+  state: 0.45,
+  reveal: 0.9,
+  heavy: 1.1,
+  plate: 1.4,
+} as const;

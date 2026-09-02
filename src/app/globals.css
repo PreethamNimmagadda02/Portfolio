@@ -1,451 +1,491 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+/* ------------------------------------------------------------------------
+   Obsidian Aurum design tokens.
+   One dark theme, one hue (gold) plus obsidian and ivory neutrals. Every
+   utility (bg-obsidian-0, text-ivory-200, border-hairline, bg-aurum-300)
+   derives from these values; no component may introduce another colour.
+   `inline static` emits every token as a CSS variable on :root so that
+   var(--color-aurum-300) also resolves from inline styles and WebGL glue.
+   ------------------------------------------------------------------------ */
+@theme inline static {
+  /* Faces. A Didone for display at 22px and above, a neutral sans for body and
+     UI, a mono for numerals, periods, tags, counts and the three eyebrows.
+     Which cut sits behind each token is decided in src/lib/fonts.ts and
+     nowhere else, so a licensed face can replace one without a component
+     edit. */
+  --font-display: var(--font-display-cut), "Bodoni MT", "Bodoni 72", Didot, Georgia, serif;
+  --font-sans: var(--font-sans-cut), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-cut), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Optical size for the display face, pinned rather than tracked to the type
+     size. font-optical-sizing: auto maps opsz to the font size in px, so a
+     Didone resolves its highest contrast master exactly where a screen can
+     least afford one: at 7.5rem the hairline computes below a single device
+     pixel and antialiases to grey instead of drawing. Measured on the bowl of
+     a 0, ivory on obsidian at dpr 2, as peak hairline intensity where 1.0 is
+     a fully struck stroke:
+
+       7.5rem    auto 0.38    pinned 1.00
+       5rem      auto 0.39    pinned 0.93
+       1.75rem   auto 0.40    pinned 0.51
+
+     Stroke contrast holds at 9.7 to 1 and a Bodoni cut for print runs about
+     10 to 1, so this buys a hairline that images without trading the engraved
+     character away. 22 is also the smallest size the system allows this face,
+     so no tier extrapolates from a master it never uses. */
+  --display-opsz: 22;
+
+  /* Ground */
+  --color-obsidian-0: #0C0A08;
+  --color-obsidian-1: #14110D;
+  --color-obsidian-2: #1C1813;
+
+  /* Ink */
+  --color-ivory-100: #F2ECE0;
+  --color-ivory-200: #B8AE9C;
+  --color-ivory-300: #857D70;
+
+  /* Foil */
+  --color-aurum-100: #EBD9A8;
+  --color-aurum-200: #D9BE7C;
+  --color-aurum-300: #C9A961;
+  --color-aurum-400: #A8874A;
+  --color-aurum-500: #7A6134;
+
+  /* Rules */
+  --color-hairline: rgba(242, 236, 224, 0.10);
+  --color-hairline-strong: rgba(242, 236, 224, 0.18);
+  --color-hairline-gold: rgba(201, 169, 97, 0.45);
+
+  /* Semantic aliases the codebase already uses */
+  --color-background: #0C0A08;
+  --color-foreground: #F2ECE0;
+  --color-card: #14110D;
+  --color-border: rgba(242, 236, 224, 0.10);
+  --color-primary: #C9A961;
+  --color-primary-foreground: #0C0A08;
+  --color-muted-foreground: #B8AE9C;
+  --color-ring: #EBD9A8;
+  --color-input: #14110D;
+
+  /* Motion: heavy for masks, rules and panels; settle for fades and rises. */
+  --ease-heavy: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* All sharp. Any stray rounded-* class renders square. */
+  --radius: 0;
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 }
 
-:root {
-  /* Deeper-than-black void so glows and starlight have somewhere to bloom */
-  --background: 240 30% 2.4%;
-  --foreground: 0 0% 98%;
-  --card: 250 22% 7%;
-  --card-foreground: 0 0% 98%;
-  --popover: 250 22% 7%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 258 90% 66%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 255 16% 14%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 255 14% 14%;
-  --muted-foreground: 240 8% 74%;
-  --accent: 189 85% 55%;
-  --accent-foreground: 240 30% 4%;
-  --destructive: 0 70% 55%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 255 16% 16%;
-  --input: 255 16% 14%;
-  --ring: 258 90% 66%;
-  --chart-1: 258 90% 66%;
-  --chart-2: 189 85% 55%;
-  --chart-3: 330 80% 60%;
-  --chart-4: 38 92% 58%;
-  --chart-5: 160 70% 50%;
-
-  /* ── Cosmic Journey identity tokens ──
-     Used by CosmicScene uniforms, editorial gradients, and section accents.
-     Kept as plain hex (not HSL) so they can be passed straight into WebGL. */
-  --iris: #8b5cf6;
-  --iris-soft: #a78bfa;
-  --cyan: #22d3ee;
-  --amber: #fbbf24;
-  --rose: #f472b6;
-  --void: #030308;
-  --ink: #07070d;
-}
-
+/* ------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------ */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *,
+  ::before,
+  ::after {
+    /* A bare `border` renders as a hairline rule by default. */
+    border-color: var(--color-hairline);
   }
 
   html {
-    /* Match the void — prevents white checkerboard flashes when the
-       compositor outruns paint during fast scrolling */
-    background-color: #030308;
-    /* Lenis handles smooth scrolling - remove native to avoid conflicts */
-    scroll-behavior: auto;
-    /* Prevent overscroll bounce on macOS/iOS for cleaner feel */
-    overscroll-behavior: none;
-    /* Global horizontal-overflow guard. `clip` (not `hidden`) prevents any
-       accidental sideways scroll on small screens without creating a scroll
-       container — so it never interferes with position: sticky/fixed. */
+    /* The ground is painted at the root so nothing ever flashes white. */
+    background-color: var(--color-obsidian-0);
+    color-scheme: dark;
+    /* `clip` keeps sideways overflow out without creating a scroll container,
+       so position: sticky and position: fixed keep working. */
     overflow-x: clip;
+    overscroll-behavior: none;
+    /* Lenis owns smooth scrolling; native smoothing would fight it. */
+    scroll-behavior: auto;
   }
 
   body {
-    @apply bg-background text-foreground;
-    /* Prevent selection during scroll for smoother feel */
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.65;
+    /* Inheritance is the delivery mechanism: it carries the pin to the
+       font-display utility sites as well as to the headings below. The sans
+       and mono cuts expose no opsz axis, so it is inert on body text. Both
+       properties are set because font-variation-settings winning over
+       font-optical-sizing is not a precedence worth leaning on. */
+    font-optical-sizing: none;
+    font-variation-settings: "opsz" var(--display-opsz);
+    color: var(--color-ivory-100);
+    background-color: var(--color-obsidian-0);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
-    /* Base text shadow — a hairline of contrast over the cosmic backdrop.
-       Cheap (no blur radius spread), applies once to every text node. */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
   }
 
-  /* ── Visible keyboard focus indicator (a11y) ──
-     Only shows for keyboard nav, never on mouse click. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+
+  /* Square aurum focus ring, keyboard only. */
   :focus-visible {
-    outline: 2px solid rgba(167, 139, 250, 0.9);
-    outline-offset: 2px;
-    /* No border-radius override — the outline follows each element's own
-       radius, so pills get pill-shaped rings instead of boxy corners. */
+    outline: 2px solid var(--color-aurum-100);
+    outline-offset: 3px;
+    border-radius: 0;
   }
 
-  [data-theme="nebula"] :focus-visible {
-    outline-color: rgba(244, 114, 182, 0.9);
-  }
-
-  /* Remove default outline only when a visible focus ring is shown */
   :focus:not(:focus-visible) {
     outline: none;
   }
 
-  /* ── Text selection color (brand) ── */
   ::selection {
-    background: rgba(139, 92, 246, 0.35);
-    color: #ffffff;
+    background: rgba(201, 169, 97, 0.30);
+    color: var(--color-ivory-100);
   }
 
-  [data-theme="nebula"] ::selection {
-    background: rgba(236, 72, 153, 0.35);
+  /* Thin scrollbar: umber thumb, no track. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(122, 97, 52, 0.6) transparent;
   }
 
-  /* ── Skip-to-content link (a11y) ── */
-  .skip-link {
-    position: fixed;
-    top: -100px;
-    left: 1rem;
-    z-index: 200;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.75rem;
-    background: rgba(139, 92, 246, 0.95);
-    color: #fff;
-    font-weight: 600;
-    transition: top 0.2s ease;
-  }
-
-  .skip-link:focus {
-    top: 1rem;
-  }
-
-  /* Premium scrollbar styling */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.03);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3);
-    border-radius: 10px;
-    transition: background 0.3s ease;
+    background: rgba(122, 97, 52, 0.6);
+    border-radius: 0;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.5);
+  /* Skip to content (a11y) */
+  .skip-link {
+    position: fixed;
+    top: -100px;
+    left: 1.5rem;
+    z-index: 200;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-aurum-300);
+    border-radius: 0;
+    background: var(--color-obsidian-1);
+    color: var(--color-ivory-100);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: top 200ms var(--ease-settle);
   }
 
-  /* Firefox scrollbar styling */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(255, 255, 255, 0.03);
-  }
-}
-
-/* ── Global reduced-motion kill-switch (a11y) ──
-   Honors prefers-reduced-motion for every CSS animation/transition.
-   Framer Motion is handled separately via <MotionConfig reducedMotion="user">. */
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-body {
-  font-family: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow-x: hidden;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-
-/* Enhanced Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-rendering: optimizeLegibility;
-}
-
-h1 {
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  text-shadow: 0 0 80px rgba(139, 92, 246, 0.3);
-}
-
-/* Pulse glow — opacity-only on a pseudo layer (see .pulse-glow-layer).
-   Animating box-shadow repaints every frame; animating opacity re-composites
-   an existing GPU layer at near-zero cost. */
-.pulse-glow-layer {
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.45), transparent 70%);
-  z-index: -1;
-  opacity: 0.6;
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    opacity: 0.4;
+  .skip-link:focus {
+    top: 1rem;
   }
 
-  50% {
-    opacity: 0.9;
+  /* Tap feedback on coarse pointers. Lives in the base layer so utility
+     transitions on the element still win. */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"],
+    .tap-feedback {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active,
+    a:active,
+    [role="button"]:active,
+    .tap-feedback:active {
+      transform: scale(0.98);
+    }
   }
 }
 
-.animate-pulse-glow {
-  /* Legacy hook: no-op. New usage adds <span class="pulse-glow-layer" /> */
-  animation: none;
-}
-
-/* Shimmer effect — Footer's animated gradient hairline */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+/* ------------------------------------------------------------------------
+   Component classes: the shared API section owners rely on.
+   Kept in the components layer so utilities can still override them.
+   ------------------------------------------------------------------------ */
+@layer components {
+  /* Display alias: engraved serif, weight 400. */
+  .text-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.04;
   }
 
-  100% {
-    background-position: 200% 0;
+  /* The three uppercase eyebrows (home, github-stats, contact). */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ivory-200);
+  }
+
+  /* Ledger numerals: fixed-width digits so nothing shifts as values roll. */
+  .ledger {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Plate lift: a clip mask with a descender reserve, and the line inside
+     that rises out of it once the InViewClass wrapper gains .in-view. */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.5rem;
+  }
+
+  .line-rise {
+    display: inline-block;
+    transform: translateY(110%);
+    opacity: 0.001;
+  }
+
+  .in-view .line-rise {
+    animation: line-rise 1100ms var(--ease-settle) forwards;
+    animation-delay: var(--rise-delay, 0ms);
+  }
+
+  /* The hairline-gold rule drawn beneath every headline. */
+  .rule-draw {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: var(--color-hairline-gold);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 900ms var(--ease-heavy) 150ms;
+  }
+
+  .in-view .rule-draw {
+    transform: scaleX(1);
+  }
+
+  /* Live indicator breathing (Contact eyebrow dot). */
+  .breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  /* Word-level plate lift. One mask per word, so a display line assembles
+     left to right instead of arriving whole. The descender reserve is in em so
+     it tracks the type size at every heading scale, and the matching negative
+     margin keeps that reserve out of the line box. */
+  .word-mask {
+    display: inline-block;
+    overflow: hidden;
+    padding-bottom: 0.16em;
+    margin-bottom: -0.16em;
+    vertical-align: bottom;
+  }
+
+  /* Hot foil. A specular gold band parked just off the left edge of the text
+     and drawn through the glyphs, travelling once across on hover or keyboard
+     focus.
+
+     Two constraints set the numbers. The fill has to be transparent for
+     background-clip: text to show the gradient, which means any part of the
+     box the gradient does not cover renders as nothing at all rather than as
+     plain ink, so the image must span the box at both ends of the travel. And
+     the band has to start and finish outside the box. At three times the box
+     width, a position of 100% offsets the image by -2W and 0% by 0, so the
+     box stays covered throughout while the band centre travels from -0.5W to
+     1.5W. A narrower image cannot satisfy both at once.
+
+     The base colour is declared rather than inherited for the same reason:
+     currentColor inside the gradient would resolve to the transparent fill.
+     Override --foil-base wherever the text is not ivory. */
+  .foil {
+    --foil-base: var(--color-ivory-100);
+    /* Gold shoulders around a bright core. A band of aurum-100 alone sits
+       within a few points of ivory-100 in luminance and simply does not read;
+       the darker shoulders are what make it look like light raking across
+       foil rather than a faint smudge. */
+    background-image: linear-gradient(
+      100deg,
+      var(--foil-base) 42%,
+      var(--color-aurum-300) 47%,
+      var(--color-aurum-100) 50%,
+      var(--color-aurum-300) 53%,
+      var(--foil-base) 58%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: background-position 1100ms var(--ease-heavy);
+  }
+
+  .foil:hover,
+  .foil:focus-visible,
+  .group:hover .foil,
+  .group:focus-visible .foil {
+    background-position: 0 0;
+  }
+
+  /* Without background-clip: text the transparent fill would hide the words
+     outright, so the foil degrades to flat ink. */
+  @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    .foil {
+      background-image: none;
+      color: var(--foil-base);
+    }
+  }
+
+  /* A hairline that draws in from the left beneath an inline link. The rule is
+     a pseudo-element in reserved space, so drawing it moves nothing. */
+  .rule-hover {
+    position: relative;
+  }
+
+  .rule-hover::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.2em;
+    height: 1px;
+    background: var(--color-hairline-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition:
+      transform 500ms var(--ease-heavy),
+      background-color 500ms var(--ease-heavy);
+  }
+
+  .rule-hover:hover::after,
+  .rule-hover:focus-visible::after,
+  .group:hover .rule-hover::after {
+    transform: scaleX(1);
+    background: var(--color-aurum-200);
+  }
+
+  /* Raking light for the framed plates: the gold catches where the cursor is,
+     the way a light source catches a physical object. --mx and --my are
+     written straight onto the node by the pointer handler, so the highlight
+     tracks the cursor without a React render per frame. Only opacity
+     transitions, so leaving the plate drains the light instead of cutting it. */
+  .sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 600ms var(--ease-heavy);
+    background: radial-gradient(
+      42% 32% at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--color-aurum-100) 15%, transparent),
+      transparent 70%
+    );
+  }
+
+  .sheen:hover::after,
+  .sheen:focus-within::after {
+    opacity: 1;
+  }
+
+  /* Photogravure grade for the portrait's resting layer. */
+  .plate-mono {
+    filter: grayscale(1) sepia(0.28) contrast(1.06) brightness(0.92);
+  }
+
+  /* Dossier accordion: grid-row interpolation, no height measurement. */
+  .grid-accordion {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 650ms var(--ease-heavy);
+  }
+
+  .grid-accordion[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  .grid-accordion > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Heatmap cell stagger: opacity only, delay set per cell via --d. */
+  .cell-in {
+    animation: cell-in 250ms ease-out both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Paper grain over the whole page at 4%. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* Off-screen rendering skip for sections without sticky descendants.
+     Each wrapper must declare its own --cv-h: the reserved height is what the
+     document is built from until a section has rendered once, so a single
+     shared estimate makes the page grow under the reader, which lands in-page
+     navigation short and freezes the navbar highlight. Measured per section in
+     page.tsx. The `auto` keyword takes over with the real size after the first
+     render. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--cv-h, 720px);
+  }
+
+  /* Opt-in compositing hint for the one fixed canvas layer. */
+  .gpu-layer {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Static vignette over the scene: darkens the frame edges in obsidian. */
+  .cosmic-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(12, 10, 8, 0.55) 100%),
+      linear-gradient(180deg, rgba(12, 10, 8, 0.25) 0%, transparent 12%, transparent 88%, rgba(12, 10, 8, 0.35) 100%);
+  }
+
+  /* Hide the scrollbar while keeping scrollability (mobile carousels). */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Navbar floating particles + scroll-transition shimmer sweep.
-   Centralized here (was a component-local <style jsx global>) so every
-   animation in the app has a single source of truth. */
-@keyframes navFloat0 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.4;
-  }
-
-  50% {
-    transform: translate(8px, -6px) scale(1.3);
-    opacity: 0.8;
-  }
-}
-
-@keyframes navFloat1 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.3;
-  }
-
-  50% {
-    transform: translate(-6px, 5px) scale(1.2);
-    opacity: 0.7;
-  }
-}
-
-@keyframes navFloat2 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1.1);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: translate(5px, 4px) scale(0.8);
-    opacity: 0.9;
-  }
-}
-
-@keyframes navFloat3 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(0.9);
-    opacity: 0.35;
-  }
-
-  50% {
-    transform: translate(-4px, -7px) scale(1.4);
-    opacity: 0.75;
-  }
-}
-
-@keyframes navShimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* Rotate animation — AvatarFlipCard orbiting rings */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-/* ── GPU compositing hint — opt-in only ──
-   Previously applied to every `.fixed.inset-0` element globally, which
-   promoted every full-screen overlay (cursor glow, noise, canvas, loader...)
-   to its own GPU layer simultaneously. Apply `.gpu-layer` explicitly to the
-   one or two elements that actually benefit (the cosmic canvas backdrop). */
-.gpu-layer {
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* ── Editorial display type + line-reveal masks ── */
-.text-display {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
-}
-
-.text-gradient-iris {
-  background: linear-gradient(120deg, #fff 0%, var(--iris-soft) 55%, var(--cyan) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.line-mask {
-  overflow: hidden;
-  display: block;
-}
-
-.card-hairline {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  /* Solid warm-dark fill — no backdrop-filter. Cheaper than blur, and the
-     darker tone reads as a real surface over the cosmic backdrop. */
-  background: rgba(14, 12, 24, 0.72);
-}
-
-/* ── Cinematic vignette — static CSS overlay, zero GPU cost ──
-   Darkens the frame edges (deep-space keynote look) and dims a soft
-   vertical column so body copy always sits on a darker patch of sky,
-   regardless of what the nebula/stars are doing underneath. */
-.cosmic-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(2, 2, 6, 0.55) 100%),
-    linear-gradient(180deg, rgba(2, 2, 6, 0.25) 0%, transparent 12%, transparent 88%, rgba(2, 2, 6, 0.35) 100%);
-}
-
-/* ── Section surface — stronger than .card-hairline, used to wrap entire
-   sections so paragraph copy stays legible against the busiest parts of
-   the scene (nebula churn, light shafts). Solid fill, no backdrop-filter. */
-.content-panel {
-  background: rgba(6, 5, 12, 0.55);
-  border-radius: 1.5rem;
-}
-
-/* ── InteractiveCard — pointer-following sheen + rim light ──
-   Driven by CSS vars written from a self-stopping rAF loop
-   (see InteractiveCard.tsx). The pseudo-elements composite on the GPU;
-   only custom properties change per frame. */
-.icard {
-  position: relative;
-  --ic-accent: var(--iris);
-  /* will-change is toggled by InteractiveCard.tsx's rAF loop (only while
-     hovering/decaying), not held statically — dozens of idle cards on a
-     page would otherwise force dozens of permanent GPU layers for nothing. */
-  transform-style: preserve-3d;
-}
-
-.icard::before {
-  /* Radial sheen following the pointer */
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: var(--ic-opacity, 0);
-  background: radial-gradient(320px circle at var(--icx, 50%) var(--icy, 50%),
-      color-mix(in srgb, var(--ic-accent) 10%, transparent),
-      transparent 65%);
-  z-index: 1;
-}
-
-.icard::after {
-  /* Rim light — a masked border ring that brightens near the pointer */
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: var(--ic-opacity, 0);
-  background: radial-gradient(200px circle at var(--icx, 50%) var(--icy, 50%),
-      color-mix(in srgb, var(--ic-accent) 55%, transparent),
-      transparent 70%);
-  padding: 1px;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  z-index: 2;
-}
-
-/* ── Masked line reveal — headings slide up out of a clipping mask ── */
-@keyframes lineRise {
+/* ------------------------------------------------------------------------
+   Keyframes
+   ------------------------------------------------------------------------ */
+@keyframes line-rise {
   from {
     transform: translateY(110%);
     opacity: 0.001;
@@ -457,311 +497,69 @@ h1 {
   }
 }
 
-.line-rise {
-  display: inline-block;
-  transform: translateY(110%);
-  opacity: 0.001;
-}
-
-.in-view .line-rise {
-  animation: lineRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: var(--rise-delay, 0ms);
-}
-
-/* ── Section kicker — ghost numeral + label + drawing hairline ── */
-.kicker {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.kicker-num {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.35em;
-  color: color-mix(in srgb, var(--iris-soft) 55%, transparent);
-}
-
-.kicker-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  white-space: nowrap;
-}
-
-.kicker-line {
-  flex: 1;
-  height: 1px;
-  transform-origin: left;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--iris) 45%, transparent), transparent);
-  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
-}
-
-.in-view .kicker-line {
-  transform: scaleX(1);
-}
-
-/* ── Hero headline shimmer — a light sweep across the gradient text ── */
-@keyframes textSheen {
-
+@keyframes breathe {
   0%,
-  55%,
   100% {
-    background-position: 200% center;
+    opacity: 0.7;
   }
 
-  75% {
-    background-position: -50% center;
-  }
-}
-
-.hero-sheen {
-  background-size: 250% auto;
-  animation: textSheen 7s ease-in-out infinite;
-}
-
-/* ── Comet divider — a bright particle travels the line once on reveal ── */
-@keyframes cometTravel {
-  0% {
-    left: 8%;
-    opacity: 0;
-  }
-
-  12% {
+  50% {
     opacity: 1;
   }
-
-  88% {
-    opacity: 1;
-  }
-
-  100% {
-    left: 92%;
-    opacity: 0;
-  }
 }
 
-.comet {
-  position: absolute;
-  top: 50%;
-  width: 44px;
-  height: 2px;
-  margin-top: -1px;
-  border-radius: 999px;
-  opacity: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9));
-  box-shadow: 0 0 12px 2px rgba(167, 139, 250, 0.6);
-  pointer-events: none;
-}
-
-.in-view .comet {
-  animation: cometTravel 1.6s cubic-bezier(0.45, 0, 0.2, 1) 0.15s both;
-}
-
-/* ── Off-screen rendering skip — the single biggest scroll-perf win.
-   The browser skips layout/paint entirely for sections outside the
-   viewport; contain-intrinsic-size reserves scroll space. ── */
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 720px;
-}
-
-/* ── Count-up completion flare ── */
-@keyframes statFlare {
-  0% {
-    text-shadow: 0 0 0 transparent;
-  }
-
-  35% {
-    text-shadow: 0 0 24px currentColor;
-  }
-
-  100% {
-    text-shadow: 0 0 0 transparent;
-  }
-}
-
-.stat-flare {
-  animation: statFlare 0.9s ease-out both;
-}
-
-/* ── Conic border rotation (Contact form focus) — animates a registered
-   custom property so only paint of the border layer updates ── */
-@property --conic-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes conicSpin {
-  to {
-    --conic-angle: 360deg;
-  }
-}
-
-.conic-border {
-  position: absolute;
-  inset: -1px;
-  border-radius: 1rem;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  background: conic-gradient(from var(--conic-angle),
-      transparent 0%,
-      color-mix(in srgb, var(--iris) 70%, transparent) 12%,
-      transparent 28%,
-      transparent 55%,
-      color-mix(in srgb, var(--cyan) 55%, transparent) 68%,
-      transparent 82%);
-  padding: 1px;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-}
-
-.group:hover .conic-border,
-.group:focus-within .conic-border {
-  opacity: 1;
-  animation: conicSpin 4s linear infinite;
-}
-
-/* ── Haptic-style tap feedback for touch devices ── */
-@media (pointer: coarse) {
-
-  button,
-  a,
-  [role="button"],
-  .tap-feedback {
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.1s ease-out;
-  }
-
-  button:active,
-  a:active,
-  [role="button"]:active,
-  .tap-feedback:active {
-    transform: scale(0.95);
-  }
-}
-
-/* ── Nebula Theme ── */
-/* Override Tailwind's purple palette + all hardcoded purple rgba() values */
-[data-theme="nebula"] {
-  --background: 270 30% 5%;
-  --foreground: 280 20% 96%;
-  --card: 270 25% 8%;
-  --card-foreground: 280 20% 96%;
-  --primary: 330 80% 60%;
-  --primary-foreground: 270 30% 5%;
-  --secondary: 300 20% 18%;
-  --secondary-foreground: 280 20% 96%;
-  --muted: 300 20% 18%;
-  --muted-foreground: 310 10% 65%;
-  --accent: 330 40% 18%;
-  --accent-foreground: 280 20% 96%;
-  --border: 300 20% 18%;
-  --ring: 330 80% 60%;
-
-  /* Override Tailwind's purple color palette to rose/pink */
-  --color-purple-300: #f9a8d4;
-  --color-purple-400: #f472b6;
-  --color-purple-500: #ec4899;
-  --color-purple-600: #db2777;
-  --color-purple-700: #be185d;
-  --color-purple-800: #9d174d;
-  --color-purple-900: #831843;
-
-  /* Cosmic identity tokens follow the theme too (read by CosmicScene) */
-  --iris: #ec4899;
-  --iris-soft: #f9a8d4;
-  --cyan: #38bdf8;
-  --amber: #fbbf24;
-  --rose: #fb7185;
-}
-
-/* Nebula — override hardcoded purple glow/shadow rgba values */
-[data-theme="nebula"] h1 {
-  text-shadow: 0 0 80px rgba(236, 72, 153, 0.35) !important;
-}
-
-[data-theme="nebula"] ::-webkit-scrollbar-thumb {
-  background: rgba(236, 72, 153, 0.3) !important;
-}
-
-[data-theme="nebula"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(236, 72, 153, 0.5) !important;
-}
-
-[data-theme="nebula"] * {
-  scrollbar-color: rgba(236, 72, 153, 0.3) rgba(255, 255, 255, 0.03);
-}
-
-/* Override the pink/rose glow color for the pulse-glow-layer, opacity-only */
-[data-theme="nebula"] .pulse-glow-layer {
-  background: radial-gradient(closest-side, rgba(236, 72, 153, 0.45), transparent 70%);
-}
-
-/* Hide scrollbar while keeping scrollability (mobile carousels) */
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* Testimonials marquee animations */
-@keyframes marquee-left {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes marquee-right {
-  0% {
-    transform: translateX(-50%);
-  }
-
-  100% {
-    transform: translateX(0);
-  }
-}
-
-.animate-marquee-left {
-  animation: marquee-left 40s linear infinite;
-}
-
-.animate-marquee-right {
-  animation: marquee-right 45s linear infinite;
-}
-
-/* GitHub contribution heatmap — CSS-only stagger-in instead of ~365
-   individually-mounted Framer Motion nodes. Delay is set inline per-cell
-   via `--d` (see GitHubStats.tsx). */
-@keyframes cellIn {
+@keyframes cell-in {
   from {
     opacity: 0;
-    transform: scale(0.4);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-.cell-in {
-  animation: cellIn 0.25s ease-out both;
-  animation-delay: var(--d, 0ms);
+/* ------------------------------------------------------------------------
+   Reduced motion: the global kill switch, plus final states for the
+   masked reveals so nothing stays hidden. Framer Motion is handled
+   separately by <MotionConfig reducedMotion="user">.
+   ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .line-rise,
+  .in-view .line-rise {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .rule-draw {
+    transform: scaleX(1);
+  }
+
+  .breathe {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* The foil sweep and the raking light are motion, not decoration: with
+     transitions cut to nothing they would snap rather than travel, so both are
+     dropped and the text keeps its flat colour. */
+  .foil {
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--foil-base);
+  }
+
+  .sheen::after {
+    display: none;
+  }
 }

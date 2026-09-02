@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withPWAInit from "next-pwa";
 
 const nextConfig: NextConfig = {
   output: 'export',
@@ -39,9 +40,9 @@ const nextConfig: NextConfig = {
               enforce: true,
               chunks: 'all',
             },
-            lucide: {
-              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-              name: 'lucide-icons',
+            phosphor: {
+              test: /[\\/]node_modules[\\/]@phosphor-icons[\\/]/,
+              name: 'phosphor-icons',
               priority: 10,
               enforce: true,
               chunks: 'all',
@@ -54,7 +55,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withPWA = require("next-pwa")({
+const withPWA = withPWAInit({
   dest: "public",
   register: true,
   skipWaiting: true,

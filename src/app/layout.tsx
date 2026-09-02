@@ -1,32 +1,25 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeToggle";
 import PageLoader from "@/components/PageLoader";
 import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-});
+import SmoothScroll from "@/components/SmoothScroll";
+import PerformanceProvider from "@/components/PerformanceProvider";
+import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
+import { fontVariables } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://preethamnimmagadda.github.io"),
-  title: "Preetham Nimmagadda | AI Agent Developer & Full Stack Engineer",
-  description: "Portfolio of Preetham Nimmagadda, an AI Engineer and Full Stack Developer from IIT (ISM) Dhanbad. Specializing in Autonomous AI Agents, CrewAI, Next.js, and System Architecture. Top 1% on CodeChef & Codeforces Specialist.",
+  title: "Preetham Nimmagadda | AI engineer, autonomous systems",
+  description:
+    "Preetham Nimmagadda builds AI that acts: self-healing data security at Matters.AI, multimodal RAG at Introspect Labs, autonomous agents at METAVERTEX. CodeChef top 0.8%, HackerRank top 0.07%.",
   manifest: "/manifest.json",
   keywords: [
     "Preetham Nimmagadda",
+    "AI Engineer",
+    "Autonomous AI Systems",
     "AI Agent Developer",
     "Full Stack Engineer",
     "IIT Dhanbad",
@@ -38,7 +31,7 @@ export const metadata: Metadata = {
     "React Developer",
     "Python Developer",
     "Machine Learning",
-    "Generative AI"
+    "Generative AI",
   ],
   authors: [{ name: "Preetham Nimmagadda", url: "https://preethamnimmagadda.github.io" }],
   creator: "Preetham Nimmagadda",
@@ -49,20 +42,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://preethamnimmagadda.github.io",
-    title: "Preetham Nimmagadda | Building Autonomous AI Systems",
-    description: "Explore the portfolio of Preetham Nimmagadda - showcasing innovative projects in AI Agents, Full Stack Dev, and award-winning hackathon builds.",
-    siteName: "Preetham Nimmagadda Portfolio",
-    images: [{
-      url: "/og-image.png",
-      width: 1200,
-      height: 630,
-      alt: "Preetham Nimmagadda Portfolio Preview"
-    }],
+    title: "Preetham Nimmagadda, AI engineer",
+    description:
+      "Systems that find what is exposed and close it before anyone asks. Selected work, the record, and how to reach me.",
+    siteName: "Preetham Nimmagadda",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Preetham Nimmagadda, AI engineer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Preetham Nimmagadda | AI Agent Developer",
-    description: "Building the future with Autonomous Agents and Scalable Systems.",
+    title: "Preetham Nimmagadda, AI engineer",
+    description:
+      "Systems that find what is exposed and close it before anyone asks. Selected work, the record, and how to reach me.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -71,41 +68,48 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
-    icon: "/favicon.png",
-    // iOS "Add to Home Screen" expects ~180px; the 32px favicon upscales
-    // blurrily. Reuse the PWA icon that's already generated at proper size.
+    // Both tab sizes are drawn at their real pixel size rather than letting the
+    // browser downscale one raster, which is what reduced the monogram to a
+    // smudge. Source and sizes: scripts/brand/README.md.
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    // iOS "Add to Home Screen" expects about 180px; the 32px favicon upscales
+    // blurrily. Reuse the PWA icon that is already generated at a proper size.
     apple: "/icon-192x192.png",
   },
 };
 
-// Runs before paint to apply the saved theme, preventing a flash (FOUC)
-const themeInitScript = `(function(){try{var t=localStorage.getItem('portfolio-theme');if(t==='nebula'||t==='deep-space'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+export const viewport: Viewport = {
+  themeColor: "#0C0A08",
+  colorScheme: "dark",
+};
 
 // Disable browser scroll restoration so every refresh always starts at the top
 const scrollResetScript = `if('scrollRestoration' in history){history.scrollRestoration='manual';}window.scrollTo(0,0);`;
 
-
-// JSON-LD Structured Data for SEO
+// JSON-LD structured data for SEO
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Preetham Nimmagadda",
   url: "https://preethamnimmagadda.github.io",
   image: "https://preethamnimmagadda.github.io/ai-headshot.jpeg",
-  jobTitle: "AI Agent Developer & Full Stack Engineer",
+  jobTitle: "AI Engineer",
   worksFor: {
     "@type": "Organization",
-    name: "IIT (ISM) Dhanbad"
+    name: "IIT (ISM) Dhanbad",
   },
   alumniOf: {
     "@type": "CollegeOrUniversity",
-    name: "Indian Institute of Technology (ISM) Dhanbad"
+    name: "Indian Institute of Technology (ISM) Dhanbad",
   },
   knowsAbout: [
     "Artificial Intelligence",
@@ -115,39 +119,26 @@ const jsonLd = {
     "Next.js",
     "React",
     "Python",
-    "Full Stack Development"
+    "Full Stack Development",
   ],
   sameAs: [
-    "https://github.com/preethamnimmagadda",
-    "https://linkedin.com/in/preethamnimmagadda"
-  ]
+    "https://github.com/PreethamNimmagadda02",
+    "https://linkedin.com/in/preethamnimmagadda",
+  ],
 };
-
-import SmoothScroll from "@/components/SmoothScroll";
-import PerformanceProvider from "@/components/PerformanceProvider";
-import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // suppressHydrationWarning on <html>: the theme init script sets data-theme
-  // before React hydrates — an expected, intentional attribute mismatch.
+  // suppressHydrationWarning on <html> and <body>: browser extensions inject
+  // attributes and <script> tags before React hydrates. App code cannot
+  // prevent that, and the mismatch is expected.
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        {/* suppressHydrationWarning on both scripts: browser extensions can
-            inject their own <script> tags into <head> before React hydrates,
-            shifting node matching. App code can't prevent that. */}
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: scrollResetScript }}
-        />
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: scrollResetScript }} />
         <script
           suppressHydrationWarning
           type="application/ld+json"
@@ -156,31 +147,31 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-background text-foreground`}
+        className={`${fontVariables} antialiased bg-obsidian-0 text-ivory-100`}
       >
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
         <LazyMotion features={domMax} strict>
-        <MotionConfig reducedMotion="user">
-          <PerformanceProvider>
-            <ThemeProvider>
+          <MotionConfig reducedMotion="user">
+            <PerformanceProvider>
               <PageLoader />
               <ScrollProgress />
               <KonamiEasterEgg />
               <SmoothScroll>
                 <Navbar />
-                <main id="main-content" className="min-h-screen">
+                <main
+                  id="main-content"
+                  className="relative min-h-[100dvh] bg-obsidian-0 text-ivory-100 overflow-x-clip"
+                >
                   {children}
                 </main>
                 <Footer />
               </SmoothScroll>
-            </ThemeProvider>
-          </PerformanceProvider>
-        </MotionConfig>
+            </PerformanceProvider>
+          </MotionConfig>
         </LazyMotion>
       </body>
     </html>
   );
 }
-

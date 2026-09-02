@@ -1,12 +1,14 @@
 "use client";
 
-import { motion, useInView } from "@/lib/motion";
-import { useRef, useState, useEffect, useCallback } from "react";
-import { Code2, Trophy, Loader2, AlertCircle, TrendingUp, Target, BarChart2 } from "lucide-react";
+import { useInView } from "@/lib/motion";
+import { useRef, useState, useEffect, useCallback, type CSSProperties } from "react";
+import { Warning } from "@phosphor-icons/react";
+import { LedgerNumber } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 const CODOLIO_USERNAME = "Preetham_02";
 
-/* ─── Types ─── */
+/* Types */
 interface PlatformUserStats {
   currentRating: number | null;
   maxRating: number | null;
@@ -34,7 +36,7 @@ interface PlatformProfile {
     badgeList: BadgeStat[];
   } | null;
   certificateStats?: {
-    certificates: any[];
+    certificates: unknown[];
   } | null;
   dailyActivityStatsResponse?: {
     maxStreak: number | null;
@@ -44,7 +46,7 @@ interface PlatformProfile {
     topicWiseDistribution: Record<string, number> | null;
   } | null;
   contestActivityStats?: {
-    contestActivityList: any[];
+    contestActivityList: unknown[];
   } | null;
 }
 
@@ -57,41 +59,13 @@ interface CodolioAPIResponse {
   };
 }
 
-/* ─── Platform Styling & Icons ─── */
-const PLATFORM_CONFIG: Record<
-  string,
-  { name: string; icon: any; color: string; bgGradient: string }
-> = {
-  leetcode: {
-    name: "LeetCode",
-    icon: Code2,
-    color: "text-yellow-400",
-    bgGradient: "from-yellow-500/20 to-orange-500/20",
-  },
-  codeforces: {
-    name: "Codeforces",
-    icon: BarChart2,
-    color: "text-blue-400",
-    bgGradient: "from-blue-500/20 to-cyan-500/20",
-  },
-  codechef: {
-    name: "CodeChef",
-    icon: Trophy,
-    color: "text-amber-600",
-    bgGradient: "from-amber-700/20 to-orange-700/20",
-  },
-  hackerrank: {
-    name: "HackerRank",
-    icon: Target,
-    color: "text-green-400",
-    bgGradient: "from-green-500/20 to-emerald-500/20",
-  },
-  tuf: {
-    name: "TakeUForward",
-    icon: TrendingUp,
-    color: "text-red-400",
-    bgGradient: "from-red-500/20 to-pink-500/20",
-  },
+/* Platform display names, as each platform writes them. */
+const PLATFORM_NAMES: Record<string, string> = {
+  leetcode: "LeetCode",
+  codeforces: "Codeforces",
+  codechef: "CodeChef",
+  hackerrank: "HackerRank",
+  tuf: "TakeUForward",
 };
 
 const getCodeChefStars = (rating: number) => {
@@ -104,60 +78,140 @@ const getCodeChefStars = (rating: number) => {
   return "7★";
 };
 
-/* ─── Animated counter (same as GitHubStats) ─── */
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
-  const [displayValue, setDisplayValue] = useState(0);
+export const LIVE_DATA_ERROR = "Live data is unavailable right now. Showing the last known figures.";
 
-  useEffect(() => {
-    if (!isInView) return;
-    const duration = 2000;
-    const start = Date.now();
-    let frameId: number;
-    const animate = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(Math.floor(value * eased));
-      if (progress < 1) frameId = requestAnimationFrame(animate);
-      else setDisplayValue(value);
-    };
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [isInView, value]);
-
+/**
+ * The one plain-language error line shared by the GitHub and Codolio plates:
+ * a light Warning glyph and a sentence, announced politely, no pill.
+ */
+export function LiveDataNotice({ message, className }: { message: string; className?: string }) {
   return (
-    <span ref={ref}>
-      {displayValue.toLocaleString()}
-      {suffix}
-    </span>
+    <p
+      role="status"
+      aria-live="polite"
+      className={cn("flex items-center gap-2 font-sans text-[14px] leading-[1.5] text-ivory-200", className)}
+    >
+      <Warning size={16} weight="light" aria-hidden className="shrink-0 text-aurum-200" />
+      <span>{message}</span>
+    </p>
   );
 }
 
-/* ─── Skeleton ─── */
+/* One ledger row per platform: name and badge, then the stat columns. */
+const ROW_CLASS = "grid grid-cols-1 gap-y-5 border-t border-hairline py-7 md:grid-cols-12 md:items-baseline md:gap-x-6 lg:py-8";
+const NAME_COL_CLASS = "flex flex-wrap items-baseline gap-x-3 gap-y-1 md:col-span-4";
+const STATS_COL_CLASS = "grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 md:col-span-8";
+
+interface StatColumn {
+  label: string;
+  value: string;
+}
+
+/**
+ * The columns a platform shows, in the order the previous card listed them.
+ * The conditions are unchanged; only the presentation is.
+ */
+function buildColumns(profile: PlatformProfile): StatColumn[] {
+  const topBadge = profile.badgeStats?.badgeList?.reduce(
+    (prev, curr) => ((curr.stars || 0) > (prev.stars || 0) ? curr : prev),
+    { name: "", stars: 0 } as BadgeStat
+  );
+
+  const columns: StatColumn[] = [
+    {
+      label: "Solved",
+      value: (profile.totalQuestionStats?.totalQuestionCounts || 0).toLocaleString(),
+    },
+  ];
+
+  if (profile.platform === "hackerrank" && topBadge) {
+    columns.push({ label: topBadge.name, value: `${(topBadge.stars || 0).toLocaleString()}★` });
+  } else if (profile.platform === "tuf") {
+    columns.push({
+      label: "Max streak",
+      value: ((profile.dailyActivityStatsResponse?.maxStreak || 0) + 43).toLocaleString(),
+    });
+  } else {
+    columns.push({
+      label: "Rating",
+      value: profile.userStats?.currentRating ? profile.userStats.currentRating.toLocaleString() : "N/A",
+    });
+  }
+
+  if (profile.userStats?.maxRating) {
+    columns.push({ label: "Max rating", value: profile.userStats.maxRating.toLocaleString() });
+  }
+  if (["codeforces", "codechef"].includes(profile.platform) && profile.contestActivityStats?.contestActivityList) {
+    columns.push({
+      label: "Contests attended",
+      value: profile.contestActivityStats.contestActivityList.length.toLocaleString(),
+    });
+  }
+  if (profile.platform === "leetcode" && profile.totalQuestionStats) {
+    columns.push({
+      label: "Medium problems",
+      value: (profile.totalQuestionStats.mediumQuestionCounts || 0).toLocaleString(),
+    });
+  }
+  if (profile.platform === "hackerrank" && profile.badgeStats?.badgeList && profile.badgeStats.badgeList.length > 0) {
+    columns.push({ label: "Awards", value: profile.badgeStats.badgeList.length.toLocaleString() });
+  }
+  if (
+    profile.platform === "hackerrank" &&
+    profile.certificateStats?.certificates &&
+    profile.certificateStats.certificates.length > 0
+  ) {
+    columns.push({ label: "Certifications", value: profile.certificateStats.certificates.length.toLocaleString() });
+  }
+  if (profile.platform === "tuf" && profile.dailyActivityStatsResponse?.submissionCalendar) {
+    columns.push({
+      label: "Active days",
+      value: Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length.toLocaleString(),
+    });
+  }
+  if (profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts) {
+    columns.push({
+      label: "Hard problems",
+      value: (profile.totalQuestionStats.hardQuestionCounts || 0).toLocaleString(),
+    });
+  }
+
+  return columns;
+}
+
+function displayBadge(profile: PlatformProfile): string | null | undefined {
+  if (profile.platform === "codechef" && profile.userStats?.currentRating) {
+    return getCodeChefStars(profile.userStats.currentRating);
+  }
+  return profile.platform === "leetcode" ? null : profile.userStats?.maxRank;
+}
+
+/* Skeleton rows in the exact shape of a platform row. */
 function ProfileSkeleton() {
   return (
-    <div className="relative p-6 rounded-2xl bg-zinc-900/90 border border-white/10 animate-pulse">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-white/10" />
-        <div>
-          <div className="w-24 h-5 bg-white/10 rounded mb-2" />
-          <div className="w-16 h-4 bg-white/10 rounded" />
-        </div>
+    <div className={ROW_CLASS} aria-hidden>
+      <div className={NAME_COL_CLASS}>
+        <span className="breathe block h-6 w-32 bg-obsidian-2" />
+        <span className="breathe block h-3 w-14 bg-obsidian-2" />
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <div className="w-full h-12 bg-white/10 rounded-lg" />
-        <div className="w-full h-12 bg-white/10 rounded-lg" />
+      <div className={STATS_COL_CLASS}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-3">
+            <span className="breathe block h-3 w-16 bg-obsidian-2" />
+            <span className="breathe block h-4 w-12 bg-obsidian-2" />
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
-  const sectionRef = useRef<any>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  const shouldFetch = isEmbedded ? true : useInView(sectionRef, { once: true, margin: "1000px" });
+  const plateRef = useRef<HTMLDivElement>(null);
+  // Embedded, the parent tab already gates mounting, so fetch at once;
+  // standalone, wait until the plate is within 1000px of the viewport.
+  const inViewMargin = useInView(plateRef, { once: true, margin: "1000px" });
+  const shouldFetch = isEmbedded || inViewMargin;
 
   const [profiles, setProfiles] = useState<PlatformProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,14 +266,14 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
       });
 
       setProfiles(sorted);
-      
+
       localStorage.setItem(cacheKey, JSON.stringify({
         timestamp: Date.now(),
         profiles: sorted
       }));
     } catch (err) {
       console.error("Codolio fetch error:", err);
-      setError("Failed to load live coding stats. Showing latest snapshot.");
+      setError(LIVE_DATA_ERROR);
       // Fallback data
       setProfiles([
         {
@@ -247,208 +301,69 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
     if (shouldFetch) fetchData();
   }, [shouldFetch, fetchData]);
 
-  const innerContent = (
-    <>
-      {!isEmbedded && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-4"
-          >
-            <Trophy size={16} />
-            <span>Problem Solving</span>
-            {loading && <Loader2 size={14} className="animate-spin text-indigo-300" />}
-          </motion.span>
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-3">
-            Competitive{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-400">
-              Programming
-            </span>
-          </h2>
-          <p className="text-gray-300 max-w-lg mx-auto">
-            Live statistics fetched directly from global coding platforms.
-          </p>
+  const plate = (
+    <div ref={plateRef} className="w-full">
+      {error && <LiveDataNotice message={error} className="mb-6" />}
 
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs"
-            >
-              <AlertCircle size={12} />
-              {error}
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="border-b border-hairline" aria-busy={loading || undefined}>
         {loading
           ? Array.from({ length: 3 }).map((_, i) => <ProfileSkeleton key={i} />)
           : profiles.map((profile, idx) => {
-            const config = PLATFORM_CONFIG[profile.platform] || {
-              name: profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1),
-              icon: Code2,
-              color: "text-gray-300",
-              bgGradient: "from-gray-500/20 to-zinc-500/20",
-            };
-
-            let displayBadge = profile.platform === "leetcode" ? null : profile.userStats?.maxRank;
-            if (profile.platform === "codechef" && profile.userStats?.currentRating) {
-              displayBadge = getCodeChefStars(profile.userStats.currentRating);
-            }
-
-            const topBadge = profile.badgeStats?.badgeList?.reduce(
-              (prev, curr) => ((curr.stars || 0) > (prev.stars || 0) ? curr : prev),
-              { name: '', stars: 0 } as BadgeStat
-            );
+            const name =
+              PLATFORM_NAMES[profile.platform] ||
+              profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
+            const badge = displayBadge(profile);
+            const columns = buildColumns(profile);
 
             return (
-              <motion.div
+              <article
                 key={profile.platform}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                whileHover={{ y: -8, scale: 1.02, transition: { delay: 0, duration: 0.2, type: "spring", stiffness: 400, damping: 25 } }}
-                transition={{
-                  delay: 0.1 + idx * 0.1,
-                  duration: 0.4,
-                  type: "spring",
-                }}
-                className="relative group w-full md:w-[calc(50%-8px)] lg:w-[calc(33.333%-12px)] min-w-[260px]"
+                className={cn(ROW_CLASS, "cell-in")}
+                style={{ "--d": `${idx * 90}ms` } as CSSProperties}
+                aria-label={`${name} statistics`}
               >
-                {/* Outer Glow */}
-                <div className={`absolute -inset-0.5 bg-linear-to-r ${config.bgGradient} rounded-2xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500`} />
-                
-                {/* Main Card */}
-                <div className="relative p-5 rounded-2xl bg-zinc-900/95 border border-white/10 group-hover:border-white/30 transition-all duration-300 h-full flex flex-col min-h-[250px] overflow-hidden shadow-2xl">
-                  
-                  {/* Subtle inner gradient shift on hover */}
-                  <div className={`absolute inset-0 bg-linear-to-br ${config.bgGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`} />
-
-                  {/* Header */}
-                  <div className="relative z-10 flex items-center gap-3 mb-3">
-                    <div className={`p-2.5 rounded-xl bg-zinc-800/80 border border-white/5 ${config.color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg`}>
-                      <config.icon size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white tracking-wide group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-white group-hover:to-gray-400 transition-all duration-300">
-                        {config.name}
-                      </h3>
-                      {displayBadge && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/5 text-gray-300 capitalize border border-white/10 group-hover:border-white/20 group-hover:bg-white/10 transition-colors duration-300">
-                          {displayBadge}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="relative z-10 grid grid-cols-2 gap-3 my-auto">
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center shadow-inner">
-                      <span className="text-[13px] text-gray-400 mb-1 font-medium group-hover:text-gray-300 transition-colors">Solved</span>
-                      <span className="text-2xl font-black text-white drop-shadow-md">
-                        <AnimatedCounter value={profile.totalQuestionStats?.totalQuestionCounts || 0} />
-                      </span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex flex-col items-center justify-center text-center shadow-inner">
-                      <span className="text-[13px] text-gray-400 mb-1 font-medium truncate w-full px-1 group-hover:text-gray-300 transition-colors">
-                        {profile.platform === "hackerrank" && topBadge ? topBadge.name : (profile.platform === "tuf" ? "Max Streak" : "Rating")}
-                      </span>
-                      <span className={`text-2xl font-black drop-shadow-md ${(profile.userStats?.currentRating || topBadge || profile.platform === "tuf") ? config.color : 'text-gray-600'}`}>
-                        {profile.platform === "hackerrank" && topBadge
-                          ? <><AnimatedCounter value={topBadge.stars || 0} />★</>
-                          : profile.platform === "tuf"
-                            ? <AnimatedCounter value={(profile.dailyActivityStatsResponse?.maxStreak || 0) + 43} />
-                            : profile.userStats?.currentRating
-                              ? <AnimatedCounter value={profile.userStats.currentRating} />
-                              : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Extra Meta */}
-                  <div className="relative z-10 pt-4 border-t border-white/10 group-hover:border-white/20 transition-colors flex flex-col gap-2">
-                    {profile.userStats?.maxRating && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Max Rating</span>
-                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.userStats.maxRating} /></span>
-                      </div>
-                    )}
-                    {["codeforces", "codechef"].includes(profile.platform) && profile.contestActivityStats?.contestActivityList && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Contests Attended</span>
-                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.contestActivityStats.contestActivityList.length} /></span>
-                      </div>
-                    )}
-                    {profile.platform === "leetcode" && profile.totalQuestionStats && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Medium Problems</span>
-                        <span className="font-mono text-gray-200 font-medium">
-                          <span className="text-yellow-400 drop-shadow-sm" title="Medium"><AnimatedCounter value={profile.totalQuestionStats.mediumQuestionCounts || 0} /></span>
-                        </span>
-                      </div>
-                    )}
-                    {profile.platform === "hackerrank" && profile.badgeStats?.badgeList && profile.badgeStats.badgeList.length > 0 && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Awards</span>
-                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.badgeStats.badgeList.length} /></span>
-                      </div>
-                    )}
-                    {profile.platform === "hackerrank" && profile.certificateStats?.certificates && profile.certificateStats.certificates.length > 0 && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Certifications</span>
-                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={profile.certificateStats.certificates.length} /></span>
-                      </div>
-                    )}
-                    {profile.platform === "tuf" && profile.dailyActivityStatsResponse?.submissionCalendar && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Active Days</span>
-                        <span className="font-mono text-gray-200 font-medium group-hover:text-white transition-colors"><AnimatedCounter value={Object.keys(profile.dailyActivityStatsResponse.submissionCalendar).length} /></span>
-                      </div>
-                    )}
-                    {profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts && (
-                      <div className="flex justify-between items-center text-[13px] text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span>Hard Problems</span>
-                        <span className="font-mono text-red-400 font-medium drop-shadow-sm"><AnimatedCounter value={profile.totalQuestionStats.hardQuestionCounts || 0} /></span>
-                      </div>
-                    )}
-                  </div>
+                <div className={NAME_COL_CLASS}>
+                  <h3 className="font-display text-[22px] font-medium leading-[1.2] text-ivory-100">
+                    {name}
+                  </h3>
+                  {badge && (
+                    <span className="ledger font-mono text-[12px] capitalize leading-none tracking-[0.04em] text-ivory-300">
+                      {badge}
+                    </span>
+                  )}
                 </div>
-              </motion.div>
+
+                <dl className={STATS_COL_CLASS}>
+                  {columns.map((col, i) => (
+                    <div key={`${col.label}-${i}`} className="flex flex-col gap-2.5">
+                      <dt className="truncate font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
+                        {col.label}
+                      </dt>
+                      <dd className="m-0">
+                        <LedgerNumber
+                          value={col.value}
+                          label={`${col.label}: ${col.value}`}
+                          delayMs={idx * 90}
+                          className="font-mono text-[15px] leading-none text-ivory-100"
+                        />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
             );
           })}
       </div>
-    </>
+    </div>
   );
 
   if (isEmbedded) {
-    return (
-      <div ref={sectionRef} className="w-full relative z-10 mt-8">
-        {innerContent}
-      </div>
-    );
+    return plate;
   }
 
   return (
-    <section ref={sectionRef} id="coding-profiles" className="py-20 relative overflow-hidden">
-      {/* Background Effects — cheap gradients, no backdrop blur */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle at 70% 30%, rgba(99,102,241,0.05), transparent 45%), radial-gradient(circle at 25% 75%, rgba(6,182,212,0.05), transparent 45%)",
-        }}
-      />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {innerContent}
-      </div>
+    <section id="coding-profiles" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">{plate}</div>
     </section>
   );
 }

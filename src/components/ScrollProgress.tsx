@@ -1,10 +1,18 @@
 "use client";
 
 import { motion, useScroll, useSpring } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
+/**
+ * A 1px aurum hairline across the very top of the viewport, drawn from the
+ * left in proportion to scroll progress. Scroll-driven, so it reads as state
+ * rather than animation; the spring only smooths the hand-off between frames
+ * and is bypassed under reduced motion.
+ */
 export default function ScrollProgress() {
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
+  const smoothed = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
@@ -12,14 +20,9 @@ export default function ScrollProgress() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-[3px] z-[9999] origin-left"
-      style={{
-        scaleX,
-        background:
-          "linear-gradient(90deg, #7c3aed, #a855f7, #ec4899, #3b82f6)",
-        boxShadow:
-          "0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)",
-      }}
+      aria-hidden
+      className="pointer-events-none fixed top-0 left-0 right-0 z-9998 h-px origin-left bg-aurum-300"
+      style={{ scaleX: reduced ? scrollYProgress : smoothed }}
     />
   );
 }

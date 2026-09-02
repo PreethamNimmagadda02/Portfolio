@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Reveal primitives for the masked-line heading system.
+ * Reveal primitives for the plate-lift heading system.
  *
  * `InViewClass` adds `.in-view` to its wrapper the first time it enters the
- * viewport — all descendant `.line-rise` / `.kicker-line` / `.comet` CSS
- * animations key off that class, so an entire section's entrance is one
- * IntersectionObserver + pure CSS (no per-element Framer nodes).
+ * viewport. Every descendant `.line-rise` and `.rule-draw` (see globals.css)
+ * keys off that class, so an entire section's entrance is one
+ * IntersectionObserver plus pure CSS, with no per-element Framer nodes.
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -24,7 +24,7 @@ export function InViewClass({
   as?: "div" | "section" | "header" | "span";
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  // Always starts false — the server prerenders without `.in-view`, and the
+  // Always starts false: the server prerenders without `.in-view`, and the
   // client hydrates identically (a lazy `typeof IntersectionObserver` check
   // here caused a server/client class mismatch).
   const [inView, setInView] = useState(false);
@@ -59,8 +59,13 @@ export function InViewClass({
 }
 
 /**
- * Splits text into words, each wrapped in a clipping mask with a staggered
- * `.line-rise` animation. Use inside an `InViewClass` wrapper.
+ * Splits text into words, each rising out of its own clipping mask on a
+ * left-to-right stagger, so a display line assembles rather than arriving
+ * whole. Use inside an `InViewClass` wrapper.
+ *
+ * The mask is `.word-mask`, whose descender reserve is set in em: one shared
+ * pixel reserve would clip a "g" at 3rem and leave a gap at 22px. The space
+ * between words sits outside the masks so it stays a line break opportunity.
  */
 export function RiseWords({
   text,
@@ -73,27 +78,22 @@ export function RiseWords({
   baseDelay?: number;
   step?: number;
 }) {
+  const words = text.split(" ");
   return (
     <>
-      {text.split(" ").map((word, i) => (
-        <span key={i} className={cn("line-mask align-bottom", className)} style={{ display: "inline-block" }}>
-          <span className="line-rise" style={{ "--rise-delay": `${baseDelay + i * step}ms` } as React.CSSProperties}>
-            {word}
+      {words.map((word, i) => (
+        <span key={i}>
+          <span className={cn("word-mask", className)}>
+            <span
+              className="line-rise"
+              style={{ "--rise-delay": `${baseDelay + i * step}ms` } as React.CSSProperties}
+            >
+              {word}
+            </span>
           </span>
-          {i < text.split(" ").length - 1 ? "\u00A0" : ""}
+          {i < words.length - 1 ? " " : ""}
         </span>
       ))}
     </>
-  );
-}
-
-/** Oversized ghost index + label + drawing hairline. Place inside InViewClass. */
-export function SectionKicker({ num, label }: { num: string; label: string }) {
-  return (
-    <div className="kicker" aria-hidden>
-      <span className="kicker-num">{num}</span>
-      <span className="kicker-label">{label}</span>
-      <span className="kicker-line" />
-    </div>
   );
 }

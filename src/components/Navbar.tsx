@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "@/lib/motion";
-import { cn, smoothScrollTo, seededRandom } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
+import { List } from "@phosphor-icons/react";
+import { AnimatePresence, EASE_HEAVY, EASE_SETTLE, motion } from "@/lib/motion";
+import { TextButton } from "@/components/ui/TextButton";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useMediaQuery } from "@/lib/viewport-store";
+import { cn, smoothScrollTo } from "@/lib/utils";
 
+/* The eight labels and hrefs are fixed by the brief. The contact section is
+   measured for the active state but never carries a highlighted link. */
 const navLinks = [
   { name: "Home", href: "#home" },
   { name: "About", href: "#about" },
@@ -15,484 +20,380 @@ const navLinks = [
   { name: "Activity", href: "#github-stats" },
   { name: "Achievements", href: "#achievements" },
   { name: "Testimonials", href: "#testimonials" },
-];
+] as const;
 
-/* ─── Floating Particle ─── */
-interface NavParticleStyle {
-  width: string;
-  height: string;
-  left: string;
-  top: string;
-  animation: string;
+const CONTACT_HREF = "#contact";
+const CONTACT_LABEL = "Get in touch";
+const MENU_ID = "mobile-menu";
+
+/* Section ids measured for the active link, in page order. */
+const SECTION_IDS = [...navLinks.map((l) => l.href.slice(1)), CONTACT_HREF.slice(1)];
+
+/* The reading line: a band 38% down the viewport, expressed as a negative
+   root margin. Sections are contiguous, so exactly one can cross it, and the
+   highlight moves the instant a section's edge does. This replaces ranking
+   sections by visible area, which favoured whichever section was tallest and
+   changed late at every boundary. */
+const READING_LINE = "-38% 0px -61% 0px";
+
+type LenisLike = { stop: () => void; start: () => void };
+
+function getLenis(): LenisLike | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as unknown as { lenis?: LenisLike }).lenis;
 }
 
-function makeNavParticleStyle(index: number): NavParticleStyle {
-  // Seeded per-index PRNG: identical values during prerender and hydration.
-  // (Math.random() here caused hydration mismatches — useState lazy
-  // initializers DO run on the server.)
-  const rand = seededRandom(index * 1013 + 7);
-  const duration = (3 + rand() * 3).toFixed(3);
-  const delay = (rand() * 2).toFixed(3);
-  return {
-    width: `${(2 + rand() * 2).toFixed(2)}px`,
-    height: `${(2 + rand() * 2).toFixed(2)}px`,
-    left: `${(10 + rand() * 80).toFixed(4)}%`,
-    top: `${(20 + rand() * 60).toFixed(4)}%`,
-    // Embed delay inside the shorthand so there's no competing animationDelay prop
-    animation: `navFloat${index % 4} ${duration}s ease-in-out ${delay}s infinite`,
-  };
+/* Scroll lock is idempotent so a link click can release it synchronously
+   (Lenis ignores scrollTo while stopped) and the effect cleanup can release
+   it again without side effects. */
+let lockedOverflow: string | null = null;
+
+function lockScroll() {
+  if (lockedOverflow !== null) return;
+  lockedOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  getLenis()?.stop();
 }
 
-function NavParticle({ index }: { index: number }) {
-  // Deterministic style — same output on server and client.
-  const [s] = useState<NavParticleStyle>(() => makeNavParticleStyle(index));
+function unlockScroll() {
+  if (lockedOverflow === null) return;
+  document.body.style.overflow = lockedOverflow;
+  lockedOverflow = null;
+  getLenis()?.start();
+}
 
-  const style: React.CSSProperties = {
-    position: "absolute",
-    width: s.width,
-    height: s.height,
-    borderRadius: "50%",
-    background: index % 2 === 0
-      ? "rgba(139, 92, 246, 0.6)"
-      : "rgba(59, 130, 246, 0.5)",
-    left: s.left,
-    top: s.top,
-    animation: s.animation,
-    pointerEvents: "none",
-    filter: "blur(0.5px)",
-    zIndex: 0,
-  };
-  return <div style={style} />;
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function visibleFocusables(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+    (el) => el.getClientRects().length > 0
+  );
 }
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const navRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
 
-  // Mouse state for 3D tilt — direct DOM manipulation for reliability
-  const mouseState = useRef({ x: 0.5, y: 0.5, hovering: false });
-  const tiltState = useRef({ rx: 0, ry: 0, spotX: 50, spotY: 50 });
+  const headerRef = useRef<HTMLElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
-  // ── Smooth tilt animation loop ──
-  // The rAF loop only runs while hovering (or decaying back to flat).
-  // Previously it ran for the entire session, writing styles every frame
-  // even when the cursor never touched the navbar.
-  const loopActive = useRef(false);
+  const reducedMotion = useReducedMotion();
+  const isDesktop = useMediaQuery("(min-width: 1024px)", false);
+  // Derived, never synced: crossing to the desktop layout closes the overlay.
+  const menuOpen = isOpen && !isDesktop;
 
-  const tick = useCallback(function tickFn() {
-    if (!innerRef.current) {
-      loopActive.current = false;
-      return;
-    }
-    const ms = mouseState.current;
-    const ts = tiltState.current;
-
-    if (ms.hovering) {
-      // Lerp toward target with damping — kept subtle so click targets
-      // don't drift away from the cursor mid-interaction.
-      ts.ry += ((ms.x - 0.5) * 7 - ts.ry) * 0.08;
-      ts.rx += ((0.5 - ms.y) * 4 - ts.rx) * 0.08;
-      ts.spotX += (ms.x * 100 - ts.spotX) * 0.12;
-      ts.spotY += (ms.y * 100 - ts.spotY) * 0.12;
-    } else {
-      // Decay back to flat
-      ts.ry *= 0.92;
-      ts.rx *= 0.92;
-      ts.spotX += (50 - ts.spotX) * 0.06;
-      ts.spotY += (50 - ts.spotY) * 0.06;
-    }
-
-    innerRef.current.style.transform = `perspective(800px) rotateX(${ts.rx}deg) rotateY(${ts.ry}deg) translateZ(0)`;
-
-    // Update spotlight via CSS variable
-    innerRef.current.style.setProperty("--spot-x", `${ts.spotX}%`);
-    innerRef.current.style.setProperty("--spot-y", `${ts.spotY}%`);
-    innerRef.current.style.setProperty("--spot-opacity", ms.hovering ? "1" : "0");
-
-    // Stop once fully decayed and not hovering — zero idle cost
-    const converged =
-      !ms.hovering &&
-      Math.abs(ts.rx) < 0.01 &&
-      Math.abs(ts.ry) < 0.01 &&
-      Math.abs(ts.spotX - 50) < 0.1 &&
-      Math.abs(ts.spotY - 50) < 0.1;
-
-    if (converged) {
-      loopActive.current = false;
-      return;
-    }
-    rafRef.current = requestAnimationFrame(tickFn);
-  }, []);
-
-  const startLoop = useCallback(() => {
-    if (loopActive.current) return;
-    loopActive.current = true;
-    rafRef.current = requestAnimationFrame(tick);
-  }, [tick]);
-
+  /* Letterhead state: the bar is transparent over the hero and gains its
+     fill once a 1px sentinel 80px into the document leaves the viewport. */
   useEffect(() => {
-    return () => {
-      loopActive.current = false;
-      cancelAnimationFrame(rafRef.current);
-    };
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[entries.length - 1];
+        if (entry) setScrolled(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!navRef.current) return;
-    const rect = navRef.current.getBoundingClientRect();
-    mouseState.current.x = (e.clientX - rect.left) / rect.width;
-    mouseState.current.y = (e.clientY - rect.top) / rect.height;
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    mouseState.current.hovering = true;
-    startLoop();
-  }, [startLoop]);
-
-  const handleMouseLeave = useCallback(() => {
-    mouseState.current.hovering = false;
-    // Loop keeps running until the decay converges, then stops itself
-    startLoop();
-  }, [startLoop]);
-
-  // ── Scroll tracking ──
+  /* Active section: whichever one is crossing the reading line.
+     Sections arrive lazily, and a node can be replaced outright later (a hot
+     reload, a remount), which silently drops it from the observer and leaves
+     the highlight stuck on whatever was last set. So the mapping tracked is
+     id to element, not id to "seen", and the MutationObserver stays alive to
+     re-observe whenever the element behind an id changes. */
   useEffect(() => {
-    let ticking = false;
-    let lastSectionCheck = 0;
+    const observed = new Map<string, Element>();
 
-    const measureSections = () => {
-      const viewportHeight = window.innerHeight;
-      let bestSection = "home";
-      let bestOverlap = 0;
-
-      const allSections = [...navLinks.map(l => l.href.slice(1)), "contact"];
-
-      for (const sectionId of allSections) {
-        const el = document.getElementById(sectionId);
-        if (!el) continue;
-
-        const rect = el.getBoundingClientRect();
-        const visibleTop = Math.max(0, rect.top);
-        const visibleBottom = Math.min(viewportHeight, rect.bottom);
-        const overlap = Math.max(0, visibleBottom - visibleTop);
-
-        if (overlap > bestOverlap) {
-          bestOverlap = overlap;
-          bestSection = sectionId;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
         }
-      }
+      },
+      { rootMargin: READING_LINE, threshold: 0 }
+    );
 
-      setActiveSection(bestSection);
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          // Cheap check every frame
-          setScrolled(window.scrollY > 50);
-
-          // Expensive check (9× getBoundingClientRect = forced layout)
-          // throttled to ~6/s — plenty for a section highlight.
-          const now = performance.now();
-          if (now - lastSectionCheck > 150) {
-            lastSectionCheck = now;
-            measureSections();
-          }
-          ticking = false;
-        });
-        ticking = true;
+    const attach = () => {
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (!el || observed.get(id) === el) continue;
+        const previous = observed.get(id);
+        if (previous) io.unobserve(previous);
+        observed.set(id, el);
+        io.observe(el);
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    attach();
+
+    // Coalesced to one re-scan per frame: subtree mutations are frequent while
+    // the page animates, and a re-scan is nine id lookups.
+    let queued = false;
+    const mo = new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        attach();
+      });
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
   }, []);
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  /* Overlay open: lock scroll, move focus in, trap Tab, close on Escape. */
+  useEffect(() => {
+    if (!menuOpen) return;
+    lockScroll();
+
+    const raf = requestAnimationFrame(() => {
+      const menu = document.getElementById(MENU_ID);
+      const first = menu ? visibleFocusables(menu)[0] : undefined;
+      first?.focus();
+    });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setIsOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const root = headerRef.current;
+      if (!root) return;
+      const focusables = visibleFocusables(root);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const current = document.activeElement as HTMLElement | null;
+      const inside = current ? root.contains(current) : false;
+      if (e.shiftKey) {
+        if (!inside || current === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (!inside || current === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("keydown", onKeyDown);
+      unlockScroll();
+    };
+  }, [menuOpen]);
+
+  const goTo = useCallback((e: MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    smoothScrollTo(href);
+    // Release the lock before scrolling: Lenis drops scrollTo while stopped.
+    unlockScroll();
     setIsOpen(false);
-  };
+    smoothScrollTo(href);
+  }, []);
+
+  const toggleMenu = () => setIsOpen((open) => !open);
+
+  /* The Get in touch link in the overlay is a plain anchor at 40px; the
+     shared TextButton is sized for the bar. */
+  const onOverlayContact = (e: MouseEvent<HTMLAnchorElement>) => goTo(e, CONTACT_HREF);
+
+  const filled = scrolled && !menuOpen;
 
   return (
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50"
-        ref={navRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+    <>
+      {/* Position sentinel, 80px into the document. Absolute against the
+          initial containing block, so it never moves with the fixed bar. */}
+      <div
+        ref={sentinelRef}
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-20 h-px w-px"
+      />
+
+      <header
+        ref={headerRef}
+        className={cn(
+          "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-350 ease-heavy",
+          filled
+            ? "border-hairline bg-obsidian-1/92 backdrop-blur-[12px]"
+            : "border-transparent bg-transparent"
+        )}
       >
-        {/* 3D-tilting container — transforms applied via rAF */}
-        <div
-          ref={innerRef}
-          className={cn(
-            "relative rounded-full transition-all duration-700 overflow-hidden will-change-transform",
-            scrolled
-              ? "px-3 sm:px-4 py-2 bg-black/95 border border-white/15 shadow-[0_8px_40px_rgba(139,92,246,0.2),0_0_80px_rgba(139,92,246,0.06)]"
-              : "px-4 sm:px-6 py-3 bg-black/50 border border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
-          )}
-        >
-          {/* Cursor-following spotlight glow */}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-full z-0 transition-opacity duration-500"
-            style={{
-              opacity: "var(--spot-opacity, 0)",
-              background: `radial-gradient(circle 200px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(139,92,246,0.18), rgba(59,130,246,0.06) 50%, transparent 100%)`,
-            }}
-          />
-
-          {/* Cursor-following border rim light */}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-full z-0 transition-opacity duration-500"
-            style={{
-              opacity: "var(--spot-opacity, 0)",
-              background: `radial-gradient(circle 140px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(139,92,246,0.4), transparent 70%)`,
-              mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-              maskComposite: "exclude",
-              WebkitMaskComposite: "xor",
-              padding: "1.5px",
-            }}
-          />
-
-          {/* Top specular highlight */}
-          <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent z-0" />
-
-          {/* Bottom shadow line for 3D depth */}
-          <div className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-linear-to-r from-transparent via-black/30 to-transparent z-0" />
-
-          {/* Floating particles */}
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <NavParticle key={i} index={i} />
-          ))}
-
-          {/* Shimmer sweep on scroll transition */}
-          <div
-            className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-full"
-            style={{ opacity: scrolled ? 0.6 : 0 }}
-          >
-            <div
-              className="absolute inset-0 bg-linear-to-r from-transparent via-purple-500/10 to-transparent"
-              style={{
-                animationName: scrolled ? "navShimmer" : "none",
-                animationDuration: "2s",
-                animationTimingFunction: "ease-in-out",
-                animationFillMode: "forwards",
-              }}
-            />
-          </div>
-
-          {/* ── Content ── */}
-          <div className="relative z-10 flex items-center justify-between">
-            {/* Brand Logo */}
-            <a
-              href="#home"
-              onClick={(e) => scrollToSection(e, "#home")}
-              className="flex items-center gap-2.5 group"
-            >
-              <motion.div
-                whileHover={{ scale: 1.12, rotateY: 20 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 12 }}
-                className="relative"
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                <motion.div
-                  className="absolute -inset-1.5 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-70 blur-lg transition-opacity duration-300"
-                />
-                <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 via-purple-500 to-blue-500 p-[2px] overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.35)]">
-                  <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
-                    <span className="text-sm font-black tracking-tighter text-white">
-                      PN
-                    </span>
-                  </div>
-                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                </div>
-              </motion.div>
-              <div className="flex flex-col">
-                <span className="relative text-base sm:text-lg font-bold tracking-tight leading-none whitespace-nowrap">
-                  <span className="text-white group-hover:opacity-0 transition-opacity duration-300">Preetham Nimmagadda</span>
-                  <span className="absolute inset-0 bg-clip-text text-transparent bg-linear-to-r from-purple-400 via-fuchsia-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Preetham Nimmagadda</span>
-                </span>
-                <span className="text-[10px] sm:text-xs text-purple-300/90 tracking-widest uppercase font-medium group-hover:text-blue-300 transition-colors duration-300">
-                  AI & Full Stack Engineer
-                </span>
-              </div>
-            </a>
-
-            {/* Desktop Menu — xl+ only: brand + 8 links + toggle + CTA needs
-                ~1090px, which overflows the pill on tablets/small laptops */}
-            <div className="hidden xl:flex items-center gap-0.5 p-1 rounded-full bg-white/3 border border-white/4">
-              {navLinks.map((link) => {
-                const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
-                return (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={(e) => scrollToSection(e, link.href)}
-                    className="relative px-3 py-1.5 text-sm font-medium group/link"
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNav"
-                        className="absolute inset-0 rounded-full"
-                        style={{
-                          background: "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.15))",
-                          border: "1px solid rgba(139,92,246,0.4)",
-                          boxShadow: "0 0 16px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.3)",
-                        }}
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                    <span
-                      className={cn(
-                        "relative z-10 inline-block transition-all duration-200",
-                        isActive
-                          ? "text-white drop-shadow-[0_0_10px_rgba(139,92,246,0.6)]"
-                          : "text-gray-300 group-hover/link:text-white group-hover/link:-translate-y-[2px] group-hover/link:drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]"
-                      )}
-                    >
-                      {link.name}
-                    </span>
-
-                    {/* Hover underline glow */}
-                    {!isActive && (
-                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-linear-to-r from-purple-400 to-blue-400 rounded-full group-hover/link:w-3/4 transition-all duration-300 opacity-0 group-hover/link:opacity-70 blur-[0.5px]" />
-                    )}
-                  </a>
-                );
-              })}
-            </div>
-
-            {/* Theme Toggle */}
-            <div className="hidden xl:block">
-              <ThemeToggle />
-            </div>
-
-            {/* CTA Button */}
-            <motion.div
-              whileHover={{ scale: 1.06, rotateY: -6 }}
-              whileTap={{ scale: 0.94 }}
-              className="hidden xl:block relative group"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <div className={cn(
-                "absolute -inset-1 bg-linear-to-r from-purple-600 to-blue-600 rounded-full blur-md transition-all duration-300",
-                activeSection === "contact" ? "opacity-100 blur-lg scale-110" : "opacity-0 group-hover:opacity-80"
-              )} />
-              <a
-                href="#contact"
-                onClick={(e) => scrollToSection(e, "#contact")}
-                className={cn(
-                  "relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold transition-all overflow-hidden",
-                  activeSection === "contact"
-                    ? "ring-2 ring-purple-400/60"
-                    : ""
-                )}
-                style={{
-                  boxShadow: activeSection === "contact"
-                    ? "0 0 30px rgba(139,92,246,0.55), 0 0 60px rgba(139,92,246,0.15), inset 0 1px 0 rgba(255,255,255,0.2)"
-                    : "0 4px 16px rgba(139,92,246,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
-                }}
-              >
-                {/* Button shimmer */}
-                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                </span>
-                <span className="relative">Hire Me</span>
-              </a>
-            </motion.div>
-
-            {/* Mobile/tablet Menu Button */}
-            <div className="xl:hidden">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label={isOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isOpen}
-                aria-controls="mobile-menu"
-                className="p-2 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:text-white"
-              >
-                {isOpen ? <X size={20} /> : <Menu size={20} />}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
+        {/* Full-screen menu, below lg. Sits under the bar so the letterhead
+            name and the toggle stay visible and operable above it. */}
         <AnimatePresence>
-          {isOpen && (
+          {menuOpen && (
             <motion.div
-              id="mobile-menu"
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="absolute top-16 left-0 w-full max-h-[calc(100svh-6rem)] overflow-y-auto bg-black/95 border border-white/10 rounded-2xl p-4 xl:hidden shadow-2xl"
+              id={MENU_ID}
+              data-lenis-prevent
+              className="fixed inset-0 z-0 overflow-y-auto bg-obsidian-0 lg:hidden"
+              initial={reducedMotion ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0)" }}
+              animate={reducedMotion ? { opacity: 1 } : { clipPath: "inset(0 0 0% 0)" }}
+              exit={reducedMotion ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0)" }}
+              transition={
+                reducedMotion
+                  ? { duration: 0.2, ease: "linear" }
+                  : { duration: 0.7, ease: EASE_HEAVY }
+              }
             >
-              <div className="flex flex-col space-y-2">
-                {navLinks.map((link, i) => {
-                  const isActive = activeSection === link.href.slice(1) && activeSection !== "contact";
-                  return (
-                    <motion.div
-                      key={link.name}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
+              <div className="mx-auto flex min-h-full w-full max-w-[1280px] flex-col px-6 pb-12 pt-24 lg:px-10">
+                <nav aria-label="Menu">
+                  <ul className="flex flex-col gap-2">
+                    {navLinks.map((link, i) => {
+                      const id = link.href.slice(1);
+                      const isActive = activeSection === id;
+                      return (
+                        <li key={link.href} className="line-mask">
+                          <motion.a
+                            href={link.href}
+                            onClick={(e) => goTo(e, link.href)}
+                            aria-current={isActive ? "location" : undefined}
+                            className="inline-block font-display text-[40px] leading-[1.1] text-ivory-100 transition-colors duration-250 ease-heavy hover:text-aurum-200"
+                            initial={reducedMotion ? false : { y: "110%" }}
+                            animate={{ y: 0 }}
+                            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: "20%" }}
+                            transition={
+                              reducedMotion
+                                ? { duration: 0.2 }
+                                : { duration: 0.7, ease: EASE_SETTLE, delay: 0.2 + i * 0.06 }
+                            }
+                          >
+                            {link.name}
+                          </motion.a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+
+                <div className="mt-6 border-t border-hairline pt-6">
+                  <span className="line-mask">
+                    <motion.a
+                      href={CONTACT_HREF}
+                      onClick={onOverlayContact}
+                      className="inline-block font-display text-[40px] leading-[1.1] text-aurum-300 transition-colors duration-250 ease-heavy hover:text-aurum-200"
+                      initial={reducedMotion ? false : { y: "110%" }}
+                      animate={{ y: 0 }}
+                      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: "20%" }}
+                      transition={
+                        reducedMotion
+                          ? { duration: 0.2 }
+                          : { duration: 0.7, ease: EASE_SETTLE, delay: 0.2 + navLinks.length * 0.06 }
+                      }
                     >
-                      <a
-                        href={link.href}
-                        onClick={(e) => scrollToSection(e, link.href)}
-                        className={cn(
-                          "block px-4 py-3 rounded-xl text-lg font-medium transition-colors",
-                          isActive
-                            ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-500/30"
-                            : "text-gray-300 hover:bg-white/5 hover:text-white"
-                        )}
-                      >
-                        {link.name}
-                      </a>
-                    </motion.div>
-                  );
-                })}
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.22 }}
-                  className="flex justify-center py-2"
-                >
-                  <ThemeToggle />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.28 }}
-                  className="pt-2"
-                >
-                  <a
-                    href="#contact"
-                    onClick={(e) => scrollToSection(e, "#contact")}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-linear-to-r from-purple-600 to-blue-600 text-white font-medium"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Hire Me
-                  </a>
-                </motion.div>
+                      {CONTACT_LABEL}
+                    </motion.a>
+                  </span>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.nav>
+
+        {/* The 64px letterhead bar, aligned to the page columns. */}
+        <div className="relative z-10 mx-auto flex h-16 w-full max-w-[1280px] flex-nowrap items-center justify-between px-6 lg:px-10">
+          <a
+            href="#home"
+            onClick={(e) => goTo(e, "#home")}
+            className="foil shrink-0 whitespace-nowrap font-display font-medium text-[22px] leading-none"
+          >
+            Preetham Nimmagadda
+          </a>
+
+          {/* Desktop: eight labels, then the contact link. The link gap tightens
+              to 20px at lg so the row holds one line at 1024px with clear air
+              between the letterhead and Home; 28px from xl. */}
+          <div className="hidden lg:flex lg:items-center lg:gap-8 xl:gap-10">
+            <nav aria-label="Primary">
+              <ul className="flex flex-nowrap items-center gap-5 xl:gap-7">
+                {navLinks.map((link) => {
+                  const id = link.href.slice(1);
+                  const isActive = activeSection === id;
+                  return (
+                    <li key={link.href}>
+                      <a
+                        href={link.href}
+                        onClick={(e) => goTo(e, link.href)}
+                        aria-current={isActive ? "location" : undefined}
+                        className={cn(
+                          "relative block whitespace-nowrap py-3 font-sans text-[13px] leading-none tracking-[-0.01em] transition-colors duration-250 ease-heavy hover:text-ivory-100",
+                          isActive ? "text-ivory-100" : "text-ivory-200"
+                        )}
+                      >
+                        {link.name}
+                        {isActive && (
+                          <motion.span
+                            layoutId="activeNav"
+                            aria-hidden
+                            className="absolute inset-x-0 bottom-[5px] h-px bg-aurum-300"
+                            transition={{ duration: 0.5, ease: EASE_HEAVY }}
+                          />
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <TextButton
+              variant="secondary"
+              href={CONTACT_HREF}
+              className="text-[13px] tracking-[-0.01em] text-aurum-300 hover:text-aurum-200"
+            >
+              {CONTACT_LABEL}
+            </TextButton>
+          </div>
+
+          {/* Below lg: the List glyph. Its top and bottom lines are real 1px
+              bars laid exactly over the icon strokes; on open the icon fades
+              and the two bars swing into an X. Transform and opacity only. */}
+          <button
+            ref={toggleRef}
+            type="button"
+            onClick={toggleMenu}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls={MENU_ID}
+            className="relative -mr-2 flex h-11 w-11 shrink-0 items-center justify-center text-ivory-100 lg:hidden"
+          >
+            <span className="relative block h-6 w-6" aria-hidden>
+              <List
+                weight="light"
+                size={24}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-150 ease-heavy",
+                  menuOpen ? "opacity-0" : "opacity-100"
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute left-[3.75px] top-[5.5px] h-px w-[16.5px] bg-current transition-transform duration-400 ease-heavy",
+                  menuOpen ? "translate-y-1.5 rotate-45" : "translate-y-0 rotate-0"
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute left-[3.75px] top-[17.5px] h-px w-[16.5px] bg-current transition-transform duration-400 ease-heavy",
+                  menuOpen ? "-translate-y-1.5 -rotate-45" : "translate-y-0 rotate-0"
+                )}
+              />
+            </span>
+          </button>
+        </div>
+      </header>
+    </>
   );
 }

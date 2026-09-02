@@ -1,164 +1,233 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useInView } from "@/lib/motion";
-import { Star, Trophy, Code, Flame, LucideIcon } from "lucide-react";
-import InteractiveCard from "./InteractiveCard";
-import { InViewClass, SectionKicker } from "./Reveal";
+/**
+ * Achievements: the competitive record set as a ledger sheet.
+ *
+ * Four display numerals on a 12-column grid (7/5, then 5/7), separated by
+ * hairline rules that draw in as the section enters: the ledger is ruled
+ * before it is filled. Figures use the shared LedgerNumber roll-in, staggered
+ * 120ms between blocks so the largest percentile lands first. Hovering a block
+ * turns its figure gold and raises the rules that border it. Nothing else moves.
+ */
 
-interface Achievement {
-  id: number;
+import { useState, type PointerEvent, type ReactNode } from "react";
+import { LedgerNumber, SectionHeading } from "@/components/ui";
+import { InViewClass } from "./Reveal";
+import { cn } from "@/lib/utils";
+
+type RuleId = "row" | "v1" | "v2";
+
+interface Record {
+  id: string;
+  figure: string;
+  /** Sentence read by assistive tech in place of the character spans. */
+  spoken: string;
+  /** Mono caption set beneath the figure (Codeforces only). */
+  unit?: string;
   title: string;
   description: string;
-  stat: string;
-  icon: LucideIcon;
-  color: string;
+  /** Denomination: the two large figures reach 7.5rem, the two small ones 5rem. */
+  size: "large" | "small";
+  /** Column span on the 12-column grid. */
+  span: 7 | 5;
+  /** The rules this block borders, raised to hairline-strong while hovered. */
+  rules: RuleId[];
 }
 
-const achievements: Achievement[] = [
+const records: Record[] = [
   {
-    id: 0,
+    id: "hackerrank",
+    figure: "Top 0.07%",
+    spoken: "Ranked in the top 0.07% of developers on HackerRank.",
+    title: "HackerRank 6-star gold",
+    description: "Ranked in the top 0.07% of 26M+ developers on the platform.",
+    size: "large",
+    span: 7,
+    rules: ["row", "v1"],
+  },
+  {
+    id: "codechef",
+    figure: "Top 0.8%",
+    spoken: "Ranked in the top 0.8% of coders on CodeChef.",
+    title: "CodeChef 4-star",
+    description: "4-star status (1864 rating). Top 0.8% among 2 million+ coders worldwide.",
+    size: "small",
+    span: 5,
+    rules: ["row", "v1"],
+  },
+  {
+    id: "codeforces",
+    figure: "1450",
+    spoken: "Codeforces rating of 1450, Specialist.",
+    unit: "rating",
     title: "Codeforces Specialist",
     description: "Reached 1450 rating, outperforming 80% of global competitive programmers.",
-    stat: "Top 20%",
-    icon: Code,
-    color: "#22d3ee",
+    size: "small",
+    span: 5,
+    rules: ["row", "v2"],
   },
   {
-    id: 1,
-    title: "CodeChef Elite",
-    description: "4-Star status (1864 rating). Top 0.8% among 2 million+ coders worldwide.",
-    stat: "Top 0.8%",
-    icon: Star,
-    color: "#fbbf24",
-  },
-  {
-    id: 2,
-    title: "HackerRank 6★ Gold",
-    description: "Ranked in the top 0.07% of 26M+ developers on the platform.",
-    stat: "Top 0.07%",
-    icon: Trophy,
-    color: "#4ade80",
-  },
-  {
-    id: 3,
-    title: "1,000+ Problems Solved",
-    description: "Across Leetcode, TUF+, Codeforces, CodeChef, and HackerRank — depth across every major judge.",
-    stat: "1000+",
-    icon: Flame,
-    color: "#f472b6",
+    id: "problems",
+    figure: "1,000+",
+    spoken: "More than 1,000 problems solved.",
+    title: "1,000+ problems solved",
+    description: "Across LeetCode, TUF+, Codeforces, CodeChef and HackerRank. Depth across every major judge.",
+    size: "large",
+    span: 7,
+    rules: ["row", "v2"],
   },
 ];
 
-function StatNumber({ value, color }: { value: string; color: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
-  const match = value.match(/[\d.]+/);
-  const numeric = match?.[0];
-  const prefix = numeric ? value.slice(0, match!.index) : "";
-  const suffix = numeric ? value.slice(match!.index! + numeric.length) : "";
-  const [display, setDisplay] = useState(numeric ? `${prefix}0${suffix}` : value);
-  const [done, setDone] = useState(false);
+/** Block-to-block stagger for the roll-in, in milliseconds. */
+const BLOCK_STAGGER = 120;
 
-  useEffect(() => {
-    if (!isInView || !numeric) return;
-    const target = parseFloat(numeric);
-    const duration = 1400;
-    const start = Date.now();
-    let frameId: number;
-    const animate = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = numeric.includes(".") ? (target * eased).toFixed(2) : Math.floor(target * eased).toString();
-      setDisplay(`${prefix}${current}${suffix}`);
-      if (progress < 1) frameId = requestAnimationFrame(animate);
-      else {
-        setDisplay(value);
-        setDone(true); // triggers the brief glow flare
-      }
-    };
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [isInView, numeric, prefix, suffix, value]);
+/* Display sizes. At the 1280px design width the large figure is exactly
+   7.5rem and the small one 5rem; between 1024px and 1280px both scale with
+   the viewport so "Top 0.07%" never breaks its column. */
+const FIGURE_SIZE = {
+  large: "text-[3.5rem] sm:text-[4rem] lg:text-[clamp(5rem,9.375vw,7.5rem)]",
+  small: "text-[3.5rem] lg:text-[clamp(4rem,6.25vw,5rem)]",
+} as const;
 
+/* Each rule carries one transition shorthand: the draw (the `scale` property,
+   which Tailwind's scale-x/scale-y utilities set, 900ms, heavy, verticals
+   150ms after the horizontal) and the hover lift (background-color, 300ms,
+   settle). Under reduced motion the global kill switch collapses the
+   durations and the rules render in their final state. */
+const HORIZONTAL_DRAW = "[transition:scale_900ms_var(--ease-heavy),background-color_300ms_var(--ease-settle)]";
+const VERTICAL_DRAW = "[transition:scale_900ms_var(--ease-heavy)_150ms,background-color_300ms_var(--ease-settle)]";
+
+function HorizontalRule({ active, className }: { active: boolean; className?: string }) {
   return (
-    <span ref={ref} style={{ color }} className={done ? "stat-flare" : undefined}>
-      {display}
-    </span>
+    <span
+      aria-hidden
+      className={cn(
+        "block h-px w-full origin-left scale-x-0 in-[.in-view]:scale-x-100 motion-reduce:scale-x-100",
+        HORIZONTAL_DRAW,
+        active ? "bg-hairline-strong" : "bg-hairline",
+        className
+      )}
+    />
   );
 }
 
-function AchievementCard({ item, index }: { item: Achievement; index: number }) {
-  const Icon = item.icon;
+function VerticalRule({ active }: { active: boolean }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: index * 0.08 }}
+    <span
+      aria-hidden
+      className={cn(
+        "absolute inset-y-0 right-0 hidden w-px origin-top scale-y-0 lg:block",
+        "in-[.in-view]:scale-y-100 motion-reduce:scale-y-100",
+        VERTICAL_DRAW,
+        active ? "bg-hairline-strong" : "bg-hairline"
+      )}
+    />
+  );
+}
+
+function RecordBlock({
+  record,
+  index,
+  onEnter,
+  onLeave,
+  children,
+}: {
+  record: Record;
+  index: number;
+  onEnter: (id: string, e: PointerEvent<HTMLElement>) => void;
+  onLeave: () => void;
+  children?: ReactNode;
+}) {
+  const isLeft = index % 2 === 0;
+
+  return (
+    <article
+      aria-labelledby={`achievement-${record.id}`}
+      onPointerEnter={(e) => onEnter(record.id, e)}
+      onPointerLeave={onLeave}
+      className={cn(
+        "group relative flex flex-col items-start py-10 lg:py-14",
+        record.span === 7 ? "lg:col-span-7" : "lg:col-span-5",
+        isLeft ? "lg:pr-10" : "lg:pl-10"
+      )}
     >
-      <InteractiveCard
-        accent={item.color}
-        className="card-hairline rounded-3xl p-6 md:p-8 relative overflow-hidden group hover:border-white/20 transition-[border-color,box-shadow] duration-300 hover:shadow-[0_18px_50px_-24px_var(--ic-accent)] h-full"
+      <p
+        className={cn(
+          "font-display font-normal leading-[0.95] tracking-[-0.01em] text-ivory-100",
+          "transition-colors duration-600 ease-settle group-hover:text-aurum-300",
+          FIGURE_SIZE[record.size]
+        )}
       >
-        <div
-          className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-35 transition-opacity"
-          style={{ backgroundColor: item.color }}
-        />
-        <div className="relative z-3">
-          <div className="flex items-center justify-between mb-6">
-            <div
-              className="p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110"
-              style={{ backgroundColor: `${item.color}16`, color: item.color }}
-            >
-              <Icon size={22} />
-            </div>
-            <span className="text-3xl md:text-4xl font-black tabular-nums">
-              <StatNumber value={item.stat} color={item.color} />
-            </span>
-          </div>
-          <h3 className="text-lg md:text-xl font-bold text-white mb-2">{item.title}</h3>
-          <p className="text-sm text-gray-300 leading-relaxed" style={{ fontFamily: "var(--font-inter)" }}>
-            {item.description}
-          </p>
-        </div>
-      </InteractiveCard>
-    </motion.div>
+        <LedgerNumber value={record.figure} label={record.spoken} delayMs={index * BLOCK_STAGGER} />
+      </p>
+
+      {record.unit ? (
+        <span aria-hidden className="mt-3 font-mono text-[12px] tracking-[0.04em] text-ivory-300">
+          {record.unit}
+        </span>
+      ) : null}
+
+      <h3
+        id={`achievement-${record.id}`}
+        className="mt-8 font-display text-[22px] font-medium leading-[1.2] text-ivory-100 lg:mt-10"
+      >
+        {record.title}
+      </h3>
+
+      <p className="mt-3 max-w-[36ch] font-sans text-[15px] leading-[1.6] text-ivory-200">{record.description}</p>
+
+      {children}
+    </article>
   );
 }
 
 export default function Achievements() {
-  return (
-    <section id="achievements" className="relative w-full py-20 md:py-32">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <InViewClass>
-          <SectionKicker num="06" label="Milestones" />
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-14"
-          >
-            <h2 className="text-display text-3xl md:text-5xl text-white mb-3">
-              <span className="line-mask">
-                <span className="line-rise">
-                  My <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-200 via-yellow-400 to-amber-500">Achievements</span>
-                </span>
-              </span>
-            </h2>
-            <p className="text-gray-300 text-sm md:text-base max-w-xl mx-auto">
-              Numbers earned through thousands of hours at the keyboard.
-            </p>
-          </motion.div>
-        </InViewClass>
+  const [hovered, setHovered] = useState<string | null>(null);
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
-          {achievements.map((item, i) => (
-            <AchievementCard key={item.id} item={item} index={i} />
-          ))}
+  const handleEnter = (id: string, e: PointerEvent<HTMLElement>) => {
+    // Hover is a pointer affordance; a touch should not leave a block lit.
+    if (e.pointerType === "touch") return;
+    setHovered(id);
+  };
+  const handleLeave = () => setHovered(null);
+
+  const isActive = (rule: RuleId) => {
+    if (!hovered) return false;
+    const record = records.find((r) => r.id === hovered);
+    return record ? record.rules.includes(rule) : false;
+  };
+
+  const [hackerrank, codechef, codeforces, problems] = records;
+
+  return (
+    <section id="achievements" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
+        <div className="lg:grid lg:grid-cols-12">
+          <SectionHeading
+            title="Competitive record."
+            subtext="Rankings across CodeChef, Codeforces and HackerRank, and 1,000+ problems solved."
+            className="lg:col-span-8"
+          />
         </div>
+
+        <InViewClass amount={0.2} className="mt-16 flex flex-col lg:mt-20 lg:grid lg:grid-cols-12">
+          {/* Row one: HackerRank (1 to 7), CodeChef (8 to 12) */}
+          <RecordBlock record={hackerrank} index={0} onEnter={handleEnter} onLeave={handleLeave}>
+            <VerticalRule active={isActive("v1")} />
+          </RecordBlock>
+          <HorizontalRule active={isActive("v1")} className="lg:hidden" />
+          <RecordBlock record={codechef} index={1} onEnter={handleEnter} onLeave={handleLeave} />
+
+          {/* The ledger's one horizontal rule between the rows */}
+          <HorizontalRule active={isActive("row")} className="lg:col-span-12" />
+
+          {/* Row two: Codeforces (1 to 5), problems solved (6 to 12) */}
+          <RecordBlock record={codeforces} index={2} onEnter={handleEnter} onLeave={handleLeave}>
+            <VerticalRule active={isActive("v2")} />
+          </RecordBlock>
+          <HorizontalRule active={isActive("v2")} className="lg:hidden" />
+          <RecordBlock record={problems} index={3} onEnter={handleEnter} onLeave={handleLeave} />
+        </InViewClass>
       </div>
     </section>
   );

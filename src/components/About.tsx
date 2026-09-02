@@ -1,207 +1,116 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useInView } from "@/lib/motion";
-import { Code, Rocket, Globe, BookOpen, Users, Zap, Target } from "lucide-react";
-import InteractiveCard from "./InteractiveCard";
-import { InViewClass, SectionKicker } from "./Reveal";
+import { motion, EASE_SETTLE } from "@/lib/motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { SectionHeading, LedgerNumber } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import styles from "./About.module.css";
 
-const features = [
-  {
-    id: 0,
-    icon: Code,
-    title: "AI & Autonomous Systems Innovator",
-    description: (
-      <>
-        I build intelligent pipelines that <span className="text-blue-400 font-semibold">act, not just answer</span>. From self-healing data security models at Matters.AI to empathic GenAI companions, I push the boundaries of autonomous technology.
-      </>
-    ),
-    color: "#60a5fa",
-  },
-  {
-    id: 1,
-    icon: Rocket,
-    title: "Performance-Driven Engineer",
-    description: (
-      <>
-        Ranked in the <span className="text-yellow-400 font-semibold">top 0.8% on CodeChef (4★)</span> and a Codeforces Specialist. I bring elite algorithmic rigor to production code, ensuring highly optimized, scalable, and resilient architectures.
-      </>
-    ),
-    color: "#c084fc",
-  },
-  {
-    id: 2,
-    icon: Globe,
-    title: "Strategic Tech Leader",
-    description: (
-      <>
-        Led initiatives reaching <span className="text-teal-400 font-semibold">4,000+ students</span> as a Student Senator and drove strategic campus adoption for Perplexity. I bridge the gap between complex technology and large-scale user impact.
-      </>
-    ),
-    color: "#34d399",
-  },
-  {
-    id: 3,
-    icon: BookOpen,
-    title: "Multi-Agent Orchestrator",
-    description: (
-      <>
-        Architecting <span className="text-amber-400 font-semibold">complex, event-driven platforms</span>. From automated financial trading swarms to logistical AI agents, I design systems where multiple intelligent components coordinate seamlessly.
-      </>
-    ),
-    color: "#fbbf24",
-  },
-];
+/**
+ * About: a manifesto column with hanging figures.
+ *
+ * Four paragraphs of running prose sit in the centre columns. Each opens with
+ * a Bodoni lead phrase set inline, and one figure per paragraph hangs in the
+ * left gutter, right-aligned toward the prose, with a mono caption beneath.
+ * No cards, nothing sticky; the record carries the page.
+ */
 
-const stats = [
-  { value: "95%", label: "AI Model Accuracy", color: "text-purple-400", accent: "#c084fc", icon: Target },
-  { value: "99%", label: "Global Coder Percentile", color: "text-yellow-400", accent: "#facc15", icon: Zap },
-  { value: "4000+", label: "Students Empowered", color: "text-emerald-400", accent: "#34d399", icon: Users },
-];
-
-function AnimatedCounter({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
-  const [displayValue, setDisplayValue] = useState("0");
-  const numericPart = value.match(/[\d.]+/)?.[0] || "0";
-  const suffix = value.replace(/[\d.]+/, "");
-
-  useEffect(() => {
-    if (!isInView) return;
-    const target = parseFloat(numericPart);
-    const duration = 1400;
-    const startTime = Date.now();
-    let frameId: number;
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(Math.floor(target * eased).toString());
-      if (progress < 1) frameId = requestAnimationFrame(animate);
-      else setDisplayValue(numericPart);
-    };
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [isInView, numericPart]);
-
-  return (
-    <span ref={ref}>
-      {displayValue}
-      {suffix}
-    </span>
-  );
+interface Paragraph {
+  lead: string;
+  text: string;
+  figure: string;
+  caption: string;
 }
 
-function PillarCard({
-  feature,
-  index,
-  onActive,
-}: {
-  feature: (typeof features)[0];
-  index: number;
-  onActive: (i: number) => void;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.6 });
-  const Icon = feature.icon;
+const PARAGRAPHS: Paragraph[] = [
+  {
+    lead: "Autonomy, not autocomplete.",
+    text:
+      "Most of the field is still demonstrating what AI could do. At Matters.AI I built a copilot that finds data exposures the moment they open and closes them without being asked; at Introspect Labs, a multimodal companion that reads 100+ hours of video at 95% accuracy and lifted retention by 40%. Both were shipped, not staged.",
+    figure: "95%",
+    caption: "VideoRAG accuracy",
+  },
+  {
+    lead: "Proof, not claims.",
+    text:
+      "Top 0.8% on CodeChef, top 0.07% on HackerRank, Codeforces Specialist. Public numbers, checkable by anyone who cares to, and the same discipline is what keeps production code honest.",
+    figure: "0.07%",
+    caption: "HackerRank, top percentile",
+  },
+  {
+    lead: "Many agents, one intent.",
+    text:
+      "Multi-agent architectures for trading, event logistics and agentic tooling: independent components that hold a single intent between them. At METAVERTEX the agents I architected cut system resource load by 20%.",
+    figure: "20%",
+    caption: "system load reduced, METAVERTEX",
+  },
+  {
+    lead: "People, at scale.",
+    text:
+      "Elected Student Senator for 1,500+ peers. Hostel Prefect for 1,800+ residents, where I cut disputes by 30%. Campus Ambassador for Perplexity. Building the system is the easy half; holding the mandate to run it is the other.",
+    figure: "1,800+",
+    caption: "residents as Hostel Prefect",
+  },
+];
 
-  useEffect(() => {
-    if (inView) onActive(index);
-  }, [inView, index, onActive]);
+/** Row-to-row stagger, in seconds, so rows already on screen enter in reading order. */
+const ROW_STAGGER = 0.12;
+
+function ManifestoRow({ paragraph, index }: { paragraph: Paragraph; index: number }) {
+  const reduced = useReducedMotion();
 
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      className={cn(styles.row, "grid grid-cols-12 gap-x-6 lg:gap-x-8")}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
+      whileInView={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="h-full"
+      transition={
+        reduced
+          ? { duration: 0.2 }
+          : { duration: 0.9, ease: EASE_SETTLE, delay: index * ROW_STAGGER }
+      }
     >
-      <InteractiveCard
-        accent={feature.color}
-        className="card-hairline rounded-3xl p-6 md:p-8 transition-colors duration-500 group/pillar h-full flex flex-col justify-center"
-        style={{ borderColor: inView ? `${feature.color}40` : undefined }}
-      >
-        <div className="flex items-start gap-4 relative z-3">
-          <div
-            className="p-3 rounded-2xl shrink-0 transition-all duration-500 group-hover/pillar:shadow-[0_0_24px_-4px_var(--ic-accent)]"
-            style={{ backgroundColor: `${feature.color}14`, color: feature.color }}
-          >
-            <Icon size={22} />
-          </div>
-          <div>
-            <h3 className="text-lg md:text-xl font-bold text-white mb-2">{feature.title}</h3>
-            <p className="text-sm md:text-[15px] text-gray-300 leading-relaxed" style={{ fontFamily: "var(--font-inter)" }}>
-              {feature.description}
-            </p>
-          </div>
-        </div>
-      </InteractiveCard>
+      {/* Hanging figure. Mobile: a block above the paragraph. Desktop: hung in
+          columns 1 to 3, right-aligned toward the prose, nudged up so the
+          Bodoni baseline sits near the paragraph's first baseline. */}
+      <div className="col-span-12 mb-6 lg:col-span-3 lg:col-start-1 lg:mb-0 lg:-mt-4 lg:text-right">
+        <LedgerNumber
+          value={paragraph.figure}
+          delayMs={index * ROW_STAGGER * 1000}
+          className={cn(
+            styles.figure,
+            "font-display font-normal text-[2.5rem] leading-[0.95] lg:text-[3rem]"
+          )}
+        />
+        <span className="mt-2 block font-mono text-[12px] leading-[1.4] tracking-[0.04em] text-ivory-300 ledger">
+          {paragraph.caption}
+        </span>
+      </div>
+
+      <p className="col-span-12 col-start-1 max-w-[62ch] font-sans text-[16px] leading-[1.7] text-ivory-200 md:text-[17px] lg:col-span-8 lg:col-start-4 lg:text-[18px]">
+        <strong className={cn(styles.lead, "font-display font-medium text-[22px] leading-[1] text-ivory-100")}>
+          {paragraph.lead}
+        </strong>{" "}
+        {paragraph.text}
+      </p>
     </motion.div>
   );
 }
 
 export default function About() {
-  const [activeId, setActiveId] = useState(0);
-
   return (
-    <section id="about" className="relative w-full py-12 md:py-16 lg:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-10 md:mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="flex flex-col items-center w-full"
-          >
-            <InViewClass>
-              <div className="flex justify-center w-full mb-3">
-                <SectionKicker num="01" label="Who I Am" />
-              </div>
-
-              <h2 className="text-display text-4xl md:text-5xl lg:text-6xl text-white mb-4">
-                <span className="line-mask">
-                  <span className="line-rise">
-                    About <span className="text-gradient-iris">Me</span>
-                  </span>
-                </span>
-              </h2>
-            </InViewClass>
-
-            <div className="space-y-3 mb-8 text-gray-300 w-full" style={{ fontFamily: "var(--font-inter)" }}>
-              <h3 className="text-xl md:text-2xl font-bold text-white leading-tight">
-                I build AI systems that <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-300 to-cyan-300">act</span>,
-                {" "}not just <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-300 to-pink-300">answer</span>
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-              {stats.map((stat, i) => (
-                <InteractiveCard
-                  key={i}
-                  accent={stat.accent}
-                  className="min-w-0 text-center p-6 rounded-2xl card-hairline bg-white/5 transition-all duration-300 group hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
-                >
-                  <div className="mb-3 flex justify-center text-gray-300 transition-transform duration-300 group-hover:scale-125 group-hover:text-white">
-                    <stat.icon size={22} className={stat.color} />
-                  </div>
-                  <h4 className="text-3xl md:text-4xl font-bold text-white mb-2 transition-transform duration-300 group-hover:scale-105">
-                    <AnimatedCounter value={stat.value} />
-                  </h4>
-                  <p className={`text-[10px] md:text-xs font-bold uppercase tracking-wider ${stat.color} opacity-80 group-hover:opacity-100 transition-opacity duration-300`}>
-                    {stat.label}
-                  </p>
-                </InteractiveCard>
-              ))}
-            </div>
-          </motion.div>
+    <section id="about" className="relative w-full py-32 lg:py-40">
+      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+        <div className="grid grid-cols-12 gap-x-6 lg:gap-x-8">
+          <div className="col-span-12 lg:col-span-9">
+            <SectionHeading title="I build for where AI is going, not where it is." />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {features.map((feature, i) => (
-            <PillarCard key={feature.id} feature={feature} index={i} onActive={setActiveId} />
+        <div className="mt-16 flex flex-col gap-y-14 lg:mt-24 lg:gap-y-20">
+          {PARAGRAPHS.map((paragraph, i) => (
+            <ManifestoRow key={paragraph.lead} paragraph={paragraph} index={i} />
           ))}
         </div>
       </div>

@@ -1,0 +1,14 @@
+/* The claim points at its evidence: hovering a paragraph's lead phrase turns
+   its hanging figure from ivory-100 to aurum-300 over 400ms. Pointer devices
+   only; touch gets no hover state. Colours come from the foundation tokens. */
+
+.figure {
+  color: var(--color-ivory-100);
+  transition: color 400ms var(--ease-settle);
+}
+
+@media (hover: hover) {
+  .row:has(.lead:hover) .figure {
+    color: var(--color-aurum-300);
+  }
+}
