@@ -217,10 +217,10 @@ function Dial({ index, rotation, onSelect, onStep, reduced }: DialProps) {
               tabIndex={selected ? 0 : -1}
               onClick={() => onSelect(i)}
               className={cn(
-                "absolute left-1/2 top-1/2 flex flex-col items-center gap-1 whitespace-nowrap px-1",
+                "absolute left-1/2 top-1/2 flex flex-col items-center gap-1 whitespace-nowrap px-1 focus-visible:outline-none",
                 "font-mono text-[10px] uppercase leading-none tracking-[0.12em] sm:text-[11px]",
                 "transition-[color,transform] ease-heavy",
-                reduced ? "duration-0" : "duration-[950ms]",
+                reduced ? "duration-0" : "duration-950",
                 // Gold marks the stop under the index, so the dial's position
                 // is unmistakable without reading the figure.
                 selected ? "text-aurum-200" : "text-ivory-300 hover:text-ivory-200"
@@ -311,7 +311,7 @@ export default function Skills() {
 
   return (
     <section id="skills-sphere" className="relative w-full py-28 lg:py-36">
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
@@ -344,7 +344,7 @@ export default function Skills() {
 
               {/* Keyed on the discipline so the list crossfades as one plate
                   rather than reflowing item by item. */}
-              <div className="relative mt-8 min-h-[320px]">
+              <div className="relative mt-8 min-h-80">
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.ul
                     key={group.cat}
@@ -357,7 +357,7 @@ export default function Skills() {
                     {group.skills.map((name) => (
                       <li
                         key={name}
-                        className="break-inside-avoid font-sans text-[16px] leading-[2] text-ivory-200 transition-colors duration-300 ease-heavy hover:text-ivory-100"
+                        className="break-inside-avoid font-sans text-[16px] leading-loose text-ivory-200 transition-colors duration-300 ease-heavy hover:text-ivory-100"
                       >
                         {name}
                       </li>

@@ -134,10 +134,10 @@ function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: bool
   // out of it, which buys the full travel; the section's own bottom padding
   // absorbs the overhang.
   return (
-    <div className="sticky top-[128px] h-0" aria-hidden>
+    <div className="sticky top-32 h-0" aria-hidden>
       <div className="flex flex-col">
         {/* The numeral mask: outgoing year slides up and out while the next rises in. */}
-        <div className="relative h-[5rem] overflow-hidden">
+        <div className="relative h-20 overflow-hidden">
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.span
               key={year}
@@ -164,7 +164,7 @@ function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: bool
               <span className="mt-6 font-display font-medium text-[28px] leading-[1.15] text-ivory-100">
                 {entry.company}
               </span>
-              <span className="mt-2 font-sans text-[15px] leading-[1.5] text-ivory-200">{entry.role}</span>
+              <span className="mt-2 font-sans text-[15px] leading-normal text-ivory-200">{entry.role}</span>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -224,7 +224,7 @@ function Entry({
 
       <ul
         aria-label="Skills"
-        className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-hairline pt-4 transition-colors duration-300 ease-[var(--ease-heavy)] group-hover:border-hairline-strong"
+        className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-hairline pt-4 transition-colors duration-300 ease-heavy group-hover:border-hairline-strong"
       >
         {entry.skills.map((skill) => (
           <li key={skill} className="font-mono text-[12px] leading-none text-ivory-300">
@@ -287,7 +287,7 @@ export default function Experience() {
 
   return (
     <section id="experience" aria-labelledby="experience-heading" className="relative w-full py-32 lg:py-40">
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-9">
             <SectionHeading id="experience-heading" title="Six roles since 2024." />
