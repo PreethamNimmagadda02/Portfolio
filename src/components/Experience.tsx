@@ -128,13 +128,11 @@ function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: bool
   const fade = reduced ? { duration: 0 } : { duration: 0.4, ease: EASE_SETTLE };
 
   // A sticky box detaches once its bottom edge reaches the bottom of its
-  // parent, so the box's own height is travel the dossier loses at the end of
-  // the section: a tall one let go of the last two entries while they were
-  // still on screen. The anchor is therefore zero-height and the dossier hangs
-  // out of it, which buys the full travel; the section's own bottom padding
-  // absorbs the overhang.
+  // parent. The aside is as tall as the column of entries, so the dossier's
+  // bottom meets the last entry's bottom and the two leave the viewport
+  // together instead of the dossier lingering after the record has gone.
   return (
-    <div className="sticky top-32 h-0" aria-hidden>
+    <div className="sticky top-32" aria-hidden>
       <div className="flex flex-col">
         {/* The numeral mask: outgoing year slides up and out while the next rises in. */}
         <div className="relative h-20 overflow-hidden">
