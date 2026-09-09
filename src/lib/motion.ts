@@ -24,6 +24,8 @@ export {
   useSpring,
   useTransform,
   useMotionValue,
+  useMotionValueEvent,
+  animate,
 } from "framer-motion";
 
 export type { Variants, MotionValue } from "framer-motion";
