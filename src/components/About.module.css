@@ -1,14 +1,28 @@
 /* The claim points at its evidence: hovering a paragraph's lead phrase turns
-   its hanging figure from ivory-100 to aurum-300 over 400ms. Pointer devices
-   only; touch gets no hover state. Colours come from the foundation tokens. */
+   its hanging figure from ivory-100 to aurum-300 over 400ms, and warms the
+   row's index with it. Pointer devices only; touch gets no hover state.
+   Colours come from the foundation tokens.
+
+   This stays in a module rather than becoming a Tailwind group-hover because
+   the trigger is the lead phrase, not the row: a group would also satisfy
+   .group:hover .rule-hover and draw the lead's rule from anywhere in the row. */
 
 .figure {
   color: var(--color-ivory-100);
   transition: color 400ms var(--ease-settle);
 }
 
+.index {
+  color: var(--color-ivory-300);
+  transition: color 400ms var(--ease-settle);
+}
+
 @media (hover: hover) {
   .row:has(.lead:hover) .figure {
+    color: var(--color-aurum-300);
+  }
+
+  .row:has(.lead:hover) .index {
     color: var(--color-aurum-300);
   }
 }

@@ -7,8 +7,8 @@ import { useSyncExternalStore } from "react";
  *
  * The whole page is one continuous WebGL journey: as the visitor scrolls,
  * normalized document progress (0..1, from viewport-store's scroll tracker)
- * is looked up here to drive camera position, palette, nebula intensity and
- * focus-object state, instead of each section owning its own canvas.
+ * is looked up here to drive camera position, palette and focus-object state,
+ * instead of each section owning its own canvas.
  *
  * Boundaries are approximate fractions of total document height. Precision
  * doesn't matter: this is an ambient backdrop, not a scrollytelling rig with
@@ -24,7 +24,7 @@ export interface SceneChapter {
   id: string;
   start: number;
   end: number;
-  /** Hex colors driving the nebula shader + focus-object emissive tones. */
+  /** Hex colors driving the star field + focus-object emissive tones. */
   colorA: string;
   colorB: string;
   colorC: string;
@@ -32,9 +32,10 @@ export interface SceneChapter {
   camera: [number, number, number];
   lookAt: [number, number, number];
   /**
-   * Nebula and focus-object presence, 0 to 1. The gold cloud is at full
-   * intensity in the hero and contact chapters only; the middle of the page
-   * is pure obsidian and type.
+   * Focus-object presence, 0 to 1: 1 in the hero and contact chapters, 0
+   * through the middle of the page, which is pure obsidian and type. This
+   * gated the aurora nebula before it was removed; the star field still reads
+   * it to lift itself in those two chapters.
    */
   intensity: number;
   /** Base opacity of the skills star chart, 0 to 1 (0.12 in the skills chapter). */

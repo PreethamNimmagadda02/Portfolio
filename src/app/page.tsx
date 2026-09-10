@@ -17,25 +17,32 @@ const SectionSkeleton = ({ className }: { className: string }) => <div className
 
 /* Placeholder heights are measured, not guessed. A skeleton shorter than the
    section it stands in for makes the document grow as the chunk arrives, which
-   slides every anchor below it out from under an in-flight scroll. The two
-   tiers are the rendered heights at 390px and at 1280px and up. */
+   slides every anchor below it out from under an in-flight scroll.
+
+   Each tier holds the tallest measurement inside its own range, not the
+   measurement at one representative width. Several sections are taller at
+   1024 than at 1280 (About by 61px, Experience by 72px) because the columns
+   are tighter there, so a single 1280 reading left them short at exactly the
+   width where lg: begins. Ranges sampled at 320, 390, 1024 and 1280.
+
+   Re-measure after any change to a section's contents. */
 const About = dynamic(() => import("@/components/About"), {
-  loading: () => <SectionSkeleton className="min-h-[1658px] w-full lg:min-h-[1191px]" />,
+  loading: () => <SectionSkeleton className="min-h-[2095px] w-full lg:min-h-[1462px]" />,
 });
 const Experience = dynamic(() => import("@/components/Experience"), {
-  loading: () => <SectionSkeleton className="min-h-[2662px] w-full lg:min-h-[2312px]" />,
+  loading: () => <SectionSkeleton className="min-h-[3438px] w-full lg:min-h-[2632px]" />,
 });
 const Skills = dynamic(() => import("@/components/Skills"), {
-  loading: () => <SectionSkeleton className="min-h-[1222px] w-full lg:min-h-[929px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1358px] w-full lg:min-h-[955px]" />,
 });
 const Projects = dynamic(() => import("@/components/Projects"), {
-  loading: () => <SectionSkeleton className="min-h-[1355px] w-full lg:min-h-[1450px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1423px] w-full lg:min-h-[1496px]" />,
 });
 const GitHubStats = dynamic(() => import("@/components/GitHubStats"), {
-  loading: () => <SectionSkeleton className="min-h-[1265px] w-full lg:min-h-[1226px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1396px] w-full lg:min-h-[1345px]" />,
 });
 const Achievements = dynamic(() => import("@/components/Achievements"), {
-  loading: () => <SectionSkeleton className="min-h-[1651px] w-full lg:min-h-[1397px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1911px] w-full lg:min-h-[1515px]" />,
 });
 /* The one section that needs more than two tiers, and the only one whose
    reserve is worth this much detail.
@@ -43,24 +50,30 @@ const Achievements = dynamic(() => import("@/components/Achievements"), {
    Two things move its height. Above 1024 the fourteen-name voice strip wraps to
    three rows, then two from 1160. Below 1024 the carousel is as tall as the
    longest quote at that width, so it steps every time the text reflows. Each
-   tier below is a measured plateau, worst residual 25px at 700.
+   tier below is the tallest measurement in its range, sampled at 320, 360,
+   384, 480, 700, 960, 1024, 1056 and 1160.
 
    Every tier is min-[..rem] on purpose. Mixing lg: with min-[..px] put
    min-width:1080px ahead of min-width:64rem in the output, and with equal
    specificity source order decided it, so lg won at every wide viewport and the
    later tiers never applied. Keep the units consistent when editing.
 
+   The 66rem tier is gone: since the stage gained its frame, 1024 and 1056
+   measure identically, so the tier only restated the one before it.
+
    Re-measure after any change to the quote text: the sub-1024 plateaus are a
    function of how the longest quote wraps, not of the layout alone. */
 const Testimonials = dynamic(() => import("@/components/Testimonials"), {
-  loading: () => <SectionSkeleton className="min-h-[932px] w-full min-[24rem]:min-h-[859px] min-[30rem]:min-h-[812px] min-[60rem]:min-h-[775px] min-[64rem]:min-h-[934px] min-[66rem]:min-h-[907px] min-[72.5rem]:min-h-[870px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1109px] min-[72.5rem]:min-h-[1072px]" />,
 });
 
-/* Gold light leaking from the upper right, where the nebula will sit behind
-   the portrait plate once the scene mounts. Also the permanent backdrop under
-   reduced motion, where no canvas is ever created. Token-pure: no literals. */
-const STATIC_LIGHT =
-  "radial-gradient(60% 45% at 78% 30%, color-mix(in srgb, var(--color-aurum-300) 10%, transparent), transparent 70%), var(--color-obsidian-0)";
+/* Flat obsidian behind the page until the scene mounts, and the permanent
+   backdrop under reduced motion, where no canvas is ever created. This used to
+   carry a gold radial gradient standing in for the nebula behind the portrait;
+   with the nebula gone the gradient was the only thing still glowing, and it
+   made the pre-mount paint and the reduced-motion view brighter than the
+   scene they were standing in for. */
+const STATIC_LIGHT = "var(--color-obsidian-0)";
 
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
@@ -88,30 +101,30 @@ export default function Home() {
       <div className="relative z-10 flex flex-col">
         <Hero />
 
-        <div className="cv-auto [--cv-h:1658px] lg:[--cv-h:1191px]">
+        <div className="cv-auto [--cv-h:2095px] lg:[--cv-h:1462px]">
           <About />
         </div>
 
         {/* Experience holds a position: sticky column, so no content-visibility here. */}
         <Experience />
 
-        <div className="cv-auto [--cv-h:1222px] lg:[--cv-h:929px]">
+        <div className="cv-auto [--cv-h:1358px] lg:[--cv-h:955px]">
           <Skills />
         </div>
 
-        <div className="cv-auto [--cv-h:1355px] lg:[--cv-h:1450px]">
+        <div className="cv-auto [--cv-h:1423px] lg:[--cv-h:1496px]">
           <Projects />
         </div>
 
-        <div className="cv-auto [--cv-h:1265px] lg:[--cv-h:1226px]">
+        <div className="cv-auto [--cv-h:1396px] lg:[--cv-h:1345px]">
           <GitHubStats />
         </div>
 
-        <div className="cv-auto [--cv-h:1651px] lg:[--cv-h:1397px]">
+        <div className="cv-auto [--cv-h:1911px] lg:[--cv-h:1515px]">
           <Achievements />
         </div>
 
-        <div className="cv-auto [--cv-h:932px] min-[24rem]:[--cv-h:859px] min-[30rem]:[--cv-h:812px] min-[60rem]:[--cv-h:775px] min-[64rem]:[--cv-h:934px] min-[66rem]:[--cv-h:907px] min-[72.5rem]:[--cv-h:870px]">
+        <div className="cv-auto [--cv-h:1048px] min-[24rem]:[--cv-h:955px] min-[30rem]:[--cv-h:884px] min-[60rem]:[--cv-h:934px] min-[64rem]:[--cv-h:1109px] min-[72.5rem]:[--cv-h:1072px]">
           <Testimonials />
         </div>
 

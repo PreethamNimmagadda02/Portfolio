@@ -55,8 +55,11 @@ type LenisLike = {
 
 const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
-/** Room left for the 64px letterhead above a section's first line. */
-const NAV_CLEARANCE = -80;
+/** Room left for the letterhead above a section's first line: the bar itself,
+ *  then a deliberate gap so the eyebrow is not tucked against it. */
+const NAV_HEIGHT = 64;
+const NAV_GAP = 48;
+const NAV_CLEARANCE = -(NAV_HEIGHT + NAV_GAP);
 
 /** Landing tolerance, and the cap on correction passes. */
 const DRIFT_TOLERANCE = 6;
@@ -89,23 +92,36 @@ export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) 
   const el = document.getElementById(target.replace(/^#/, ""));
   if (!el) return;
 
+  /* Every section carries 112 to 176px of its own top padding. Aligning the
+     padding box under the letterhead therefore lands on dead air and pushes
+     the foot of the section off screen, which is how Activity used to arrive
+     with its heatmap below the fold. Spend the padding so the first line is
+     what the clearance applies to, and re-measure it per pass: the value is
+     breakpoint dependent, and a lazy section can reflow while the flight is
+     still in the air. */
+  const clearance = () => offset + (parseFloat(getComputedStyle(el).paddingTop) || 0);
+
   if (!lenis) {
-    el.scrollIntoView({ behavior: "smooth" });
+    // scrollIntoView has no notion of the fixed letterhead, so resolve the
+    // position by hand and keep the same landing as the Lenis path.
+    const top = window.scrollY + el.getBoundingClientRect().top + clearance();
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     return;
   }
 
   let pass = 0;
   const fly = (duration: number) => {
     const startedAt = window.scrollY;
+    const landing = clearance();
     lenis.scrollTo(el, {
-      offset,
+      offset: landing,
       duration,
       easing: easeOutExpo,
       onComplete: () => {
         pass += 1;
         // Where the section's first line actually ended up, against where the
         // clearance asked for it.
-        const drift = el.getBoundingClientRect().top + offset;
+        const drift = el.getBoundingClientRect().top + landing;
         // A pass that moved nothing means the page is clamped at either end
         // and no further correction can land.
         const moved = Math.abs(window.scrollY - startedAt) > 1;

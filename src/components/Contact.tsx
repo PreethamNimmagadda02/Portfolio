@@ -4,9 +4,9 @@
  * Contact: the letter column.
  *
  * A single centred 640px measure with left-aligned text, three ledger-line
- * fields and one full-width submit, followed by the address line. The gold
- * nebula returns behind it through the shared CosmicScene (page.tsx); under
- * reduced motion a static gradient stands in, painted here with CSS only.
+ * fields and one full-width submit, followed by the keyed address. Nothing is
+ * painted behind it: the gold nebula that used to return here, and the static
+ * gradient that stood in for it under reduced motion, are both gone.
  *
  * EmailJS submission, env var names, validation rules, messages and the
  * touched-field logic are unchanged from the previous version.
@@ -27,7 +27,7 @@ import { Check, CircleNotch, Warning, X } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
-import { SectionHeading, TextButton } from "@/components/ui";
+import { SectionHeading, TextButton, PlateTicks } from "@/components/ui";
 
 /* ------------------------------------------------------------------------
    Validation (unchanged rules and messages)
@@ -98,6 +98,10 @@ function Toast({ message, type, onClose }: ToastState & { onClose: () => void })
       transition={{ duration: 0.4, ease: EASE_SETTLE }}
       className="fixed bottom-6 right-6 left-6 sm:left-auto sm:max-w-[420px] z-50 flex items-center gap-3 px-5 py-4 bg-obsidian-2 border border-hairline text-ivory-100 font-sans text-[14px] leading-[1.5]"
     >
+      {/* The same trim marks the framed plates carry, so the one surface that
+          appears over the page is still part of the same object. */}
+      <PlateTicks length="1rem" />
+
       <span aria-hidden className="inline-flex shrink-0">
         {type === "success" ? (
           <Check size={18} weight="light" className="text-aurum-300" />
@@ -153,12 +157,28 @@ function FieldError({ id, error }: { id: string; error?: string }) {
   );
 }
 
-function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
+/* The label carries the field's number. Three unnumbered mono labels read as
+   a plain form; numbered small caps read as a docket, which is the register
+   the rest of the page is in. The numeral is decorative, so it stays out of
+   the accessible name. */
+function FieldLabel({
+  htmlFor,
+  index,
+  children,
+}: {
+  htmlFor: string;
+  index: number;
+  children: ReactNode;
+}) {
   return (
     <label
       htmlFor={htmlFor}
-      className="block font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-200 transition-colors duration-350 ease-heavy group-focus-within/field:text-ivory-100"
+      className="flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-200 transition-colors duration-350 ease-heavy group-focus-within/field:text-ivory-100"
     >
+      <span aria-hidden className="ledger text-ivory-300 transition-colors duration-350 ease-heavy group-focus-within/field:text-aurum-300">
+        {String(index).padStart(2, "0")}
+      </span>
+      <span aria-hidden className="h-px w-4 bg-hairline-gold" />
       {children}
     </label>
   );
@@ -168,6 +188,8 @@ interface InputFieldProps {
   id: string;
   name: FieldName;
   label: string;
+  /** Position in the docket, used for the label numeral. */
+  index: number;
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   type?: "text" | "email";
@@ -180,6 +202,7 @@ function InputField({
   id,
   name,
   label,
+  index,
   value,
   onChange,
   type = "text",
@@ -190,8 +213,10 @@ function InputField({
   const errorId = `${id}-error`;
   return (
     <div className="group/field">
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <div className="relative mt-2">
+      <FieldLabel htmlFor={id} index={index}>
+        {label}
+      </FieldLabel>
+      <div className="relative mt-3">
         <input
           id={id}
           name={name}
@@ -216,6 +241,8 @@ interface TextareaFieldProps {
   id: string;
   name: FieldName;
   label: string;
+  /** Position in the docket, used for the label numeral. */
+  index: number;
   value: string;
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
@@ -228,6 +255,7 @@ function TextareaField({
   id,
   name,
   label,
+  index,
   value,
   onChange,
   placeholder,
@@ -237,10 +265,14 @@ function TextareaField({
 }: TextareaFieldProps) {
   const errorId = `${id}-error`;
   const countId = `${id}-count`;
+  const filled = Math.min(100, (value.length / maxLength) * 100);
+  const nearLimit = filled >= 90;
   return (
     <div className="group/field">
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <div className="relative mt-2">
+      <FieldLabel htmlFor={id} index={index}>
+        {label}
+      </FieldLabel>
+      <div className="relative mt-3">
         <textarea
           id={id}
           name={name}
@@ -256,10 +288,30 @@ function TextareaField({
         />
         <span aria-hidden className={FOCUS_LINE} />
       </div>
-      <div className="mt-2 flex items-start justify-between gap-6">
+      <div className="mt-3 flex items-start justify-between gap-6">
         <FieldError id={errorId} error={error} />
-        <span id={countId} className="ledger ml-auto shrink-0 pt-1 font-mono text-[12px] leading-none text-ivory-300">
-          {value.length} / {maxLength}
+
+        {/* A gauge, not just a readout: a hairline track that fills as the
+            message runs toward the limit, and turns gold in the last tenth
+            so the ceiling is visible before it is hit. */}
+        <span id={countId} className="ml-auto flex shrink-0 items-center gap-3 pt-1">
+          <span aria-hidden className="relative block h-px w-16 bg-hairline">
+            <span
+              className={cn(
+                "absolute inset-y-0 left-0 origin-left transition-[width,background-color] duration-350 ease-heavy",
+                nearLimit ? "bg-aurum-300" : "bg-ivory-300"
+              )}
+              style={{ width: `${filled}%` }}
+            />
+          </span>
+          <span
+            className={cn(
+              "ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] transition-colors duration-350 ease-heavy",
+              nearLimit ? "text-aurum-300" : "text-ivory-300"
+            )}
+          >
+            {value.length} / {maxLength}
+          </span>
         </span>
       </div>
     </div>
@@ -301,6 +353,19 @@ function Rise({
 
 const CONTACT_LINK =
   "inline-block border-b border-hairline-gold pb-px text-ivory-200 transition-colors duration-300 ease-heavy hover:text-aurum-200 hover:border-aurum-200";
+
+/* One keyed row of the address. The key is a small-caps term in its own
+   column, so the three values line up against a single left edge. */
+function AddressRow({ term, children }: { term: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2 border-b border-hairline py-4 sm:flex-row sm:items-baseline sm:gap-6">
+      <dt className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 sm:w-24 sm:shrink-0">
+        {term}
+      </dt>
+      <dd className="m-0 font-sans text-[15px] leading-[1.6]">{children}</dd>
+    </div>
+  );
+}
 
 const EMAIL = "preethamnimmagadda@gmail.com";
 
@@ -427,17 +492,6 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative w-full py-32 lg:py-44">
-      {/* Reduced-motion stand-in for the returning nebula: a static gold
-          gradient low behind the column, CSS-gated so it never hydrates. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 hidden motion-reduce:block"
-        style={{
-          background:
-            "radial-gradient(60% 45% at 50% 85%, color-mix(in srgb, var(--color-aurum-300) 10%, transparent), transparent 70%)",
-        }}
-      />
-
       <AnimatePresence>
         {toast ? <Toast message={toast.message} type={toast.type} onClose={dismissToast} /> : null}
       </AnimatePresence>
@@ -445,7 +499,6 @@ export default function Contact() {
       <div className="relative z-10 mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         <div ref={columnRef} className="mx-auto w-full max-w-[640px]">
           <SectionHeading
-            indicator
             eyebrow="CURRENTLY TAKING ON NEW WORK"
             title="Start a conversation."
             subtext="Autonomous systems, applied AI and data security, whether that is an internship, a full-time role or a build. Tell me what needs making and I will say plainly whether I am the right person. Every message gets a reply inside a day."
@@ -463,6 +516,7 @@ export default function Contact() {
                 id={nameId}
                 name="name"
                 label="Name"
+                index={1}
                 value={formState.name}
                 onChange={handleChange}
                 autoComplete="name"
@@ -477,6 +531,7 @@ export default function Contact() {
                 name="email"
                 type="email"
                 label="Email"
+                index={2}
                 value={formState.email}
                 onChange={handleChange}
                 autoComplete="email"
@@ -490,6 +545,7 @@ export default function Contact() {
                 id={messageId}
                 name="message"
                 label="Message"
+                index={3}
                 value={formState.message}
                 onChange={handleChange}
                 placeholder="A few lines about the role or the project"
@@ -531,13 +587,23 @@ export default function Contact() {
             </Rise>
           </form>
 
-          <Rise index={4} inView={columnInView} reduced={reduced} className="mt-12">
-            <address className="flex flex-col gap-3 font-sans text-[15px] not-italic leading-[1.6] text-ivory-200 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-10 sm:gap-y-3">
-              <CopyEmail />
-              <a href="tel:+918074021047" className={cn(CONTACT_LINK, "ledger")}>
-                +91 80740 21047
-              </a>
-              <span>Hyderabad, Telangana</span>
+          {/* The three ways to reach me, keyed like a colophon rather than run
+              together as one line of body text. */}
+          <Rise index={4} inView={columnInView} reduced={reduced} className="mt-14">
+            <address className="not-italic">
+              <dl className="flex flex-col border-t border-hairline">
+                <AddressRow term="Email">
+                  <CopyEmail />
+                </AddressRow>
+                <AddressRow term="Phone">
+                  <a href="tel:+918074021047" className={cn(CONTACT_LINK, "ledger")}>
+                    +91 80740 21047
+                  </a>
+                </AddressRow>
+                <AddressRow term="Location">
+                  <span className="text-ivory-200">Hyderabad, Telangana</span>
+                </AddressRow>
+              </dl>
             </address>
           </Rise>
         </div>

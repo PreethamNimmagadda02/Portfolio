@@ -6,15 +6,18 @@
  * One canvas, one GL context, one render loop, driven entirely by document
  * scroll progress via `getSceneState()` (see `@/lib/scene-store`).
  *
- * Obsidian and Aurum direction: every chapter shares one gold family. The
- * cloud is at full intensity behind the hero portrait, dissolves to nothing
- * before About finishes, leaves only a faint gold star chart during Skills,
- * and returns low behind the contact letter. In the two live chapters the
- * gas heats with scroll velocity (colorB warms toward colorA and the
- * highlight brightens), cooling within about a second of the hand stopping.
- * The middle of the page is pure obsidian and type: every focus object hides
- * itself once its smoothed presence drops below a small threshold, so the
- * middle 80% of the page renders the canvas at near-zero GPU cost.
+ * Obsidian and Aurum direction: every chapter shares one gold family, and the
+ * page is obsidian and type. The scene is a gold star field throughout, an
+ * engraved guilloche behind the hero alone, a star chart during Skills and
+ * embers at Achievements. Every focus object hides itself once its smoothed
+ * presence drops below a small threshold, so most of the page renders the
+ * canvas at near-zero GPU cost.
+ *
+ * There was an aurora nebula here: a fullscreen domain-warped FBM cloud at
+ * full intensity behind the hero and low behind the contact letter. It was
+ * removed on request, being the one element that read as glowing gas rather
+ * than as ink and engraving. `intensity` in the chapter table survives it and
+ * still lifts the star field in those two chapters.
  *
  * Design constraints:
  *  - No MeshTransmissionMaterial, no EffectComposer/Bloom, no HDR Environment,
@@ -47,7 +50,6 @@ import { markSceneWarmed, seededRandom } from "@/lib/utils";
 const AURUM_100 = "#EBD9A8";
 const AURUM_300 = "#C9A961";
 const AURUM_500 = "#7A6134";
-const OBSIDIAN_0 = "#0C0A08";
 const IVORY_100 = "#F2ECE0";
 const IVORY_200 = "#B8AE9C";
 const AURUM_200 = "#D9BE7C";
@@ -81,265 +83,6 @@ function heroOrnament(
   blend: number
 ): number {
   return chapterWeight(chapter, next, blend, "hero");
-}
-
-// -----------------------------------------------------------------------------
-// Aurora Nebula: single fullscreen-ish plane, domain-warped FBM shader.
-// -----------------------------------------------------------------------------
-const nebulaVertex = /* glsl */ `
-  uniform float uTime;
-  uniform float uVelocity;
-  varying vec2 vUv;
-  varying float vHeight;
-  varying vec3 vNormal;
-  varying vec3 vViewDir;
-
-  float vHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
-  float vNoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(vHash(i), vHash(i + vec2(1.0, 0.0)), u.x),
-               mix(vHash(i + vec2(0.0, 1.0)), vHash(i + vec2(1.0, 1.0)), u.x), u.y);
-  }
-  float vFbm(vec2 p) {
-    float v = 0.0;
-    float a = 0.5;
-    for (int i = 0; i < 3; i++) {
-      v += a * vNoise(p);
-      p = p * 2.0 + vec2(13.7, 7.3);
-      a *= 0.5;
-    }
-    return v;
-  }
-
-  // Same swirl + drift as the fragment domain-warp, sampled here to raise
-  // the gas into real 3D relief instead of a flat painted gradient. The
-  // coordinates spiral around a slowly drifting center rather than sliding
-  // in a straight line, so the surface visibly churns instead of just
-  // tilting as a rigid plane.
-  float heightAt(vec2 p) {
-    float t = uTime * 0.035;
-    vec2 center = vec2(0.5 + sin(t * 0.3) * 0.06, 0.45 + cos(t * 0.24) * 0.05);
-    vec2 toCenter = p - center;
-    float radius = length(toCenter);
-    float angle = atan(toCenter.y, toCenter.x);
-    angle += sin(radius * 6.0 - t * 2.2) * (0.35 + uVelocity * 0.3);
-    vec2 swirlP = center + vec2(cos(angle), sin(angle)) * radius;
-    vec2 drift = vec2(t * 0.6, -t * 0.3);
-    return vFbm(swirlP * 3.0 + drift);
-  }
-
-  void main() {
-    vUv = uv;
-
-    // Amplitude grows with scroll velocity: the surface visibly heaves as
-    // you move, on top of its constant slow breathing.
-    float amp = 1.1 + uVelocity * 1.4;
-    float h = heightAt(uv);
-
-    float e = 0.015;
-    float hx = heightAt(uv + vec2(e, 0.0));
-    float hy = heightAt(uv + vec2(0.0, e));
-    vec3 tangentX = vec3(1.0, 0.0, (hx - h) * amp / e);
-    vec3 tangentY = vec3(0.0, 1.0, (hy - h) * amp / e);
-    // normalMatrix (inverse-transpose of modelView) keeps lighting correct
-    // under this mesh's non-uniform viewport-scale; a raw object-space
-    // normal would skew under stretch.
-    vNormal = normalize(normalMatrix * normalize(cross(tangentX, tangentY)));
-    vHeight = h;
-
-    vec3 pos = position;
-    pos.z += (h - 0.5) * amp;
-    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-    vViewDir = normalize(-mvPosition.xyz);
-    gl_Position = projectionMatrix * mvPosition;
-  }
-`;
-
-const nebulaFragment = /* glsl */ `
-  uniform float uTime;
-  uniform float uScroll;
-  uniform float uVelocity;
-  uniform float uIntensity;
-  uniform vec2 uMouse;
-  uniform vec3 uColorA;
-  uniform vec3 uColorB;
-  uniform vec3 uColorC;
-  varying vec2 vUv;
-  varying float vHeight;
-  varying vec3 vNormal;
-  varying vec3 vViewDir;
-
-  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
-               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
-  }
-  float fbm(vec2 p) {
-    float v = 0.0;
-    float a = 0.5;
-    for (int i = 0; i < 5; i++) {
-      v += a * noise(p);
-      p = p * 2.0 + vec2(13.7, 7.3);
-      a *= 0.5;
-    }
-    return v;
-  }
-
-  void main() {
-    vec2 uv = vUv;
-    float t = uTime * 0.035;
-
-    // Scroll velocity swells the domain warp: the gas stirs while you move
-    // and settles when you stop.
-    float stir = 1.0 + uVelocity * 0.9;
-
-    // Swirling vortex warp: coordinates spiral around a slowly drifting
-    // center instead of sliding in a straight line, so the gas visibly
-    // churns rather than reading as a flat plane sliding under a tilt.
-    vec2 swirlCenter = vec2(0.5 + sin(t * 0.3) * 0.06, 0.45 + cos(t * 0.24) * 0.05);
-    vec2 toCenter = uv - swirlCenter;
-    float radius = length(toCenter);
-    float angle = atan(toCenter.y, toCenter.x);
-    angle += sin(radius * 6.0 - t * 2.2) * (0.35 + uVelocity * 0.3);
-    vec2 swirlUv = swirlCenter + vec2(cos(angle), sin(angle)) * radius;
-
-    vec2 drift = vec2(t * 0.6, -t * 0.3) + uMouse * 0.05 + vec2(0.0, uScroll * 1.4);
-    vec2 q = vec2(fbm(swirlUv * 2.2 + drift), fbm(swirlUv * 2.2 + vec2(5.2, 1.3) - drift));
-    float f = fbm(swirlUv * 2.6 + q * 1.6 * stir);
-
-    vec3 col = uColorC;
-    col = mix(col, uColorA, smoothstep(0.35, 0.85, f) * (0.5 + uVelocity * 0.18));
-    col = mix(col, uColorB, smoothstep(0.5, 1.0, q.x * f) * 0.4);
-
-    // Aurora ribbons: traveling color curtains riding the swirl.
-    float ribbon = sin(swirlUv.x * 7.0 + f * 4.0 - t * 3.0) * 0.5 + 0.5;
-    ribbon = pow(ribbon, 4.0) * smoothstep(0.2, 0.8, f);
-    vec3 ribbonColor = mix(uColorA, uColorB, sin(t * 0.4) * 0.5 + 0.5);
-    col += ribbonColor * ribbon * 0.35;
-
-    float d = distance(uv, vec2(0.5 + uMouse.x * 0.02, 0.45 - uMouse.y * 0.02));
-    col *= smoothstep(0.95, 0.25, d);
-
-    // Pointer-follow glow: a soft light source that lives inside the gas.
-    vec2 mousePos = vec2(0.5, 0.5) + uMouse * vec2(0.28, 0.2);
-    float mGlow = smoothstep(0.45, 0.0, distance(uv, mousePos));
-    col += uColorA * mGlow * 0.2 * (0.6 + 0.4 * f);
-
-    col *= 0.8 + 0.22 * sin(uTime * 0.24);
-
-    // Relief shading from the displaced surface's normal: ridges catch a
-    // fixed key light, valleys fall into shadow.
-    vec3 lightDir = normalize(vec3(0.4, 0.6, 1.0));
-    vec3 viewDir = normalize(vViewDir);
-    float ndl = clamp(dot(vNormal, lightDir), 0.0, 1.0);
-    col *= 0.55 + 0.75 * ndl;
-    col += uColorB * smoothstep(0.65, 1.0, vHeight) * 0.1;
-
-    // Specular glint + Fresnel rim, the pair that reads as polished volume
-    // rather than flat matte paint.
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float spec = pow(clamp(dot(vNormal, halfDir), 0.0, 1.0), 28.0);
-    float fresnel = pow(1.0 - clamp(dot(vNormal, viewDir), 0.0, 1.0), 2.5);
-    col += vec3(1.0, 0.97, 0.92) * spec * 0.4;
-    col += uColorA * fresnel * 0.22;
-
-    // Mild saturation lift for deliberate color grading.
-    float luma = dot(col, vec3(0.299, 0.587, 0.114));
-    col = mix(vec3(luma), col, 1.18);
-
-    // Chapter intensity gates the whole cloud: 1 in hero and contact, 0 in
-    // the middle of the page.
-    gl_FragColor = vec4(col, 1.0) * 0.52 * uIntensity;
-  }
-`;
-
-function AuroraNebula({ pointer, scroll }: { pointer: PointerState; scroll: ScrollState }) {
-  const matRef = useRef<THREE.ShaderMaterial>(null);
-  const meshRef = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
-
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uScroll: { value: 0 },
-      uVelocity: { value: 0 },
-      uIntensity: { value: 0 },
-      uMouse: { value: new THREE.Vector2(0, 0) },
-      uColorA: { value: new THREE.Vector3(...hexToVec3(AURUM_300)) },
-      uColorB: { value: new THREE.Vector3(...hexToVec3(AURUM_500)) },
-      uColorC: { value: new THREE.Vector3(...hexToVec3(OBSIDIAN_0)) },
-    }),
-    []
-  );
-
-  useFrame((state) => {
-    if (!matRef.current) return;
-    const u = matRef.current.uniforms;
-    u.uTime.value = state.clock.elapsedTime;
-    u.uMouse.value.x += (pointer.nx - u.uMouse.value.x) * 0.04;
-    u.uMouse.value.y += (pointer.ny - u.uMouse.value.y) * 0.04;
-    // Normalized |velocity| (px/ms), soft-capped to [0, 1] and smoothed
-    const vNorm = Math.min(Math.abs(scroll.velocity) * 0.6, 1);
-    u.uVelocity.value += (vNorm - u.uVelocity.value) * 0.08;
-
-    const { chapter, next, blend, intensity } = getSceneState(scroll.progress);
-    u.uIntensity.value += (intensity - u.uIntensity.value) * 0.06;
-    const currentIntensity = u.uIntensity.value;
-
-    // Velocity heat, gated by intensity so it exists only in the hero and
-    // contact chapters: the umber body warms toward the gold highlight and
-    // the highlight itself brightens while the hand moves. The 0.06 colour
-    // lerp below plus the store's velocity decay cool it within about a
-    // second of the hand stopping.
-    const heat = vNorm * currentIntensity;
-    const a0 = lerp3(hexToVec3(chapter.colorA), hexToVec3(next.colorA), blend);
-    const b0 = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
-    const c = lerp3(hexToVec3(chapter.colorC), hexToVec3(next.colorC), blend);
-    const b = lerp3(b0, a0, heat * 0.6);
-    const lift = 1 + heat * 0.25;
-    const a: [number, number, number] = [a0[0] * lift, a0[1] * lift, a0[2] * lift];
-
-    const uA = u.uColorA.value as THREE.Vector3;
-    const uB = u.uColorB.value as THREE.Vector3;
-    const uC = u.uColorC.value as THREE.Vector3;
-    uA.set(uA.x + (a[0] - uA.x) * 0.06, uA.y + (a[1] - uA.y) * 0.06, uA.z + (a[2] - uA.z) * 0.06);
-    uB.set(uB.x + (b[0] - uB.x) * 0.06, uB.y + (b[1] - uB.y) * 0.06, uB.z + (b[2] - uB.z) * 0.06);
-    uC.set(uC.x + (c[0] - uC.x) * 0.06, uC.y + (c[1] - uC.y) * 0.06, uC.z + (c[2] - uC.z) * 0.06);
-    u.uScroll.value = scroll.progress;
-
-    if (meshRef.current) {
-      // Skip the fullscreen draw entirely once the cloud has faded out.
-      meshRef.current.visible = currentIntensity >= 0.01;
-
-      // A faint pointer-driven tilt: just enough residual parallax to sell
-      // the displaced surface's depth. The swirl and ribbons carry the actual
-      // dynamism, so this stays subtle.
-      const wobble = state.clock.elapsedTime * 0.06;
-      const targetRotX = pointer.ny * 0.04 + Math.sin(wobble) * 0.015;
-      const targetRotY = -pointer.nx * 0.05 + Math.cos(wobble * 0.85) * 0.015;
-      meshRef.current.rotation.x += (targetRotX - meshRef.current.rotation.x) * 0.04;
-      meshRef.current.rotation.y += (targetRotY - meshRef.current.rotation.y) * 0.04;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={[0, 0, -8]} scale={[viewport.width * 3.2, viewport.height * 3.2, 1]}>
-      <planeGeometry args={[1, 1, 48, 48]} />
-      <shaderMaterial
-        ref={matRef}
-        vertexShader={nebulaVertex}
-        fragmentShader={nebulaFragment}
-        uniforms={uniforms}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </mesh>
-  );
 }
 
 // -----------------------------------------------------------------------------
@@ -948,7 +691,6 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
     <>
       <CameraRig pointer={pointer} scroll={scroll} />
       <AdaptiveQuality maxDpr={isMobile ? 1 : 1.5} />
-      <AuroraNebula pointer={pointer} scroll={scroll} />
       <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 120 : 360} />
       <GuillocheField pointer={pointer} scroll={scroll} isMobile={isMobile} />
       {!isMobile && <SkillsConstellation scroll={scroll} />}

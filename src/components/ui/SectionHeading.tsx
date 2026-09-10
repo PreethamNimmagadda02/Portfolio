@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 export interface SectionHeadingProps {
   /** One of the three uppercase eyebrows. Rendered in Geist Mono above the title. */
   eyebrow?: string;
-  /** Renders the single 6px aurum live indicator before the eyebrow (Contact only). */
-  indicator?: boolean;
   title: ReactNode;
   /** The heading tag. Sizes are applied for h2; the hero sizes its own h1 via titleClassName. */
   as?: "h1" | "h2";
@@ -34,7 +32,6 @@ const WORD_STEP = 62;
  */
 export function SectionHeading({
   eyebrow,
-  indicator = false,
   title,
   as: Tag = "h2",
   subtext,
@@ -50,18 +47,7 @@ export function SectionHeading({
     <InViewClass amount={0.3} className={cn("flex flex-col items-start", className)}>
       {eyebrow ? (
         <span className="line-mask mb-3">
-          <span className="line-rise eyebrow">
-            {indicator ? (
-              // The eyebrow also carries .line-rise, whose display:
-              // inline-block makes the class's own `gap` inert, so the dot
-              // holds its distance from the text with a margin instead.
-              <span
-                aria-hidden
-                className="breathe mr-3 inline-block size-1.5 shrink-0 rounded-full bg-aurum-300"
-              />
-            ) : null}
-            {eyebrow}
-          </span>
+          <span className="line-rise eyebrow">{eyebrow}</span>
         </span>
       ) : null}
 

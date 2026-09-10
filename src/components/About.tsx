@@ -61,7 +61,16 @@ function ManifestoRow({ paragraph, index }: { paragraph: Paragraph; index: numbe
 
   return (
     <motion.div
-      className={cn(styles.row, "grid grid-cols-12 gap-x-6 lg:gap-x-8")}
+      /* Each conviction gets its own rule. Four paragraphs separated by air
+         alone had nothing of the record about them. */
+      /* Deliberately not a `group`: .rule-hover answers to .group:hover as
+         well as its own, so a group here would draw the lead's rule from
+         anywhere in the row while the figure stayed ivory. The figure, the
+         index and the rule all key off the lead phrase instead. */
+      className={cn(
+        styles.row,
+        "grid grid-cols-12 gap-x-6 border-t border-hairline pt-8 transition-colors duration-500 ease-heavy hover:border-hairline-strong lg:gap-x-8 lg:pt-10"
+      )}
       initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12 }}
       whileInView={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.4 }}
@@ -73,23 +82,34 @@ function ManifestoRow({ paragraph, index }: { paragraph: Paragraph; index: numbe
     >
       {/* Hanging figure. Mobile: a block above the paragraph. Desktop: hung in
           columns 1 to 3, right-aligned toward the prose, nudged up so the
-          Bodoni baseline sits near the paragraph's first baseline. */}
+          Bodoni baseline sits near the paragraph's first baseline. The index
+          rides the caption line rather than sitting above the figure, which
+          would push the numeral off that baseline. */}
       <div className="col-span-12 mb-6 lg:col-span-3 lg:col-start-1 lg:mb-0 lg:-mt-4 lg:text-right">
         <LedgerNumber
           value={paragraph.figure}
           delayMs={index * ROW_STAGGER * 1000}
           className={cn(
             styles.figure,
-            "font-display font-normal text-[2.5rem] leading-[0.95] lg:text-[3rem]"
+            "font-display font-normal text-[2.75rem] leading-[0.95] lg:text-[3.5rem]"
           )}
         />
-        <span className="mt-2 block font-mono text-[12px] leading-[1.4] tracking-[0.04em] text-ivory-300 ledger">
+        <span className="mt-3 flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 lg:justify-end">
+          <span aria-hidden className={cn(styles.index, "ledger")}>
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span aria-hidden className="h-px w-4 bg-hairline-gold" />
           {paragraph.caption}
         </span>
       </div>
 
       <p className="col-span-12 col-start-1 max-w-[62ch] font-sans text-[16px] leading-[1.7] text-ivory-200 md:text-[17px] lg:col-span-8 lg:col-start-4 lg:text-[18px]">
-        <strong className={cn(styles.lead, "font-display font-medium text-[22px] leading-[1] text-ivory-100")}>
+        <strong
+          className={cn(
+            styles.lead,
+            "rule-hover font-display font-medium text-[22px] leading-[1] text-ivory-100"
+          )}
+        >
           {paragraph.lead}
         </strong>{" "}
         {paragraph.text}
@@ -104,7 +124,10 @@ export default function About() {
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6 lg:gap-x-8">
           <div className="col-span-12 lg:col-span-9">
-            <SectionHeading title="I build for where AI is going, not where it is." />
+            <SectionHeading
+              eyebrow="FOUR CONVICTIONS"
+              title="I build for where AI is going, not where it is."
+            />
           </div>
         </div>
 

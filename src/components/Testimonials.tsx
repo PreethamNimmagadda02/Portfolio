@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from
 import { motion, AnimatePresence, useInView, EASE_SETTLE, EASE_HEAVY } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SectionHeading } from "@/components/ui";
+import { SectionHeading, PlateTicks } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 interface Testimonial {
@@ -187,16 +187,19 @@ function quoteSizeClass(quote: string) {
    ------------------------------------------------------------------------ */
 function QuoteBody({ t, className }: { t: Testimonial; className?: string }) {
   return (
-    <figure className={cn("flex flex-col", className)}>
+    <figure className={cn("flex max-w-[60ch] flex-col", className)}>
       <blockquote
         className={cn(
-          "font-display font-normal italic text-ivory-100 leading-[1.35] tracking-[-0.005em] max-w-[60ch]",
+          "font-display font-normal italic text-ivory-100 leading-[1.35] tracking-[-0.005em]",
           quoteSizeClass(t.quote)
         )}
       >
         {t.quote}
       </blockquote>
-      <figcaption className="mt-8 flex flex-col gap-1.5">
+      {/* The attribution sits below its own rule. A quote and its source
+          running together with nothing between them is the one thing a set
+          pull quote never does. */}
+      <figcaption className="mt-8 flex flex-col gap-1.5 border-t border-hairline pt-6">
         <span className="font-sans text-[15px] leading-none text-ivory-100">{t.name}</span>
         <span className="font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">{t.role}</span>
         {t.project ? (
@@ -289,11 +292,15 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
       onFocus={onRegionFocus}
       onBlur={onRegionBlur}
     >
-      {/* Stage */}
-      <div className="relative min-h-[260px]">
+      {/* Stage. Framed top and bottom with gold registration ticks at the
+          corners, and a page number in the bottom right: the quote used to
+          float in open space with only an opening mark for company. */}
+      <div className="relative border-y border-hairline py-12 lg:py-14">
+        <PlateTicks />
+
         <span
           aria-hidden
-          className="hidden lg:block absolute -left-10 top-0 select-none font-display font-normal text-aurum-300 text-[5rem] leading-none"
+          className="hidden lg:block absolute -left-10 top-8 select-none font-display font-normal text-aurum-300 text-[5rem] leading-none"
         >
           &ldquo;
         </span>
@@ -302,21 +309,33 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
           Quote {active + 1} of {COUNT}
         </p>
 
-        {reduced ? (
-          <div key={active}>{quoteNode}</div>
-        ) : (
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6, transition: { duration: 0.35, ease: EASE_SETTLE } }}
-              transition={{ duration: 0.7, ease: EASE_SETTLE }}
-            >
-              {quoteNode}
-            </motion.div>
-          </AnimatePresence>
-        )}
+        <div className="min-h-[260px]">
+          {reduced ? (
+            <div key={active}>{quoteNode}</div>
+          ) : (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6, transition: { duration: 0.35, ease: EASE_SETTLE } }}
+                transition={{ duration: 0.7, ease: EASE_SETTLE }}
+              >
+                {quoteNode}
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </div>
+
+        {/* Folio. Mobile carries its own counter under each pane. */}
+        <p
+          aria-hidden
+          className="ledger absolute bottom-5 right-0 hidden font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 lg:block"
+        >
+          <span className="text-aurum-300">{String(active + 1).padStart(2, "0")}</span>
+          <span className="px-2 text-ivory-300/60">/</span>
+          {String(COUNT).padStart(2, "0")}
+        </p>
       </div>
 
       {/* Name strip */}
@@ -340,25 +359,37 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
               onMouseEnter={() => previewAfterIntent(i)}
               onMouseLeave={clearPreview}
               className={cn(
-                "relative py-1 font-sans text-[13px] leading-none transition-colors duration-300 ease-settle",
+                "group relative py-1 font-sans text-[13px] leading-none transition-colors duration-300 ease-settle",
                 isActive ? "text-ivory-100" : "text-ivory-300 hover:text-ivory-200"
               )}
             >
               {t.name}
               <span aria-hidden className="absolute inset-x-0 -bottom-1 h-px">
-                {isActive && !reduced ? (
-                  <motion.span
-                    key={active}
-                    className="block h-full w-full origin-left bg-aurum-300"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: running ? 1 : 0 }}
-                    transition={
-                      running
-                        ? { duration: INTERVAL_MS / 1000, ease: "linear" }
-                        : { duration: 0.35, ease: EASE_HEAVY }
-                    }
-                  />
-                ) : null}
+                {isActive ? (
+                  reduced ? (
+                    /* No dwell to draw, so the selection is a static rule.
+                       Without it the active voice would be marked by text
+                       colour alone. */
+                    <span className="block h-full w-full bg-aurum-300" />
+                  ) : (
+                    <motion.span
+                      key={active}
+                      className="block h-full w-full origin-left bg-aurum-300"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: running ? 1 : 0 }}
+                      transition={
+                        running
+                          ? { duration: INTERVAL_MS / 1000, ease: "linear" }
+                          : { duration: 0.35, ease: EASE_HEAVY }
+                      }
+                    />
+                  )
+                ) : (
+                  /* An unselected name draws a plain hairline on hover, in
+                     the same gutter the dwell line uses, so the strip reads
+                     as one mechanism rather than two. */
+                  <span className="block h-full w-full origin-left scale-x-0 bg-hairline-strong transition-transform duration-300 ease-heavy group-hover:scale-x-100" />
+                )}
               </span>
             </button>
           );
@@ -379,10 +410,18 @@ function QuoteCarousel() {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {testimonials.map((t, i) => (
-          <div key={t.name} className="snap-center shrink-0 w-[85vw] max-w-[420px] flex flex-col border-t border-hairline pt-6">
+          <div
+            key={t.name}
+            className="relative snap-center shrink-0 w-[85vw] max-w-[420px] flex flex-col border-t border-hairline pt-6"
+          >
+            {/* The same trim marks the desktop stage carries, on the one rule
+                a pane has. */}
+            <PlateTicks edges="top" />
             <QuoteBody t={t} className="flex-1" />
-            <p className="mt-6 font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">
-              {i + 1} of {COUNT}
+            <p className="ledger mt-6 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+              <span className="text-aurum-300">{String(i + 1).padStart(2, "0")}</span>
+              <span className="px-2 text-ivory-300/60">/</span>
+              {String(COUNT).padStart(2, "0")}
             </p>
           </div>
         ))}
@@ -404,10 +443,16 @@ export default function Testimonials() {
     <section ref={sectionRef} id="testimonials" className="relative w-full py-32 lg:py-40">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6">
+          {/* The count lives in the eyebrow and the folio, where a numeral
+              belongs, and is interpolated so it cannot drift: the subtext used
+              to say twelve while the strip held fourteen. The prose no longer
+              carries it, which also keeps the section's voice spelling its
+              numbers out the way every other one does. */}
           <SectionHeading
             className="col-span-12 lg:col-span-8"
+            eyebrow={`${COUNT} VOICES`}
             title="In their words."
-            subtext="Twelve notes from collaborators, mentors and peers who have seen the work up close."
+            subtext="Notes from collaborators, mentors and peers who have seen the work up close."
           />
 
           {isMobile ? <QuoteCarousel /> : <QuoteStage inView={inView} reduced={reduced} />}

@@ -97,10 +97,24 @@ export function LiveDataNotice({ message, className }: { message: string; classN
   );
 }
 
-/* One ledger row per platform: name and badge, then the stat columns. */
-const ROW_CLASS = "grid grid-cols-1 gap-y-5 border-t border-hairline py-7 md:grid-cols-12 md:items-baseline md:gap-x-6 lg:py-8";
-const NAME_COL_CLASS = "flex flex-wrap items-baseline gap-x-3 gap-y-1 md:col-span-4";
-const STATS_COL_CLASS = "grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 md:col-span-8";
+/* One ledger row per platform, read left to right the way an entry in a
+   ledger is: index, then who, then the one figure that matters, then the
+   supporting figures. The lead figure is set in the display face two steps
+   above the rest, which is the whole difference between a table and a ledger. */
+const ROW_CLASS =
+  "group grid grid-cols-1 gap-y-6 border-t border-hairline py-7 transition-colors duration-500 ease-heavy hover:border-hairline-strong md:grid-cols-12 md:gap-x-6 lg:py-8";
+const INDEX_COL_CLASS = "hidden md:col-span-1 md:block";
+const NAME_COL_CLASS = "flex flex-wrap items-baseline gap-x-3 gap-y-1 md:col-span-3";
+/* The stat grid stays a real dl: display:contents would let the cells join the
+   row grid directly, but it also drops the list semantics in several engines,
+   which is exactly the dt/dd pairing that makes these figures legible to a
+   screen reader. Four equal columns, lead first. */
+const STATS_COL_CLASS = "grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4 sm:gap-x-0 md:col-span-8";
+const STAT_CELL_CLASS = "flex flex-col gap-2.5 sm:border-l sm:border-hairline sm:px-6 sm:first:border-l-0 sm:first:pl-0";
+/* The label above a figure. One treatment for every stat in the row, lead or
+   supporting, so the eye reads a single line of small caps across the plate. */
+const STAT_LABEL_CLASS =
+  "truncate font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-ivory-200";
 
 interface StatColumn {
   label: string;
@@ -186,17 +200,25 @@ function displayBadge(profile: PlatformProfile): string | null | undefined {
   return profile.platform === "leetcode" ? null : profile.userStats?.maxRank;
 }
 
-/* Skeleton rows in the exact shape of a platform row. */
+/* Skeleton rows in the exact shape of a platform row, lead figure included,
+   so the row does not change height when the fetch resolves. */
 function ProfileSkeleton() {
   return (
     <div className={ROW_CLASS} aria-hidden>
+      <div className={INDEX_COL_CLASS}>
+        <span className="breathe block h-3 w-5 bg-obsidian-2" />
+      </div>
       <div className={NAME_COL_CLASS}>
         <span className="breathe block h-6 w-32 bg-obsidian-2" />
         <span className="breathe block h-3 w-14 bg-obsidian-2" />
       </div>
       <div className={STATS_COL_CLASS}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-3">
+        <div className={cn(STAT_CELL_CLASS, "gap-3")}>
+          <span className="breathe block h-3 w-14 bg-obsidian-2" />
+          <span className="breathe block h-8 w-24 bg-obsidian-2" />
+        </div>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={STAT_CELL_CLASS}>
             <span className="breathe block h-3 w-16 bg-obsidian-2" />
             <span className="breathe block h-4 w-12 bg-obsidian-2" />
           </div>
@@ -313,7 +335,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
               PLATFORM_NAMES[profile.platform] ||
               profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
             const badge = displayBadge(profile);
-            const columns = buildColumns(profile);
+            const [lead, ...rest] = buildColumns(profile);
 
             return (
               <article
@@ -322,28 +344,51 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                 style={{ "--d": `${idx * 90}ms` } as CSSProperties}
                 aria-label={`${name} statistics`}
               >
+                {/* Hanging index, hidden below md where the row stacks and a
+                    lone numeral in the flow would read as a stat of its own. */}
+                <div className={INDEX_COL_CLASS} aria-hidden>
+                  <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-aurum-300">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                </div>
+
                 <div className={NAME_COL_CLASS}>
-                  <h3 className="font-display text-[22px] font-medium leading-[1.2] text-ivory-100">
+                  <h3 className="foil font-display text-[22px] font-medium leading-[1.2]">
                     {name}
                   </h3>
                   {badge && (
-                    <span className="ledger font-mono text-[12px] capitalize leading-none tracking-[0.04em] text-ivory-300">
+                    <span className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
                       {badge}
                     </span>
                   )}
                 </div>
 
                 <dl className={STATS_COL_CLASS}>
-                  {columns.map((col, i) => (
-                    <div key={`${col.label}-${i}`} className="flex flex-col gap-2.5">
-                      <dt className="truncate font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
-                        {col.label}
-                      </dt>
+                  {/* The headline figure, in the display face, two steps above
+                      the rest. This is the one figure a visitor should carry
+                      away from the row. */}
+                  <div className={cn(STAT_CELL_CLASS, "gap-3")}>
+                    <dt className={STAT_LABEL_CLASS}>{lead.label}</dt>
+                    <dd className="m-0">
+                      <LedgerNumber
+                        value={lead.value}
+                        label={`${lead.label}: ${lead.value}`}
+                        delayMs={idx * 90}
+                        className="font-display text-[2rem] font-medium leading-none text-ivory-100 transition-colors duration-600 ease-settle group-hover:text-aurum-200"
+                      />
+                    </dd>
+                  </div>
+
+                  {/* The supporting figures, each behind a hairline once they
+                      sit on one row and cannot wrap across a rule. */}
+                  {rest.map((col, i) => (
+                    <div key={`${col.label}-${i}`} className={STAT_CELL_CLASS}>
+                      <dt className={STAT_LABEL_CLASS}>{col.label}</dt>
                       <dd className="m-0">
                         <LedgerNumber
                           value={col.value}
                           label={`${col.label}: ${col.value}`}
-                          delayMs={idx * 90}
+                          delayMs={idx * 90 + (i + 1) * 60}
                           className="font-mono text-[15px] leading-none text-ivory-100"
                         />
                       </dd>

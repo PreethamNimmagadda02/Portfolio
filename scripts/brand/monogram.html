@@ -12,10 +12,14 @@
      listed in scripts/brand/README.md, using a square viewport: every length
      here is a share of the canvas, so all sizes are the same drawing.
 
-     No frame, and weight 700 rather than the letterhead's 400: a favicon is
-     drawn at 16 to 32 device pixels, where a Didone's hairlines and a 2px
-     inset border both fall below a single pixel. The earlier framed 400 mark
-     lost the entire N in the browser tab. */
+     Weight 700 rather than the letterhead's 400 everywhere: a favicon is drawn
+     at 16 to 32 device pixels, where a Didone's hairlines fall below a single
+     pixel. The earlier 400 mark lost the entire N in the browser tab.
+
+     The gold frame is the one thing that is not size independent, and it is
+     gated below on purpose. At 16 to 32 device pixels an inset hairline is the
+     same order of magnitude as the letters, so it crowds the mark and reads as
+     noise; at 192 and 512 it is the plate edge the whole site is built on. */
   html, body { margin: 0; padding: 0; }
   body {
     width: 100vw; height: 100vh; overflow: hidden;
@@ -39,9 +43,25 @@
     padding-bottom: 3vw;
     box-sizing: border-box;
   }
+  /* The plate edge, in the site's hairline gold. Rendered only from 64px up,
+     so favicon-16 and favicon-32 stay the bare mark. */
+  .frame { display: none; }
+  @media (min-width: 64px) {
+    .frame {
+      display: block;
+      position: absolute; inset: 7.8%;
+      /* max() holds the rule at a full device pixel once the proportional
+         width would round to a fraction: 2px at 512, 1px at 192. */
+      border: max(1px, 0.39vw) solid rgba(201, 169, 97, 0.45);
+    }
+    /* Give the letters air inside the frame rather than letting the P and the
+       N crowd the rule. */
+    .mono { font-size: 50vw; padding-bottom: 2.5vw; }
+  }
 </style>
 </head>
 <body>
+  <div class="frame"></div>
   <div class="mono">PN</div>
 </body>
 </html>

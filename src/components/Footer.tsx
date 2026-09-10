@@ -37,6 +37,22 @@ function Dash() {
   return <span aria-hidden className={DASH} />;
 }
 
+/* A column heading. Three stacks of links with nothing above them read as a
+   template footer; the small caps are what make them a colophon's columns. */
+function ColumnLabel({ children, className }: { children: ReactNode; className?: string }) {
+  /* Block heading, eyebrow inside: .eyebrow is inline-flex, so it is the
+     wrapper that owns the spacing and any rule, the same shape SectionHeading
+     uses. */
+  return (
+    <h2 className={cn("mb-4", className)}>
+      <span className="eyebrow text-ivory-300">
+        {children}
+        <span aria-hidden className="h-px w-6 bg-hairline" />
+      </span>
+    </h2>
+  );
+}
+
 /* Fade in once with a 10px rise over 800ms; opacity only under reduced motion. */
 function Rise({
   children,
@@ -84,13 +100,17 @@ export default function Footer() {
 
   return (
     <footer className="relative z-10 border-t border-hairline bg-obsidian-0 text-ivory-100">
-      <div className="mx-auto max-w-[1280px] px-6 py-16 lg:px-10 lg:py-20">
-        <div className="grid grid-cols-12 gap-y-10 lg:gap-x-8">
+      <div className="mx-auto max-w-[1280px] px-6 py-12 lg:px-10 lg:py-16">
+        {/* Below lg the brand takes a full row and the two link lists share
+            the next one, six columns each: stacked, the shorter Elsewhere list
+            cost the footer its own height plus a row gap for three items.
+            gap-y only bites here, since at lg all three sit on one row. */}
+        <div className="grid grid-cols-12 gap-x-6 gap-y-8 lg:gap-x-8">
           {/* Brand */}
           <Rise reduced={reduced} className="col-span-12 lg:col-span-5">
             <Link
               href="/"
-              className="inline-block font-display font-medium text-[24px] leading-tight tracking-[-0.005em] text-ivory-100"
+              className="foil inline-block font-display font-medium text-[24px] leading-tight tracking-[-0.005em]"
             >
               Preetham Nimmagadda
             </Link>
@@ -106,9 +126,15 @@ export default function Footer() {
             delay={0.08}
             as="nav"
             ariaLabel="Footer"
-            className="col-span-12 lg:col-span-3 lg:col-start-7"
+            className="col-span-6 lg:col-span-3 lg:col-start-7 lg:border-l lg:border-hairline lg:pl-8"
           >
-            <ul className="flex flex-col items-start gap-2.5">
+            <ColumnLabel>Navigate</ColumnLabel>
+            {/* leading-none on the list, not just the anchors: the items
+                otherwise inherit the body's 1.65 line-height, which gave every
+                14px link a 26px line box. Six links carried 72px of leading
+                they never used, and this is the tallest column, so that was
+                the footer's height. */}
+            <ul className="flex flex-col items-start gap-2.5 leading-none">
               {NAV_LINKS.map((link) => (
                 <li key={link.id}>
                   <a href={`#${link.id}`} onClick={(e) => handleNavClick(e, link.id)} className={LINK}>
@@ -121,8 +147,16 @@ export default function Footer() {
           </Rise>
 
           {/* Connect */}
-          <Rise reduced={reduced} delay={0.16} className="col-span-12 lg:col-span-3 lg:text-right">
-            <ul className="flex flex-col items-start gap-2.5 lg:items-end">
+          <Rise
+            reduced={reduced}
+            delay={0.16}
+            /* The rule runs at every width here: below lg it is what divides
+               the two lists sharing the row, above lg it is the third column
+               boundary. */
+            className="col-span-6 border-l border-hairline pl-6 lg:col-span-3 lg:pl-8"
+          >
+            <ColumnLabel>Elsewhere</ColumnLabel>
+            <ul className="flex flex-col items-start gap-2.5 leading-none">
               {CONNECT_LINKS.map(({ label, href, Icon, external }) => (
                 <li key={label}>
                   <a
@@ -144,22 +178,32 @@ export default function Footer() {
         <Rise
           reduced={reduced}
           delay={0.24}
-          className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-6"
+          className="mt-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-5 border-t border-hairline pt-6"
         >
-          <p className="ledger font-mono text-[12px] leading-none text-ivory-300">
-            &copy; {year} Preetham Nimmagadda
-          </p>
+          {/* The colophon proper: what the page is set in, and where it was
+              set. The line a printed edition would carry at the back. */}
+          <div className="flex flex-col gap-2">
+            <p className="ledger font-mono text-[12px] leading-none text-ivory-300">
+              &copy; {year} Preetham Nimmagadda
+            </p>
+            <p className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+              Set in Bodoni Moda and Geist. Hyderabad, Telangana.
+            </p>
+          </div>
+
+          {/* A control, not a fourth link: its own hairline box, so it does
+              not borrow the left dash the lists above use. */}
           <button
             type="button"
             onClick={() => smoothScrollTo(0)}
-            className={cn(LINK, "cursor-pointer")}
+            className="group inline-flex cursor-pointer items-center gap-3 border border-hairline px-4 py-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-200 transition-colors duration-300 ease-heavy hover:border-hairline-gold hover:text-aurum-200"
           >
             Back to top
             <ArrowUp
               size={14}
               weight="light"
               aria-hidden
-              className="shrink-0 transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5"
+              className="shrink-0 transition-transform duration-300 ease-heavy group-hover:-translate-y-1"
             />
           </button>
         </Rise>

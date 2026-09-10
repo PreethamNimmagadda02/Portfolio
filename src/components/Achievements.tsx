@@ -23,7 +23,9 @@ interface Record {
   /** Sentence read by assistive tech in place of the character spans. */
   spoken: string;
   /** Mono caption set beneath the figure (Codeforces only). */
-  unit?: string;
+  /** The denominator under the figure: percentile, rating, solved. Required,
+   *  so no record can ship with a bare number and no unit beside it. */
+  unit: string;
   title: string;
   description: string;
   /** Denomination: the two large figures reach 7.5rem, the two small ones 5rem. */
@@ -39,6 +41,7 @@ const records: Record[] = [
     id: "hackerrank",
     figure: "Top 0.07%",
     spoken: "Ranked in the top 0.07% of developers on HackerRank.",
+    unit: "percentile",
     title: "HackerRank 6-star gold",
     description: "Ranked in the top 0.07% of 26M+ developers on the platform.",
     size: "large",
@@ -49,6 +52,7 @@ const records: Record[] = [
     id: "codechef",
     figure: "Top 0.8%",
     spoken: "Ranked in the top 0.8% of coders on CodeChef.",
+    unit: "percentile",
     title: "CodeChef 4-star",
     description: "4-star status (1864 rating). Top 0.8% among 2 million+ coders worldwide.",
     size: "small",
@@ -70,6 +74,7 @@ const records: Record[] = [
     id: "problems",
     figure: "1,000+",
     spoken: "More than 1,000 problems solved.",
+    unit: "solved",
     title: "1,000+ problems solved",
     description: "Across LeetCode, TUF+, Codeforces, CodeChef and HackerRank. Depth across every major judge.",
     size: "large",
@@ -151,6 +156,19 @@ function RecordBlock({
         isLeft ? "lg:pr-10" : "lg:pl-10"
       )}
     >
+      {/* Index and denominator on one line above the figure: which record
+          this is, and what the figure is measured in. Every record carries a
+          unit now, so the line is never half empty. */}
+      <div aria-hidden className="mb-5 flex items-center gap-3">
+        <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="h-px w-4 bg-hairline-gold" />
+        <span className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+          {record.unit}
+        </span>
+      </div>
+
       <p
         className={cn(
           "font-display font-normal leading-[0.95] tracking-[-0.01em] text-ivory-100",
@@ -161,15 +179,9 @@ function RecordBlock({
         <LedgerNumber value={record.figure} label={record.spoken} delayMs={index * BLOCK_STAGGER} />
       </p>
 
-      {record.unit ? (
-        <span aria-hidden className="mt-3 font-mono text-[12px] tracking-[0.04em] text-ivory-300">
-          {record.unit}
-        </span>
-      ) : null}
-
       <h3
         id={`achievement-${record.id}`}
-        className="mt-8 font-display text-[22px] font-medium leading-[1.2] text-ivory-100 lg:mt-10"
+        className="mt-8 font-display text-[24px] font-medium leading-[1.2] text-ivory-100 lg:mt-10 lg:text-[26px]"
       >
         {record.title}
       </h3>
@@ -204,6 +216,7 @@ export default function Achievements() {
       <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         <div className="lg:grid lg:grid-cols-12">
           <SectionHeading
+            eyebrow="FOUR RECORDS"
             title="Competitive record."
             subtext="Rankings across CodeChef, Codeforces and HackerRank, and 1,000+ problems solved."
             className="lg:col-span-8"

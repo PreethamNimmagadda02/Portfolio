@@ -175,11 +175,19 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
           onClick={() => onToggle(slug)}
           className="group w-full grid grid-cols-12 items-center h-[72px] lg:h-[88px] text-left"
         >
+          {/* Hanging index. Six rows in a dossier should be numbered. */}
+          <span
+            aria-hidden
+            className="ledger hidden lg:block lg:col-span-1 font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-[var(--ease-heavy)] group-hover:text-aurum-300"
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
           {/* No text colour utility here: .foil paints the glyphs from a
               gradient and needs the transparent fill it sets to survive. */}
           <span
             className={cn(
-              "col-span-11 sm:col-span-8 lg:col-span-6 pr-4",
+              "col-span-11 sm:col-span-8 lg:col-span-5 pr-4",
               "font-display font-medium text-[22px] lg:text-[28px] leading-none",
               "foil transition-transform duration-300 ease-[var(--ease-heavy)] group-hover:translate-x-[6px]"
             )}
@@ -189,15 +197,19 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
 
           <span
             className={cn(
-              "sr-only sm:not-sr-only sm:block sm:col-span-3 lg:col-span-2",
-              "font-mono text-[12px] leading-none tabular-nums",
+              "sr-only sm:not-sr-only sm:flex sm:items-center sm:gap-2.5 sm:col-span-3 lg:col-span-2",
+              "font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums",
               isLive ? "text-aurum-300" : "text-ivory-300"
             )}
           >
+            {/* A live build gets a breathing gold detent. Nothing else on the
+                row moves on its own, so it is the one thing that reads as
+                still running. */}
+            {isLive ? <span aria-hidden className="breathe size-1.5 shrink-0 bg-aurum-300" /> : null}
             {status}
           </span>
 
-          <span className="hidden lg:block lg:col-span-3 font-mono text-[12px] leading-none tabular-nums text-ivory-300">
+          <span className="hidden lg:block lg:col-span-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums text-ivory-300">
             {tags[0]}
           </span>
 
@@ -244,7 +256,15 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
                 >
                   <p className="font-sans text-[17px] leading-[1.6] text-ivory-200 max-w-[52ch]">{description}</p>
 
-                  <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[12px] leading-none tabular-nums text-ivory-300" aria-label="Stack">
+                  {/* Small caps and a wide gutter carry the separation here.
+                      A hairline between items does not survive the wrap: the
+                      stack runs to two lines at this column width, and a
+                      divider drawn before each entry leaves the second line
+                      starting with a rule and no tag in front of it. */}
+                  <ul
+                    className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2.5 font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums text-ivory-300"
+                    aria-label="Stack"
+                  >
                     {tags.map((tag) => (
                       <li key={tag}>{tag}</li>
                     ))}
@@ -296,7 +316,7 @@ function ScreenshotPlate({ src, title }: { src: string; title: string }) {
   const sheen = useSheen();
 
   return (
-    <div {...sheen} className="sheen relative border border-hairline aspect-[16/10] overflow-hidden">
+    <div {...sheen} className="sheen relative aspect-[16/10] overflow-hidden">
       <Image
         src={src}
         alt={`Screenshot of ${title}`}
@@ -306,6 +326,24 @@ function ScreenshotPlate({ src, title }: { src: string; title: string }) {
         decoding="async"
         className="block h-full w-full object-cover"
       />
+
+      {/* Bottom scrim, so a bright screenshot does not run straight into the
+          panel tint beneath it. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--color-obsidian-0) 45%, transparent))",
+        }}
+      />
+
+      {/* The same double bezel PortraitPlate carries: outer frame at the edge,
+          inner frame inset 12px. One frame grammar for every plate on the
+          page, rather than a double bezel on the portrait and a single flat
+          border here. */}
+      <span aria-hidden className="pointer-events-none absolute inset-0 border border-hairline" />
+      <span aria-hidden className="pointer-events-none absolute inset-3 border border-hairline" />
     </div>
   );
 }
@@ -323,7 +361,12 @@ export default function Projects() {
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6 lg:gap-x-10">
           <div className="col-span-12 lg:col-span-8">
-            <SectionHeading id="projects-heading" title="Selected work." subtext="Six builds, three of them live." />
+            <SectionHeading
+              id="projects-heading"
+              eyebrow="SOURCE LINKED FOR EVERY BUILD"
+              title="Selected work."
+              subtext="Six builds, three of them live."
+            />
           </div>
 
           <div ref={listRef} className="col-span-12 mt-16 lg:mt-20">

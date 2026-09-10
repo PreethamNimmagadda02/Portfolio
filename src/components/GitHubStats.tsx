@@ -1,10 +1,18 @@
 "use client";
 
 import { motion, useInView, AnimatePresence, EASE_HEAVY } from "@/lib/motion";
-import { useRef, useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import CodingProfiles, { LiveDataNotice, LIVE_DATA_ERROR } from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SectionHeading, LedgerNumber } from "@/components/ui";
+import { SectionHeading, LedgerNumber, PlateTicks } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import bakedLoc from "@/data/github-loc.json";
 
@@ -405,13 +413,17 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
             ))}
           </div>
         </div>
-        {/* Legend */}
+        {/* Legend, in the same small caps as every other label on the plate. */}
         <div className="mt-5 flex items-center justify-end gap-[3px]">
-          <span className="mr-2 font-mono text-[11px] leading-none text-ivory-300">Less</span>
+          <span className="mr-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+            Less
+          </span>
           {CELL_COLORS.map((c, i) => (
             <span key={i} aria-hidden className="size-3" style={{ backgroundColor: c }} />
           ))}
-          <span className="ml-2 font-mono text-[11px] leading-none text-ivory-300">More</span>
+          <span className="ml-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+            More
+          </span>
         </div>
       </div>
     </div>
@@ -420,6 +432,20 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
 
 /* Figure row: the ledger of four. Hairline rules divide the cells; on
    mobile the row folds to 2x2 with a rule between the two rows. */
+/* The caption over a sub-plate. Small caps with a closing hairline, so the
+   heatmap and the language gauge are introduced the way the section is,
+   rather than by a line of mono body text. */
+function SubCaption({ children }: { children: ReactNode }) {
+  return (
+    <p className="mb-6">
+      <span className="eyebrow text-ivory-300">
+        {children}
+        <span aria-hidden className="h-px w-6 bg-hairline" />
+      </span>
+    </p>
+  );
+}
+
 function figureCellClass(i: number) {
   return cn(
     "group flex flex-col gap-4 py-8 lg:py-10",
@@ -732,21 +758,22 @@ export default function GitHubStats() {
                         label={`${figure.value.toLocaleString()} ${figure.label.toLowerCase()}`}
                         className="font-display text-[2.5rem] leading-none text-ivory-100 lg:text-[3.5rem]"
                       />
-                      <span className="font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
-                        <span className="decoration-hairline-gold underline-offset-[5px] group-hover:underline">
-                          {figure.label}
-                        </span>
+                      <span className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                        {/* .rule-hover draws a gold hairline in reserved
+                            space, so the label does not shift the way a
+                            text-decoration underline does. */}
+                        <span className="rule-hover">{figure.label}</span>
                       </span>
                     </a>
                   ))}
                 </div>
               )}
 
-              {/* Heatmap */}
+              {/* Heatmap, on a framed plate: twelve months of ink sat in open
+                  space before, with nothing to say where the reading began or
+                  ended. */}
               <div className="mt-16">
-                <p className="mb-6 font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
-                  Contributions by day
-                </p>
+                <SubCaption>Contributions by day</SubCaption>
                 {loading ? (
                   <div aria-busy="true" className="flex flex-col gap-[3px]">
                     {Array.from({ length: 7 }).map((_, i) => (
@@ -754,8 +781,11 @@ export default function GitHubStats() {
                     ))}
                   </div>
                 ) : contributions.length > 0 ? (
-                  <div className="w-full overflow-x-auto no-scrollbar">
-                    <ContributionHeatmap data={contributions} />
+                  <div className="relative border-y border-hairline py-7">
+                    <PlateTicks />
+                    <div className="w-full overflow-x-auto no-scrollbar">
+                      <ContributionHeatmap data={contributions} />
+                    </div>
                   </div>
                 ) : (
                   <p className="font-sans text-[14px] text-ivory-300">No contribution data available</p>
@@ -764,12 +794,12 @@ export default function GitHubStats() {
 
               {/* Language distribution */}
               <div className="mt-16">
-                <p className="mb-6 font-mono text-[12px] leading-none tracking-[0.04em] text-ivory-300">
-                  Languages by repository
-                </p>
+                <SubCaption>Languages by repository</SubCaption>
                 {loading ? (
                   <div aria-busy="true">
-                    <span className="breathe block h-[6px] w-full bg-obsidian-2" />
+                    {/* Matches the framed gauge: 1px rule, 4px inset, 10px of
+                        ink, 4px inset, 1px rule. */}
+                    <span className="breathe block h-5 w-full bg-obsidian-2" />
                     <div className="mt-5 flex gap-6">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <span key={i} className="breathe block h-3 w-20 bg-obsidian-2" />
@@ -778,24 +808,33 @@ export default function GitHubStats() {
                   </div>
                 ) : (
                   <div>
-                    <div
-                      role="img"
-                      aria-label={languages.map((l) => `${l.name} ${l.percentage}%`).join(", ")}
-                      className="flex h-[6px] w-full gap-[2px]"
-                    >
-                      {languages.map((lang, i) => (
-                        <span
-                          key={lang.name}
-                          className="block h-full min-w-0"
-                          style={{ width: `${lang.percentage}%`, backgroundColor: langInk(i) }}
-                        />
-                      ))}
+                    {/* The gauge, framed and inset rather than a bare 6px
+                        dashboard stack: hairline box, ink sitting inside it,
+                        and a tick dropped at every boundary so the divisions
+                        can be read off the rule. */}
+                    <div className="relative border border-hairline p-1">
+                      <PlateTicks />
+                      <div
+                        role="img"
+                        aria-label={languages.map((l) => `${l.name} ${l.percentage}%`).join(", ")}
+                        className="flex h-2.5 w-full gap-px"
+                      >
+                        {languages.map((lang, i) => (
+                          <span
+                            key={lang.name}
+                            className="block h-full min-w-0"
+                            style={{ width: `${lang.percentage}%`, backgroundColor: langInk(i) }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[12px] leading-none tracking-[0.04em]">
+
+                    <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em]">
                       {languages.map((lang, i) => (
                         <li key={lang.name} className="flex items-center gap-2.5">
                           <span aria-hidden className="size-2 shrink-0" style={{ backgroundColor: langInk(i) }} />
                           <span className="text-ivory-200">{lang.name}</span>
+                          <span aria-hidden className="h-3 w-px bg-hairline" />
                           <span className="ledger text-ivory-300">{lang.percentage}%</span>
                         </li>
                       ))}

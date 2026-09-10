@@ -145,17 +145,6 @@ export default function Hero() {
       id="home"
       className="relative flex min-h-[100dvh] items-center pt-20 pb-16 lg:pt-24"
     >
-      {/* Static gold light behind the plate; stands in until the scene mounts
-          and remains the only glow under reduced motion. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(60% 45% at 78% 30%, color-mix(in srgb, var(--color-aurum-300) 10%, transparent), transparent 70%)",
-        }}
-      />
-
       <div className="relative mx-auto grid w-full max-w-[1280px] grid-cols-12 items-start gap-x-6 px-6 lg:px-10">
         {/* Text block */}
         <motion.div
