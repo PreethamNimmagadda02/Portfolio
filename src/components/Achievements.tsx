@@ -216,6 +216,7 @@ export default function Achievements() {
       <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         <div className="lg:grid lg:grid-cols-12">
           <SectionHeading
+            chapter="achievements"
             eyebrow="FOUR RECORDS"
             title="Competitive record."
             subtext="Rankings across CodeChef, Codeforces and HackerRank, and 1,000+ problems solved."

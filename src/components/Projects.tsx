@@ -8,14 +8,23 @@
  * foundation's .grid-accordion class (grid-template-rows 0fr to 1fr), so no
  * height is ever measured. Inside an open panel the copy fades in and the
  * live product's screenshot wipes in from the left behind a hairline frame.
+ *
+ * Screenshots rest in the same warm photogravure grade as the portrait, so
+ * three products built in three palettes sit in this one, and lift to full
+ * colour under the hand. On a desktop, a closed row with a screenshot sends a
+ * small graded plate after the cursor, the way a print is slid across a
+ * table for a closer look.
  */
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ArrowUpRight, GithubLogo, Plus, X } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useSheen } from "@/hooks/use-sheen";
+import { useFollowPointer } from "@/hooks/use-follow-pointer";
+import { useMediaQuery } from "@/lib/viewport-store";
 import { SectionHeading, TextButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import shotsJson from "@/data/project-shots.json";
@@ -144,9 +153,11 @@ interface ProjectRowProps {
   ready: boolean;
   reduced: boolean;
   onToggle: (slug: string) => void;
+  /** Reports the row under the hand, for the preview plate. */
+  onHover: (slug: string | null) => void;
 }
 
-function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectRowProps) {
+function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }: ProjectRowProps) {
   const { slug, title, description, tags, links, status } = project;
   const triggerId = `project-${slug}-trigger`;
   const panelId = `project-${slug}-panel`;
@@ -172,8 +183,14 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
           id={triggerId}
           aria-expanded={open}
           aria-controls={panelId}
-          onClick={() => onToggle(slug)}
-          className="group w-full grid grid-cols-12 items-center h-[72px] lg:h-[88px] text-left"
+          onClick={() => {
+            onToggle(slug);
+            onHover(null);
+          }}
+          onPointerEnter={() => onHover(open ? null : slug)}
+          onPointerLeave={() => onHover(null)}
+          data-cursor={open ? "Close" : "Open"}
+          className="group w-full grid grid-cols-12 items-center h-[84px] lg:h-[112px] text-left"
         >
           {/* Hanging index. Six rows in a dossier should be numbered. */}
           <span
@@ -188,8 +205,8 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
           <span
             className={cn(
               "col-span-11 sm:col-span-8 lg:col-span-5 pr-4",
-              "font-display font-medium text-[22px] lg:text-[28px] leading-none",
-              "foil transition-transform duration-300 ease-[var(--ease-heavy)] group-hover:translate-x-[6px]"
+              "font-display font-normal text-[26px] leading-none tracking-[-0.01em] lg:text-[clamp(2rem,3.1vw,2.75rem)]",
+              "foil transition-transform duration-500 ease-[var(--ease-heavy)] group-hover:translate-x-[10px]"
             )}
           >
             {title}
@@ -295,10 +312,10 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
                 {shot ? (
                   <div className="col-span-12 lg:col-span-6">
                     {reduced ? (
-                      <ScreenshotPlate src={shot} title={title} />
+                      <ScreenshotPlate src={shot} title={title} href={isLive ? links.demo : undefined} />
                     ) : (
                       <motion.div variants={plateVariants} initial="hidden" animate={ready ? "show" : "hidden"}>
-                        <ScreenshotPlate src={shot} title={title} />
+                        <ScreenshotPlate src={shot} title={title} href={isLive ? links.demo : undefined} />
                       </motion.div>
                     )}
                   </div>
@@ -312,20 +329,41 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle }: ProjectR
   );
 }
 
-function ScreenshotPlate({ src, title }: { src: string; title: string }) {
+/**
+ * A product screenshot as a framed plate. It rests in the photogravure grade
+ * and lifts to colour under the hand (or keyboard focus) by raising a colour
+ * layer's opacity, so the filter is painted once and never animated. For a
+ * live product the whole plate is the way in.
+ */
+function ScreenshotPlate({ src, title, href }: { src: string; title: string; href?: string }) {
   const sheen = useSheen();
-
-  return (
-    <div {...sheen} className="sheen relative aspect-[16/10] overflow-hidden">
-      <Image
-        src={src}
-        alt={`Screenshot of ${title}`}
-        width={1600}
-        height={1000}
-        loading="lazy"
-        decoding="async"
-        className="block h-full w-full object-cover"
-      />
+  const frame = (
+    <>
+      <div className="absolute inset-0 transition-transform duration-[1400ms] ease-settle group-hover:scale-[1.035]">
+        <Image
+          src={src}
+          alt={`Screenshot of ${title}`}
+          width={1600}
+          height={1000}
+          loading="lazy"
+          decoding="async"
+          className="plate-mono block h-full w-full object-cover"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-0 transition-opacity duration-[900ms] ease-heavy group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          <Image
+            src={src}
+            alt=""
+            width={1600}
+            height={1000}
+            loading="lazy"
+            decoding="async"
+            className="block h-full w-full object-cover"
+          />
+        </div>
+      </div>
 
       {/* Bottom scrim, so a bright screenshot does not run straight into the
           panel tint beneath it. */}
@@ -334,17 +372,109 @@ function ScreenshotPlate({ src, title }: { src: string; title: string }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--color-obsidian-0) 45%, transparent))",
+            "linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--color-obsidian-0) 55%, transparent))",
         }}
       />
 
+      {href ? (
+        <span
+          aria-hidden
+          className="absolute bottom-6 left-6 z-[2] inline-flex translate-y-1 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-100 opacity-0 transition-[opacity,translate] duration-500 ease-heavy group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+        >
+          Visit the live site
+          <ArrowUpRight size={12} weight="light" />
+        </span>
+      ) : null}
+
       {/* The same double bezel PortraitPlate carries: outer frame at the edge,
-          inner frame inset 12px. One frame grammar for every plate on the
-          page, rather than a double bezel on the portrait and a single flat
-          border here. */}
+          inner frame inset 12px. One frame grammar for every plate. */}
       <span aria-hidden className="pointer-events-none absolute inset-0 border border-hairline" />
       <span aria-hidden className="pointer-events-none absolute inset-3 border border-hairline" />
+    </>
+  );
+
+  const classes = "group sheen relative block aspect-[16/10] overflow-hidden";
+
+  if (href) {
+    return (
+      <a
+        {...sheen}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Visit ${title}, opens the live site`}
+        data-cursor="Visit"
+        className={classes}
+      >
+        {frame}
+      </a>
+    );
+  }
+
+  return (
+    <div {...sheen} className={classes}>
+      {frame}
     </div>
+  );
+}
+
+/**
+ * The preview plate that follows the cursor over a closed row. Every plate
+ * is mounted once and cross-fades by opacity, so moving from one row to the
+ * next dissolves the prints rather than swapping them. The plate leans a few
+ * degrees into its travel and straightens as it catches up.
+ *
+ * Portalled to the body: the section sits inside a content-visibility
+ * wrapper, and containment makes that wrapper the containing block for fixed
+ * descendants, which would measure the plate from the section instead of the
+ * viewport. It only ever renders on the client (enabled is false on the
+ * server and through hydration), so the portal target always exists.
+ */
+function HoverPreview({ slug, enabled }: { slug: string | null; enabled: boolean }) {
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  const write = useCallback((x: number, y: number, dx: number) => {
+    const el = nodeRef.current;
+    if (!el) return;
+    const lean = Math.max(-7, Math.min(7, dx * 0.12));
+    el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${lean.toFixed(2)}deg)`;
+  }, []);
+
+  useFollowPointer({ lerp: 0.14, enabled, write });
+
+  if (!enabled) return null;
+  const entries = Object.entries(shots);
+
+  return createPortal(
+    <div ref={nodeRef} aria-hidden className="pointer-events-none fixed left-0 top-0 z-40 origin-top-left will-change-transform">
+      <div
+        className={cn(
+          "relative -translate-x-1/2 -translate-y-1/2 transition-[opacity,scale] duration-500 ease-heavy",
+          slug ? "scale-100 opacity-100" : "scale-[0.86] opacity-0"
+        )}
+      >
+        <div className="relative aspect-[16/10] w-[21rem] overflow-hidden bg-obsidian-1">
+          {entries.map(([key, src]) => (
+            <Image
+              key={key}
+              src={src}
+              alt=""
+              width={672}
+              height={420}
+              loading="lazy"
+              decoding="async"
+              className={cn(
+                "plate-mono absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-heavy",
+                key === slug ? "opacity-100" : "opacity-0"
+              )}
+            />
+          ))}
+          <span className="pointer-events-none absolute inset-0 border border-hairline-strong" />
+          <span className="pointer-events-none absolute inset-2 border border-hairline" />
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 
@@ -353,16 +483,23 @@ export default function Projects() {
   const listRef = useRef<HTMLDivElement>(null);
   const inView = useInView(listRef, { once: true, amount: 0.1 });
   const [openSlug, setOpenSlug] = useState<string | null>(DEFAULT_OPEN);
+  const [hoverSlug, setHoverSlug] = useState<string | null>(null);
+  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine) and (min-width: 1024px)", false);
+  const previewEnabled = finePointer && !reduced;
 
   const toggle = (slug: string) => setOpenSlug((current) => (current === slug ? null : slug));
+  // Only rows that have a print to show send the plate out.
+  const hover = useCallback((slug: string | null) => setHoverSlug(slug && shots[slug] ? slug : null), []);
 
   return (
     <section id="projects" aria-labelledby="projects-heading" className="relative w-full py-32 lg:py-40">
+      <HoverPreview slug={hoverSlug} enabled={previewEnabled} />
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6 lg:gap-x-10">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
               id="projects-heading"
+              chapter="projects"
               eyebrow="SOURCE LINKED FOR EVERY BUILD"
               title="Selected work."
               subtext="Six builds, three of them live."
@@ -379,6 +516,7 @@ export default function Projects() {
                 ready={inView}
                 reduced={reduced}
                 onToggle={toggle}
+                onHover={hover}
               />
             ))}
           </div>

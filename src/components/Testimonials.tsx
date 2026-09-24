@@ -450,6 +450,7 @@ export default function Testimonials() {
               numbers out the way every other one does. */}
           <SectionHeading
             className="col-span-12 lg:col-span-8"
+            chapter="testimonials"
             eyebrow={`${COUNT} VOICES`}
             title="In their words."
             subtext="Notes from collaborators, mentors and peers who have seen the work up close."

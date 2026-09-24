@@ -22,10 +22,11 @@ const ALT = "Preetham Nimmagadda";
  * colour over 900ms and it drains back on leave. Opacity is the only thing
  * that ever animates, so the filter on the LCP image is painted once.
  *
- * Sizing: a 4:5 plate up to 480px wide from md up (420px on tablet). Below
- * md it is a 3:4 plate at 56vw, right-aligned, whose width is also bounded by
- * the height cap (38vh, 30vh when the viewport is 700px tall or less) so the
- * frame keeps its ratio instead of squashing when the cap wins.
+ * Sizing: a 4:5 plate filling its column from md up (420px on tablet, 480px
+ * at most). Below md it is a 3:4 plate at 40vw, right-aligned, whose width is
+ * also bounded by a height cap (20vh, 16vh when the viewport is 700px tall or
+ * less) so the three-line headline and both calls to action still fit the
+ * first screen, and the frame keeps its ratio when the cap wins.
  *
  * A second, quieter layer sits on top: a gold raking light that follows the
  * cursor across the plate (`.sheen` plus useSheen), so the frame reads as a
@@ -44,8 +45,8 @@ export function PortraitPlate({ className }: PortraitPlateProps) {
       aria-label="Portrait of Preetham Nimmagadda"
       className={cn(
         "group sheen relative block overflow-hidden",
-        "ml-auto aspect-[3/4] w-[min(56vw,28.5vh)]",
-        "[@media(max-height:700px)_and_(max-width:767px)]:w-[min(56vw,22.5vh)]",
+        "ml-auto aspect-[3/4] w-[min(40vw,20vh)]",
+        "[@media(max-height:700px)_and_(max-width:767px)]:w-[min(34vw,16vh)]",
         "md:aspect-[4/5] md:w-full md:max-w-[420px] lg:ml-auto lg:max-w-[480px]",
         className
       )}

@@ -327,6 +327,7 @@ export default function Experience() {
           <div className="col-span-12 lg:col-span-9">
             <SectionHeading
               id="experience-heading"
+              chapter="experience"
               eyebrow="TWO TRACKS, INDUSTRY AND CAMPUS"
               title="Six roles since 2024."
             />

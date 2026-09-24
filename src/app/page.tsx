@@ -25,18 +25,22 @@ const SectionSkeleton = ({ className }: { className: string }) => <div className
    are tighter there, so a single 1280 reading left them short at exactly the
    width where lg: begins. Ranges sampled at 320, 390, 1024 and 1280.
 
-   Re-measure after any change to a section's contents. */
+   Re-measure after any change to a section's contents.
+
+   About is the one reserve written partly in vh: its thesis is pinned over a
+   track of 200vh (230vh from lg), so the reserve is that track plus the
+   measured height of the method block beneath it. */
 const About = dynamic(() => import("@/components/About"), {
-  loading: () => <SectionSkeleton className="min-h-[2095px] w-full lg:min-h-[1462px]" />,
+  loading: () => <SectionSkeleton className="min-h-[calc(200vh+1389px)] w-full lg:min-h-[calc(230vh+991px)]" />,
 });
 const Experience = dynamic(() => import("@/components/Experience"), {
-  loading: () => <SectionSkeleton className="min-h-[3438px] w-full lg:min-h-[2632px]" />,
-});
-const Skills = dynamic(() => import("@/components/Skills"), {
-  loading: () => <SectionSkeleton className="min-h-[1358px] w-full lg:min-h-[955px]" />,
+  loading: () => <SectionSkeleton className="min-h-[3457px] w-full lg:min-h-[2632px]" />,
 });
 const Projects = dynamic(() => import("@/components/Projects"), {
-  loading: () => <SectionSkeleton className="min-h-[1423px] w-full lg:min-h-[1496px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1794px] w-full lg:min-h-[1640px]" />,
+});
+const Skills = dynamic(() => import("@/components/Skills"), {
+  loading: () => <SectionSkeleton className="min-h-[1404px] w-full lg:min-h-[1001px]" />,
 });
 const GitHubStats = dynamic(() => import("@/components/GitHubStats"), {
   loading: () => <SectionSkeleton className="min-h-[1396px] w-full lg:min-h-[1345px]" />,
@@ -101,19 +105,18 @@ export default function Home() {
       <div className="relative z-10 flex flex-col">
         <Hero />
 
-        <div className="cv-auto [--cv-h:2095px] lg:[--cv-h:1462px]">
-          <About />
-        </div>
+        {/* About pins its thesis (position: sticky) and Experience holds a
+            sticky column, so neither sits under content-visibility. */}
+        <About />
 
-        {/* Experience holds a position: sticky column, so no content-visibility here. */}
         <Experience />
 
-        <div className="cv-auto [--cv-h:1358px] lg:[--cv-h:955px]">
-          <Skills />
+        <div className="cv-auto [--cv-h:1794px] lg:[--cv-h:1640px]">
+          <Projects />
         </div>
 
-        <div className="cv-auto [--cv-h:1423px] lg:[--cv-h:1496px]">
-          <Projects />
+        <div className="cv-auto [--cv-h:1404px] lg:[--cv-h:1001px]">
+          <Skills />
         </div>
 
         <div className="cv-auto [--cv-h:1396px] lg:[--cv-h:1345px]">

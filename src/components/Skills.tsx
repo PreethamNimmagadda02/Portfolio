@@ -638,6 +638,8 @@ export default function Skills() {
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
+              chapter="skills-sphere"
+              eyebrow={`${TOTAL_TOOLS} TOOLS, ${STOPS} DISCIPLINES`}
               title="The working toolset."
               subtext="Turn the dial to a discipline, by hand or by the crown. The star chart behind the page follows."
             />

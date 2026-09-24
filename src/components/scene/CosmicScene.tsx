@@ -41,7 +41,7 @@ import {
   type ScrollState,
 } from "@/lib/viewport-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { getSceneState, hexToVec3, lerp3 } from "@/lib/scene-store";
+import { getSceneState, hexToVec3, lerp3, useChapterCalibration } from "@/lib/scene-store";
 import { getActiveSkillCategories } from "@/lib/scene-store";
 import { skillsData, getCategoryColor } from "@/lib/skills-data";
 import { markSceneWarmed, seededRandom } from "@/lib/utils";
@@ -704,6 +704,8 @@ export default function CosmicScene() {
   const visible = useDocumentVisible();
   const prefersReducedMotion = useReducedMotion();
   const [ready, setReady] = useState(false);
+  // Chapter boundaries follow the real section positions, not a guess.
+  useChapterCalibration();
 
   useEffect(() => {
     // Small delay lets the hero paint first; the background then fades in,

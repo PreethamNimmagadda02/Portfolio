@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 /**
  * Chapter map for the single persistent CosmicScene background.
@@ -10,10 +10,13 @@ import { useSyncExternalStore } from "react";
  * is looked up here to drive camera position, palette and focus-object state,
  * instead of each section owning its own canvas.
  *
- * Boundaries are approximate fractions of total document height. Precision
- * doesn't matter: this is an ambient backdrop, not a scrollytelling rig with
- * hard cuts, so a chapter boundary drifting by a few percent across content
- * edits is invisible.
+ * The fractions below are only the first guess. Once the page is mounted,
+ * useChapterCalibration measures where each chapter's section actually sits
+ * and rewrites start and end in place, so a chapter begins when its section
+ * reaches the middle of the viewport whatever the section heights turn out
+ * to be. That matters now that some chapters are long (the About thesis is
+ * pinned for over two screens) and the star chart has to light in Skills and
+ * nowhere else.
  *
  * Palette: every chapter shares one gold family. colorA is aurum-300 (the
  * highlight), colorB is aurum-500 (the umber body of the cloud; it must stay
@@ -22,6 +25,8 @@ import { useSyncExternalStore } from "react";
  */
 export interface SceneChapter {
   id: string;
+  /** The DOM id of the section this chapter follows. */
+  section: string;
   start: number;
   end: number;
   /** Hex colors driving the star field + focus-object emissive tones. */
@@ -32,10 +37,9 @@ export interface SceneChapter {
   camera: [number, number, number];
   lookAt: [number, number, number];
   /**
-   * Focus-object presence, 0 to 1: 1 in the hero and contact chapters, 0
-   * through the middle of the page, which is pure obsidian and type. This
-   * gated the aurora nebula before it was removed; the star field still reads
-   * it to lift itself in those two chapters.
+   * Star-field presence, 0 to 1: 1 in the hero and contact chapters, a little
+   * behind the pinned thesis in About, 0 through the rest of the page, which
+   * is pure obsidian and type.
    */
   intensity: number;
   /** Base opacity of the skills star chart, 0 to 1 (0.12 in the skills chapter). */
@@ -47,16 +51,72 @@ const AURUM_500 = "#7A6134";
 const OBSIDIAN_0 = "#0C0A08";
 
 export const SCENE_CHAPTERS: SceneChapter[] = [
-  { id: "hero", start: 0.0, end: 0.06, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
-  { id: "about", start: 0.06, end: 0.17, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "experience", start: 0.17, end: 0.33, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "skills", start: 0.33, end: 0.43, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
-  { id: "projects", start: 0.43, end: 0.59, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "activity", start: 0.59, end: 0.71, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "achievements", start: 0.71, end: 0.81, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "testimonials", start: 0.81, end: 0.91, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "contact", start: 0.91, end: 1.0, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
+  { id: "hero", section: "home", start: 0.0, end: 0.05, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
+  { id: "about", section: "about", start: 0.05, end: 0.24, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0.35, constellationOpacity: 0 },
+  { id: "experience", section: "experience", start: 0.24, end: 0.4, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
+  { id: "projects", section: "projects", start: 0.4, end: 0.53, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
+  { id: "skills", section: "skills-sphere", start: 0.53, end: 0.61, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
+  { id: "activity", section: "github-stats", start: 0.61, end: 0.72, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
+  { id: "achievements", section: "achievements", start: 0.72, end: 0.82, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  { id: "testimonials", section: "testimonials", start: 0.82, end: 0.91, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  { id: "contact", section: "contact", start: 0.91, end: 1.0, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
 ];
+
+/**
+ * Rewrites every chapter's start and end from the live layout. A chapter
+ * starts at the scroll progress where its section's top edge crosses the
+ * middle of the viewport and ends where the next one starts. A section that
+ * has not mounted yet keeps its previous boundaries, and the result is kept
+ * monotonic so the lookup below always finds exactly one chapter.
+ */
+export function calibrateChapters() {
+  if (typeof window === "undefined") return;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  if (max <= 0) return;
+  const line = window.innerHeight * 0.5;
+
+  const starts = SCENE_CHAPTERS.map((chapter, i) => {
+    if (i === 0) return 0;
+    const el = document.getElementById(chapter.section);
+    if (!el) return chapter.start;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    return Math.min(Math.max((top - line) / max, 0), 1);
+  });
+
+  for (let i = 1; i < starts.length; i++) starts[i] = Math.max(starts[i], starts[i - 1]);
+
+  SCENE_CHAPTERS.forEach((chapter, i) => {
+    chapter.start = starts[i];
+    chapter.end = i === SCENE_CHAPTERS.length - 1 ? 1 : starts[i + 1];
+  });
+}
+
+/**
+ * Keeps the chapter map calibrated while the page settles: on mount, when the
+ * document changes height (a lazy section arriving, an accordion opening) and
+ * on resize. Each burst of changes costs one measurement, on the next frame.
+ */
+export function useChapterCalibration() {
+  useEffect(() => {
+    let raf = 0;
+    const run = () => {
+      raf = 0;
+      calibrateChapters();
+    };
+    const queue = () => {
+      if (!raf) raf = requestAnimationFrame(run);
+    };
+    queue();
+    const observer = new ResizeObserver(queue);
+    observer.observe(document.body);
+    window.addEventListener("resize", queue);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", queue);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+}
 
 export function hexToVec3(hex: string): [number, number, number] {
   const n = parseInt(hex.replace("#", ""), 16);

@@ -690,6 +690,7 @@ export default function GitHubStats() {
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
+              chapter="github-stats"
               eyebrow="LIVE FROM GITHUB AND CODOLIO"
               title={copy.title}
               subtext={copy.subtext}

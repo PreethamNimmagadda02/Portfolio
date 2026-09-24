@@ -228,6 +228,27 @@ export default function PageLoader() {
           >
             <motion.div className="h-full w-full origin-left bg-aurum-300" style={{ scaleX: fill }} />
           </motion.div>
+
+          {/* The role, set beneath the rule the way a card carries a title
+              under a name, so the positioning is on screen from the first
+              frame. It leaves with the name, before the line stretches. */}
+          <motion.p
+            className="mt-5 select-none font-mono text-[11px] uppercase leading-none tracking-[0.32em] text-ivory-300"
+            initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+            animate={{ opacity: stretching ? 0 : 1, y: 0 }}
+            transition={
+              reduced
+                ? { duration: 0 }
+                : {
+                    opacity: stretching
+                      ? { duration: NAME_FADE_S, ease: EASE_SETTLE }
+                      : { duration: 0.8, ease: EASE_SETTLE, delay: NAME_DELAY_S + NAME_WIPE_S * 0.6 },
+                    y: { duration: 0.8, ease: EASE_SETTLE, delay: NAME_DELAY_S + NAME_WIPE_S * 0.6 },
+                  }
+            }
+          >
+            AI architect
+          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>

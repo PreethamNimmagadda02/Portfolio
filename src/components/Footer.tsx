@@ -1,11 +1,12 @@
 "use client";
 
-import type { MouseEvent, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUp, EnvelopeSimple, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
 import { motion, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn, smoothScrollTo } from "@/lib/utils";
+import { InViewClass } from "./Reveal";
 
 const NAV_LINKS = [
   { label: "Home", id: "home" },
@@ -86,8 +87,10 @@ function Rise({
 
 /**
  * Colophon. One hairline, a 12-column grid (brand, links, connect), a second
- * hairline, then the copyright and a back-to-top control. No clock, no
- * watermark, no badges: the record above has already made the argument.
+ * hairline, the copyright and a back-to-top control, and then the page is
+ * signed: the name set once more across the full measure, rising out of its
+ * masks as the reader arrives at the end. No clock, no watermark, no badges:
+ * the record above has already made the argument.
  */
 export default function Footer() {
   const reduced = useReducedMotion();
@@ -115,7 +118,7 @@ export default function Footer() {
               Preetham Nimmagadda
             </Link>
             <p className="mt-4 max-w-[42ch] font-sans text-[15px] leading-[1.6] text-ivory-200">
-              AI engineer. I build systems that act on their own judgment, and I stay accountable
+              AI architect. I design systems that act on their own judgment, and I stay accountable
               for what they do. Autonomy is not a demo.
             </p>
           </Rise>
@@ -207,6 +210,29 @@ export default function Footer() {
             />
           </button>
         </Rise>
+
+        {/* The signature. Sized in container units against the rendered
+            width of the name in the display cut (10.42em at this tracking,
+            Nimmagadda alone 5.92em), so it spans the column edge to edge at
+            every width: one line from sm, two below, where one would set it
+            too small to carry. Decorative; the brand link above names him. */}
+        <InViewClass amount={0.4} className="mt-12 border-t border-hairline pt-8 [container-type:inline-size] lg:mt-16 lg:pt-10">
+          <p
+            aria-hidden
+            className="select-none whitespace-nowrap font-display font-normal leading-[0.9] tracking-[-0.02em] text-ivory-100 text-[calc(100cqw/6.05)] sm:text-[calc(100cqw/10.5)]"
+          >
+            <span className="word-mask">
+              <span className="line-rise">Preetham</span>
+            </span>
+            <span className="hidden sm:inline"> </span>
+            <br className="sm:hidden" />
+            <span className="word-mask">
+              <span className="line-rise" style={{ "--rise-delay": "110ms" } as CSSProperties}>
+                Nimmagadda
+              </span>
+            </span>
+          </p>
+        </InViewClass>
       </div>
     </footer>
   );

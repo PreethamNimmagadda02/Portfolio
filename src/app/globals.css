@@ -351,6 +351,58 @@
     }
   }
 
+  /* A single unprompted pass of the foil band, once, after an entrance has
+     settled: the light catches the one word the page is built around. Fill
+     is backwards only: the resting position holds through the delay, and
+     nothing is pinned afterwards, so the hover sweep above keeps working.
+     Both ends of the travel park the band off the glyphs, so the hand-back
+     from the last keyframe to the resting position is invisible. */
+  .glint.is-lit {
+    animation: glint 1600ms var(--ease-heavy) var(--glint-delay, 0ms) 1 backwards;
+  }
+
+  /* The custom cursor owns pointing on fine pointers. Text fields keep the
+     native I-beam, because a caret position is not something a follower
+     lagging behind the hand can show. */
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+
+  html.has-cursor input,
+  html.has-cursor textarea,
+  html.has-cursor [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  /* A drawn stroke: an SVG path or line with pathLength="1" that inks itself
+     in once its InViewClass wrapper arrives, the way a draughtsman lays a
+     line down. Stagger with --draw-delay. */
+  .draw-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1800ms var(--ease-heavy) var(--draw-delay, 0ms);
+  }
+
+  .in-view .draw-path {
+    stroke-dashoffset: 0;
+  }
+
+  /* The active stage on the architecture loop: a ring that breathes out from
+     the node while the signal rests on it. Opacity and scale only. */
+  .node-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: node-pulse 2400ms var(--ease-settle) infinite;
+  }
+
+  /* Scroll cue on the cover: a hairline that draws down, then drains from the
+     top, slow enough to read as breath rather than as an alert. */
+  .scroll-cue {
+    transform-origin: top;
+    animation: scroll-cue 2800ms var(--ease-heavy) infinite;
+  }
+
   /* A hairline that draws in from the left beneath an inline link. The rule is
      a pseudo-element in reserved space, so drawing it moves nothing. */
   .rule-hover {
@@ -518,6 +570,51 @@
   }
 }
 
+@keyframes glint {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes node-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
 /* ------------------------------------------------------------------------
    Reduced motion: the global kill switch, plus final states for the
    masked reveals so nothing stays hidden. Framer Motion is handled
@@ -561,5 +658,23 @@
 
   .sheen::after {
     display: none;
+  }
+
+  .glint.is-lit {
+    animation: none;
+  }
+
+  .draw-path {
+    stroke-dashoffset: 0;
+  }
+
+  .node-pulse {
+    animation: none;
+    opacity: 0;
+  }
+
+  .scroll-cue {
+    animation: none;
+    transform: scaleY(1);
   }
 }

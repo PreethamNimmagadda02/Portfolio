@@ -499,9 +499,10 @@ export default function Contact() {
       <div className="relative z-10 mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         <div ref={columnRef} className="mx-auto w-full max-w-[640px]">
           <SectionHeading
+            chapter="contact"
             eyebrow="CURRENTLY TAKING ON NEW WORK"
-            title="Start a conversation."
-            subtext="Autonomous systems, applied AI and data security, whether that is an internship, a full-time role or a build. Tell me what needs making and I will say plainly whether I am the right person. Every message gets a reply inside a day."
+            title="Let's build what comes next."
+            subtext="AI architecture, autonomous systems and data security, whether that is an internship, a full-time role or a build. Tell me what needs making and I will say plainly whether I am the right person. Every message gets a reply inside a day."
           />
 
           <form

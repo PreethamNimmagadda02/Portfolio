@@ -45,18 +45,23 @@ No test framework is configured.
 - **Path alias**: `@/*` maps to `src/*`
 - **Utility function**: `cn()` in `src/lib/utils.ts` merges Tailwind classes via clsx + tailwind-merge
 - **Theming**: single committed dark theme (Obsidian & Aurum tokens in globals.css @theme inline); no toggle
-- **Plate lift reveals**: `SectionHeading` and `InViewClass` (src/components/Reveal.tsx) add `.in-view` via IntersectionObserver to drive the `.line-rise` and `.rule-draw` CSS
-- **Data is hardcoded in components** (no CMS or content collections): project data lives in `Projects.tsx`, experience in `Experience.tsx`
+- **Plate lift reveals**: `SectionHeading` and `InViewClass` (src/components/Reveal.tsx) add `.in-view` via IntersectionObserver to drive the `.line-rise`, `.rule-draw` and `.draw-path` CSS
+- **Chapter registry**: `src/lib/chapters.ts` is the single source for section ids, chapter numerals and labels. The letterhead's running chapter indicator, the Index overlay and `SectionHeading chapter="<id>"` all read it; the WebGL scene calibrates its chapter map against the same section ids at runtime (`useChapterCalibration` in `scene-store.ts`). Add or reorder a section there, not in each consumer
+- **Positioning**: the site presents Preetham as an AI architect. Every figure and claim must already be on the record (experience, projects, rankings); new copy reframes, it never invents metrics
+- **Custom cursor**: `Cursor.tsx` (fine pointers only; off under reduced motion, forced colours, touch, and over text fields). Give an element `data-cursor="Word"` to have the cursor ring show that word over it. Trailing elements use `useFollowPointer` (src/hooks), which reads the shared pointer store; never add a window pointer listener
+- **About** is `about/Manifesto.tsx` (the thesis pinned on a 200vh/230vh sticky track, words lit by scroll progress) plus `about/ArchitectureLoop.tsx` (the Perceive, Decide, Act, Adapt blueprint with evidence per stage). Neither may sit under `.cv-auto`: containment breaks `position: sticky`, and it also makes a wrapper the containing block for `position: fixed` descendants, which is why the Projects hover preview is portalled to `document.body`
+- **Avoid `useId` inside `next/dynamic` sections**: the server render carries preload siblings the client tree lacks, so generated ids mismatch on hydration. Use fixed ids for single-instance components
+- **Data is hardcoded in components** (no CMS or content collections): project data lives in `Projects.tsx`, experience in `Experience.tsx`, the architecture loop's stages in `about/ArchitectureLoop.tsx`
 
 ### Layout Structure
 
-`src/app/layout.tsx` wraps everything with: LazyMotion + MotionConfig, PerformanceProvider, PageLoader, ScrollProgress, KonamiEasterEgg, SmoothScroll, Navbar + main content + Footer
+`src/app/layout.tsx` wraps everything with: LazyMotion + MotionConfig, PerformanceProvider, PageLoader, ScrollProgress, KonamiEasterEgg, Cursor, SmoothScroll, Navbar (letterhead + Index overlay) + main content + Footer (colophon + signature)
 
 `src/app/page.tsx` composes all sections top-to-bottom; every section after the hero is a dynamic() import with a sized skeleton, and the single CosmicScene canvas mounts once the main thread is idle.
 
 ### Custom CSS Animations
 
-`src/app/globals.css` holds the design tokens (`@theme inline static`), the base layer and the shared component classes (`.eyebrow`, `.line-mask`, `.line-rise`, `.rule-draw`, `.ledger`, `.grid-accordion`, `.cell-in`, `.grain`, `.breathe`). Check this file before adding new animation classes; there is likely an existing one. Zero em or en dashes are allowed under src (enforced by `scripts/check-copy.mjs` at prebuild).
+`src/app/globals.css` holds the design tokens (`@theme inline static`), the base layer and the shared component classes (`.eyebrow`, `.line-mask`, `.line-rise`, `.rule-draw`, `.draw-path`, `.ledger`, `.foil`, `.glint`, `.grid-accordion`, `.cell-in`, `.grain`, `.breathe`, `.node-pulse`, `.scroll-cue`, `html.has-cursor`). Every animated class has a final state in the reduced-motion block at the end of the file. Check this file before adding new animation classes; there is likely an existing one. Zero em or en dashes are allowed under src (enforced by `scripts/check-copy.mjs` at prebuild).
 
 ### Deployment
 
