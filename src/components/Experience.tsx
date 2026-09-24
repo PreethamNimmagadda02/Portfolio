@@ -5,6 +5,7 @@ import { Briefcase, Buildings, Gavel, Users, type Icon } from "@phosphor-icons/r
 import { AnimatePresence, motion, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SectionHeading } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------------
    Record
@@ -121,7 +122,7 @@ function startYear(period: string): string {
    hidden from assistive technology.
    ------------------------------------------------------------------------ */
 
-function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: boolean }) {
+function YearDossier({ entry, index, reduced }: { entry: ExperienceEntry; index: number; reduced: boolean }) {
   const year = startYear(entry.period);
   const yearIn = reduced ? { duration: 0 } : { duration: 0.7, ease: EASE_HEAVY };
   const yearOut = reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_HEAVY };
@@ -169,6 +170,28 @@ function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: bool
               <span className="mt-2 font-sans text-[15px] leading-normal text-ivory-200">{entry.role}</span>
             </motion.div>
           </AnimatePresence>
+        </div>
+
+        {/* Where the reader is in the record: six ticks, the roles read so
+            far held in ivory and the current one in gold. */}
+        <div className="mt-12 flex max-w-[220px] items-center gap-4">
+          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-aurum-300">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="flex flex-1 gap-1">
+            {entries.map((e, i) => (
+              <span
+                key={e.id}
+                className={cn(
+                  "h-px flex-1 transition-colors duration-500 ease-heavy",
+                  i === index ? "bg-aurum-300" : i < index ? "bg-ivory-300/60" : "bg-hairline"
+                )}
+              />
+            ))}
+          </span>
+          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300">
+            {String(entries.length).padStart(2, "0")}
+          </span>
         </div>
       </div>
     </div>
@@ -336,7 +359,7 @@ export default function Experience() {
 
         <div className="mt-16 grid grid-cols-12 gap-x-6 lg:mt-24">
           <aside className="hidden lg:col-span-4 lg:block">
-            <YearDossier entry={entries[active]} reduced={reduced} />
+            <YearDossier entry={entries[active]} index={active} reduced={reduced} />
           </aside>
 
           <div className="col-span-12 flex flex-col gap-y-24 lg:col-span-7 lg:col-start-6">

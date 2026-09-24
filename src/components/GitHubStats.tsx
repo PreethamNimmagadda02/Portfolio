@@ -789,7 +789,29 @@ export default function GitHubStats() {
                     </div>
                   </div>
                 ) : (
-                  <p className="font-sans text-[14px] text-ivory-300">No contribution data available</p>
+                  /* The calendar is the one reading with no honest fallback:
+                     a year of days cannot be restated from a cached total. So
+                     the plate stays, and points to where the record lives. */
+                  <div className="relative border-y border-hairline py-10">
+                    <PlateTicks />
+                    <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                      <p className="max-w-[46ch] font-display text-[1.375rem] italic leading-[1.35] text-ivory-200">
+                        The day by day record is kept on GitHub, where every square can be opened.
+                      </p>
+                      <a
+                        href={`https://github.com/${GITHUB_USERNAME}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-cursor="Open"
+                        className="group inline-flex shrink-0 items-center gap-2 border-b border-hairline-gold pb-1 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300 transition-colors duration-300 ease-heavy hover:border-aurum-200 hover:text-aurum-200"
+                      >
+                        Open the calendar
+                        <span aria-hidden className="transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                          &#8599;
+                        </span>
+                      </a>
+                    </div>
+                  </div>
                 )}
               </div>
 

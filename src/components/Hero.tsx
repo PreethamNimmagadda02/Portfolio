@@ -5,6 +5,7 @@ import { ArrowDownRight } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocalTime } from "@/hooks/use-local-time";
 import { TextButton } from "@/components/ui";
 import { cn, smoothScrollTo } from "@/lib/utils";
 import PortraitPlate from "./PortraitPlate";
@@ -156,6 +157,7 @@ export default function Hero() {
   const ruleRef = useRef<HTMLSpanElement>(null);
   const loaderDone = useLoaderDone();
   const reduced = useReducedMotion();
+  const localTime = useLocalTime();
   const isMobile = useIsMobile();
 
   /* Scroll parallax: the text sinks and fades while the plate lifts off the
@@ -380,7 +382,11 @@ export default function Hero() {
             <span aria-hidden className="size-1.5 rotate-45 bg-aurum-300" />
             <span className="text-ivory-200">Taking on new work</span>
           </span>
-          <span className="col-span-4 text-center">Hyderabad, India</span>
+          <span className="col-span-4 flex items-center justify-center gap-3">
+            Hyderabad, India
+            <span aria-hidden className="h-px w-4 bg-hairline-gold" />
+            <span className="ledger text-ivory-200">{localTime ?? "--:--"} IST</span>
+          </span>
           <a
             href="#about"
             onClick={(e) => {

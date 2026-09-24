@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView, EASE_SETTLE, EASE_HEAVY } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -213,8 +214,31 @@ function QuoteBody({ t, className }: { t: Testimonial; className?: string }) {
 }
 
 /* ------------------------------------------------------------------------
-   Desktop: one pull quote on a stage, a name strip with the dwell line.
+   Desktop: a pull quote set against its attribution, with a seal.
    ------------------------------------------------------------------------ */
+
+/** Two initials for the seal: the first and last names, titles left out. */
+function initials(name: string) {
+  const words = name.replace(/^Prof\s+/, "").split(/\s+/).filter(Boolean);
+  const first = words[0]?.[0] ?? "";
+  const last = words.length > 1 ? words[words.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+/* The seal: a monogram struck in foil inside a double gold ring, the mark a
+   letter carries at its foot. Ornament, since the name is set beside it. */
+function Seal({ name }: { name: string }) {
+  return (
+    <span aria-hidden className="relative flex size-24 shrink-0 items-center justify-center rounded-full border border-hairline-gold">
+      <span className="absolute inset-1.5 rounded-full border border-hairline" />
+      <span className="foil font-display text-[2rem] italic leading-none tracking-[0.02em]">{initials(name)}</span>
+    </span>
+  );
+}
+
+const STEP =
+  "inline-flex size-11 items-center justify-center border border-hairline text-ivory-200 transition-colors duration-300 ease-heavy hover:border-aurum-300 hover:text-aurum-200 focus-visible:border-aurum-300";
+
 function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) {
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
@@ -253,7 +277,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
 
   const select = (index: number) => {
     clearPreview();
-    setActive(index);
+    setActive(((index % COUNT) + COUNT) % COUNT);
   };
 
   const previewAfterIntent = (index: number) => {
@@ -269,7 +293,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
   };
 
-  const onStripKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const onTrackKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!(e.target instanceof HTMLButtonElement)) return;
     let next: number | null = null;
     if (e.key === "ArrowRight") next = (active + 1) % COUNT;
@@ -282,71 +306,103 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
     buttonRefs.current[next]?.focus();
   };
 
-  const quoteNode = <QuoteBody t={current} />;
+  const swap = (key: number, children: ReactNode, delay = 0) =>
+    reduced ? (
+      <div key={key}>{children}</div>
+    ) : (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={key}
+          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: EASE_SETTLE, delay } }}
+          exit={{ opacity: 0, y: -6, filter: "blur(2px)", transition: { duration: 0.35, ease: EASE_SETTLE } }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    );
 
   return (
     <div
-      className="col-span-12 lg:col-start-2 lg:col-span-10 mt-16 lg:mt-20"
+      className="col-span-12 mt-16 lg:col-span-11 lg:col-start-2 lg:mt-20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={onRegionFocus}
       onBlur={onRegionBlur}
     >
-      {/* Stage. Framed top and bottom with gold registration ticks at the
-          corners, and a page number in the bottom right: the quote used to
-          float in open space with only an opening mark for company. */}
-      <div className="relative border-y border-hairline py-12 lg:py-14">
+      {/* Stage. The quote takes the page; its source sits in a margin column
+          of its own under a seal, the way a letter is signed, instead of
+          trailing under the last line. */}
+      <figure className="relative border-y border-hairline py-14 lg:py-16">
         <PlateTicks />
+        <div className="grid grid-cols-11 gap-x-6">
 
-        <span
-          aria-hidden
-          className="hidden lg:block absolute -left-10 top-8 select-none font-display font-normal text-aurum-300 text-[5rem] leading-none"
-        >
-          &ldquo;
-        </span>
+          <p className="sr-only">
+            Quote {active + 1} of {COUNT}, from {current.name}
+          </p>
 
-        <p className="sr-only">
-          Quote {active + 1} of {COUNT}
-        </p>
-
-        <div className="min-h-[260px]">
-          {reduced ? (
-            <div key={active}>{quoteNode}</div>
-          ) : (
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6, transition: { duration: 0.35, ease: EASE_SETTLE } }}
-                transition={{ duration: 0.7, ease: EASE_SETTLE }}
+          <div className="relative col-span-7 min-h-[300px] pl-2">
+            <span
+              aria-hidden
+              className="absolute -left-12 -top-4 select-none font-display font-normal text-[6rem] leading-none text-aurum-300/80"
+            >
+              &ldquo;
+            </span>
+            {swap(
+              active,
+              <blockquote
+                className={cn(
+                  "max-w-[30ch] font-display font-normal italic leading-[1.3] tracking-[-0.01em] text-ivory-100",
+                  current.quote.length > LONG_QUOTE ? "text-[2rem]" : "text-[2.25rem] xl:text-[2.5rem]"
+                )}
               >
-                {quoteNode}
-              </motion.div>
-            </AnimatePresence>
-          )}
+                {current.quote}
+              </blockquote>
+            )}
+          </div>
+
+          <div className="col-span-4 col-start-8 flex flex-col justify-between border-l border-hairline pl-10">
+            {swap(
+              active,
+              <figcaption className="flex flex-col items-start">
+                <Seal name={current.name} />
+                <span className="mt-8 font-display text-[1.5rem] leading-[1.15] text-ivory-100">{current.name}</span>
+                <span className="ledger mt-3 font-mono text-[12px] leading-[1.5] text-ivory-300">{current.role}</span>
+                {current.project ? (
+                  <span className="mt-4 flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">
+                    <span aria-hidden className="h-px w-4 bg-aurum-400" />
+                    On {current.project}
+                  </span>
+                ) : null}
+              </figcaption>,
+              0.08
+            )}
+
+            <div className="mt-10 flex items-center gap-4">
+              <button type="button" aria-label="Previous voice" onClick={() => select(active - 1)} className={STEP}>
+                <CaretLeft size={16} weight="light" aria-hidden />
+              </button>
+              <p aria-hidden className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                <span className="text-aurum-300">{String(active + 1).padStart(2, "0")}</span>
+                <span className="px-2 text-ivory-300/60">/</span>
+                {String(COUNT).padStart(2, "0")}
+              </p>
+              <button type="button" aria-label="Next voice" onClick={() => select(active + 1)} className={STEP}>
+                <CaretRight size={16} weight="light" aria-hidden />
+              </button>
+            </div>
+          </div>
         </div>
+      </figure>
 
-        {/* Folio. Mobile carries its own counter under each pane. */}
-        <p
-          aria-hidden
-          className="ledger absolute bottom-5 right-0 hidden font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 lg:block"
-        >
-          <span className="text-aurum-300">{String(active + 1).padStart(2, "0")}</span>
-          <span className="px-2 text-ivory-300/60">/</span>
-          {String(COUNT).padStart(2, "0")}
-        </p>
-      </div>
-
-      {/* Name strip */}
-      <div
-        role="group"
-        aria-label="Choose a voice"
-        className="mt-12 flex flex-wrap items-baseline gap-x-7 gap-y-4"
-        onKeyDown={onStripKeyDown}
-      >
+      {/* The track: one segment per voice. Heard voices stay lit, the current
+          one fills with its dwell, and a name surfaces over a segment on
+          hover. It replaces a strip of fourteen names that wrapped onto a
+          second line and read as a tag cloud. */}
+      <div role="group" aria-label="Choose a voice" className="mt-8 flex items-center gap-1.5" onKeyDown={onTrackKeyDown}>
         {testimonials.map((t, i) => {
           const isActive = i === active;
+          const align = i < 3 ? "left-0" : i > COUNT - 4 ? "right-0" : "left-1/2 -translate-x-1/2";
           return (
             <button
               key={t.name}
@@ -354,29 +410,35 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
                 buttonRefs.current[i] = el;
               }}
               type="button"
+              aria-label={`${t.name}, ${t.role}`}
               aria-pressed={isActive}
               onClick={() => select(i)}
               onMouseEnter={() => previewAfterIntent(i)}
               onMouseLeave={clearPreview}
-              className={cn(
-                "group relative py-1 font-sans text-[13px] leading-none transition-colors duration-300 ease-settle",
-                isActive ? "text-ivory-100" : "text-ivory-300 hover:text-ivory-200"
-              )}
+              className="group/seg relative h-10 flex-1"
             >
-              {t.name}
-              <span aria-hidden className="absolute inset-x-0 -bottom-1 h-px">
+              <span
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute bottom-full mb-1 whitespace-nowrap font-mono text-[10px] uppercase leading-none tracking-[0.14em] text-ivory-200 opacity-0 transition-[opacity,translate] duration-300 ease-heavy group-hover/seg:-translate-y-1 group-hover/seg:opacity-100",
+                  align
+                )}
+              >
+                {t.name}
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-1/2 h-px bg-hairline transition-colors duration-300 ease-heavy group-hover/seg:bg-hairline-strong"
+              >
                 {isActive ? (
                   reduced ? (
-                    /* No dwell to draw, so the selection is a static rule.
-                       Without it the active voice would be marked by text
-                       colour alone. */
                     <span className="block h-full w-full bg-aurum-300" />
                   ) : (
                     <motion.span
                       key={active}
                       className="block h-full w-full origin-left bg-aurum-300"
                       initial={{ scaleX: 0 }}
-                      animate={{ scaleX: running ? 1 : 0 }}
+                      animate={{ scaleX: running ? 1 : 0.08 }}
                       transition={
                         running
                           ? { duration: INTERVAL_MS / 1000, ease: "linear" }
@@ -384,12 +446,9 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
                       }
                     />
                   )
-                ) : (
-                  /* An unselected name draws a plain hairline on hover, in
-                     the same gutter the dwell line uses, so the strip reads
-                     as one mechanism rather than two. */
-                  <span className="block h-full w-full origin-left scale-x-0 bg-hairline-strong transition-transform duration-300 ease-heavy group-hover:scale-x-100" />
-                )}
+                ) : i < active ? (
+                  <span className="block h-full w-full bg-ivory-300/50" />
+                ) : null}
               </span>
             </button>
           );

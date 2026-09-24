@@ -51,9 +51,9 @@ const Achievements = dynamic(() => import("@/components/Achievements"), {
 /* The one section that needs more than two tiers, and the only one whose
    reserve is worth this much detail.
 
-   Two things move its height. Above 1024 the fourteen-name voice strip wraps to
-   three rows, then two from 1160. Below 1024 the carousel is as tall as the
-   longest quote at that width, so it steps every time the text reflows. Each
+   Above 1024 the stage and its segmented track hold one height, 1053 at every
+   width measured, since the quote column is fixed and nothing wraps. Below
+   1024 the carousel is as tall as the longest quote at that width, so it steps every time the text reflows. Each
    tier below is the tallest measurement in its range, sampled at 320, 360,
    384, 480, 700, 960, 1024, 1056 and 1160.
 
@@ -62,13 +62,10 @@ const Achievements = dynamic(() => import("@/components/Achievements"), {
    specificity source order decided it, so lg won at every wide viewport and the
    later tiers never applied. Keep the units consistent when editing.
 
-   The 66rem tier is gone: since the stage gained its frame, 1024 and 1056
-   measure identically, so the tier only restated the one before it.
-
    Re-measure after any change to the quote text: the sub-1024 plateaus are a
    function of how the longest quote wraps, not of the layout alone. */
 const Testimonials = dynamic(() => import("@/components/Testimonials"), {
-  loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1109px] min-[72.5rem]:min-h-[1072px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1053px]" />,
 });
 
 /* Flat obsidian behind the page until the scene mounts, and the permanent
