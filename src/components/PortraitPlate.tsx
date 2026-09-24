@@ -7,7 +7,14 @@ export interface PortraitPlateProps {
   className?: string;
 }
 
-const SOURCES = "/ai-headshot-sm.webp 1x, /ai-headshot.webp 2x";
+/* Width descriptors, not density ones: with "1x, 2x" a standard display got
+   the 240px copy for a plate up to 480px wide, stretched to fill it. Now the
+   browser picks by the plate's real width times the screen's density. The set
+   is cut from the master by scripts/brand/headshot.mjs. */
+const SOURCES = "/ai-headshot-sm.webp 240w, /ai-headshot-md.webp 480w, /ai-headshot.webp 864w";
+/* Mirrors the figure's width classes below: 480px from lg, 420px from md,
+   and on phones min(40vw, 20vh), approximated by its usual 40vw bound. */
+const SIZES = "(min-width: 1024px) 480px, (min-width: 768px) 420px, 40vw";
 const FALLBACK = "/ai-headshot.jpeg";
 // The enclosing figure already announces that this is a portrait, so the alt
 // carries the name alone rather than repeating it.
@@ -53,13 +60,13 @@ export function PortraitPlate({ className }: PortraitPlateProps) {
     >
       {/* Resting layer: the photogravure grade. This is the LCP element. */}
       <picture className="absolute inset-0 block">
-        <source srcSet={SOURCES} type="image/webp" />
+        <source srcSet={SOURCES} sizes={SIZES} type="image/webp" />
         <img
           src={FALLBACK}
           alt={ALT}
           className="plate-mono block h-full w-full object-cover"
-          width={504}
-          height={690}
+          width={864}
+          height={1184}
           loading="eager"
           fetchPriority="high"
           decoding="async"
@@ -76,13 +83,13 @@ export function PortraitPlate({ className }: PortraitPlateProps) {
         )}
       >
         <picture className="absolute inset-0 block">
-          <source srcSet={SOURCES} type="image/webp" />
+          <source srcSet={SOURCES} sizes={SIZES} type="image/webp" />
           <img
             src={FALLBACK}
             alt=""
             className="block h-full w-full object-cover"
-            width={504}
-            height={690}
+            width={864}
+            height={1184}
             decoding="async"
           />
         </picture>

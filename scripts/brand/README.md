@@ -54,3 +54,21 @@ favicons are not in the loop above: they are the unframed drawing, so leave
 them alone unless the letters themselves change.
 
 `og.html` in the same folder draws the 1200x630 social card.
+
+## Portrait
+
+`headshot-master.jpeg` (864 x 1184) is the largest copy of the hero photograph
+on record, recovered from the repository's history. `headshot.mjs` cuts every
+served size from it:
+
+| Output | Width | Used as |
+| --- | --- | --- |
+| `public/ai-headshot.webp` | 864 | hero plate, high density screens |
+| `public/ai-headshot-md.webp` | 480 | hero plate, standard screens and phones |
+| `public/ai-headshot-sm.webp` | 240 | phone plate on standard screens |
+| `public/ai-headshot.jpeg` | 864 | fallback without WebP, structured data |
+
+Run `node scripts/brand/headshot.mjs` after replacing the master. Never resize
+from one of the outputs: each pass through a lossy encoder costs detail, which
+is how the previous set went soft. A new master should be at least 1000px wide
+so the 2x plate is drawn from more pixels than it shows.
