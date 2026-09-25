@@ -117,9 +117,15 @@ const R = 190;
 /** Stage i sits at this angle, clockwise from twelve o'clock, in degrees. */
 const stageAngle = (i: number) => -90 + (i * 360) / COUNT;
 
+/* Geometry is rendered on the server and again in the browser, and the two
+   engines' Math.cos and Math.sin can differ in the last digit, which React
+   reports as a hydration mismatch on every attribute. Rounding to a
+   thousandth of a unit, far below a device pixel, makes both agree. */
+const fix = (v: number) => Math.round(v * 1000) / 1000;
+
 function pointAt(angleDeg: number, radius = R) {
   const a = (angleDeg * Math.PI) / 180;
-  return { x: CX + radius * Math.cos(a), y: CY + radius * Math.sin(a) };
+  return { x: fix(CX + radius * Math.cos(a)), y: fix(CY + radius * Math.sin(a)) };
 }
 
 const NODES = STAGES.map((_, i) => pointAt(stageAngle(i)));
@@ -149,10 +155,10 @@ const BEZEL_TICKS = (() => {
     const a = ((deg - 90) * Math.PI) / 180;
     const r1 = major ? BEZEL_MAJOR_IN : BEZEL_IN;
     ticks.push({
-      x1: CX + r1 * Math.cos(a),
-      y1: CY + r1 * Math.sin(a),
-      x2: CX + BEZEL_OUT * Math.cos(a),
-      y2: CY + BEZEL_OUT * Math.sin(a),
+      x1: fix(CX + r1 * Math.cos(a)),
+      y1: fix(CY + r1 * Math.sin(a)),
+      x2: fix(CX + BEZEL_OUT * Math.cos(a)),
+      y2: fix(CY + BEZEL_OUT * Math.sin(a)),
       major,
     });
   }
