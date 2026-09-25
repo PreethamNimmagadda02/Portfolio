@@ -3,7 +3,7 @@
 import { useSheen } from "@/hooks/use-sheen";
 import { cn } from "@/lib/utils";
 
-export interface PortraitPlateProps {
+interface PortraitPlateProps {
   className?: string;
 }
 
@@ -42,7 +42,7 @@ const ALT = "Preetham Nimmagadda";
  * Owners who want the image to rest in colour can set
  * --portrait-rest-color: 1 on any ancestor.
  */
-export function PortraitPlate({ className }: PortraitPlateProps) {
+export default function PortraitPlate({ className }: PortraitPlateProps) {
   const sheen = useSheen();
 
   return (
@@ -112,4 +112,3 @@ export function PortraitPlate({ className }: PortraitPlateProps) {
   );
 }
 
-export default PortraitPlate;

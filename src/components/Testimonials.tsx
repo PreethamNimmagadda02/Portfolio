@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useInView, EASE_SETTLE, EASE_HEAVY } from "@/l
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SectionHeading, PlateTicks } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 
 interface Testimonial {
   quote: string;
@@ -204,7 +204,7 @@ function QuoteBody({ t, className }: { t: Testimonial; className?: string }) {
         <span className="font-sans text-[15px] leading-none text-ivory-100">{t.name}</span>
         <span className="font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">{t.role}</span>
         {t.project ? (
-          <span className="mt-1 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">
+          <span className="mt-1 caption text-aurum-300">
             On {t.project}
           </span>
         ) : null}
@@ -369,7 +369,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
                 <span className="mt-8 font-display text-[1.5rem] leading-[1.15] text-ivory-100">{current.name}</span>
                 <span className="ledger mt-3 font-mono text-[12px] leading-[1.5] text-ivory-300">{current.role}</span>
                 {current.project ? (
-                  <span className="mt-4 flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">
+                  <span className="mt-4 flex items-center gap-3 caption text-aurum-300">
                     <span aria-hidden className="h-px w-4 bg-aurum-400" />
                     On {current.project}
                   </span>
@@ -382,10 +382,10 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
               <button type="button" aria-label="Previous voice" onClick={() => select(active - 1)} className={STEP}>
                 <CaretLeft size={16} weight="light" aria-hidden />
               </button>
-              <p aria-hidden className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
-                <span className="text-aurum-300">{String(active + 1).padStart(2, "0")}</span>
+              <p aria-hidden className="ledger caption text-ivory-300">
+                <span className="text-aurum-300">{pad2(active + 1)}</span>
                 <span className="px-2 text-ivory-300/60">/</span>
-                {String(COUNT).padStart(2, "0")}
+                {pad2(COUNT)}
               </p>
               <button type="button" aria-label="Next voice" onClick={() => select(active + 1)} className={STEP}>
                 <CaretRight size={16} weight="light" aria-hidden />
@@ -477,10 +477,10 @@ function QuoteCarousel() {
                 a pane has. */}
             <PlateTicks edges="top" />
             <QuoteBody t={t} className="flex-1" />
-            <p className="ledger mt-6 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
-              <span className="text-aurum-300">{String(i + 1).padStart(2, "0")}</span>
+            <p className="ledger mt-6 caption text-ivory-300">
+              <span className="text-aurum-300">{pad2(i + 1)}</span>
               <span className="px-2 text-ivory-300/60">/</span>
-              {String(COUNT).padStart(2, "0")}
+              {pad2(COUNT)}
             </p>
           </div>
         ))}

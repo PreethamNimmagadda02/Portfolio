@@ -1,3 +1,5 @@
+import { pad2 } from "@/lib/utils";
+
 /**
  * The page's chapters, in reading order.
  *
@@ -40,4 +42,4 @@ export function chapter(id: string): Chapter {
 }
 
 /** Total chapters after the cover, for "03 / 08" style folios. */
-export const CHAPTER_COUNT = String(CHAPTERS.length - 1).padStart(2, "0");
+export const CHAPTER_COUNT = pad2(CHAPTERS.length - 1);

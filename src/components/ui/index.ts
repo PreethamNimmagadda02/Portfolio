@@ -4,5 +4,4 @@ export { LedgerNumber } from "./LedgerNumber";
 export type { LedgerNumberProps } from "./LedgerNumber";
 export { TextButton } from "./TextButton";
 export type { TextButtonProps } from "./TextButton";
-export { Plate, PlateTicks } from "./Plate";
-export type { PlateProps } from "./Plate";
+export { PlateTicks } from "./Plate";

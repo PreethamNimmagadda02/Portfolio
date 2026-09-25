@@ -354,7 +354,7 @@ export default function Hero() {
                 <span className="whitespace-nowrap font-sans text-[13px] leading-none text-ivory-100">
                   Preetham Nimmagadda
                 </span>
-                <span className="whitespace-nowrap font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                <span className="whitespace-nowrap caption text-ivory-300">
                   IIT (ISM) Dhanbad
                 </span>
               </div>
@@ -376,7 +376,7 @@ export default function Hero() {
           variants={coverVariants}
           initial="hidden"
           animate={state}
-          className="grid grid-cols-12 items-center gap-x-6 border-t border-hairline pt-5 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300"
+          className="grid grid-cols-12 items-center gap-x-6 border-t border-hairline pt-5 caption text-ivory-300"
         >
           <span className="col-span-4 flex items-center gap-3">
             <span aria-hidden className="size-1.5 rotate-45 bg-aurum-300" />

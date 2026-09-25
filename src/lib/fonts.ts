@@ -33,7 +33,7 @@ import { Bodoni_Moda, Geist, Geist_Mono } from "next/font/google";
    text masters wants --display-opsz removed from globals.css so its own
    masters are chosen again, and the Bodoni-specific names in the --font-display
    fallback stack should be re-pointed at whatever the new face degrades to. */
-export const display = Bodoni_Moda({
+const display = Bodoni_Moda({
   subsets: ["latin"],
   style: ["normal", "italic"],
   axes: ["opsz"],
@@ -42,14 +42,14 @@ export const display = Bodoni_Moda({
 });
 
 /* Body and UI face. */
-export const body = Geist({
+const body = Geist({
   subsets: ["latin"],
   variable: "--font-sans-cut",
   display: "swap",
 });
 
 /* Numerals, periods, tags, counts and the three eyebrows. */
-export const mono = Geist_Mono({
+const mono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono-cut",
   display: "swap",

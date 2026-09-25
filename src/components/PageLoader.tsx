@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { warmedSceneCount, TOTAL_WARMED_SCENES } from "@/lib/utils";
+import { isSceneWarmed } from "@/lib/utils";
 
 /* ---------------------------------------------------------------------------
    Timing, in milliseconds unless noted.
@@ -124,7 +124,7 @@ export default function PageLoader() {
       const elapsed = now - start;
       /* Real progress, with a time-based floor that reaches 1 exactly at
          MAX_WAIT so the line never stalls on a slow device. */
-      const real = TOTAL_WARMED_SCENES > 0 ? warmedSceneCount() / TOTAL_WARMED_SCENES : 1;
+      const real = isSceneWarmed() ? 1 : 0;
       const floor = easeOutCubic(Math.min(elapsed / MAX_WAIT, 1));
       const target = finishing ? 1 : Math.min(1, Math.max(real, floor));
       current = reduced ? target : current + (target - current) * (1 - Math.exp(-dt / FILL_TAU));
@@ -151,7 +151,7 @@ export default function PageLoader() {
     };
 
     const check = () => {
-      if (warmedSceneCount() >= TOTAL_WARMED_SCENES) dismiss();
+      if (isSceneWarmed()) dismiss();
     };
 
     window.addEventListener("scene-warmed", check);

@@ -5,14 +5,8 @@ const nextConfig: NextConfig = {
   output: 'export',
   images: {
     // Static export requires unoptimized: true (Next.js image optimisation
-    // requires a server). formats/deviceSizes are ignored when unoptimized.
+    // requires a server).
     unoptimized: true,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "framerusercontent.com",
-      },
-    ],
   },
   experimental: {
     optimizeCss: true,
@@ -25,9 +19,9 @@ const nextConfig: NextConfig = {
           chunks: 'all',
           cacheGroups: {
             // Isolate the entire 3D stack into one long-lived cacheable chunk.
-            // Matches three, @react-three/fiber, @react-three/drei (and any sub-packages).
+            // Matches three and @react-three/fiber (and any sub-packages).
             three: {
-              test: /[\\/]node_modules[\\/](three|@react-three[\\/]fiber|@react-three[\\/]drei)[\\/]/,
+              test: /[\\/]node_modules[\\/](three|@react-three[\\/]fiber)[\\/]/,
               name: 'three-vendor',
               priority: 20,
               enforce: true,

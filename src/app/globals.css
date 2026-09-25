@@ -58,17 +58,6 @@
   --color-hairline-strong: rgba(242, 236, 224, 0.18);
   --color-hairline-gold: rgba(201, 169, 97, 0.45);
 
-  /* Semantic aliases the codebase already uses */
-  --color-background: #0C0A08;
-  --color-foreground: #F2ECE0;
-  --color-card: #14110D;
-  --color-border: rgba(242, 236, 224, 0.10);
-  --color-primary: #C9A961;
-  --color-primary-foreground: #0C0A08;
-  --color-muted-foreground: #B8AE9C;
-  --color-ring: #EBD9A8;
-  --color-input: #14110D;
-
   /* Motion: heavy for masks, rules and panels; settle for fades and rises. */
   --ease-heavy: cubic-bezier(0.7, 0, 0.2, 1);
   --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
@@ -199,15 +188,13 @@
   @media (pointer: coarse) {
     button,
     a,
-    [role="button"],
-    .tap-feedback {
+    [role="button"] {
       -webkit-tap-highlight-color: transparent;
     }
 
     button:active,
     a:active,
-    [role="button"]:active,
-    .tap-feedback:active {
+    [role="button"]:active {
       transform: scale(0.98);
     }
   }
@@ -218,14 +205,6 @@
    Kept in the components layer so utilities can still override them.
    ------------------------------------------------------------------------ */
 @layer components {
-  /* Display alias: engraved serif, weight 400. */
-  .text-display {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    line-height: 1.04;
-  }
-
   /* The three uppercase eyebrows (home, github-stats, contact). */
   .eyebrow {
     display: inline-flex;
@@ -238,6 +217,20 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-ivory-200);
+  }
+
+  /* The small mono caption: counts, folios, tags and labels in small caps.
+     Colour and spacing are left to utilities, which override this layer. */
+  .caption {
+    /* The stack is spelled out, as Tailwind's font-mono utility does, rather
+       than read through var(--font-mono): that token is defined on :root, but
+       next/font sets --font-mono-cut on <body>, so from a class it resolves
+       without the Geist Mono cut. */
+    font-family: var(--font-mono-cut), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   /* Ledger numerals: fixed-width digits so nothing shifts as values roll. */

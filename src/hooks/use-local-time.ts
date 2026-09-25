@@ -25,5 +25,3 @@ export function useLocalTime() {
   }, []);
   return now;
 }
-
-export default useLocalTime;

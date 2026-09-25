@@ -32,5 +32,3 @@ export function useSheen() {
 
   return { onPointerEnter, onPointerMove };
 }
-
-export default useSheen;

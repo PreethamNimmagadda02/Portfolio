@@ -192,7 +192,7 @@ function IndexOverlay({
 
                       <span
                         aria-hidden
-                        className="hidden text-right font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-ivory-200 sm:col-span-4 sm:block"
+                        className="hidden text-right caption text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-ivory-200 sm:col-span-4 sm:block"
                       >
                         {c.note}
                       </span>
@@ -211,7 +211,7 @@ function IndexOverlay({
             transition={RISE(reduced, 0.55)}
           >
             <div className="border-t border-hairline pt-5">
-              <p className="mb-4 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+              <p className="mb-4 caption text-ivory-300">
                 Correspondence
               </p>
               <a
@@ -223,7 +223,7 @@ function IndexOverlay({
             </div>
 
             <div className="border-t border-hairline pt-5">
-              <p className="mb-4 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+              <p className="mb-4 caption text-ivory-300">
                 Elsewhere
               </p>
               <ul className="flex flex-col gap-3 leading-none">
@@ -243,7 +243,7 @@ function IndexOverlay({
             </div>
 
             <div className="border-t border-hairline pt-5">
-              <p className="mb-5 flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-200">
+              <p className="mb-5 flex items-center gap-3 caption text-ivory-200">
                 <span aria-hidden className="size-1.5 rotate-45 bg-aurum-300" />
                 Taking on new work
               </p>

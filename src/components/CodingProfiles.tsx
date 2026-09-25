@@ -4,7 +4,8 @@ import { useInView } from "@/lib/motion";
 import { useRef, useState, useEffect, useCallback, type CSSProperties } from "react";
 import { Warning } from "@phosphor-icons/react";
 import { LedgerNumber } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
+import { readCache, writeCache } from "@/lib/cache";
 
 const CODOLIO_USERNAME = "Preetham_02";
 
@@ -114,7 +115,7 @@ const STAT_CELL_CLASS = "flex flex-col gap-2.5 sm:border-l sm:border-hairline sm
 /* The label above a figure. One treatment for every stat in the row, lead or
    supporting, so the eye reads a single line of small caps across the plate. */
 const STAT_LABEL_CLASS =
-  "truncate font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-ivory-200";
+  "truncate caption text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-ivory-200";
 
 interface StatColumn {
   label: string;
@@ -228,6 +229,39 @@ function ProfileSkeleton() {
   );
 }
 
+const CODOLIO_CACHE_KEY = "codolio_stats_cache_v2";
+const CODOLIO_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
+
+/* One request per page visit. The Competitive tab remounts this component on
+   every switch, and a failed request (rate limit, CORS) would otherwise be
+   fired again each time only to fail the same way. */
+let codolioRequest: Promise<PlatformProfile[]> | null = null;
+
+function loadCodolioProfiles() {
+  codolioRequest ??= fetchCodolioProfiles();
+  return codolioRequest;
+}
+
+async function fetchCodolioProfiles(): Promise<PlatformProfile[]> {
+  const res = await fetch(`https://api.codolio.com/profile?userKey=${CODOLIO_USERNAME}`);
+  if (!res.ok) throw new Error("Failed to fetch Codolio stats");
+
+  const data: CodolioAPIResponse = await res.json();
+
+  const rawProfiles = data.data.platformProfiles?.platformProfiles || data.data.platformStats || [];
+
+  // Filter out platforms with 0 questions and no rating to keep it clean
+  const activeProfiles = rawProfiles.filter(
+    (p) =>
+      (p.totalQuestionStats?.totalQuestionCounts && p.totalQuestionStats.totalQuestionCounts > 0) ||
+      (p.userStats?.currentRating && p.userStats.currentRating > 0)
+  );
+
+  // Sort: LeetCode and Codeforces first
+  const priority: Record<string, number> = { leetcode: 1, codeforces: 2, codechef: 3 };
+  return activeProfiles.sort((a, b) => (priority[a.platform] || 99) - (priority[b.platform] || 99));
+}
+
 export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
   const plateRef = useRef<HTMLDivElement>(null);
   // Embedded, the parent tab already gates mounting, so fetch at once;
@@ -244,55 +278,15 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
       setLoading(true);
       setError(null);
 
-      const cacheKey = "codolio_stats_cache_v2";
-      const cached = localStorage.getItem(cacheKey);
+      const cached = readCache<{ profiles: PlatformProfile[] }>(CODOLIO_CACHE_KEY, CODOLIO_CACHE_TTL_MS);
       if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (Date.now() - parsed.timestamp < 1000 * 60 * 60 * 12) {
-            setProfiles(parsed.profiles);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.warn("Failed to parse cached Codolio stats", e);
-        }
+        setProfiles(cached.profiles);
+        return;
       }
 
-      const res = await fetch(
-        `https://api.codolio.com/profile?userKey=${CODOLIO_USERNAME}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch Codolio stats");
-
-      const data: CodolioAPIResponse = await res.json();
-
-      const rawProfiles =
-        data.data.platformProfiles?.platformProfiles ||
-        data.data.platformStats ||
-        [];
-
-      // Filter out platforms with 0 questions and no rating to keep it clean
-      const activeProfiles = rawProfiles.filter(
-        (p) =>
-          (p.totalQuestionStats?.totalQuestionCounts &&
-            p.totalQuestionStats.totalQuestionCounts > 0) ||
-          (p.userStats?.currentRating && p.userStats.currentRating > 0)
-      );
-
-      // Sort: LeetCode and Codeforces first
-      const sorted = activeProfiles.sort((a, b) => {
-        const priority: Record<string, number> = { leetcode: 1, codeforces: 2, codechef: 3 };
-        const pa = priority[a.platform] || 99;
-        const pb = priority[b.platform] || 99;
-        return pa - pb;
-      });
-
+      const sorted = await loadCodolioProfiles();
       setProfiles(sorted);
-
-      localStorage.setItem(cacheKey, JSON.stringify({
-        timestamp: Date.now(),
-        profiles: sorted
-      }));
+      writeCache(CODOLIO_CACHE_KEY, { profiles: sorted });
     } catch (err) {
       console.error("Codolio fetch error:", err);
       setError(LIVE_DATA_ERROR);
@@ -348,7 +342,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     lone numeral in the flow would read as a stat of its own. */}
                 <div className={INDEX_COL_CLASS} aria-hidden>
                   <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-aurum-300">
-                    {String(idx + 1).padStart(2, "0")}
+                    {pad2(idx + 1)}
                   </span>
                 </div>
 
@@ -357,7 +351,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                     {name}
                   </h3>
                   {badge && (
-                    <span className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                    <span className="ledger caption text-ivory-300">
                       {badge}
                     </span>
                   )}

@@ -43,7 +43,7 @@ No test framework is configured.
 - **All components are client-side** (`"use client"`) due to heavy interactivity
 - **Three.js components are dynamically imported** with `ssr: false` in `page.tsx` to avoid server-side rendering issues
 - **Path alias**: `@/*` maps to `src/*`
-- **Utility function**: `cn()` in `src/lib/utils.ts` merges Tailwind classes via clsx + tailwind-merge
+- **Utility functions**: `cn()` in `src/lib/utils.ts` merges Tailwind classes via clsx + tailwind-merge; `pad2()` there formats every two-digit numeral ("03"). Live figures cache through `readCache`/`writeCache` in `src/lib/cache.ts`
 - **Theming**: single committed dark theme (Obsidian & Aurum tokens in globals.css @theme inline); no toggle
 - **Plate lift reveals**: `SectionHeading` and `InViewClass` (src/components/Reveal.tsx) add `.in-view` via IntersectionObserver to drive the `.line-rise`, `.rule-draw` and `.draw-path` CSS
 - **Chapter registry**: `src/lib/chapters.ts` is the single source for section ids, chapter numerals and labels. The letterhead's running chapter indicator, the Index overlay and `SectionHeading chapter="<id>"` all read it; the WebGL scene calibrates its chapter map against the same section ids at runtime (`useChapterCalibration` in `scene-store.ts`). Add or reorder a section there, not in each consumer
@@ -64,7 +64,7 @@ No test framework is configured.
 
 ### Custom CSS Animations
 
-`src/app/globals.css` holds the design tokens (`@theme inline static`), the base layer and the shared component classes (`.eyebrow`, `.line-mask`, `.line-rise`, `.rule-draw`, `.draw-path`, `.ledger`, `.foil`, `.glint`, `.grid-accordion`, `.cell-in`, `.grain`, `.breathe`, `.node-pulse`, `.scroll-cue`, `html.has-cursor`). Every animated class has a final state in the reduced-motion block at the end of the file. Check this file before adding new animation classes; there is likely an existing one. Zero em or en dashes are allowed under src (enforced by `scripts/check-copy.mjs` at prebuild).
+`src/app/globals.css` holds the design tokens (`@theme inline static`), the base layer and the shared component classes (`.eyebrow`, `.caption` (the small mono small-caps label; use it instead of spelling out the mono 11px uppercase utilities), `.line-mask`, `.line-rise`, `.rule-draw`, `.draw-path`, `.ledger`, `.foil`, `.glint`, `.grid-accordion`, `.cell-in`, `.grain`, `.breathe`, `.node-pulse`, `.scroll-cue`, `html.has-cursor`). Every animated class has a final state in the reduced-motion block at the end of the file. Check this file before adding new animation classes; there is likely an existing one. Zero em or en dashes are allowed under src (enforced by `scripts/check-copy.mjs` at prebuild).
 
 ### Deployment
 

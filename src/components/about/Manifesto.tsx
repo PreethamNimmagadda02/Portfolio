@@ -117,7 +117,7 @@ function Movements({ progress }: { progress: MotionValue<number> }) {
     setCurrent((c) => (c === r ? c : r));
   });
   return (
-    <div aria-hidden className="hidden items-center gap-5 font-mono text-[11px] uppercase leading-none tracking-[0.14em] sm:flex">
+    <div aria-hidden className="hidden items-center gap-5 caption sm:flex">
       <span className="flex items-center gap-3">
         {NUMERALS.map((n, i) => (
           <span
@@ -239,7 +239,7 @@ export default function Manifesto() {
                   </motion.span>
                   <motion.span
                     style={reduced ? undefined : { opacity: caption }}
-                    className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300"
+                    className="caption text-ivory-300"
                   >
                     AI architect, Hyderabad
                   </motion.span>

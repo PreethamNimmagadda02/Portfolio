@@ -73,5 +73,3 @@ export function useFollowPointer({ lerp = 0.18, enabled = true, write }: FollowO
 
   return state;
 }
-
-export default useFollowPointer;

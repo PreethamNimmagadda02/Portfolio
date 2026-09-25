@@ -23,12 +23,11 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import emailjs from "@emailjs/browser";
 import { Check, CircleNotch, Warning, X } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useLocalTime } from "@/hooks/use-local-time";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 import { SectionHeading, TextButton, PlateTicks } from "@/components/ui";
 
 /* ------------------------------------------------------------------------
@@ -175,10 +174,10 @@ function FieldLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-200 transition-colors duration-350 ease-heavy group-focus-within/field:text-ivory-100"
+      className="flex items-center gap-3 caption text-ivory-200 transition-colors duration-350 ease-heavy group-focus-within/field:text-ivory-100"
     >
       <span aria-hidden className="ledger text-ivory-300 transition-colors duration-350 ease-heavy group-focus-within/field:text-aurum-300">
-        {String(index).padStart(2, "0")}
+        {pad2(index)}
       </span>
       <span aria-hidden className="h-px w-4 bg-hairline-gold" />
       {children}
@@ -308,7 +307,7 @@ function TextareaField({
           </span>
           <span
             className={cn(
-              "ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] transition-colors duration-350 ease-heavy",
+              "ledger caption transition-colors duration-350 ease-heavy",
               nearLimit ? "text-aurum-300" : "text-ivory-300"
             )}
           >
@@ -361,7 +360,7 @@ const CONTACT_LINK =
 function AddressRow({ term, children }: { term: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-2 border-b border-hairline py-4 sm:flex-row sm:items-baseline sm:gap-6">
-      <dt className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 sm:w-24 sm:shrink-0">
+      <dt className="caption text-ivory-300 sm:w-24 sm:shrink-0">
         {term}
       </dt>
       <dd className="m-0 font-sans text-[15px] leading-[1.6]">{children}</dd>
@@ -410,7 +409,7 @@ function CopyEmail() {
       <button
         type="button"
         onClick={copy}
-        className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy hover:text-aurum-200"
+        className="caption text-ivory-300 transition-colors duration-300 ease-heavy hover:text-aurum-200"
       >
         <span aria-hidden>{copied ? "Copied" : "Copy"}</span>
         <span className="sr-only" aria-live="polite">
@@ -460,7 +459,7 @@ function Receipt({ name, email, onAnother }: { name: string; email: string; onAn
           />
         </svg>
       </span>
-      <p className="mt-10 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">Letter received</p>
+      <p className="mt-10 caption text-aurum-300">Letter received</p>
       <p className="mt-5 font-display text-[2.5rem] leading-[1.1] text-ivory-100">Thank you, {first}.</p>
       <p className="mt-5 max-w-[42ch] font-sans text-[16px] leading-[1.65] text-ivory-200">
         Your message is with me. A reply will reach <span className="text-ivory-100">{email}</span> within a day.
@@ -521,6 +520,8 @@ export default function Contact() {
     }
 
     try {
+      // Loaded on the first send, not with the page: most visitors never write.
+      const { default: emailjs } = await import("@emailjs/browser");
       await emailjs.sendForm(serviceId, templateId, formRef.current!, publicKey);
       setSent({ name: formState.name, email: formState.email });
       setFormState(EMPTY_VALUES);
@@ -685,7 +686,7 @@ export default function Contact() {
             <div className="relative border border-hairline bg-obsidian-1/60 px-6 py-10 backdrop-blur-[2px] sm:px-10 sm:py-12 lg:px-12 lg:py-14">
               <PlateTicks />
               <div className="mb-12 flex items-baseline justify-between border-b border-hairline pb-5">
-                <span className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                <span className="caption text-ivory-300">
                   To <span className="text-ivory-100">Preetham Nimmagadda</span>
                 </span>
                 <span aria-hidden className="font-display text-[1.25rem] italic leading-none text-aurum-300">

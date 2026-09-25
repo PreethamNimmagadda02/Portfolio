@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
+import { CHAPTERS } from "@/lib/chapters";
 
 /**
  * Chapter map for the single persistent CosmicScene background.
  *
  * The whole page is one continuous WebGL journey: as the visitor scrolls,
  * normalized document progress (0..1, from viewport-store's scroll tracker)
- * is looked up here to drive camera position, palette and focus-object state,
+ * is looked up here to drive camera position and focus-object state,
  * instead of each section owning its own canvas.
  *
  * The fractions below are only the first guess. Once the page is mounted,
@@ -18,21 +19,17 @@ import { useEffect, useSyncExternalStore } from "react";
  * pinned for over two screens) and the star chart has to light in Skills and
  * nowhere else.
  *
- * Palette: every chapter shares one gold family. colorA is aurum-300 (the
- * highlight), colorB is aurum-500 (the umber body of the cloud; it must stay
- * this dark or the additive shaders push the gold toward orange), colorC is
- * obsidian-0 (the page ground).
+ * The chapter list itself comes from the registry in @/lib/chapters, so a
+ * section added or reordered there is followed here automatically; this file
+ * only holds how the scene behaves in each one.
  */
-export interface SceneChapter {
+interface SceneChapter {
+  /** Scene-side name, which the focus objects key off ("hero", "skills"). */
   id: string;
   /** The DOM id of the section this chapter follows. */
   section: string;
   start: number;
   end: number;
-  /** Hex colors driving the star field + focus-object emissive tones. */
-  colorA: string;
-  colorB: string;
-  colorC: string;
   /** Camera waypoint this chapter settles toward. */
   camera: [number, number, number];
   lookAt: [number, number, number];
@@ -46,21 +43,28 @@ export interface SceneChapter {
   constellationOpacity: number;
 }
 
-const AURUM_300 = "#C9A961";
-const AURUM_500 = "#7A6134";
-const OBSIDIAN_0 = "#0C0A08";
+type SceneTuning = Omit<SceneChapter, "section" | "start" | "end">;
 
-export const SCENE_CHAPTERS: SceneChapter[] = [
-  { id: "hero", section: "home", start: 0.0, end: 0.05, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
-  { id: "about", section: "about", start: 0.05, end: 0.24, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0.35, constellationOpacity: 0 },
-  { id: "experience", section: "experience", start: 0.24, end: 0.4, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "projects", section: "projects", start: 0.4, end: 0.53, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "skills", section: "skills-sphere", start: 0.53, end: 0.61, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
-  { id: "activity", section: "github-stats", start: 0.61, end: 0.72, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "achievements", section: "achievements", start: 0.72, end: 0.82, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "testimonials", section: "testimonials", start: 0.82, end: 0.91, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  { id: "contact", section: "contact", start: 0.91, end: 1.0, colorA: AURUM_300, colorB: AURUM_500, colorC: OBSIDIAN_0, camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
-];
+/** How the scene behaves in each section, keyed by the section's DOM id. */
+const TUNING: Record<string, SceneTuning> = {
+  home: { id: "hero", camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
+  about: { id: "about", camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0.35, constellationOpacity: 0 },
+  experience: { id: "experience", camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
+  projects: { id: "projects", camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
+  "skills-sphere": { id: "skills", camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
+  "github-stats": { id: "activity", camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
+  achievements: { id: "achievements", camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  testimonials: { id: "testimonials", camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  contact: { id: "contact", camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
+};
+
+/* An even first guess for the boundaries; calibrateChapters replaces it with
+   the measured layout on the first frame after mount. */
+const SCENE_CHAPTERS: SceneChapter[] = CHAPTERS.map((c, i, all) => {
+  const tuning = TUNING[c.id];
+  if (!tuning) throw new Error(`No scene tuning for chapter "${c.id}"`);
+  return { ...tuning, section: c.id, start: i / all.length, end: (i + 1) / all.length };
+});
 
 /**
  * Rewrites every chapter's start and end from the live layout. A chapter
@@ -69,7 +73,7 @@ export const SCENE_CHAPTERS: SceneChapter[] = [
  * has not mounted yet keeps its previous boundaries, and the result is kept
  * monotonic so the lookup below always finds exactly one chapter.
  */
-export function calibrateChapters() {
+function calibrateChapters() {
   if (typeof window === "undefined") return;
   const max = document.documentElement.scrollHeight - window.innerHeight;
   if (max <= 0) return;
@@ -89,6 +93,7 @@ export function calibrateChapters() {
     chapter.start = starts[i];
     chapter.end = i === SCENE_CHAPTERS.length - 1 ? 1 : starts[i + 1];
   });
+  layoutVersion++;
 }
 
 /**
@@ -123,12 +128,12 @@ export function hexToVec3(hex: string): [number, number, number] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
-export function lerp3(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
+function lerp3(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 }
 
 /** Piecewise-linear lookup: returns the interpolated chapter state at progress `p`. */
-export function getSceneState(p: number) {
+function computeSceneState(p: number) {
   const clamped = Math.min(Math.max(p, 0), 1);
   let i = SCENE_CHAPTERS.findIndex((c) => clamped >= c.start && clamped <= c.end);
   if (i === -1) i = clamped < SCENE_CHAPTERS[0].start ? 0 : SCENE_CHAPTERS.length - 1;
@@ -154,13 +159,30 @@ export function getSceneState(p: number) {
   };
 }
 
+/* Bumped whenever calibration moves the boundaries, so a memoised state
+   computed against the old ones is never served. */
+let layoutVersion = 0;
+let memo: { p: number; version: number; state: ReturnType<typeof computeSceneState> } | null = null;
+
+/**
+ * The interpolated chapter state at scroll progress `p`. Every focus object
+ * asks for it each frame with the same progress, so the result is memoised on
+ * (progress, layout) and the lookup runs once per frame, not once per caller.
+ * Treat the returned object as read-only.
+ */
+export function getSceneState(p: number) {
+  if (memo && memo.p === p && memo.version === layoutVersion) return memo.state;
+  const state = computeSceneState(p);
+  memo = { p, version: layoutVersion, state };
+  return state;
+}
+
 // -----------------------------------------------------------------------------
 // Skills category filter, shared between the DOM filter UI (Skills section)
 // and the constellation focus-object inside CosmicScene, so toggling a
 // category dims/highlights the matching points in the persistent background.
 // -----------------------------------------------------------------------------
 let activeCategories = new Set<string>();
-const listeners = new Set<() => void>();
 
 /**
  * Selects one category, exclusively. The Skills dial always points at a
@@ -170,29 +192,8 @@ const listeners = new Set<() => void>();
 export function selectSkillCategory(cat: string) {
   if (activeCategories.size === 1 && activeCategories.has(cat)) return;
   activeCategories = new Set<string>([cat]);
-  for (const l of listeners) l();
 }
 
 export function getActiveSkillCategories() {
   return activeCategories;
-}
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
-}
-
-/**
- * One frozen empty set for the server snapshot. Returning a fresh Set on every
- * call makes useSyncExternalStore see a new value each render, which React
- * reports as an uncached getServerSnapshot and can spin into a render loop.
- */
-const EMPTY_CATEGORIES: ReadonlySet<string> = new Set<string>();
-
-function getServerCategories(): Set<string> {
-  return EMPTY_CATEGORIES as Set<string>;
-}
-
-export function useActiveSkillCategories(): Set<string> {
-  return useSyncExternalStore(subscribe, getActiveSkillCategories, getServerCategories);
 }

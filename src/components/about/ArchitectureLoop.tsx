@@ -24,7 +24,7 @@ import {
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SectionHeading, LedgerNumber } from "@/components/ui";
 import { InViewClass } from "../Reveal";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 
 /**
  * The method, drawn as a blueprint.
@@ -98,7 +98,6 @@ const STAGES: Stage[] = [
 ];
 
 const COUNT = STAGES.length;
-const pad2 = (n: number) => String(n).padStart(2, "0");
 
 /** Dwell on a stage before the signal moves on, in milliseconds. */
 const DWELL_MS = 5600;
@@ -563,9 +562,9 @@ export default function ArchitectureLoop() {
           out from a gold lozenge, the ornament a printed book sets between
           movements of one chapter. */}
       <InViewClass amount={0.8} className="mb-20 flex items-center justify-center gap-5 lg:mb-28">
-        <span aria-hidden className="rule-draw !w-20 [transform-origin:right] sm:!w-32" />
+        <span aria-hidden className="rule-draw w-20 [transform-origin:right] sm:w-32" />
         <span aria-hidden className="size-2 rotate-45 border border-aurum-300" />
-        <span aria-hidden className="rule-draw !w-20 sm:!w-32" />
+        <span aria-hidden className="rule-draw w-20 sm:w-32" />
       </InViewClass>
 
       <div className="grid grid-cols-12 gap-x-6">
@@ -614,7 +613,7 @@ export default function ArchitectureLoop() {
               </motion.span>
             </AnimatePresence>
 
-            <div className="flex items-center justify-between gap-6 border-b border-hairline pb-4 font-mono text-[11px] uppercase leading-none tracking-[0.14em]">
+            <div className="flex items-center justify-between gap-6 border-b border-hairline pb-4 caption">
               <span className="ledger text-ivory-300">
                 Stage <span className="text-aurum-300">{pad2(active + 1)}</span>
                 <span className="px-1.5 text-ivory-300/60">/</span>

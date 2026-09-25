@@ -86,7 +86,7 @@ export default function Home() {
   // With no canvas to warm, tell the loader the scene is ready so it does not
   // hold for MAX_WAIT under reduced motion.
   useEffect(() => {
-    if (prefersReducedMotion) markSceneWarmed("cosmic");
+    if (prefersReducedMotion) markSceneWarmed();
   }, [prefersReducedMotion]);
 
   return (
@@ -124,7 +124,7 @@ export default function Home() {
           <Achievements />
         </div>
 
-        <div className="cv-auto [--cv-h:1048px] min-[24rem]:[--cv-h:955px] min-[30rem]:[--cv-h:884px] min-[60rem]:[--cv-h:934px] min-[64rem]:[--cv-h:1109px] min-[72.5rem]:[--cv-h:1072px]">
+        <div className="cv-auto [--cv-h:1048px] min-[24rem]:[--cv-h:955px] min-[30rem]:[--cv-h:884px] min-[60rem]:[--cv-h:934px] min-[64rem]:[--cv-h:1053px]">
           <Testimonials />
         </div>
 

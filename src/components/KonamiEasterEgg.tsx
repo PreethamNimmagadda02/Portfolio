@@ -248,7 +248,10 @@ function AccessGrantedBadge() {
 export default function KonamiEasterEgg() {
   const reduced = useReducedMotion();
   const [triggered, setTriggered] = useState(false);
-  const [sequence, setSequence] = useState<string[]>([]);
+  /* The keys typed so far. A ref, not state: every key press anywhere on the
+     site (every character typed into the contact form) would otherwise
+     re-render this component and re-attach its window listener. */
+  const sequence = useRef<string[]>([]);
   const [isExiting, setIsExiting] = useState(false);
   const autoCloseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -273,16 +276,16 @@ export default function KonamiEasterEgg() {
         return;
       }
 
-      const newSequence = [...sequence, e.code].slice(-KONAMI_CODE.length);
-      setSequence(newSequence);
+      const typed = [...sequence.current, e.code].slice(-KONAMI_CODE.length);
+      sequence.current = typed;
 
-      if (newSequence.length === KONAMI_CODE.length && newSequence.every((key, i) => key === KONAMI_CODE[i])) {
+      if (typed.length === KONAMI_CODE.length && typed.every((key, i) => key === KONAMI_CODE[i])) {
         setTriggered(true);
-        setSequence([]);
+        sequence.current = [];
         autoCloseRef.current = setTimeout(close, AUTO_CLOSE_MS);
       }
     },
-    [sequence, triggered, isExiting, close]
+    [triggered, isExiting, close]
   );
 
   const handleClick = useCallback(() => {

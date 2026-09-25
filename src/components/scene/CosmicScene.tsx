@@ -41,7 +41,7 @@ import {
   type ScrollState,
 } from "@/lib/viewport-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { getSceneState, hexToVec3, lerp3, useChapterCalibration } from "@/lib/scene-store";
+import { getSceneState, hexToVec3, useChapterCalibration } from "@/lib/scene-store";
 import { getActiveSkillCategories } from "@/lib/scene-store";
 import { skillsData, getCategoryColor } from "@/lib/skills-data";
 import { markSceneWarmed, seededRandom } from "@/lib/utils";
@@ -71,18 +71,6 @@ function chapterWeight(
   id: string
 ): number {
   return lerp1(chapter.id === id ? 1 : 0, next.id === id ? 1 : 0, blend);
-}
-
-/**
- * The sculptural flourishes: the focus core, its light shafts, the ribbons,
- * the shards and the warp rings. All of them belong to the hero alone.
- */
-function heroOrnament(
-  chapter: { id: string },
-  next: { id: string },
-  blend: number
-): number {
-  return chapterWeight(chapter, next, blend, "hero");
 }
 
 // -----------------------------------------------------------------------------
@@ -202,8 +190,6 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
     }),
     []
   );
-  const tintColor = useMemo(() => new THREE.Color(), []);
-
   useFrame((state) => {
     if (!matRef.current) return;
     const u = matRef.current.uniforms;
@@ -214,12 +200,9 @@ function GPUStars({ pointer, scroll, count }: { pointer: PointerState; scroll: S
     // Signed velocity, soft-capped: drives streaks in the vertex shader
     const v = Math.max(-1, Math.min(1, scroll.velocity * 0.5));
     u.uVelocity.value += (v - u.uVelocity.value) * 0.1;
-    // Gentle retint toward the chapter's colorB (umber) at a low mix, and
-    // the nebula's intensity lifts the field in the two live chapters.
-    const { chapter, next, blend, intensity } = getSceneState(scroll.progress);
-    const b = lerp3(hexToVec3(chapter.colorB), hexToVec3(next.colorB), blend);
-    tintColor.setRGB(b[0], b[1], b[2]);
-    (u.uColorMod.value as THREE.Color).lerp(tintColor, 0.04);
+    // A low mix toward the umber tone (uColorMod), and the chapter's intensity
+    // lifts the field in the two live chapters.
+    const { intensity } = getSceneState(scroll.progress);
     u.uModMix.value += (0.2 - u.uModMix.value) * 0.05;
     u.uIntensity.value += (intensity - u.uIntensity.value) * 0.06;
   });
@@ -363,6 +346,7 @@ function GuillocheField({
   isMobile: boolean;
 }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const uniforms = useMemo(
     () => ({
@@ -398,12 +382,15 @@ function GuillocheField({
     u.uReveal.value = Math.min(1, Math.max(0, (elapsed - GUILLOCHE_CUT_DELAY) / GUILLOCHE_CUT));
 
     const { chapter, next, blend } = getSceneState(scroll.progress);
-    const target = heroOrnament(chapter, next, blend) * GUILLOCHE_INK;
+    const target = chapterWeight(chapter, next, blend, "hero") * GUILLOCHE_INK;
     u.uOpacity.value += (target - u.uOpacity.value) * 0.05;
+    // A full-screen shader past the hero draws nothing but black, so it stops
+    // drawing at all once its ink has drained, as every other focus object does.
+    if (meshRef.current) meshRef.current.visible = u.uOpacity.value > 0.002;
   });
 
   return (
-    <mesh position={[0, 0, -0.5]}>
+    <mesh ref={meshRef} position={[0, 0, -0.5]}>
       <planeGeometry args={[GUILLOCHE_W, GUILLOCHE_H]} />
       <shaderMaterial
         ref={matRef}
@@ -516,9 +503,11 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       groupRef.current.scale.setScalar(0.85 + weight * 0.25);
     }
 
-    const activeCats = getActiveSkillCategories();
-    const anyFilter = activeCats.size > 0;
-    if (pointsRef.current) {
+    // Hidden outside Skills: no point easing colours and re-uploading them to
+    // the GPU every frame for a group that is not drawn.
+    if (pointsRef.current && groupRef.current?.visible) {
+      const activeCats = getActiveSkillCategories();
+      const anyFilter = activeCats.size > 0;
       const mat = pointsRef.current.material as THREE.PointsMaterial;
       // Brightness lives in the vertex colour (fragment output is clamped to
       // [0, 1] before additive blending, so a per-point lift above the base
@@ -738,7 +727,7 @@ export default function CosmicScene() {
           dpr={[1, isMobile ? 1 : 1.5]}
           style={{ background: "transparent" }}
           frameloop={visible ? "always" : "never"}
-          onCreated={() => markSceneWarmed("cosmic")}
+          onCreated={() => markSceneWarmed()}
         >
           <Suspense fallback={null}>
             <SceneContents isMobile={isMobile} />

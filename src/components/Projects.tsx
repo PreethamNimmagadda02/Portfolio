@@ -26,7 +26,7 @@ import { useSheen } from "@/hooks/use-sheen";
 import { useFollowPointer } from "@/hooks/use-follow-pointer";
 import { useMediaQuery } from "@/lib/viewport-store";
 import { SectionHeading, TextButton } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 import shotsJson from "@/data/project-shots.json";
 
 /* Public paths to the committed screenshots, keyed by project slug. The map
@@ -197,7 +197,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
             aria-hidden
             className="ledger hidden lg:block lg:col-span-1 font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-[var(--ease-heavy)] group-hover:text-aurum-300"
           >
-            {String(index + 1).padStart(2, "0")}
+            {pad2(index + 1)}
           </span>
 
           {/* No text colour utility here: .foil paints the glyphs from a
@@ -215,7 +215,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
           <span
             className={cn(
               "sr-only sm:not-sr-only sm:flex sm:items-center sm:gap-2.5 sm:col-span-3 lg:col-span-2",
-              "font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums",
+              "caption tabular-nums",
               isLive ? "text-aurum-300" : "text-ivory-300"
             )}
           >
@@ -226,7 +226,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
             {status}
           </span>
 
-          <span className="hidden lg:block lg:col-span-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums text-ivory-300">
+          <span className="hidden lg:block lg:col-span-3 caption tabular-nums text-ivory-300">
             {tags[0]}
           </span>
 
@@ -279,7 +279,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
                       divider drawn before each entry leaves the second line
                       starting with a rule and no tag in front of it. */}
                   <ul
-                    className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2.5 font-mono text-[11px] uppercase leading-none tracking-[0.14em] tabular-nums text-ivory-300"
+                    className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2.5 caption tabular-nums text-ivory-300"
                     aria-label="Stack"
                   >
                     {tags.map((tag) => (
@@ -379,7 +379,7 @@ function ScreenshotPlate({ src, title, href }: { src: string; title: string; hre
       {href ? (
         <span
           aria-hidden
-          className="absolute bottom-6 left-6 z-[2] inline-flex translate-y-1 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-100 opacity-0 transition-[opacity,translate] duration-500 ease-heavy group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+          className="absolute bottom-6 left-6 z-[2] inline-flex translate-y-1 items-center gap-2 caption text-ivory-100 opacity-0 transition-[opacity,translate] duration-500 ease-heavy group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
         >
           Visit the live site
           <ArrowUpRight size={12} weight="light" />
@@ -430,7 +430,7 @@ function ScreenshotPlate({ src, title, href }: { src: string; title: string; hre
  * viewport. It only ever renders on the client (enabled is false on the
  * server and through hydration), so the portal target always exists.
  */
-function HoverPreview({ slug, enabled }: { slug: string | null; enabled: boolean }) {
+function HoverPreview({ slug, enabled, preload }: { slug: string | null; enabled: boolean; preload: boolean }) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
   const write = useCallback((x: number, y: number, dx: number) => {
@@ -441,6 +441,13 @@ function HoverPreview({ slug, enabled }: { slug: string | null; enabled: boolean
   }, []);
 
   useFollowPointer({ lerp: 0.14, enabled, write });
+
+  /* The plate sits in the viewport's corner, so the browser treats its prints
+     as visible and lazy loading never defers them. They are mounted once the
+     list scrolls into view (or on a first hover, whichever comes first), so
+     about 430 KB of screenshots never compete with the cover. */
+  const [primed, setPrimed] = useState(false);
+  if ((slug || preload) && !primed) setPrimed(true);
 
   if (!enabled) return null;
   const entries = Object.entries(shots);
@@ -454,7 +461,7 @@ function HoverPreview({ slug, enabled }: { slug: string | null; enabled: boolean
         )}
       >
         <div className="relative aspect-[16/10] w-[21rem] overflow-hidden bg-obsidian-1">
-          {entries.map(([key, src]) => (
+          {primed && entries.map(([key, src]) => (
             <Image
               key={key}
               src={src}
@@ -493,7 +500,7 @@ export default function Projects() {
 
   return (
     <section id="projects" aria-labelledby="projects-heading" className="relative w-full py-32 lg:py-40">
-      <HoverPreview slug={hoverSlug} enabled={previewEnabled} />
+      <HoverPreview slug={hoverSlug} enabled={previewEnabled} preload={inView} />
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6 lg:gap-x-10">
           <div className="col-span-12 lg:col-span-8">

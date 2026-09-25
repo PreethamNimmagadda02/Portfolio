@@ -38,12 +38,3 @@ export const EASE_HEAVY = [0.7, 0, 0.2, 1] as const;
 
 /** Fades and rises: fast out of the gate, long settle. */
 export const EASE_SETTLE = [0.16, 1, 0.3, 1] as const;
-
-/** Durations in seconds. Feedback is quick; reveals are slow and deliberate. */
-export const DUR = {
-  feedback: 0.3,
-  state: 0.45,
-  reveal: 0.9,
-  heavy: 1.1,
-  plate: 1.4,
-} as const;

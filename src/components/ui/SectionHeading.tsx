@@ -15,11 +15,8 @@ export interface SectionHeadingProps {
    */
   chapter?: string;
   title: ReactNode;
-  /** The heading tag. Sizes are applied for h2; the hero sizes its own h1 via titleClassName. */
-  as?: "h1" | "h2";
   subtext?: ReactNode;
   className?: string;
-  titleClassName?: string;
   id?: string;
 }
 
@@ -41,10 +38,8 @@ export function SectionHeading({
   eyebrow,
   chapter,
   title,
-  as: Tag = "h2",
   subtext,
   className,
-  titleClassName,
   id,
 }: SectionHeadingProps) {
   const splittable = typeof title === "string";
@@ -78,13 +73,9 @@ export function SectionHeading({
       ) : null}
 
       <div className="max-w-full">
-        <Tag
+        <h2
           id={id}
-          className={cn(
-            "font-display font-normal text-ivory-100",
-            Tag === "h2" && "text-[2.125rem] lg:text-[3rem] leading-[1.1] tracking-[-0.005em]",
-            titleClassName
-          )}
+          className="font-display font-normal text-ivory-100 text-[2.125rem] lg:text-[3rem] leading-[1.1] tracking-[-0.005em]"
         >
           {splittable ? (
             <RiseWords text={title as string} baseDelay={hasLabel ? 120 : 0} step={WORD_STEP} />
@@ -98,7 +89,7 @@ export function SectionHeading({
               </span>
             </span>
           )}
-        </Tag>
+        </h2>
         <span
           className="rule-draw"
           aria-hidden
@@ -112,5 +103,3 @@ export function SectionHeading({
     </InViewClass>
   );
 }
-
-export default SectionHeading;
