@@ -219,14 +219,18 @@
     color: var(--color-ivory-200);
   }
 
+  /* Mono is wider than the sans it replaced; on a phone the full tracking
+     would push the longer eyebrows onto a second line. */
+  @media (width < 40rem) {
+    .eyebrow {
+      letter-spacing: 0.1em;
+    }
+  }
+
   /* The small mono caption: counts, folios, tags and labels in small caps.
      Colour and spacing are left to utilities, which override this layer. */
   .caption {
-    /* The stack is spelled out, as Tailwind's font-mono utility does, rather
-       than read through var(--font-mono): that token is defined on :root, but
-       next/font sets --font-mono-cut on <body>, so from a class it resolves
-       without the Geist Mono cut. */
-    font-family: var(--font-mono-cut), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--font-mono);
     font-size: 0.6875rem;
     line-height: 1;
     letter-spacing: 0.14em;

@@ -144,7 +144,10 @@ export default function RootLayout({
   // attributes and <script> tags before React hydrates. App code cannot
   // prevent that, and the mismatch is expected.
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    // The font variables go on <html>, not <body>: the theme's --font-sans,
+    // --font-display and --font-mono tokens are declared on :root and read
+    // these, so they must be defined on that same element to resolve.
+    <html lang="en" className={`dark ${fontVariables}`} suppressHydrationWarning>
       <head>
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: scrollResetScript }} />
         <script
@@ -155,7 +158,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${fontVariables} antialiased bg-obsidian-0 text-ivory-100`}
+        className="antialiased bg-obsidian-0 text-ivory-100"
       >
         <a href="#main-content" className="skip-link">
           Skip to content
