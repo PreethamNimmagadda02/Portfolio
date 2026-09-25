@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /* One frame grammar for the instrument surfaces: a hairline box with a short
@@ -39,31 +38,3 @@ export function PlateTicks({
     </span>
   );
 }
-
-export interface PlateProps {
-  children: ReactNode;
-  className?: string;
-  /** Renders only the top and bottom rules, for a surface that should not be boxed. */
-  rulesOnly?: boolean;
-}
-
-/**
- * A framed data surface. Wraps its contents in hairlines and hangs a gold
- * trim mark on each corner.
- */
-export function Plate({ children, className, rulesOnly = false }: PlateProps) {
-  return (
-    <div
-      className={cn(
-        "relative",
-        rulesOnly ? "border-y border-hairline" : "border border-hairline",
-        className
-      )}
-    >
-      <PlateTicks />
-      {children}
-    </div>
-  );
-}
-
-export default Plate;

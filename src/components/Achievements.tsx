@@ -13,7 +13,7 @@
 import { useState, type PointerEvent, type ReactNode } from "react";
 import { LedgerNumber, SectionHeading } from "@/components/ui";
 import { InViewClass } from "./Reveal";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 
 type RuleId = "row" | "v1" | "v2";
 
@@ -161,10 +161,10 @@ function RecordBlock({
           unit now, so the line is never half empty. */}
       <div aria-hidden className="mb-5 flex items-center gap-3">
         <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300">
-          {String(index + 1).padStart(2, "0")}
+          {pad2(index + 1)}
         </span>
         <span className="h-px w-4 bg-hairline-gold" />
-        <span className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+        <span className="caption text-ivory-300">
           {record.unit}
         </span>
       </div>
@@ -216,6 +216,7 @@ export default function Achievements() {
       <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
         <div className="lg:grid lg:grid-cols-12">
           <SectionHeading
+            chapter="achievements"
             eyebrow="FOUR RECORDS"
             title="Competitive record."
             subtext="Rankings across CodeChef, Codeforces and HackerRank, and 1,000+ problems solved."

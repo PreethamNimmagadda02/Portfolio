@@ -25,18 +25,22 @@ const SectionSkeleton = ({ className }: { className: string }) => <div className
    are tighter there, so a single 1280 reading left them short at exactly the
    width where lg: begins. Ranges sampled at 320, 390, 1024 and 1280.
 
-   Re-measure after any change to a section's contents. */
+   Re-measure after any change to a section's contents.
+
+   About is the one reserve written partly in vh: its thesis is pinned over a
+   track of 200vh (230vh from lg), so the reserve is that track plus the
+   measured height of the method block beneath it. */
 const About = dynamic(() => import("@/components/About"), {
-  loading: () => <SectionSkeleton className="min-h-[2095px] w-full lg:min-h-[1462px]" />,
+  loading: () => <SectionSkeleton className="min-h-[calc(200vh+1389px)] w-full lg:min-h-[calc(230vh+991px)]" />,
 });
 const Experience = dynamic(() => import("@/components/Experience"), {
-  loading: () => <SectionSkeleton className="min-h-[3438px] w-full lg:min-h-[2632px]" />,
-});
-const Skills = dynamic(() => import("@/components/Skills"), {
-  loading: () => <SectionSkeleton className="min-h-[1358px] w-full lg:min-h-[955px]" />,
+  loading: () => <SectionSkeleton className="min-h-[3457px] w-full lg:min-h-[2632px]" />,
 });
 const Projects = dynamic(() => import("@/components/Projects"), {
-  loading: () => <SectionSkeleton className="min-h-[1423px] w-full lg:min-h-[1496px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1794px] w-full lg:min-h-[1640px]" />,
+});
+const Skills = dynamic(() => import("@/components/Skills"), {
+  loading: () => <SectionSkeleton className="min-h-[1404px] w-full lg:min-h-[1001px]" />,
 });
 const GitHubStats = dynamic(() => import("@/components/GitHubStats"), {
   loading: () => <SectionSkeleton className="min-h-[1396px] w-full lg:min-h-[1345px]" />,
@@ -47,9 +51,9 @@ const Achievements = dynamic(() => import("@/components/Achievements"), {
 /* The one section that needs more than two tiers, and the only one whose
    reserve is worth this much detail.
 
-   Two things move its height. Above 1024 the fourteen-name voice strip wraps to
-   three rows, then two from 1160. Below 1024 the carousel is as tall as the
-   longest quote at that width, so it steps every time the text reflows. Each
+   Above 1024 the stage and its segmented track hold one height, 1053 at every
+   width measured, since the quote column is fixed and nothing wraps. Below
+   1024 the carousel is as tall as the longest quote at that width, so it steps every time the text reflows. Each
    tier below is the tallest measurement in its range, sampled at 320, 360,
    384, 480, 700, 960, 1024, 1056 and 1160.
 
@@ -58,13 +62,10 @@ const Achievements = dynamic(() => import("@/components/Achievements"), {
    specificity source order decided it, so lg won at every wide viewport and the
    later tiers never applied. Keep the units consistent when editing.
 
-   The 66rem tier is gone: since the stage gained its frame, 1024 and 1056
-   measure identically, so the tier only restated the one before it.
-
    Re-measure after any change to the quote text: the sub-1024 plateaus are a
    function of how the longest quote wraps, not of the layout alone. */
 const Testimonials = dynamic(() => import("@/components/Testimonials"), {
-  loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1109px] min-[72.5rem]:min-h-[1072px]" />,
+  loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1053px]" />,
 });
 
 /* Flat obsidian behind the page until the scene mounts, and the permanent
@@ -85,7 +86,7 @@ export default function Home() {
   // With no canvas to warm, tell the loader the scene is ready so it does not
   // hold for MAX_WAIT under reduced motion.
   useEffect(() => {
-    if (prefersReducedMotion) markSceneWarmed("cosmic");
+    if (prefersReducedMotion) markSceneWarmed();
   }, [prefersReducedMotion]);
 
   return (
@@ -101,19 +102,18 @@ export default function Home() {
       <div className="relative z-10 flex flex-col">
         <Hero />
 
-        <div className="cv-auto [--cv-h:2095px] lg:[--cv-h:1462px]">
-          <About />
-        </div>
+        {/* About pins its thesis (position: sticky) and Experience holds a
+            sticky column, so neither sits under content-visibility. */}
+        <About />
 
-        {/* Experience holds a position: sticky column, so no content-visibility here. */}
         <Experience />
 
-        <div className="cv-auto [--cv-h:1358px] lg:[--cv-h:955px]">
-          <Skills />
+        <div className="cv-auto [--cv-h:1794px] lg:[--cv-h:1640px]">
+          <Projects />
         </div>
 
-        <div className="cv-auto [--cv-h:1423px] lg:[--cv-h:1496px]">
-          <Projects />
+        <div className="cv-auto [--cv-h:1404px] lg:[--cv-h:1001px]">
+          <Skills />
         </div>
 
         <div className="cv-auto [--cv-h:1396px] lg:[--cv-h:1345px]">
@@ -124,7 +124,7 @@ export default function Home() {
           <Achievements />
         </div>
 
-        <div className="cv-auto [--cv-h:1048px] min-[24rem]:[--cv-h:955px] min-[30rem]:[--cv-h:884px] min-[60rem]:[--cv-h:934px] min-[64rem]:[--cv-h:1109px] min-[72.5rem]:[--cv-h:1072px]">
+        <div className="cv-auto [--cv-h:1048px] min-[24rem]:[--cv-h:955px] min-[30rem]:[--cv-h:884px] min-[60rem]:[--cv-h:934px] min-[64rem]:[--cv-h:1053px]">
           <Testimonials />
         </div>
 

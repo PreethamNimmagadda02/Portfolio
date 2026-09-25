@@ -50,7 +50,7 @@ import { skillsData, categoryLabels } from "@/lib/skills-data";
 import { selectSkillCategory } from "@/lib/scene-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SectionHeading } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, pad2 } from "@/lib/utils";
 
 interface CategoryGroup {
   cat: string;
@@ -114,7 +114,6 @@ function foldDelta(delta: number): number {
   return ((((delta + 180) % 360) + 360) % 360) - 180;
 }
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
 
 /* ------------------------------------------------------------------------
    Motion: the three ways the dial turns, each with its own character.
@@ -638,6 +637,8 @@ export default function Skills() {
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
+              chapter="skills-sphere"
+              eyebrow={`${TOTAL_TOOLS} TOOLS, ${STOPS} DISCIPLINES`}
               title="The working toolset."
               subtext="Turn the dial to a discipline, by hand or by the crown. The star chart behind the page follows."
             />
@@ -670,7 +671,7 @@ export default function Skills() {
                 <h3 className="font-display font-medium text-[26px] leading-[1.15] text-ivory-100 lg:text-[30px]">
                   {group.label}
                 </h3>
-                <span className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                <span className="ledger caption text-ivory-300">
                   {group.count} of {TOTAL_TOOLS}
                 </span>
               </div>

@@ -82,5 +82,3 @@ function LedgerRoll({ value, className, label, delayMs = 0, stagger = 40 }: Ledg
     </span>
   );
 }
-
-export default LedgerNumber;

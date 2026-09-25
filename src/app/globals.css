@@ -58,17 +58,6 @@
   --color-hairline-strong: rgba(242, 236, 224, 0.18);
   --color-hairline-gold: rgba(201, 169, 97, 0.45);
 
-  /* Semantic aliases the codebase already uses */
-  --color-background: #0C0A08;
-  --color-foreground: #F2ECE0;
-  --color-card: #14110D;
-  --color-border: rgba(242, 236, 224, 0.10);
-  --color-primary: #C9A961;
-  --color-primary-foreground: #0C0A08;
-  --color-muted-foreground: #B8AE9C;
-  --color-ring: #EBD9A8;
-  --color-input: #14110D;
-
   /* Motion: heavy for masks, rules and panels; settle for fades and rises. */
   --ease-heavy: cubic-bezier(0.7, 0, 0.2, 1);
   --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
@@ -199,15 +188,13 @@
   @media (pointer: coarse) {
     button,
     a,
-    [role="button"],
-    .tap-feedback {
+    [role="button"] {
       -webkit-tap-highlight-color: transparent;
     }
 
     button:active,
     a:active,
-    [role="button"]:active,
-    .tap-feedback:active {
+    [role="button"]:active {
       transform: scale(0.98);
     }
   }
@@ -218,14 +205,6 @@
    Kept in the components layer so utilities can still override them.
    ------------------------------------------------------------------------ */
 @layer components {
-  /* Display alias: engraved serif, weight 400. */
-  .text-display {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    line-height: 1.04;
-  }
-
   /* The three uppercase eyebrows (home, github-stats, contact). */
   .eyebrow {
     display: inline-flex;
@@ -238,6 +217,24 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-ivory-200);
+  }
+
+  /* Mono is wider than the sans it replaced; on a phone the full tracking
+     would push the longer eyebrows onto a second line. */
+  @media (width < 40rem) {
+    .eyebrow {
+      letter-spacing: 0.1em;
+    }
+  }
+
+  /* The small mono caption: counts, folios, tags and labels in small caps.
+     Colour and spacing are left to utilities, which override this layer. */
+  .caption {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   /* Ledger numerals: fixed-width digits so nothing shifts as values roll. */
@@ -349,6 +346,58 @@
       background-image: none;
       color: var(--foil-base);
     }
+  }
+
+  /* A single unprompted pass of the foil band, once, after an entrance has
+     settled: the light catches the one word the page is built around. Fill
+     is backwards only: the resting position holds through the delay, and
+     nothing is pinned afterwards, so the hover sweep above keeps working.
+     Both ends of the travel park the band off the glyphs, so the hand-back
+     from the last keyframe to the resting position is invisible. */
+  .glint.is-lit {
+    animation: glint 1600ms var(--ease-heavy) var(--glint-delay, 0ms) 1 backwards;
+  }
+
+  /* The custom cursor owns pointing on fine pointers. Text fields keep the
+     native I-beam, because a caret position is not something a follower
+     lagging behind the hand can show. */
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+
+  html.has-cursor input,
+  html.has-cursor textarea,
+  html.has-cursor [contenteditable="true"] {
+    cursor: text !important;
+  }
+
+  /* A drawn stroke: an SVG path or line with pathLength="1" that inks itself
+     in once its InViewClass wrapper arrives, the way a draughtsman lays a
+     line down. Stagger with --draw-delay. */
+  .draw-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1800ms var(--ease-heavy) var(--draw-delay, 0ms);
+  }
+
+  .in-view .draw-path {
+    stroke-dashoffset: 0;
+  }
+
+  /* The active stage on the architecture loop: a ring that breathes out from
+     the node while the signal rests on it. Opacity and scale only. */
+  .node-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: node-pulse 2400ms var(--ease-settle) infinite;
+  }
+
+  /* Scroll cue on the cover: a hairline that draws down, then drains from the
+     top, slow enough to read as breath rather than as an alert. */
+  .scroll-cue {
+    transform-origin: top;
+    animation: scroll-cue 2800ms var(--ease-heavy) infinite;
   }
 
   /* A hairline that draws in from the left beneath an inline link. The rule is
@@ -518,6 +567,51 @@
   }
 }
 
+@keyframes glint {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes node-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
 /* ------------------------------------------------------------------------
    Reduced motion: the global kill switch, plus final states for the
    masked reveals so nothing stays hidden. Framer Motion is handled
@@ -561,5 +655,23 @@
 
   .sheen::after {
     display: none;
+  }
+
+  .glint.is-lit {
+    animation: none;
+  }
+
+  .draw-path {
+    stroke-dashoffset: 0;
+  }
+
+  .node-pulse {
+    animation: none;
+    opacity: 0;
+  }
+
+  .scroll-cue {
+    animation: none;
+    transform: scaleY(1);
   }
 }

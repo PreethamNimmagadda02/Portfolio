@@ -14,6 +14,7 @@ import CodingProfiles, { LiveDataNotice, LIVE_DATA_ERROR } from "./CodingProfile
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SectionHeading, LedgerNumber, PlateTicks } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { readCache, writeCache } from "@/lib/cache";
 import bakedLoc from "@/data/github-loc.json";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
@@ -39,6 +40,16 @@ const LOC_CACHE_KEY = "github_loc_cache_v1";
 // 24h: lines-written changes slowly, so this refetches less often than the
 // other stats caches (12h) to save on the per-repo request burst.
 const LOC_CACHE_TTL_MS = 1000 * 60 * 60 * 24;
+
+const STATS_CACHE_KEY = "github_stats_cache_v3";
+const STATS_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
+
+/** Shown when the repo list comes back empty, so the gauge is never blank. */
+const EMPTY_REPO_LANGUAGES: LanguageData[] = [
+  { name: "TypeScript", percentage: 50 },
+  { name: "JavaScript", percentage: 40 },
+  { name: "Python", percentage: 10 },
+];
 
 /* Types */
 interface ContributionDay {
@@ -69,6 +80,12 @@ interface StatsData {
 interface LanguageData {
   name: string;
   percentage: number;
+}
+
+interface StatsCache {
+  stats: StatsData;
+  languages: LanguageData[];
+  contributions: ContributionDay[];
 }
 
 interface Figure {
@@ -415,13 +432,13 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
         </div>
         {/* Legend, in the same small caps as every other label on the plate. */}
         <div className="mt-5 flex items-center justify-end gap-[3px]">
-          <span className="mr-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+          <span className="mr-2 caption text-ivory-300">
             Less
           </span>
           {CELL_COLORS.map((c, i) => (
             <span key={i} aria-hidden className="size-3" style={{ backgroundColor: c }} />
           ))}
-          <span className="ml-2 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+          <span className="ml-2 caption text-ivory-300">
             More
           </span>
         </div>
@@ -509,14 +526,7 @@ export default function GitHubStats() {
     if (live === null || live <= 0) return;
     setLinesAdded(live);
     setLinesAreLive(true);
-    try {
-      localStorage.setItem(
-        LOC_CACHE_KEY,
-        JSON.stringify({ timestamp: Date.now(), linesAdded: live })
-      );
-    } catch (e) {
-      console.warn("Failed to cache lines-written total", e);
-    }
+    writeCache(LOC_CACHE_KEY, { linesAdded: live });
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -526,40 +536,19 @@ export default function GitHubStats() {
 
       // Read the lines cache before the early return below, so a stats-cache
       // hit still gets the last live figure instead of the build-time one.
-      const cachedLoc = localStorage.getItem(LOC_CACHE_KEY);
-      let locWasCached = false;
-      if (cachedLoc) {
-        try {
-          const parsed = JSON.parse(cachedLoc);
-          if (
-            Date.now() - parsed.timestamp < LOC_CACHE_TTL_MS &&
-            typeof parsed.linesAdded === "number" &&
-            parsed.linesAdded > 0
-          ) {
-            setLinesAdded(parsed.linesAdded);
-            setLinesAreLive(true);
-            locWasCached = true;
-          }
-        } catch (e) {
-          console.warn("Failed to parse cached lines-written total", e);
-        }
+      const cachedLoc = readCache<{ linesAdded: number }>(LOC_CACHE_KEY, LOC_CACHE_TTL_MS);
+      const locWasCached = typeof cachedLoc?.linesAdded === "number" && cachedLoc.linesAdded > 0;
+      if (locWasCached) {
+        setLinesAdded(cachedLoc.linesAdded);
+        setLinesAreLive(true);
       }
 
-      const cacheKey = "github_stats_cache_v3";
-      const cached = localStorage.getItem(cacheKey);
+      const cached = readCache<StatsCache>(STATS_CACHE_KEY, STATS_CACHE_TTL_MS);
       if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (Date.now() - parsed.timestamp < 1000 * 60 * 60 * 12) {
-            setStats(parsed.stats);
-            setLanguages(parsed.languages);
-            setContributions(parsed.contributions);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.warn("Failed to parse cached GitHub stats", e);
-        }
+        setStats(cached.stats);
+        setLanguages(cached.languages);
+        setContributions(cached.contributions);
+        return;
       }
 
       const [contribData, repos, profile] = await Promise.all([
@@ -597,25 +586,15 @@ export default function GitHubStats() {
       if (!locWasCached && repos.length > 0) void hydrateLines(repos);
 
       const aggregatedLangs = aggregateLanguages(repos);
-      let finalLangs = aggregatedLangs;
-      if (aggregatedLangs.length === 0) {
-        // Fallback if repos failed due to rate limits
-        finalLangs = [
-          { name: "TypeScript", percentage: 50 },
-          { name: "JavaScript", percentage: 40 },
-          { name: "Python", percentage: 10 },
-        ];
-        setLanguages(finalLangs);
-      } else {
-        setLanguages(finalLangs);
-      }
+      // Fallback if the repo list came back empty (rate limited).
+      const finalLangs = aggregatedLangs.length > 0 ? aggregatedLangs : EMPTY_REPO_LANGUAGES;
+      setLanguages(finalLangs);
 
-      localStorage.setItem(cacheKey, JSON.stringify({
-        timestamp: Date.now(),
+      writeCache<StatsCache>(STATS_CACHE_KEY, {
         stats: newStats,
         languages: finalLangs,
-        contributions: filtered
-      }));
+        contributions: filtered,
+      });
     } catch (err) {
       console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.", err);
       setError(LIVE_DATA_ERROR);
@@ -690,6 +669,7 @@ export default function GitHubStats() {
         <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 lg:col-span-8">
             <SectionHeading
+              chapter="github-stats"
               eyebrow="LIVE FROM GITHUB AND CODOLIO"
               title={copy.title}
               subtext={copy.subtext}
@@ -758,7 +738,7 @@ export default function GitHubStats() {
                         label={`${figure.value.toLocaleString()} ${figure.label.toLowerCase()}`}
                         className="font-display text-[2.5rem] leading-none text-ivory-100 lg:text-[3.5rem]"
                       />
-                      <span className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+                      <span className="caption text-ivory-300">
                         {/* .rule-hover draws a gold hairline in reserved
                             space, so the label does not shift the way a
                             text-decoration underline does. */}
@@ -788,7 +768,29 @@ export default function GitHubStats() {
                     </div>
                   </div>
                 ) : (
-                  <p className="font-sans text-[14px] text-ivory-300">No contribution data available</p>
+                  /* The calendar is the one reading with no honest fallback:
+                     a year of days cannot be restated from a cached total. So
+                     the plate stays, and points to where the record lives. */
+                  <div className="relative border-y border-hairline py-10">
+                    <PlateTicks />
+                    <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                      <p className="max-w-[46ch] font-display text-[1.375rem] italic leading-[1.35] text-ivory-200">
+                        The day by day record is kept on GitHub, where every square can be opened.
+                      </p>
+                      <a
+                        href={`https://github.com/${GITHUB_USERNAME}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-cursor="Open"
+                        className="group inline-flex shrink-0 items-center gap-2 border-b border-hairline-gold pb-1 caption text-aurum-300 transition-colors duration-300 ease-heavy hover:border-aurum-200 hover:text-aurum-200"
+                      >
+                        Open the calendar
+                        <span aria-hidden className="transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                          &#8599;
+                        </span>
+                      </a>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -829,7 +831,7 @@ export default function GitHubStats() {
                       </div>
                     </div>
 
-                    <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em]">
+                    <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 caption">
                       {languages.map((lang, i) => (
                         <li key={lang.name} className="flex items-center gap-2.5">
                           <span aria-hidden className="size-2 shrink-0" style={{ backgroundColor: langInk(i) }} />

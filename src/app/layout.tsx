@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import PageLoader from "@/components/PageLoader";
 import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
+import Cursor from "@/components/Cursor";
 import SmoothScroll from "@/components/SmoothScroll";
 import PerformanceProvider from "@/components/PerformanceProvider";
 import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
@@ -12,14 +13,17 @@ import { fontVariables } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://preethamnimmagadda.github.io"),
-  title: "Preetham Nimmagadda | AI engineer, autonomous systems",
+  title: "Preetham Nimmagadda | AI architect, autonomous systems",
   description:
-    "Preetham Nimmagadda builds AI that acts: self-healing data security at Matters.AI, multimodal RAG at Introspect Labs, autonomous agents at METAVERTEX. CodeChef top 0.8%, HackerRank top 0.07%.",
+    "Preetham Nimmagadda architects AI that acts: a self-healing data security copilot at Matters.AI, multimodal VideoRAG at Introspect Labs, autonomous agents at METAVERTEX. CodeChef top 0.8%, HackerRank top 0.07%.",
   manifest: "/manifest.json",
   keywords: [
     "Preetham Nimmagadda",
+    "AI Architect",
     "AI Engineer",
     "Autonomous AI Systems",
+    "Agentic AI",
+    "Multi-agent Systems",
     "AI Agent Developer",
     "Full Stack Engineer",
     "IIT Dhanbad",
@@ -42,24 +46,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://preethamnimmagadda.github.io",
-    title: "Preetham Nimmagadda, AI engineer",
+    title: "Preetham Nimmagadda, AI architect",
     description:
-      "Systems that find what is exposed and close it before anyone asks. Selected work, the record, and how to reach me.",
+      "Architecting intelligence that acts. The thesis, the method, the selected work and the record.",
     siteName: "Preetham Nimmagadda",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Preetham Nimmagadda, AI engineer",
+        alt: "Preetham Nimmagadda, AI architect",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Preetham Nimmagadda, AI engineer",
+    title: "Preetham Nimmagadda, AI architect",
     description:
-      "Systems that find what is exposed and close it before anyone asks. Selected work, the record, and how to reach me.",
+      "Architecting intelligence that acts. The thesis, the method, the selected work and the record.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -102,7 +106,9 @@ const jsonLd = {
   name: "Preetham Nimmagadda",
   url: "https://preethamnimmagadda.github.io",
   image: "https://preethamnimmagadda.github.io/ai-headshot.jpeg",
-  jobTitle: "AI Engineer",
+  jobTitle: "AI Architect",
+  description:
+    "AI architect designing autonomous systems that perceive, decide and act, shipped at Matters.AI, Introspect Labs and METAVERTEX.",
   worksFor: {
     "@type": "Organization",
     name: "IIT (ISM) Dhanbad",
@@ -113,7 +119,9 @@ const jsonLd = {
   },
   knowsAbout: [
     "Artificial Intelligence",
+    "AI Architecture",
     "Autonomous Agents",
+    "Multi-agent Systems",
     "CrewAI",
     "LangChain",
     "Next.js",
@@ -136,7 +144,10 @@ export default function RootLayout({
   // attributes and <script> tags before React hydrates. App code cannot
   // prevent that, and the mismatch is expected.
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    // The font variables go on <html>, not <body>: the theme's --font-sans,
+    // --font-display and --font-mono tokens are declared on :root and read
+    // these, so they must be defined on that same element to resolve.
+    <html lang="en" className={`dark ${fontVariables}`} suppressHydrationWarning>
       <head>
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: scrollResetScript }} />
         <script
@@ -147,7 +158,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${fontVariables} antialiased bg-obsidian-0 text-ivory-100`}
+        className="antialiased bg-obsidian-0 text-ivory-100"
       >
         <a href="#main-content" className="skip-link">
           Skip to content
@@ -158,6 +169,7 @@ export default function RootLayout({
               <PageLoader />
               <ScrollProgress />
               <KonamiEasterEgg />
+              <Cursor />
               <SmoothScroll>
                 <Navbar />
                 <main

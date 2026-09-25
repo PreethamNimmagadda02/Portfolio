@@ -30,15 +30,18 @@ export interface PointerState {
   px: number;
   /** Raw clientY in pixels. */
   py: number;
+  /** The device behind the last move: "mouse", "pen" or "touch". */
+  type: string;
 }
 
-const pointer: PointerState = { nx: 0, ny: 0, px: 0, py: 0 };
+const pointer: PointerState = { nx: 0, ny: 0, px: 0, py: 0, type: "mouse" };
 let pointerSubscribers = 0;
 const pointerMoveListeners = new Set<(p: PointerState) => void>();
 
 function handlePointerMove(e: PointerEvent) {
   pointer.px = e.clientX;
   pointer.py = e.clientY;
+  pointer.type = e.pointerType;
   pointer.nx = (e.clientX / window.innerWidth) * 2 - 1;
   pointer.ny = -(e.clientY / window.innerHeight) * 2 + 1;
   for (const listener of pointerMoveListeners) listener(pointer);

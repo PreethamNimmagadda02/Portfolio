@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** A count or position as a two-digit numeral: 3 reads "03". */
+export function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
 /**
  * Deterministic pseudo-random generator (mulberry32).
  *
@@ -24,26 +29,22 @@ export function seededRandom(seed: number): () => number {
 }
 
 /* Scene warm-up coordination.
-   Each 3D section reports when its WebGL scene has been created (Canvas
-   onCreated). The PageLoader holds until every scene has reported or its
-   max timeout elapses, so the loader covers exactly as much time as the
-   warm-up actually needs, no more. */
+   The background scene reports once its WebGL context has been created
+   (Canvas onCreated, or at once under reduced motion, where no canvas is
+   made). The PageLoader holds until it has, or until its max timeout
+   elapses, so the loader covers exactly as much time as the warm-up needs.
+   The flag lives on window so a dev fast-refresh remount still sees it. */
 
-export const TOTAL_WARMED_SCENES = 1; // the single persistent CosmicScene background
+type WarmedWindow = Window & { __sceneWarmed?: boolean };
 
-type WarmedWindow = Window & { __warmedScenes?: Set<string> };
-
-export function markSceneWarmed(name: string) {
+export function markSceneWarmed() {
   if (typeof window === "undefined") return;
-  const w = window as WarmedWindow;
-  if (!w.__warmedScenes) w.__warmedScenes = new Set();
-  w.__warmedScenes.add(name);
+  (window as WarmedWindow).__sceneWarmed = true;
   window.dispatchEvent(new Event("scene-warmed"));
 }
 
-export function warmedSceneCount(): number {
-  if (typeof window === "undefined") return 0;
-  return (window as WarmedWindow).__warmedScenes?.size ?? 0;
+export function isSceneWarmed(): boolean {
+  return typeof window !== "undefined" && Boolean((window as WarmedWindow).__sceneWarmed);
 }
 
 type LenisLike = {

@@ -5,6 +5,7 @@ import { Briefcase, Buildings, Gavel, Users, type Icon } from "@phosphor-icons/r
 import { AnimatePresence, motion, EASE_HEAVY, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SectionHeading } from "@/components/ui";
+import { cn, pad2 } from "@/lib/utils";
 
 /* ------------------------------------------------------------------------
    Record
@@ -121,7 +122,7 @@ function startYear(period: string): string {
    hidden from assistive technology.
    ------------------------------------------------------------------------ */
 
-function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: boolean }) {
+function YearDossier({ entry, index, reduced }: { entry: ExperienceEntry; index: number; reduced: boolean }) {
   const year = startYear(entry.period);
   const yearIn = reduced ? { duration: 0 } : { duration: 0.7, ease: EASE_HEAVY };
   const yearOut = reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_HEAVY };
@@ -170,6 +171,28 @@ function YearDossier({ entry, reduced }: { entry: ExperienceEntry; reduced: bool
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Where the reader is in the record: six ticks, the roles read so
+            far held in ivory and the current one in gold. */}
+        <div className="mt-12 flex max-w-[220px] items-center gap-4">
+          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-aurum-300">
+            {pad2(index + 1)}
+          </span>
+          <span className="flex flex-1 gap-1">
+            {entries.map((e, i) => (
+              <span
+                key={e.id}
+                className={cn(
+                  "h-px flex-1 transition-colors duration-500 ease-heavy",
+                  i === index ? "bg-aurum-300" : i < index ? "bg-ivory-300/60" : "bg-hairline"
+                )}
+              />
+            ))}
+          </span>
+          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300">
+            {pad2(entries.length)}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -217,7 +240,7 @@ function Entry({
           aria-hidden
           className="ledger w-6 shrink-0 font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300"
         >
-          {String(index + 1).padStart(2, "0")}
+          {pad2(index + 1)}
         </span>
         <Icon size={18} weight="light" className="shrink-0 text-ivory-300" aria-hidden />
         <h4 className="foil font-display font-medium text-[22px] leading-[1.15] transition-transform duration-300 ease-heavy group-hover:translate-x-1.5 lg:text-[28px]">
@@ -236,7 +259,7 @@ function Entry({
 
       {/* The one gold fact per role, marked as such: a gold tick, then small
           caps. It used to be mono body text carrying figures like 1,800+. */}
-      <p className="mt-5 flex items-center gap-3 pl-9 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-aurum-300">
+      <p className="mt-5 flex items-center gap-3 pl-9 caption text-aurum-300">
         <span aria-hidden className="h-px w-4 shrink-0 bg-aurum-400" />
         {entry.highlight}
       </p>
@@ -252,7 +275,7 @@ function Entry({
         {entry.skills.map((skill) => (
           <li
             key={skill}
-            className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-ivory-200"
+            className="caption text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-ivory-200"
           >
             {skill}
           </li>
@@ -273,7 +296,7 @@ function GroupLabel({ children, count }: { children: ReactNode; count: number })
       <span className="eyebrow">
         {children}
         <span aria-hidden className="h-px w-5 bg-hairline-gold" />
-        <span className="ledger text-ivory-300">{String(count).padStart(2, "0")}</span>
+        <span className="ledger text-ivory-300">{pad2(count)}</span>
       </span>
     </h3>
   );
@@ -327,6 +350,7 @@ export default function Experience() {
           <div className="col-span-12 lg:col-span-9">
             <SectionHeading
               id="experience-heading"
+              chapter="experience"
               eyebrow="TWO TRACKS, INDUSTRY AND CAMPUS"
               title="Six roles since 2024."
             />
@@ -335,7 +359,7 @@ export default function Experience() {
 
         <div className="mt-16 grid grid-cols-12 gap-x-6 lg:mt-24">
           <aside className="hidden lg:col-span-4 lg:block">
-            <YearDossier entry={entries[active]} reduced={reduced} />
+            <YearDossier entry={entries[active]} index={active} reduced={reduced} />
           </aside>
 
           <div className="col-span-12 flex flex-col gap-y-24 lg:col-span-7 lg:col-start-6">

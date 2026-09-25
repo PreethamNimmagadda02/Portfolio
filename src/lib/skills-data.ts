@@ -3,7 +3,7 @@
  * and the CosmicScene constellation flourish, so the two stay in sync
  * without duplicating the list.
  */
-export interface SkillItem {
+interface SkillItem {
   name: string;
   category: string;
 }
@@ -93,7 +93,7 @@ export const skillsData: SkillItem[] = [
 
 // Distinguishable tones inside the gold and ivory family only. The page has
 // exactly one hue (gold) plus obsidian and ivory neutrals.
-export const categoryColors: Record<string, string> = {
+const categoryColors: Record<string, string> = {
   AI: "#C9A961",
   Web: "#EBD9A8",
   DB: "#A8874A",

@@ -1,22 +1,22 @@
 "use client";
 
-import type { MouseEvent, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUp, EnvelopeSimple, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
 import { motion, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn, smoothScrollTo } from "@/lib/utils";
+import { InViewClass } from "./Reveal";
+import { chapter } from "@/lib/chapters";
 
-const NAV_LINKS = [
-  { label: "Home", id: "home" },
-  { label: "About", id: "about" },
-  { label: "Experience", id: "experience" },
-  { label: "Projects", id: "projects" },
-  { label: "Achievements", id: "achievements" },
-  // One label per intent: contact is "Get in touch" in the hero, the nav and
-  // here, never "Contact" in one place and something else in another.
-  { label: "Get in touch", id: "contact" },
-] as const;
+/* The footer lists a short run of chapters, named from the registry so a
+   renamed chapter cannot drift. One label per intent: contact reads "Get in
+   touch" in the hero, the nav and here, never "Contact" in one place and
+   something else in another. */
+const NAV_LINKS = ["home", "about", "experience", "projects", "achievements", "contact"].map((id) => ({
+  id,
+  label: id === "contact" ? "Get in touch" : chapter(id).label,
+}));
 
 const CONNECT_LINKS = [
   { label: "GitHub", href: "https://github.com/PreethamNimmagadda02", Icon: GithubLogo, external: true },
@@ -86,8 +86,10 @@ function Rise({
 
 /**
  * Colophon. One hairline, a 12-column grid (brand, links, connect), a second
- * hairline, then the copyright and a back-to-top control. No clock, no
- * watermark, no badges: the record above has already made the argument.
+ * hairline, the copyright and a back-to-top control, and then the page is
+ * signed: the name set once more across the full measure, rising out of its
+ * masks as the reader arrives at the end. No clock, no watermark, no badges:
+ * the record above has already made the argument.
  */
 export default function Footer() {
   const reduced = useReducedMotion();
@@ -115,7 +117,7 @@ export default function Footer() {
               Preetham Nimmagadda
             </Link>
             <p className="mt-4 max-w-[42ch] font-sans text-[15px] leading-[1.6] text-ivory-200">
-              AI engineer. I build systems that act on their own judgment, and I stay accountable
+              AI architect. I design systems that act on their own judgment, and I stay accountable
               for what they do. Autonomy is not a demo.
             </p>
           </Rise>
@@ -186,7 +188,7 @@ export default function Footer() {
             <p className="ledger font-mono text-[12px] leading-none text-ivory-300">
               &copy; {year} Preetham Nimmagadda
             </p>
-            <p className="font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-300">
+            <p className="caption text-ivory-300">
               Set in Bodoni Moda and Geist. Hyderabad, Telangana.
             </p>
           </div>
@@ -196,7 +198,7 @@ export default function Footer() {
           <button
             type="button"
             onClick={() => smoothScrollTo(0)}
-            className="group inline-flex cursor-pointer items-center gap-3 border border-hairline px-4 py-3 font-mono text-[11px] uppercase leading-none tracking-[0.14em] text-ivory-200 transition-colors duration-300 ease-heavy hover:border-hairline-gold hover:text-aurum-200"
+            className="group inline-flex cursor-pointer items-center gap-3 border border-hairline px-4 py-3 caption text-ivory-200 transition-colors duration-300 ease-heavy hover:border-hairline-gold hover:text-aurum-200"
           >
             Back to top
             <ArrowUp
@@ -207,6 +209,29 @@ export default function Footer() {
             />
           </button>
         </Rise>
+
+        {/* The signature. Sized in container units against the rendered
+            width of the name in the display cut (10.42em at this tracking,
+            Nimmagadda alone 5.92em), so it spans the column edge to edge at
+            every width: one line from sm, two below, where one would set it
+            too small to carry. Decorative; the brand link above names him. */}
+        <InViewClass amount={0.4} className="mt-12 border-t border-hairline pt-8 [container-type:inline-size] lg:mt-16 lg:pt-10">
+          <p
+            aria-hidden
+            className="select-none whitespace-nowrap font-display font-normal leading-[0.9] tracking-[-0.02em] text-ivory-100 text-[calc(100cqw/6.05)] sm:text-[calc(100cqw/10.5)]"
+          >
+            <span className="word-mask">
+              <span className="line-rise">Preetham</span>
+            </span>
+            <span className="hidden sm:inline"> </span>
+            <br className="sm:hidden" />
+            <span className="word-mask">
+              <span className="line-rise" style={{ "--rise-delay": "110ms" } as CSSProperties}>
+                Nimmagadda
+              </span>
+            </span>
+          </p>
+        </InViewClass>
       </div>
     </footer>
   );
