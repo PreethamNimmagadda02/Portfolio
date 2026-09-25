@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type FocusEvent,
   type KeyboardEvent,
+  type PointerEvent,
 } from "react";
 import {
   AnimatePresence,
@@ -132,6 +133,40 @@ const LOOP_PATH = [
   `A ${R} ${R} 0 0 1 ${CX} ${CY - R}`,
 ].join(" ");
 
+/* The bezel: a ring of ticks outside the loop, one every three degrees and a
+   long one every thirty, broken wherever a label sits (the four stations and
+   the four quarter captions) the way a dial leaves room for its numerals. */
+const BEZEL_IN = 254;
+const BEZEL_OUT = 262;
+const BEZEL_MAJOR_IN = 248;
+const BEZEL_TICKS = (() => {
+  const ticks: { x1: number; y1: number; x2: number; y2: number; major: boolean }[] = [];
+  for (let deg = 0; deg < 360; deg += 3) {
+    const fromStation = Math.min(...[0, 90, 180, 270, 360].map((a) => Math.abs(deg - a)));
+    const fromQuarter = Math.min(...[45, 135, 225, 315].map((a) => Math.abs(deg - a)));
+    if (fromStation < 14 || fromQuarter < 8) continue;
+    const major = deg % 30 === 0;
+    const a = ((deg - 90) * Math.PI) / 180;
+    const r1 = major ? BEZEL_MAJOR_IN : BEZEL_IN;
+    ticks.push({
+      x1: CX + r1 * Math.cos(a),
+      y1: CY + r1 * Math.sin(a),
+      x2: CX + BEZEL_OUT * Math.cos(a),
+      y2: CY + BEZEL_OUT * Math.sin(a),
+      major,
+    });
+  }
+  return ticks;
+})();
+
+/** An arc of the bezel's radius spanning `half` degrees either side of twelve o'clock. */
+function bezelArc(half: number) {
+  const r = (BEZEL_OUT + BEZEL_MAJOR_IN) / 2;
+  const a = pointAt(-90 - half, r);
+  const b = pointAt(-90 + half, r);
+  return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${r} ${r} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
+}
+
 /** The trail is measured against pathLength, so the browser's own arc length never matters. */
 const PATH_UNITS = 1000;
 const TRAIL = 150;
@@ -166,12 +201,15 @@ function Diagram({
 }) {
   const signalRef = useRef<SVGGElement>(null);
   const trailRef = useRef<SVGPathElement>(null);
+  const bezelLightRef = useRef<SVGGElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
   /* Fixed ids: the loop appears once, and useId cannot be trusted inside a
      next/dynamic chunk, whose server render carries preload siblings the
      client tree does not, so the generated ids differ across hydration. */
   const gridId = "loop-grid";
   const glowId = "loop-glow";
   const fadeId = "loop-fade";
+  const ticksId = "loop-ticks";
 
   /* One write per frame while the signal travels, none while it rests. */
   const paint = useCallback((pos: number) => {
@@ -182,6 +220,27 @@ function Diagram({
     // so a trail straddling twelve o'clock wraps cleanly onto both ends.
     const s = (lap / COUNT) * PATH_UNITS;
     trailRef.current?.setAttribute("stroke-dashoffset", (TRAIL - s).toFixed(2));
+    // The bezel catches the light where the signal is, like a dial under a lamp.
+    bezelLightRef.current?.setAttribute("transform", `rotate(${((lap / COUNT) * 360).toFixed(2)} ${CX} ${CY})`);
+  }, []);
+
+  /* The drawing leans a few degrees toward the mouse, as a plate on a desk
+     does when it is picked up to be read. Its own listener, written straight
+     to the node; still under reduced motion and on touch. */
+  const onTilt = useCallback(
+    (e: PointerEvent<HTMLDivElement>) => {
+      if (reduced || e.pointerType !== "mouse") return;
+      const el = tiltRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(1400px) rotateX(${(-ny * 7).toFixed(2)}deg) rotateY(${(nx * 7).toFixed(2)}deg)`;
+    },
+    [reduced]
+  );
+  const onTiltEnd = useCallback(() => {
+    if (tiltRef.current) tiltRef.current.style.transform = "";
   }, []);
 
   useMotionValueEvent(position, "change", paint);
@@ -189,7 +248,12 @@ function Diagram({
 
   return (
     <InViewClass amount={0.35} className="relative mx-auto w-full max-w-[620px] py-10 sm:py-6">
-      <div className="relative">
+      <div
+        ref={tiltRef}
+        onPointerMove={onTilt}
+        onPointerLeave={onTiltEnd}
+        className="relative transition-transform duration-700 ease-settle [transform-style:preserve-3d]"
+      >
         <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="block h-auto w-full overflow-visible" aria-hidden>
           <defs>
             <pattern id={gridId} width="28" height="28" patternUnits="userSpaceOnUse">
@@ -201,6 +265,13 @@ function Diagram({
             </radialGradient>
             <mask id={`${fadeId}-mask`}>
               <rect width={VB_W} height={VB_H} fill={`url(#${fadeId})`} />
+            </mask>
+            <mask id={ticksId} maskUnits="userSpaceOnUse" x="0" y="0" width={VB_W} height={VB_H}>
+              <g stroke="#fff" strokeWidth={1.6}>
+                {BEZEL_TICKS.map((t, i) => (
+                  <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+                ))}
+              </g>
             </mask>
             <radialGradient id={glowId}>
               <stop offset="0%" className="[stop-color:var(--color-aurum-100)]" stopOpacity="0.85" />
@@ -217,6 +288,21 @@ function Diagram({
             <line x1={CX} y1={CY - R - 70} x2={CX} y2={CY + R + 70} />
             <circle cx={CX} cy={CY} r={R + 40} />
             <circle cx={CX} cy={CY} r={R * 0.42} />
+          </g>
+
+          {/* The bezel, and the light it catches from the signal: gold arcs
+              that turn with the signal, visible only through the ticks. */}
+          <g className="stroke-hairline-strong" strokeWidth={1}>
+            {BEZEL_TICKS.map((t, i) => (
+              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} strokeOpacity={t.major ? 1 : 0.6} />
+            ))}
+          </g>
+          <g mask={`url(#${ticksId})`}>
+            <g ref={bezelLightRef}>
+              <path d={bezelArc(34)} fill="none" strokeWidth={18} className="stroke-aurum-400" strokeOpacity={0.35} />
+              <path d={bezelArc(18)} fill="none" strokeWidth={18} className="stroke-aurum-300" strokeOpacity={0.7} />
+              <path d={bezelArc(7)} fill="none" strokeWidth={18} className="stroke-aurum-100" />
+            </g>
           </g>
 
           {/* Registration marks, the way a drawing is squared on the sheet. */}
@@ -467,6 +553,15 @@ export default function ArchitectureLoop() {
 
   return (
     <div className="mx-auto w-full max-w-[1280px] px-6 pb-32 lg:px-10 lg:pb-40">
+      {/* A section break between the thesis and its method: two rules drawn
+          out from a gold lozenge, the ornament a printed book sets between
+          movements of one chapter. */}
+      <InViewClass amount={0.8} className="mb-20 flex items-center justify-center gap-5 lg:mb-28">
+        <span aria-hidden className="rule-draw !w-20 [transform-origin:right] sm:!w-32" />
+        <span aria-hidden className="size-2 rotate-45 border border-aurum-300" />
+        <span aria-hidden className="rule-draw !w-20 sm:!w-32" />
+      </InViewClass>
+
       <div className="grid grid-cols-12 gap-x-6">
         <div className="col-span-12 lg:col-span-8">
           <SectionHeading
@@ -496,8 +591,23 @@ export default function ArchitectureLoop() {
             role="tabpanel"
             tabIndex={0}
             aria-labelledby={tabId(active)}
-            className="relative min-h-[23rem] sm:min-h-[21rem]"
+            className="relative isolate min-h-[23rem] sm:min-h-[21rem]"
           >
+            {/* The stage's numeral, struck in outline behind the panel at a
+                scale nothing else on the page uses. */}
+            <AnimatePresence initial={false}>
+              <motion.span
+                key={active}
+                aria-hidden
+                className="pointer-events-none absolute -right-1 -top-3 -z-10 select-none font-display text-[8rem] sm:-top-20 sm:text-[9rem] leading-none text-transparent [-webkit-text-stroke:1px_var(--color-hairline-gold)] lg:-top-24 lg:text-[12.5rem]"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: reduced ? 0.15 : 1.1, ease: EASE_SETTLE } }}
+                exit={{ opacity: 0, transition: { duration: reduced ? 0.1 : 0.4, ease: EASE_SETTLE } }}
+              >
+                {pad2(active + 1)}
+              </motion.span>
+            </AnimatePresence>
+
             <div className="flex items-center justify-between gap-6 border-b border-hairline pb-4 font-mono text-[11px] uppercase leading-none tracking-[0.14em]">
               <span className="ledger text-ivory-300">
                 Stage <span className="text-aurum-300">{pad2(active + 1)}</span>
