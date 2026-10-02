@@ -14,6 +14,8 @@ export interface SectionHeadingProps {
    * and the Index show for it.
    */
   chapter?: string;
+  /** A numeral to print in place of the chapter's, for a movement within one ("01.2"). */
+  numeral?: string;
   title: ReactNode;
   subtext?: ReactNode;
   className?: string;
@@ -37,6 +39,7 @@ const WORD_STEP = 62;
 export function SectionHeading({
   eyebrow,
   chapter,
+  numeral: numeralOverride,
   title,
   subtext,
   className,
@@ -45,7 +48,7 @@ export function SectionHeading({
   const splittable = typeof title === "string";
   // Words carry their own delays, so the rule waits for the last one.
   const ruleDelay = splittable ? (title as string).split(" ").length * WORD_STEP : 0;
-  const numeral = chapter ? chapterFor(chapter).no : null;
+  const numeral = numeralOverride ?? (chapter ? chapterFor(chapter).no : null);
   const hasLabel = Boolean(eyebrow || numeral);
 
   return (

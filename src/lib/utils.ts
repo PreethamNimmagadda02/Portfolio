@@ -5,6 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Rounds to a thousandth. For SVG geometry computed with Math.cos and Math.sin
+ * during render: the server's engine and a visitor's browser can disagree in
+ * the last digit, which React reports as a hydration mismatch. A thousandth
+ * of a unit is far below a device pixel.
+ */
+export function round3(v: number) {
+  return Math.round(v * 1000) / 1000;
+}
+
 /** A count or position as a two-digit numeral: 3 reads "03". */
 export function pad2(n: number) {
   return String(n).padStart(2, "0");

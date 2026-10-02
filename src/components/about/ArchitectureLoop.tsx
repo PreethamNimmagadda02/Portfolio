@@ -24,7 +24,8 @@ import {
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { SectionHeading, LedgerNumber } from "@/components/ui";
 import { InViewClass } from "../Reveal";
-import { cn, pad2 } from "@/lib/utils";
+import { Ornament } from "./Ornament";
+import { cn, pad2, round3 } from "@/lib/utils";
 
 /**
  * The method, drawn as a blueprint.
@@ -116,11 +117,8 @@ const R = 190;
 /** Stage i sits at this angle, clockwise from twelve o'clock, in degrees. */
 const stageAngle = (i: number) => -90 + (i * 360) / COUNT;
 
-/* Geometry is rendered on the server and again in the browser, and the two
-   engines' Math.cos and Math.sin can differ in the last digit, which React
-   reports as a hydration mismatch on every attribute. Rounding to a
-   thousandth of a unit, far below a device pixel, makes both agree. */
-const fix = (v: number) => Math.round(v * 1000) / 1000;
+/* Rounded so the server and the browser print the same geometry (see round3). */
+const fix = round3;
 
 function pointAt(angleDeg: number, radius = R) {
   const a = (angleDeg * Math.PI) / 180;
@@ -557,19 +555,14 @@ export default function ArchitectureLoop() {
   const tabId = (i: number) => `loop-tab-${i}`;
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-6 pb-32 lg:px-10 lg:pb-40">
-      {/* A section break between the thesis and its method: two rules drawn
-          out from a gold lozenge, the ornament a printed book sets between
-          movements of one chapter. */}
-      <InViewClass amount={0.8} className="mb-20 flex items-center justify-center gap-5 lg:mb-28">
-        <span aria-hidden className="rule-draw w-20 [transform-origin:right] sm:w-32" />
-        <span aria-hidden className="size-2 rotate-45 border border-aurum-300" />
-        <span aria-hidden className="rule-draw w-20 sm:w-32" />
-      </InViewClass>
+    <div className="mx-auto w-full max-w-[1280px] px-6 pb-24 lg:px-10 lg:pb-28">
+      {/* The break between the architect and the method. */}
+      <Ornament className="mb-20 lg:mb-28" />
 
       <div className="grid grid-cols-12 gap-x-6">
         <div className="col-span-12 lg:col-span-8">
           <SectionHeading
+            numeral="01.3"
             eyebrow="THE METHOD"
             title="The architecture of autonomy."
             subtext="Every system I ship runs one loop: four stages around a single intent. Choose a stage to see where I built it."

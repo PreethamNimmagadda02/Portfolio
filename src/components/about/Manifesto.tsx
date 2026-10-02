@@ -181,7 +181,7 @@ export default function Manifesto() {
               <div className="mb-8 flex items-center justify-between gap-6 lg:mb-10">
                 <h2 className="eyebrow">
                   <span aria-hidden className="ledger text-aurum-300">
-                    {no}
+                    {no}.1
                   </span>
                   <span aria-hidden className="h-px w-6 bg-hairline-gold" />
                   THE THESIS

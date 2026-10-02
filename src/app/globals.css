@@ -393,6 +393,14 @@
     animation: node-pulse 2400ms var(--ease-settle) infinite;
   }
 
+  /* The lettered rim of the About seal: one slow revolution every two
+     minutes, about the centre of the drawing. */
+  .seal-turn {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: seal-turn 120s linear infinite;
+  }
+
   /* Scroll cue on the cover: a hairline that draws down, then drains from the
      top, slow enough to read as breath rather than as an alert. */
   .scroll-cue {
@@ -577,6 +585,12 @@
   }
 }
 
+@keyframes seal-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes node-pulse {
   0% {
     opacity: 0.9;
@@ -663,6 +677,10 @@
 
   .draw-path {
     stroke-dashoffset: 0;
+  }
+
+  .seal-turn {
+    animation: none;
   }
 
   .node-pulse {
