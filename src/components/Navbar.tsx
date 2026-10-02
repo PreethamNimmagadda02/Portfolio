@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { AnimatePresence, EASE_HEAVY, EASE_SETTLE, motion } from "@/lib/motion";
 import { TextButton } from "@/components/ui/TextButton";
+import { BrandLockup } from "@/components/ui/BrandMark";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { CHAPTERS, CHAPTER_COUNT, type Chapter } from "@/lib/chapters";
 import { cn, smoothScrollTo } from "@/lib/utils";
@@ -442,9 +443,10 @@ export default function Navbar() {
           <a
             href="#home"
             onClick={(e) => goTo(e, "#home")}
-            className="foil shrink-0 whitespace-nowrap font-display font-medium text-[20px] leading-none sm:text-[22px]"
+            aria-label="Preetham Nimmagadda, AI architect: back to the top"
+            className="group shrink-0"
           >
-            Preetham Nimmagadda
+            <BrandLockup />
           </a>
 
           <ChapterIndicator
