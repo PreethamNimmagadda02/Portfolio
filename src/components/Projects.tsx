@@ -72,7 +72,7 @@ const projects: ProjectData[] = [
     description:
       "Multi-agent AI that turns event requirements into complete logistical plans. Scheduling, budgets and vendor coordination, generated automatically.",
     tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
-    links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
+    links: { demo: "https://festflow-805bb.web.app/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
   },
   {
