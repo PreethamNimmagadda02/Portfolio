@@ -61,7 +61,7 @@ const projects: ProjectData[] = [
       "A fully automated command center for the job search: discovering the right roles, scoring fit with AI, and managing the whole application pipeline end to end.",
     tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI", "AWS"],
     links: {
-      demo: "http://careerops-alb-328156002.ap-southeast-2.elb.amazonaws.com/",
+      demo: "https://rnqvowgq45.execute-api.ap-southeast-2.amazonaws.com/",
       repo: "https://github.com/PreethamNimmagadda02/CareerOps",
     },
     status: "Live",
