@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { ArrowDownRight } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useSheen } from "@/hooks/use-sheen";
 import { SectionHeading, LedgerNumber, TextButton } from "@/components/ui";
 import { categoryLabels, skillsData } from "@/lib/skills-data";
 import { Ornament } from "./Ornament";
@@ -127,6 +128,7 @@ function Seal() {
 
 export default function Profile() {
   const reduced = useReducedMotion();
+  const sheen = useSheen();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   /* The seal turns a few degrees with the page on top of its own slow turn,
@@ -152,7 +154,13 @@ export default function Profile() {
                   "radial-gradient(closest-side, color-mix(in srgb, var(--color-aurum-300) 11%, transparent), transparent)",
               }}
             />
-            <motion.div style={reduced ? undefined : { rotate: turn }} className="relative">
+            {/* A raking light follows the pointer across the face of the seal
+                (.sheen), clipped to the disc so it reads as metal, not glass. */}
+            <motion.div
+              {...sheen}
+              style={reduced ? undefined : { rotate: turn }}
+              className="sheen relative overflow-hidden rounded-full"
+            >
               <Seal />
             </motion.div>
           </div>
@@ -179,7 +187,7 @@ export default function Profile() {
               <div
                 key={entry.label}
                 className={cn(
-                  "flex flex-col gap-3 border-b border-hairline py-6 pr-4",
+                  "group/cell relative flex flex-col gap-3 border-b border-hairline py-6 pr-4",
                   // A rule between columns: two to a row on a phone, three above.
                   i % 2 !== 0 && "max-sm:border-l max-sm:pl-5",
                   i % 3 !== 0 && "sm:border-l sm:pl-6"
@@ -191,12 +199,18 @@ export default function Profile() {
                   <span className="caption text-ivory-200">{entry.label}</span>
                   <span className="font-sans text-[13px] leading-snug text-ivory-300">{entry.source}</span>
                 </dt>
+                {/* Pointing at a figure draws a gold rule over its cell and
+                    warms the numeral, so the ledger answers the hand. */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-aurum-300 transition-transform duration-500 ease-heavy group-hover/cell:scale-x-100"
+                />
                 <dd className="order-1 m-0">
                   <LedgerNumber
                     value={entry.figure}
                     label={entry.figure}
                     delayMs={i * 90}
-                    className="font-display text-[2.25rem] leading-none text-ivory-100 lg:text-[2.75rem]"
+                    className="font-display text-[2.25rem] leading-none text-ivory-100 transition-colors duration-500 ease-heavy group-hover/cell:text-aurum-200 lg:text-[2.75rem]"
                   />
                 </dd>
               </div>

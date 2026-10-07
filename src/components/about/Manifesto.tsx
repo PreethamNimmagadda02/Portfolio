@@ -160,6 +160,11 @@ export default function Manifesto() {
   const signatureClip = useTransform(signature, (v) => `inset(-20% ${(100 - v * 100).toFixed(2)}% -20% 0)`);
   const caption = useTransform(scrollYProgress, [LIT_TO + 0.06, LIT_TO + 0.14], [0, 1]);
   const drift = useTransform(scrollYProgress, [0, 1], [36, -36]);
+  /* The chapter's numeral, struck in outline at a scale nothing else on the
+     page uses, drifting up through the empty right of the field faster than
+     the statement, so the two read as planes at different depths. */
+  const numeralY = useTransform(scrollYProgress, [0, 1], ["14%", "-22%"]);
+  const numeralOpacity = useTransform(scrollYProgress, [0, LIT_FROM, LIT_TO, 1], [0, 1, 0.75, 0.35]);
   /* A reading lamp: a pool of warm light that travels the statement with the
      lit frontier, down and across, so the eye is led and the page feels lit
      rather than printed on black. */
@@ -175,6 +180,15 @@ export default function Manifesto() {
       className={cn("relative", reduced ? "py-32 lg:py-40" : "h-[200vh] lg:h-[230vh]")}
     >
       <div className={cn(!reduced && "sticky top-0 flex h-[100dvh] items-center overflow-hidden")}>
+        {reduced ? null : (
+          <motion.span
+            aria-hidden
+            style={{ y: numeralY, opacity: numeralOpacity }}
+            className="pointer-events-none absolute -right-[2vw] top-1/2 -z-10 hidden -translate-y-1/2 select-none font-display text-[clamp(22rem,34vw,36rem)] leading-none tracking-[-0.04em] text-transparent [-webkit-text-stroke:1px_color-mix(in_srgb,var(--color-aurum-300)_30%,transparent)] lg:block"
+          >
+            {no}
+          </motion.span>
+        )}
         <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
           <motion.div style={reduced ? undefined : { y: drift }} className="grid grid-cols-12 gap-x-6">
             <div className="col-span-12 lg:col-span-11">

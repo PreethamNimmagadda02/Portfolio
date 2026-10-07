@@ -3,6 +3,7 @@
 import Manifesto from "./about/Manifesto";
 import Profile from "./about/Profile";
 import ArchitectureLoop from "./about/ArchitectureLoop";
+import { ChapterTurn } from "./about/ChapterTurn";
 
 /**
  * About, in three movements: the belief, the person, the method.
@@ -23,6 +24,7 @@ export default function About() {
       <Manifesto />
       <Profile />
       <ArchitectureLoop />
+      <ChapterTurn from="about" to="experience" />
     </section>
   );
 }

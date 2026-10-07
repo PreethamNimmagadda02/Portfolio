@@ -31,7 +31,7 @@ const SectionSkeleton = ({ className }: { className: string }) => <div className
    track of 200vh (230vh from lg), so the reserve is that track plus the
    measured height of the architect and method blocks beneath it. */
 const About = dynamic(() => import("@/components/About"), {
-  loading: () => <SectionSkeleton className="min-h-[calc(200vh+2965px)] w-full lg:min-h-[calc(230vh+2127px)]" />,
+  loading: () => <SectionSkeleton className="min-h-[calc(200vh+3057px)] w-full lg:min-h-[calc(230vh+2194px)]" />,
 });
 const Experience = dynamic(() => import("@/components/Experience"), {
   loading: () => <SectionSkeleton className="min-h-[3457px] w-full lg:min-h-[2632px]" />,
