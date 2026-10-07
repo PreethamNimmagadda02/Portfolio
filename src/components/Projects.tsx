@@ -61,7 +61,7 @@ const projects: ProjectData[] = [
       "A fully automated command center for the job search: discovering the right roles, scoring fit with AI, and managing the whole application pipeline end to end.",
     tags: ["TypeScript", "Playwright", "PostgreSQL", "Next.js", "OpenAI", "AWS"],
     links: {
-      demo: "http://careerops-alb-328156002.ap-southeast-2.elb.amazonaws.com/",
+      demo: "https://rnqvowgq45.execute-api.ap-southeast-2.amazonaws.com/",
       repo: "https://github.com/PreethamNimmagadda02/CareerOps",
     },
     status: "Live",
@@ -72,7 +72,7 @@ const projects: ProjectData[] = [
     description:
       "Multi-agent AI that turns event requirements into complete logistical plans. Scheduling, budgets and vendor coordination, generated automatically.",
     tags: ["Agentic AI", "AI Agents", "React", "Firebase", "Gemini API"],
-    links: { demo: "https://festflow.co.in/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
+    links: { demo: "https://festflow-805bb.web.app/", repo: "https://github.com/PreethamNimmagadda02/FestFlow" },
     status: "Live",
   },
   {
