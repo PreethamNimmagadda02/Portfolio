@@ -1,4 +1,6 @@
-@import "tailwindcss";
+/* Scan src only: the docs and wiki elsewhere in the repo quote utility names
+   from older designs, and would otherwise be compiled into the stylesheet. */
+@import "tailwindcss" source("..");
 
 /* ------------------------------------------------------------------------
    Obsidian Aurum design tokens.
@@ -10,7 +12,7 @@
    ------------------------------------------------------------------------ */
 @theme inline static {
   /* Faces. A Didone for display at 22px and above, a neutral sans for body and
-     UI, a mono for numerals, periods, tags, counts and the three eyebrows.
+     UI, a mono for numerals, periods, tags, counts and the eyebrows.
      Which cut sits behind each token is decided in src/lib/fonts.ts and
      nowhere else, so a licensed face can replace one without a component
      edit. */
@@ -93,14 +95,11 @@
        so position: sticky and position: fixed keep working. */
     overflow-x: clip;
     overscroll-behavior: none;
-    /* Lenis owns smooth scrolling; native smoothing would fight it. */
-    scroll-behavior: auto;
   }
 
+  /* Face, colour, ground and smoothing come from the html element and the
+     body's own utilities. */
   body {
-    font-family: var(--font-sans);
-    font-weight: 400;
-    font-size: 1rem;
     line-height: 1.65;
     /* Inheritance is the delivery mechanism: it carries the pin to the
        font-display utility sites as well as to the headings below. The sans
@@ -109,11 +108,7 @@
        font-optical-sizing is not a precedence worth leaning on. */
     font-optical-sizing: none;
     font-variation-settings: "opsz" var(--display-opsz);
-    color: var(--color-ivory-100);
-    background-color: var(--color-obsidian-0);
     text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
   }
 
   h1,
@@ -130,11 +125,6 @@
   :focus-visible {
     outline: 2px solid var(--color-aurum-100);
     outline-offset: 3px;
-    border-radius: 0;
-  }
-
-  :focus:not(:focus-visible) {
-    outline: none;
   }
 
   ::selection {
@@ -159,7 +149,6 @@
 
   ::-webkit-scrollbar-thumb {
     background: rgba(122, 97, 52, 0.6);
-    border-radius: 0;
   }
 
   /* Skip to content (a11y) */
@@ -170,10 +159,8 @@
     z-index: 200;
     padding: 0.75rem 1.25rem;
     border: 1px solid var(--color-aurum-300);
-    border-radius: 0;
     background: var(--color-obsidian-1);
     color: var(--color-ivory-100);
-    font-family: var(--font-sans);
     font-size: 0.9375rem;
     font-weight: 500;
     transition: top 200ms var(--ease-settle);
@@ -183,15 +170,10 @@
     top: 1rem;
   }
 
-  /* Tap feedback on coarse pointers. Lives in the base layer so utility
-     transitions on the element still win. */
+  /* Tap feedback on coarse pointers (the grey tap highlight is already off,
+     from html). Lives in the base layer so utility transitions on the element
+     still win. */
   @media (pointer: coarse) {
-    button,
-    a,
-    [role="button"] {
-      -webkit-tap-highlight-color: transparent;
-    }
-
     button:active,
     a:active,
     [role="button"]:active {
@@ -205,7 +187,7 @@
    Kept in the components layer so utilities can still override them.
    ------------------------------------------------------------------------ */
 @layer components {
-  /* The three uppercase eyebrows (home, github-stats, contact). */
+  /* The uppercase eyebrow over every chapter heading and sub-plate. */
   .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -257,8 +239,7 @@
   }
 
   .in-view .line-rise {
-    animation: line-rise 1100ms var(--ease-settle) forwards;
-    animation-delay: var(--rise-delay, 0ms);
+    animation: line-rise 1100ms var(--ease-settle) var(--rise-delay, 0ms) forwards;
   }
 
   /* The hairline-gold rule drawn beneath every headline. */
@@ -276,7 +257,7 @@
     transform: scaleX(1);
   }
 
-  /* Live indicator breathing (Contact eyebrow dot). */
+  /* A slow breath for the live detent and the loading blocks. */
   .breathe {
     animation: breathe 3s ease-in-out infinite;
   }
@@ -347,15 +328,6 @@
     }
   }
 
-  /* Without background-clip: text the transparent fill would hide the words
-     outright, so the foil degrades to flat ink. */
-  @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-    .foil {
-      background-image: none;
-      color: var(--foil-base);
-    }
-  }
-
   /* A single unprompted pass of the foil band, once, after an entrance has
      settled: the light catches the one word the page is built around. Fill
      is backwards only: the resting position holds through the delay, and
@@ -410,8 +382,7 @@
      over in a little over 800ms, close behind the 500ms fill rising under it. */
   .roll-char {
     display: inline-block;
-    transition: transform 600ms var(--ease-heavy);
-    transition-delay: calc(var(--i, 0) * 12ms);
+    transition: transform 600ms var(--ease-heavy) calc(var(--i, 0) * 12ms);
   }
 
   .roll-copy .roll-char {
@@ -495,9 +466,7 @@
   .rule-hover::after {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.2em;
+    inset: auto 0 -0.2em;
     height: 1px;
     background: var(--color-hairline-gold);
     transform: scaleX(0);
@@ -573,8 +542,7 @@
 
   /* Heatmap cell stagger: opacity only, delay set per cell via --d. */
   .cell-in {
-    animation: cell-in 250ms ease-out both;
-    animation-delay: var(--d, 0ms);
+    animation: cell-in 250ms ease-out var(--d, 0ms) both;
   }
 
   /* Paper grain over the whole page at 4%. */
@@ -619,7 +587,6 @@
 
   /* Hide the scrollbar while keeping scrollability (mobile carousels). */
   .no-scrollbar {
-    -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
@@ -629,14 +596,9 @@
 }
 
 /* ------------------------------------------------------------------------
-   Keyframes
+   Keyframes. A rise with no `from` starts from its class's resting state.
    ------------------------------------------------------------------------ */
 @keyframes line-rise {
-  from {
-    transform: translateY(110%);
-    opacity: 0.001;
-  }
-
   to {
     transform: translateY(0);
     opacity: 1;
@@ -675,12 +637,6 @@
 }
 
 @keyframes ink-in {
-  from {
-    opacity: 0.001;
-    transform: translateY(0.75rem);
-    filter: blur(4px);
-  }
-
   to {
     opacity: 1;
     transform: none;
@@ -710,7 +666,6 @@
 @keyframes scroll-cue {
   0% {
     transform: scaleY(0);
-    transform-origin: top;
   }
 
   45% {
@@ -744,11 +699,13 @@
     scroll-behavior: auto !important;
   }
 
+  /* Unlayered, so these beat the components layer's `.in-view` rules. */
   .line-rise,
-  .in-view .line-rise {
+  .ink-in {
     animation: none;
     transform: none;
     opacity: 1;
+    filter: none;
   }
 
   .rule-draw {
@@ -774,17 +731,10 @@
     display: none;
   }
 
-  .glint.is-lit,
-  .in-view .glint-in-view {
+  .glint,
+  .glint-in-view,
+  .seal-turn {
     animation: none;
-  }
-
-  .ink-in,
-  .in-view .ink-in {
-    animation: none;
-    opacity: 1;
-    transform: none;
-    filter: none;
   }
 
   /* The label holds still: one line, no twin waiting beneath it. */
@@ -798,10 +748,6 @@
 
   .draw-path {
     stroke-dashoffset: 0;
-  }
-
-  .seal-turn {
-    animation: none;
   }
 
   .node-pulse {

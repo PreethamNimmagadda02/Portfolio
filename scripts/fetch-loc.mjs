@@ -13,8 +13,9 @@
  * This never fails the build: on any error the existing JSON is left alone.
  */
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 const GITHUB_USERNAME = "PreethamNimmagadda02";
@@ -53,8 +54,6 @@ const BATCH_SIZE = 8;
 const STATS_ATTEMPTS = 6;
 const STATS_RETRY_MS = 2500;
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 function log(msg) {
   process.stdout.write(`[fetch-loc] ${msg}\n`);
 }
@@ -68,6 +67,12 @@ async function gh(path) {
       ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
     },
   });
+}
+
+/** Writes the snapshot, keyed username first and stamped last. */
+function writeSnapshot(fields) {
+  const snapshot = { username: GITHUB_USERNAME, ...fields, generatedAt: new Date().toISOString() };
+  return writeFile(OUT_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
 }
 
 async function readExisting() {
@@ -203,7 +208,7 @@ async function main() {
         stats.added > tree * CHURN_RATIO
           ? `additions (${stats.added.toLocaleString()}) are ${Math.round(
               stats.added / Math.max(tree, 1)
-            )}x the ~${tree.toLocaleString()} lines in its tree — generated-file churn`
+            )}x the ~${tree.toLocaleString()} lines in its tree: generated-file churn`
           : null);
 
       if (reason) {
@@ -220,22 +225,18 @@ async function main() {
 
   if (counted === 0) throw new Error("no repo stats resolved");
 
-  const out = {
-    username: GITHUB_USERNAME,
+  await writeSnapshot({
     linesAdded: added,
     linesDeleted: deleted,
     reposCounted: counted,
     reposTotal: repos.length,
     // Kept so the headline number stays auditable: what the raw API reported,
-    // and exactly which repos were dropped from it and why.
+    // and exactly which repos were dropped from it and why. The reasons land
+    // in src, so they carry no dashes (scripts/check-copy.mjs).
     linesAddedUnfiltered: rawAdded,
     excluded,
     excludedRepos: excluded.map((e) => e.repo),
-    generatedAt: new Date().toISOString(),
-  };
-
-  await mkdir(dirname(OUT_PATH), { recursive: true });
-  await writeFile(OUT_PATH, `${JSON.stringify(out, null, 2)}\n`, "utf8");
+  });
   log(
     `+${added.toLocaleString()} / -${deleted.toLocaleString()} across ${counted}/${repos.length} repos` +
       ` (${excluded.length} excluded, ${rawAdded.toLocaleString()} raw)`
@@ -249,26 +250,15 @@ main().catch(async (err) => {
     log("keeping existing snapshot");
     return;
   }
-  // First run with nothing to fall back on — write a zeroed file so the
-  // import resolves and the UI can hide the card instead of crashing.
-  await mkdir(dirname(OUT_PATH), { recursive: true });
-  await writeFile(
-    OUT_PATH,
-    `${JSON.stringify(
-      {
-        username: GITHUB_USERNAME,
-        linesAdded: 0,
-        linesDeleted: 0,
-        reposCounted: 0,
-        reposTotal: 0,
-        linesAddedUnfiltered: 0,
-        excluded: [],
-        excludedRepos: [],
-        generatedAt: new Date().toISOString(),
-      },
-      null,
-      2
-    )}\n`,
-    "utf8"
-  );
+  // First run with nothing to fall back on: write a zeroed file so the
+  // import resolves; the figure reads 0 until a fetch succeeds.
+  await writeSnapshot({
+    linesAdded: 0,
+    linesDeleted: 0,
+    reposCounted: 0,
+    reposTotal: 0,
+    linesAddedUnfiltered: 0,
+    excluded: [],
+    excludedRepos: [],
+  });
 });

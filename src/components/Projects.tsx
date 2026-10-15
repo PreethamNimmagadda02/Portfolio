@@ -20,30 +20,21 @@ import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ArrowUpRight, GithubLogo, Plus, X } from "@phosphor-icons/react";
-import {
-  motion,
-  AnimatePresence,
-  useInView,
-  useScroll,
-  useTransform,
-  EASE_HEAVY,
-  EASE_SETTLE,
-  type Variants,
-} from "@/lib/motion";
+import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useSheen } from "@/hooks/use-sheen";
 import { useFollowPointer } from "@/hooks/use-follow-pointer";
 import { useMediaQuery } from "@/lib/viewport-store";
 import { SectionHeading, TextButton } from "@/components/ui";
+import { PlateGlass } from "@/components/ui/Plate";
 import { cn, pad2 } from "@/lib/utils";
-import shotsJson from "@/data/project-shots.json";
-
 /* Public paths to the committed screenshots, keyed by project slug. The map
-   may be empty or partial: rows without a key render no image column. */
-const shots = shotsJson as Record<string, string>;
-
-type ProjectStatus = "Live" | "Complete";
+   may be partial: rows without a key render no image column. */
+const shots: Record<string, string> = {
+  "college-central": "/projects/college-central.webp",
+  festflow: "/projects/festflow.webp",
+  careerops: "/projects/careerops.webp",
+};
 
 interface ProjectData {
   slug: string;
@@ -51,7 +42,7 @@ interface ProjectData {
   description: string;
   tags: string[];
   links: { demo: string; repo: string };
-  status: ProjectStatus;
+  status: "Live" | "Complete";
 }
 
 const projects: ProjectData[] = [
@@ -173,6 +164,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
   const panelId = `project-${slug}-panel`;
   const shot = shots[slug];
   const isLive = status === "Live";
+  const plate = shot ? <ScreenshotPlate src={shot} title={title} href={isLive ? links.demo : undefined} /> : null;
 
   return (
     <motion.div
@@ -180,10 +172,10 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
       custom={index}
       initial={reduced ? false : "hidden"}
       animate={ready ? "show" : "hidden"}
-      data-open={open ? "true" : "false"}
+      data-open={open}
       className={cn(
         "border-t border-hairline last:border-b",
-        "transition-colors duration-300 ease-[var(--ease-heavy)]",
+        "transition-colors duration-300 ease-heavy",
         "has-[button:hover]:border-t-hairline-strong data-[open=true]:border-t-hairline-strong"
       )}
     >
@@ -206,12 +198,12 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
               the motif the ledger, the Index and the chapter turn share. */}
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-aurum-300/60 transition-transform duration-700 ease-[var(--ease-heavy)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+            className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-aurum-300/60 transition-transform duration-700 ease-heavy group-hover:scale-x-100 group-focus-visible:scale-x-100"
           />
           {/* Hanging index. Six rows in a dossier should be numbered. */}
           <span
             aria-hidden
-            className="ledger hidden lg:block lg:col-span-1 font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-[var(--ease-heavy)] group-hover:text-aurum-300"
+            className="ledger hidden lg:block lg:col-span-1 caption text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300"
           >
             {pad2(index + 1)}
           </span>
@@ -274,7 +266,7 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
 
       {/* The tint bleeds to the container's padding edges while the content
           stays on the grid; the inner div is the foundation's clipped track. */}
-      <div id={panelId} role="region" aria-labelledby={triggerId} className="grid-accordion -mx-6 lg:-mx-10" data-open={open ? "true" : "false"}>
+      <div id={panelId} role="region" aria-labelledby={triggerId} className="grid-accordion -mx-6 lg:-mx-10" data-open={open}>
         <div className="bg-obsidian-1/60" inert={!open}>
           <AnimatePresence>
             {open ? (
@@ -328,13 +320,13 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
                   </div>
                 </motion.div>
 
-                {shot ? (
+                {plate ? (
                   <div className="col-span-12 lg:col-span-6">
                     {reduced ? (
-                      <ScreenshotPlate src={shot} title={title} href={isLive ? links.demo : undefined} />
+                      plate
                     ) : (
                       <motion.div variants={plateVariants} initial="hidden" animate={ready ? "show" : "hidden"}>
-                        <ScreenshotPlate src={shot} title={title} href={isLive ? links.demo : undefined} />
+                        {plate}
                       </motion.div>
                     )}
                   </div>
@@ -348,86 +340,47 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
   );
 }
 
-/* The window, as on the portrait: the print drifts this far behind its
-   bezels while the page passes, carried on this much oversize so the drift
-   never shows an edge (a 1.06 print overhangs each side by 3%). */
-const PLATE_DRIFT = "3%";
-const PLATE_OVERSIZE = 1.06;
-
 /**
  * A product screenshot as a framed plate. It rests in the photogravure grade
  * and lifts to colour under the hand (or keyboard focus) by raising a colour
  * layer's opacity, so the filter is painted once and never animated. For a
  * live product the whole plate is the way in.
  *
- * On a desktop the plate is a window, like the portrait on the cover: as the
- * page passes, the print drifts the other way behind the frame, so it reads
- * as set back from the glass. The hover lift scales inside that drift.
+ * The glass, drift and double bezel are the portrait's (PlateGlass); the
+ * hover lift scales inside that drift.
  */
 function ScreenshotPlate({ src, title, href }: { src: string; title: string; href?: string }) {
   const sheen = useSheen();
-  const reduced = useReducedMotion();
-  const isMobile = useIsMobile();
-  const depth = !reduced && !isMobile;
-  const bezelRef = useRef<HTMLSpanElement>(null);
-  const { scrollYProgress } = useScroll({ target: bezelRef, offset: ["start end", "end start"] });
-  const drift = useTransform(scrollYProgress, [0, 1], [`-${PLATE_DRIFT}`, PLATE_DRIFT]);
   const frame = (
-    <>
-      <motion.div className="absolute inset-0" style={depth ? { y: drift, scale: PLATE_OVERSIZE } : undefined}>
-        <div className="absolute inset-0 transition-transform duration-[1400ms] ease-settle group-hover:scale-[1.035]">
-          <Image
-            src={src}
-            alt={`Screenshot of ${title}`}
-            width={1600}
-            height={1000}
-            loading="lazy"
-            decoding="async"
-            className="plate-mono block h-full w-full object-cover"
-          />
-          <div
+    <PlateGlass
+      overlay={
+        href ? (
+          <span
             aria-hidden
-            className="absolute inset-0 opacity-0 transition-opacity duration-[900ms] ease-heavy group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="absolute bottom-6 left-6 z-2 inline-flex translate-y-1 items-center gap-2 caption text-ivory-100 opacity-0 transition-[opacity,translate] duration-500 ease-heavy group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
           >
-            <Image
-              src={src}
-              alt=""
-              width={1600}
-              height={1000}
-              loading="lazy"
-              decoding="async"
-              className="block h-full w-full object-cover"
-            />
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Bottom scrim, so a bright screenshot does not run straight into the
-          panel tint beneath it. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--color-obsidian-0) 55%, transparent))",
-        }}
-      />
-
-      {href ? (
-        <span
+            Visit the live site
+            <ArrowUpRight size={12} weight="light" />
+          </span>
+        ) : null
+      }
+    >
+      <div className="absolute inset-0 transition-transform duration-1400 ease-settle group-hover:scale-[1.035]">
+        <Image
+          src={src}
+          alt={`Screenshot of ${title}`}
+          width={1600}
+          height={1000}
+          className="plate-mono block h-full w-full object-cover"
+        />
+        <div
           aria-hidden
-          className="absolute bottom-6 left-6 z-[2] inline-flex translate-y-1 items-center gap-2 caption text-ivory-100 opacity-0 transition-[opacity,translate] duration-500 ease-heavy group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+          className="absolute inset-0 opacity-0 transition-opacity duration-900 ease-heavy group-hover:opacity-100 group-focus-visible:opacity-100"
         >
-          Visit the live site
-          <ArrowUpRight size={12} weight="light" />
-        </span>
-      ) : null}
-
-      {/* The same double bezel PortraitPlate carries: outer frame at the edge,
-          inner frame inset 12px. One frame grammar for every plate. */}
-      <span ref={bezelRef} aria-hidden className="pointer-events-none absolute inset-0 border border-hairline" />
-      <span aria-hidden className="pointer-events-none absolute inset-3 border border-hairline" />
-    </>
+          <Image src={src} alt="" width={1600} height={1000} className="block h-full w-full object-cover" />
+        </div>
+      </div>
+    </PlateGlass>
   );
 
   const classes = "group sheen relative block aspect-[16/10] overflow-hidden";
@@ -505,8 +458,6 @@ function HoverPreview({ slug, enabled, preload }: { slug: string | null; enabled
               alt=""
               width={672}
               height={420}
-              loading="lazy"
-              decoding="async"
               className={cn(
                 "plate-mono absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-heavy",
                 key === slug ? "opacity-100" : "opacity-0"
@@ -528,12 +479,12 @@ export default function Projects() {
   const inView = useInView(listRef, { once: true, amount: 0.1 });
   const [openSlug, setOpenSlug] = useState<string | null>(DEFAULT_OPEN);
   const [hoverSlug, setHoverSlug] = useState<string | null>(null);
-  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine) and (min-width: 1024px)", false);
+  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine) and (min-width: 1024px)");
   const previewEnabled = finePointer && !reduced;
 
   const toggle = (slug: string) => setOpenSlug((current) => (current === slug ? null : slug));
   // Only rows that have a print to show send the plate out.
-  const hover = useCallback((slug: string | null) => setHoverSlug(slug && shots[slug] ? slug : null), []);
+  const hover = (slug: string | null) => setHoverSlug(slug && shots[slug] ? slug : null);
 
   return (
     <section id="projects" aria-labelledby="projects-heading" className="relative w-full py-32 lg:py-40">

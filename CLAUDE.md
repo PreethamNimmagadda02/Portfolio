@@ -36,7 +36,7 @@ No test framework is configured.
 - **Phosphor Icons** (`@phosphor-icons/react`, always `weight="light"`); lucide-react is removed
 - **Lenis** for smooth scrolling, advanced from Framer Motion's frame loop in `SmoothScroll.tsx`, which also gives the keyboard the same glide (arrows, Space, Page Up/Down, Home/End; keys a widget claims with `preventDefault` are left alone). It is not created under reduced motion, where the browser scrolls natively
 - **EmailJS** for contact form (env vars: `NEXT_PUBLIC_SERVICE_ID`, `NEXT_PUBLIC_TEMPLATE_ID`, `NEXT_PUBLIC_PUBLIC_KEY`)
-- **next-pwa** for service worker / offline support
+- **Web app manifest** (`public/manifest.json`) for home-screen install; there is no service worker
 
 ### Key Patterns
 
@@ -60,7 +60,7 @@ No test framework is configured.
 
 ### Layout Structure
 
-`src/app/layout.tsx` wraps everything with: LazyMotion + MotionConfig, PerformanceProvider, PageLoader, ScrollProgress, KonamiEasterEgg, Cursor, SmoothScroll, Navbar (letterhead + Index overlay) + main content + Footer (colophon + signature)
+`src/app/layout.tsx` wraps everything with: LazyMotion + MotionConfig, PageLoader, ScrollProgress, KonamiEasterEgg, Cursor, SmoothScroll, Navbar (letterhead + Index overlay) + main content + Footer (colophon + signature)
 
 `src/app/page.tsx` composes all sections top-to-bottom; every section after the hero is a dynamic() import with a sized skeleton, and the single CosmicScene canvas mounts once the main thread is idle.
 

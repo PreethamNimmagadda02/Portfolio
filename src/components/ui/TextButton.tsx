@@ -5,7 +5,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMagnet } from "@/hooks/use-magnet";
 import { cn, smoothScrollTo } from "@/lib/utils";
 
-export interface TextButtonProps {
+interface TextButtonProps {
   /** Bordered CTA that fills gold on hover, or an underlined text link. */
   variant?: "primary" | "secondary";
   /** "#section" smooth-scrolls in page; http(s) opens in a new tab; omit for a <button>. */
@@ -32,18 +32,15 @@ export interface TextButtonProps {
    Under a fine pointer a press sinks the plate a fraction, fast, and lets it
    back up at the button's own pace. */
 const PRIMARY =
-  "group roll-host relative isolate inline-flex items-center gap-3 overflow-hidden px-7 py-3.5 border border-aurum-300 text-ivory-100 font-sans font-medium text-[15px] leading-none whitespace-nowrap transition-[color,translate,scale] duration-500 ease-[var(--ease-heavy)] hover:text-obsidian-0 focus-visible:text-obsidian-0 pointer-fine:active:scale-[0.98] pointer-fine:active:duration-150 before:absolute before:inset-0 before:-z-10 before:origin-bottom before:scale-y-0 before:bg-aurum-300 before:transition-[scale] before:duration-500 before:ease-[var(--ease-heavy)] hover:before:scale-y-100 focus-visible:before:scale-y-100 active:before:bg-aurum-400 disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
+  "group roll-host relative isolate inline-flex items-center gap-3 overflow-hidden px-7 py-3.5 border border-aurum-300 text-ivory-100 font-sans font-medium text-[15px] leading-none whitespace-nowrap transition-[color,translate,scale] duration-500 ease-heavy hover:text-obsidian-0 focus-visible:text-obsidian-0 pointer-fine:active:scale-[0.98] pointer-fine:active:duration-150 before:absolute before:inset-0 before:-z-10 before:origin-bottom before:scale-y-0 before:bg-aurum-300 before:transition-[scale] before:duration-500 before:ease-heavy hover:before:scale-y-100 focus-visible:before:scale-y-100 active:before:bg-aurum-400 disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
 
 /* The underline is a pseudo-element so thickening it on hover moves nothing:
    1px hairline-gold at rest, scaled to 2px aurum-200 on hover. */
 const SECONDARY =
-  "group relative inline-flex items-center gap-2 pb-0.5 text-ivory-200 font-sans text-[15px] leading-none whitespace-nowrap transition-colors duration-300 ease-[var(--ease-heavy)] hover:text-ivory-100 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-bottom after:bg-hairline-gold after:transition-[transform,background-color] after:duration-300 after:ease-[var(--ease-heavy)] hover:after:scale-y-200 hover:after:bg-aurum-200 disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
+  "group relative inline-flex items-center gap-2 pb-0.5 text-ivory-200 font-sans text-[15px] leading-none whitespace-nowrap transition-colors duration-300 ease-heavy hover:text-ivory-100 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-bottom after:bg-hairline-gold after:transition-[transform,background-color] after:duration-300 after:ease-heavy hover:after:scale-y-200 hover:after:bg-aurum-200 disabled:opacity-50 disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:pointer-events-none";
 
-const PRIMARY_ICON =
-  "inline-flex shrink-0 transition-transform duration-300 ease-[var(--ease-heavy)] group-hover:translate-x-0.5 group-hover:translate-y-0.5";
-
-const SECONDARY_ICON =
-  "inline-flex shrink-0 transition-transform duration-300 ease-[var(--ease-heavy)] group-hover:translate-x-0.5";
+const ICON =
+  "inline-flex shrink-0 transition-transform duration-300 ease-heavy group-hover:translate-x-0.5";
 
 /**
  * A label set twice in one mask. When the hand reaches a primary button the
@@ -107,7 +104,7 @@ export function TextButton({
     <>
       <span>{label}</span>
       {icon ? (
-        <span aria-hidden className={isPrimary ? PRIMARY_ICON : SECONDARY_ICON}>
+        <span aria-hidden className={cn(ICON, isPrimary && "group-hover:translate-y-0.5")}>
           {icon}
         </span>
       ) : null}

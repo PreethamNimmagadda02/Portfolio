@@ -1,6 +1,18 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type Lenis from "lenis";
 import { cubicBezier, EASE_GLIDE } from "@/lib/motion";
+
+declare global {
+  interface Window {
+    /** The page's Lenis, set by SmoothScroll while it runs (never under reduced motion). */
+    lenis?: Lenis;
+    /** Set once the background scene has warmed up; see markSceneWarmed. */
+    __sceneWarmed?: boolean;
+    /** Set by the PageLoader as its exit begins, for a hero that mounts after the event. */
+    __loaderDone?: boolean;
+  }
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,40 +58,23 @@ export function seededRandom(seed: number): () => number {
    elapses, so the loader covers exactly as much time as the warm-up needs.
    The flag lives on window so a dev fast-refresh remount still sees it. */
 
-type WarmedWindow = Window & { __sceneWarmed?: boolean };
-
 export function markSceneWarmed() {
   if (typeof window === "undefined") return;
-  (window as WarmedWindow).__sceneWarmed = true;
+  window.__sceneWarmed = true;
   window.dispatchEvent(new Event("scene-warmed"));
 }
 
 export function isSceneWarmed(): boolean {
-  return typeof window !== "undefined" && Boolean((window as WarmedWindow).__sceneWarmed);
-}
-
-type LenisLike = {
-  scrollTo: (
-    target: HTMLElement | number,
-    options?: Record<string, unknown>
-  ) => void;
-  resize: () => void;
-  limit: number;
-};
-
-function getLenis(): LenisLike | undefined {
-  if (typeof window === "undefined") return undefined;
-  return (window as unknown as { lenis?: LenisLike }).lenis;
+  return typeof window !== "undefined" && Boolean(window.__sceneWarmed);
 }
 
 const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const glide = cubicBezier(...EASE_GLIDE);
 
-/** Room left for the letterhead above a section's first line: the bar itself,
- *  then a deliberate gap so the eyebrow is not tucked against it. */
-const NAV_HEIGHT = 64;
-const NAV_GAP = 48;
-const NAV_CLEARANCE = -(NAV_HEIGHT + NAV_GAP);
+/** The letterhead band: the 64px bar, then a deliberate 48px gap so a
+ *  section's eyebrow is not tucked against it. Flights land a section's first
+ *  line below it, and a keyboard page step keeps it out of the step. */
+export const LETTERHEAD_BAND = 64 + 48;
 
 /** Landing tolerance, and the caps on correction passes for a flight and a jump. */
 const DRIFT_TOLERANCE = 6;
@@ -107,8 +102,8 @@ function flightDuration(distance: number) {
    its heatmap below the fold. Spend the padding so the first line is what the
    clearance applies to, and re-measure it per pass: the value is breakpoint
    dependent, and a lazy section can reflow while the page is moving. */
-function landingFor(el: HTMLElement, offset: number) {
-  return offset + (parseFloat(getComputedStyle(el).paddingTop) || 0);
+function landingFor(el: HTMLElement) {
+  return (parseFloat(getComputedStyle(el).paddingTop) || 0) - LETTERHEAD_BAND;
 }
 
 /**
@@ -128,12 +123,12 @@ function landingFor(el: HTMLElement, offset: number) {
  * Without Lenis (reduced motion, where SmoothScroll never starts it, or a
  * click before it has mounted) the page arrives instead of flying.
  */
-export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) {
+export function smoothScrollTo(target: string | number) {
   if (typeof window === "undefined") return;
-  const lenis = getLenis();
+  const lenis = window.lenis;
 
   if (!lenis) {
-    void jumpTo(target, offset);
+    void jumpTo(target);
     return;
   }
 
@@ -163,7 +158,7 @@ export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) 
   let pass = 0;
   const fly = (first: boolean) => {
     const startedAt = window.scrollY;
-    const landing = landingFor(el, offset);
+    const landing = landingFor(el);
     lenis.scrollTo(el, {
       offset: landing,
       duration: first ? flightDuration(el.getBoundingClientRect().top + landing) : CORRECTION,
@@ -184,6 +179,8 @@ export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) 
   fly(true);
 }
 
+let jumpGeneration = 0;
+
 /**
  * Arrives at a section (or a pixel offset) at once, then corrects until it
  * holds, and resolves when it does. This is the move for the moments the
@@ -194,13 +191,11 @@ export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) 
  * made behind a closed curtain is the point of it. A newer jump retires an
  * older one, so two quick choices never fight over the page.
  */
-let jumpGeneration = 0;
-
-export function jumpTo(target: string | number, offset = NAV_CLEARANCE): Promise<void> {
+export function jumpTo(target: string | number): Promise<void> {
   const generation = ++jumpGeneration;
   return new Promise((resolve) => {
     if (typeof window === "undefined") return resolve();
-    const lenis = getLenis();
+    const lenis = window.lenis;
     const place = (top: number) => {
       if (lenis) {
         // Lenis clamps to the scroll limit it last measured, which can trail
@@ -224,7 +219,7 @@ export function jumpTo(target: string | number, offset = NAV_CLEARANCE): Promise
     let pass = 0;
     const settle = () => {
       if (generation !== jumpGeneration) return resolve();
-      const drift = el.getBoundingClientRect().top + landingFor(el, offset);
+      const drift = el.getBoundingClientRect().top + landingFor(el);
       if (Math.abs(drift) <= DRIFT_TOLERANCE || pass >= MAX_JUMP_PASSES) return resolve();
       const before = window.scrollY;
       place(before + drift);

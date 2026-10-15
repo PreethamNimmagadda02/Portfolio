@@ -8,9 +8,6 @@
  * message lands in. On the right, the letter itself: three ledger-line fields
  * on a framed plate. A sent letter does not vanish into a toast; the plate
  * turns into a sealed receipt addressed back to the sender.
- *
- * EmailJS submission, env var names, validation rules, messages and the
- * touched-field logic are unchanged from the previous version.
  */
 
 import {
@@ -31,7 +28,7 @@ import { cn, pad2 } from "@/lib/utils";
 import { SectionHeading, TextButton, PlateTicks, RollLabel } from "@/components/ui";
 
 /* ------------------------------------------------------------------------
-   Validation (unchanged rules and messages)
+   Validation
    ------------------------------------------------------------------------ */
 
 type FormValues = { name: string; email: string; message: string };
@@ -43,35 +40,26 @@ const MESSAGE_MAX = 500;
 
 const EMPTY_VALUES: FormValues = { name: "", email: "", message: "" };
 const UNTOUCHED: Touched = { name: false, email: false, message: false };
+const ALL_TOUCHED: Touched = { name: true, email: true, message: true };
 
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-/* Derived during render (no effect, no extra state): the same touched-field
-   rules and copy as before, one render earlier. */
+/* Derived during render (no effect, no extra state). Only a touched field
+   reports, so a visitor is not scolded for fields they have not reached. */
 function validate(values: FormValues, touched: Touched): Errors {
   const errors: Errors = {};
-
-  if (touched.name && values.name.length === 0) {
-    errors.name = "Name is required";
-  } else if (touched.name && values.name.length < 2) {
-    errors.name = "Name must be at least 2 characters";
+  if (touched.name) {
+    if (!values.name) errors.name = "Name is required";
+    else if (values.name.length < 2) errors.name = "Name must be at least 2 characters";
   }
-
-  if (touched.email && values.email.length === 0) {
-    errors.email = "Email is required";
-  } else if (touched.email && !isValidEmail(values.email)) {
-    errors.email = "Please enter a valid email address";
+  if (touched.email) {
+    if (!values.email) errors.email = "Email is required";
+    else if (!isValidEmail(values.email)) errors.email = "Please enter a valid email address";
   }
-
-  if (touched.message && values.message.length === 0) {
-    errors.message = "Message is required";
-  } else if (touched.message && values.message.length < 10) {
-    errors.message = "Message must be at least 10 characters";
+  if (touched.message) {
+    if (!values.message) errors.message = "Message is required";
+    else if (values.message.length < 10) errors.message = "Message must be at least 10 characters";
   }
-
   return errors;
 }
 
@@ -185,16 +173,14 @@ function FieldLabel({
   );
 }
 
-interface InputFieldProps {
+interface FieldProps<E> {
   id: string;
   name: FieldName;
   label: string;
   /** Position in the docket, used for the label numeral. */
   index: number;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  type?: "text" | "email";
-  autoComplete?: string;
+  onChange: (e: ChangeEvent<E>) => void;
   placeholder?: string;
   error?: string;
 }
@@ -210,7 +196,7 @@ function InputField({
   autoComplete,
   placeholder,
   error,
-}: InputFieldProps) {
+}: FieldProps<HTMLInputElement> & { type?: "text" | "email"; autoComplete?: string }) {
   const errorId = `${id}-error`;
   return (
     <div className="group/field">
@@ -238,20 +224,6 @@ function InputField({
   );
 }
 
-interface TextareaFieldProps {
-  id: string;
-  name: FieldName;
-  label: string;
-  /** Position in the docket, used for the label numeral. */
-  index: number;
-  value: string;
-  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  placeholder?: string;
-  error?: string;
-  maxLength?: number;
-  rows?: number;
-}
-
 function TextareaField({
   id,
   name,
@@ -261,12 +233,10 @@ function TextareaField({
   onChange,
   placeholder,
   error,
-  maxLength = MESSAGE_MAX,
-  rows = 4,
-}: TextareaFieldProps) {
+}: FieldProps<HTMLTextAreaElement>) {
   const errorId = `${id}-error`;
   const countId = `${id}-count`;
-  const filled = Math.min(100, (value.length / maxLength) * 100);
+  const filled = Math.min(100, (value.length / MESSAGE_MAX) * 100);
   const nearLimit = filled >= 90;
   return (
     <div className="group/field">
@@ -281,10 +251,10 @@ function TextareaField({
           onChange={onChange}
           placeholder={placeholder}
           required
-          maxLength={maxLength}
-          rows={rows}
+          maxLength={MESSAGE_MAX}
+          rows={5}
           aria-invalid={error ? true : undefined}
-          aria-describedby={cn(error && errorId, countId)}
+          aria-describedby={error ? `${errorId} ${countId}` : countId}
           className={cn(CONTROL, "resize-none")}
         />
         <span aria-hidden className={FOCUS_LINE} />
@@ -311,7 +281,7 @@ function TextareaField({
               nearLimit ? "text-aurum-300" : "text-ivory-300"
             )}
           >
-            {value.length} / {maxLength}
+            {value.length} / {MESSAGE_MAX}
           </span>
         </span>
       </div>
@@ -356,7 +326,7 @@ const CONTACT_LINK =
   "inline-block border-b border-hairline-gold pb-px text-ivory-200 transition-colors duration-300 ease-heavy hover:text-aurum-200 hover:border-aurum-200";
 
 /* One keyed row of the address. The key is a small-caps term in its own
-   column, so the three values line up against a single left edge. */
+   column, so the values line up against a single left edge. */
 function AddressRow({ term, children }: { term: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-2 border-b border-hairline py-4 sm:flex-row sm:items-baseline sm:gap-6">
@@ -497,11 +467,9 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched
-    setTouched({ name: true, email: true, message: true });
-
-    // Validate all fields
-    if (formState.name.length < 2 || !isValidEmail(formState.email) || formState.message.length < 10) {
+    // Every field reports on submit, whether or not it was reached.
+    setTouched(ALL_TOUCHED);
+    if (Object.keys(validate(formState, ALL_TOUCHED)).length > 0) {
       setToast({ message: "Please fix the errors in the form", type: "error" });
       return;
     }
@@ -594,38 +562,29 @@ export default function Contact() {
           onChange={handleChange}
           placeholder="A few lines about the role or the project"
           error={errors.message}
-          maxLength={MESSAGE_MAX}
-          rows={5}
         />
       </Rise>
 
       <Rise index={4} inView={columnInView} reduced={reduced}>
         <TextButton type="submit" variant="primary" full disabled={isSubmitting}>
           <AnimatePresence mode="wait" initial={false}>
-            {isSubmitting ? (
-              <motion.span
-                key="sending"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: EASE_HEAVY }}
-                className="inline-flex items-center gap-3"
-              >
-                <CircleNotch size={16} weight="light" aria-hidden className="animate-spin" />
-                Sending
-              </motion.span>
-            ) : (
-              <motion.span
-                key="send"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25, ease: EASE_HEAVY }}
-                className="inline-flex items-center"
-              >
+            <motion.span
+              key={isSubmitting ? "sending" : "send"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: EASE_HEAVY }}
+              className="inline-flex items-center gap-3"
+            >
+              {isSubmitting ? (
+                <>
+                  <CircleNotch size={16} weight="light" aria-hidden className="animate-spin" />
+                  Sending
+                </>
+              ) : (
                 <RollLabel text="Send message" />
-              </motion.span>
-            )}
+              )}
+            </motion.span>
           </AnimatePresence>
         </TextButton>
       </Rise>
@@ -651,8 +610,8 @@ export default function Contact() {
               subtext="AI architecture, autonomous systems and data security, whether that is an internship, a full-time role or a build. Tell me what needs making and I will say plainly whether I am the right person."
             />
 
-            {/* The three ways to reach me, keyed like a colophon, and the hour
-                it is where the reply will be written. */}
+            {/* The ways to reach me, keyed like a colophon, and the hour it is
+                where the reply will be written. */}
             <Rise index={0} inView={columnInView} reduced={reduced} className="mt-12">
               <address className="not-italic">
                 <dl className="flex flex-col border-t border-hairline">

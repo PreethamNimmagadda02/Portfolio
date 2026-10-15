@@ -35,11 +35,8 @@ interface Testimonial {
 }
 
 /*
- * Nine voices, ordered industry first and then the institute, so the strip
- * reads the way the record does.
- *
- * The first nine are real, identifiable people. The comment above the tenth
- * entry says what the rest are.
+ * The first nine voices are real, identifiable people. The comment above the
+ * tenth entry says what the rest are.
  */
 const testimonials: Testimonial[] = [
   {
@@ -177,42 +174,8 @@ const COUNT = testimonials.length;
 const INTERVAL_MS = 8000;
 /** Hover intent before a name previews its quote. */
 const PREVIEW_MS = 300;
-/** Quotes past this length would run to a fourth line at 2rem, so they drop to 1.75rem. */
+/** On the desktop stage, quotes past this length would run to a fourth line, so they set a step smaller. */
 const LONG_QUOTE = 150;
-
-function quoteSizeClass(quote: string) {
-  return quote.length > LONG_QUOTE ? "text-[1.75rem]" : "text-[1.75rem] lg:text-[2rem]";
-}
-
-/* ------------------------------------------------------------------------
-   Quote body: shared by the desktop stage and the mobile panes.
-   ------------------------------------------------------------------------ */
-function QuoteBody({ t, className }: { t: Testimonial; className?: string }) {
-  return (
-    <figure className={cn("flex max-w-[60ch] flex-col", className)}>
-      <blockquote
-        className={cn(
-          "font-display font-normal italic text-ivory-100 leading-[1.35] tracking-[-0.005em]",
-          quoteSizeClass(t.quote)
-        )}
-      >
-        {t.quote}
-      </blockquote>
-      {/* The attribution sits below its own rule. A quote and its source
-          running together with nothing between them is the one thing a set
-          pull quote never does. */}
-      <figcaption className="mt-8 flex flex-col gap-1.5 border-t border-hairline pt-6">
-        <span className="font-sans text-[15px] leading-none text-ivory-100">{t.name}</span>
-        <span className="font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">{t.role}</span>
-        {t.project ? (
-          <span className="mt-1 caption text-aurum-300">
-            On {t.project}
-          </span>
-        ) : null}
-      </figcaption>
-    </figure>
-  );
-}
 
 /* ------------------------------------------------------------------------
    Desktop: a pull quote set against its attribution, with a seal.
@@ -292,7 +255,6 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
     }, PREVIEW_MS);
   };
 
-  const onRegionFocus = () => setFocused(true);
   const onRegionBlur = (e: FocusEvent<HTMLDivElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
   };
@@ -331,7 +293,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
       className="col-span-12 mt-16 lg:col-span-11 lg:col-start-2 lg:mt-20"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={onRegionFocus}
+      onFocus={() => setFocused(true)}
       onBlur={onRegionBlur}
     >
       {/* Stage. The quote takes the page; its source sits in a margin column
@@ -340,7 +302,6 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
       <figure className="relative border-y border-hairline py-14 lg:py-16">
         <PlateTicks />
         <div className="grid grid-cols-11 gap-x-6">
-
           <p className="sr-only">
             Quote {active + 1} of {COUNT}, from {current.name}
           </p>
@@ -401,8 +362,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
 
       {/* The track: one segment per voice. Heard voices stay lit, the current
           one fills with its dwell, and a name surfaces over a segment on
-          hover. It replaces a strip of fourteen names that wrapped onto a
-          second line and read as a tag cloud. */}
+          hover, so the voices never wrap into a tag cloud of names. */}
       <div role="group" aria-label="Choose a voice" className="mt-8 flex items-center gap-1.5" onKeyDown={onTrackKeyDown}>
         {testimonials.map((t, i) => {
           const isActive = i === active;
@@ -468,10 +428,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
 function QuoteCarousel() {
   return (
     <div className="col-span-12 mt-14 -mx-6">
-      <div
-        className="flex items-stretch gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-6 pb-2"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
+      <div className="flex items-stretch gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-6 pb-2">
         {testimonials.map((t, i) => (
           <div
             key={t.name}
@@ -480,7 +437,19 @@ function QuoteCarousel() {
             {/* The same trim marks the desktop stage carries, on the one rule
                 a pane has. */}
             <PlateTicks edges="top" />
-            <QuoteBody t={t} className="flex-1" />
+            <figure className="flex max-w-[60ch] flex-col flex-1">
+              <blockquote className="font-display font-normal italic text-ivory-100 tracking-[-0.005em] text-[1.75rem]">
+                {t.quote}
+              </blockquote>
+              {/* The attribution sits below its own rule. A quote and its source
+                  running together with nothing between them is the one thing a
+                  set pull quote never does. */}
+              <figcaption className="mt-8 flex flex-col gap-1.5 border-t border-hairline pt-6">
+                <span className="font-sans text-[15px] leading-none text-ivory-100">{t.name}</span>
+                <span className="font-mono text-[12px] leading-none tracking-[0.01em] text-ivory-300 ledger">{t.role}</span>
+                {t.project ? <span className="mt-1 caption text-aurum-300">On {t.project}</span> : null}
+              </figcaption>
+            </figure>
             <p className="ledger mt-6 caption text-ivory-300">
               <span className="text-aurum-300">{pad2(i + 1)}</span>
               <span className="px-2 text-ivory-300/60">/</span>
@@ -507,10 +476,9 @@ export default function Testimonials() {
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6">
           {/* The count lives in the eyebrow and the folio, where a numeral
-              belongs, and is interpolated so it cannot drift: the subtext used
-              to say twelve while the strip held fourteen. The prose no longer
-              carries it, which also keeps the section's voice spelling its
-              numbers out the way every other one does. */}
+              belongs, and is interpolated so it cannot drift. The prose does
+              not carry it, which keeps the section spelling its numbers out
+              the way every other one does. */}
           <SectionHeading
             className="col-span-12 lg:col-span-8"
             chapter="testimonials"

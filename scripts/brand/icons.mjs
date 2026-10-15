@@ -16,7 +16,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
 const url = process.argv[2] ?? "http://localhost:3002/";
 
 const OUTPUTS = [
-  { size: 512, files: ["public/icon-512x512.png", "src/app/icon.png"] },
+  { size: 512, files: ["public/icon-512x512.png"] },
   { size: 192, files: ["public/icon-192x192.png"] },
 ];
 

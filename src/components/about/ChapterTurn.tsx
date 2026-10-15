@@ -4,7 +4,6 @@ import type { MouseEvent } from "react";
 import { ArrowDown } from "@phosphor-icons/react";
 import { chapter } from "@/lib/chapters";
 import { smoothScrollTo } from "@/lib/utils";
-import { InViewClass } from "../Reveal";
 
 /**
  * The foot of a chapter, set the way a book closes one and announces the
@@ -22,7 +21,7 @@ export function ChapterTurn({ from, to }: { from: string; to: string }) {
   };
 
   return (
-    <InViewClass amount={0.6} className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
+    <div className="mx-auto w-full max-w-[1280px] px-6 lg:px-10">
       <a
         href={`#${next.id}`}
         onClick={onClick}
@@ -49,6 +48,6 @@ export function ChapterTurn({ from, to }: { from: string; to: string }) {
           />
         </span>
       </a>
-    </InViewClass>
+    </div>
   );
 }

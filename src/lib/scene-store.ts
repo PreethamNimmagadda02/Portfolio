@@ -15,19 +15,17 @@ import { CHAPTERS } from "@/lib/chapters";
  * useChapterCalibration measures where each chapter's section actually sits
  * and rewrites start and end in place, so a chapter begins when its section
  * reaches the middle of the viewport whatever the section heights turn out
- * to be. That matters now that some chapters are long (the About thesis is
- * pinned for over two screens) and the star chart has to light in Skills and
- * nowhere else.
+ * to be. That matters now that some chapters are long (the About thesis holds
+ * its place for a screen and more) and the star chart has to light in Skills
+ * and nowhere else.
  *
  * The chapter list itself comes from the registry in @/lib/chapters, so a
  * section added or reordered there is followed here automatically; this file
  * only holds how the scene behaves in each one.
  */
 interface SceneChapter {
-  /** Scene-side name, which the focus objects key off ("hero", "skills"). */
+  /** The DOM id of the section this chapter follows, which the focus objects key off. */
   id: string;
-  /** The DOM id of the section this chapter follows. */
-  section: string;
   start: number;
   end: number;
   /** Camera waypoint this chapter settles toward. */
@@ -43,19 +41,19 @@ interface SceneChapter {
   constellationOpacity: number;
 }
 
-type SceneTuning = Omit<SceneChapter, "section" | "start" | "end">;
+type SceneTuning = Omit<SceneChapter, "id" | "start" | "end">;
 
 /** How the scene behaves in each section, keyed by the section's DOM id. */
 const TUNING: Record<string, SceneTuning> = {
-  home: { id: "hero", camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
-  about: { id: "about", camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0.35, constellationOpacity: 0 },
-  experience: { id: "experience", camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
-  projects: { id: "projects", camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
-  "skills-sphere": { id: "skills", camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
-  "github-stats": { id: "activity", camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
-  achievements: { id: "achievements", camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  testimonials: { id: "testimonials", camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
-  contact: { id: "contact", camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
+  home: { camera: [0.9, 0.3, 6.5], lookAt: [0.2, 0.1, 0], intensity: 1, constellationOpacity: 0 },
+  about: { camera: [1.4, 0.3, 6], lookAt: [0.4, 0, 0], intensity: 0.35, constellationOpacity: 0 },
+  experience: { camera: [-1.6, 0.6, 6.4], lookAt: [-0.3, 0.2, 0], intensity: 0, constellationOpacity: 0 },
+  projects: { camera: [1.8, -0.4, 6.2], lookAt: [0.3, -0.1, 0], intensity: 0, constellationOpacity: 0 },
+  "skills-sphere": { camera: [0, -0.2, 5.6], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0.12 },
+  "github-stats": { camera: [-1.4, 0.4, 6], lookAt: [-0.2, 0.1, 0], intensity: 0, constellationOpacity: 0 },
+  achievements: { camera: [0, 0.5, 6.5], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  testimonials: { camera: [-1, -0.2, 6.8], lookAt: [0, 0, 0], intensity: 0, constellationOpacity: 0 },
+  contact: { camera: [0, -0.6, 7], lookAt: [0, -0.3, 0], intensity: 1, constellationOpacity: 0 },
 };
 
 /* An even first guess for the boundaries; calibrateChapters replaces it with
@@ -63,7 +61,7 @@ const TUNING: Record<string, SceneTuning> = {
 const SCENE_CHAPTERS: SceneChapter[] = CHAPTERS.map((c, i, all) => {
   const tuning = TUNING[c.id];
   if (!tuning) throw new Error(`No scene tuning for chapter "${c.id}"`);
-  return { ...tuning, section: c.id, start: i / all.length, end: (i + 1) / all.length };
+  return { ...tuning, id: c.id, start: i / all.length, end: (i + 1) / all.length };
 });
 
 /**
@@ -81,7 +79,7 @@ function calibrateChapters() {
 
   const starts = SCENE_CHAPTERS.map((chapter, i) => {
     if (i === 0) return 0;
-    const el = document.getElementById(chapter.section);
+    const el = document.getElementById(chapter.id);
     if (!el) return chapter.start;
     const top = el.getBoundingClientRect().top + window.scrollY;
     return Math.min(Math.max((top - line) / max, 0), 1);
@@ -123,11 +121,6 @@ export function useChapterCalibration() {
   }, []);
 }
 
-export function hexToVec3(hex: string): [number, number, number] {
-  const n = parseInt(hex.replace("#", ""), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
-
 function lerp3(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 }
@@ -147,7 +140,6 @@ function computeSceneState(p: number) {
   const blend = Math.max(0, (localT - 0.5) / 0.5);
 
   return {
-    index: i,
     chapter,
     next,
     blend,
@@ -178,22 +170,17 @@ export function getSceneState(p: number) {
 }
 
 // -----------------------------------------------------------------------------
-// Skills category filter, shared between the DOM filter UI (Skills section)
-// and the constellation focus-object inside CosmicScene, so toggling a
-// category dims/highlights the matching points in the persistent background.
+// Skills category filter, shared between the DOM dial (Skills section) and the
+// constellation focus-object inside CosmicScene, so turning the dial lifts the
+// matching points in the persistent background. The dial always points at a
+// discipline, so there is no "nothing selected" position to clear back to.
 // -----------------------------------------------------------------------------
-let activeCategories = new Set<string>();
+let activeCategory: string | null = null;
 
-/**
- * Selects one category, exclusively. The Skills dial always points at a
- * discipline, so there is no "nothing selected" position to toggle back to:
- * re-selecting the category already showing is a no-op rather than a clear.
- */
 export function selectSkillCategory(cat: string) {
-  if (activeCategories.size === 1 && activeCategories.has(cat)) return;
-  activeCategories = new Set<string>([cat]);
+  activeCategory = cat;
 }
 
-export function getActiveSkillCategories() {
-  return activeCategories;
+export function getActiveSkillCategory() {
+  return activeCategory;
 }

@@ -23,8 +23,7 @@ function useLoaderDone(fallbackMs = 6500) {
   useEffect(() => {
     const onDone = () => setDone(true);
     window.addEventListener("loader-done", onDone);
-    const alreadyDone = (window as unknown as { __loaderDone?: boolean }).__loaderDone;
-    const fallback = setTimeout(onDone, alreadyDone ? 0 : fallbackMs);
+    const fallback = setTimeout(onDone, window.__loaderDone ? 0 : fallbackMs);
     return () => {
       window.removeEventListener("loader-done", onDone);
       clearTimeout(fallback);
@@ -52,27 +51,12 @@ const T = {
 
 const REDUCED_FADE = { duration: 0.2 } as const;
 
-/** Opacity plus an 8px rise; opacity-only 200ms under reduced motion. */
-function fadeRise(reduced: boolean, delay: number, duration: number): Variants {
-  return {
-    hidden: { opacity: 0, y: reduced ? 0 : 8 },
-    shown: {
-      opacity: 1,
-      y: 0,
-      transition: reduced ? REDUCED_FADE : { delay, duration, ease: EASE_SETTLE },
-    },
-  };
-}
-
-/** Opacity only. */
-function fade(reduced: boolean, delay: number, duration: number): Variants {
-  return {
-    hidden: { opacity: 0 },
-    shown: {
-      opacity: 1,
-      transition: reduced ? REDUCED_FADE : { delay, duration, ease: EASE_SETTLE },
-    },
-  };
+/** Opacity, plus a `rise`px lift when given; opacity only, 200ms, under reduced motion. */
+function fade(reduced: boolean, delay: number, duration: number, rise = 0): Variants {
+  const transition = reduced ? REDUCED_FADE : { delay, duration, ease: EASE_SETTLE };
+  return rise
+    ? { hidden: { opacity: 0, y: reduced ? 0 : rise }, shown: { opacity: 1, y: 0, transition } }
+    : { hidden: { opacity: 0 }, shown: { opacity: 1, transition } };
 }
 
 /* ------------------------------------------------------------------------
@@ -80,6 +64,7 @@ function fade(reduced: boolean, delay: number, duration: number): Variants {
    ------------------------------------------------------------------------ */
 
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const DECODE_MS = 900;
 
 /**
  * The eyebrow resolves out of noise, left to right, the way a model's output
@@ -96,13 +81,11 @@ function DecodeText({
   active,
   reduced,
   delayMs = 0,
-  durationMs = 900,
 }: {
   text: string;
   active: boolean;
   reduced: boolean;
   delayMs?: number;
-  durationMs?: number;
 }) {
   const [shown, setShown] = useState(text);
 
@@ -112,7 +95,7 @@ function DecodeText({
     let start = 0;
     const tick = (now: number) => {
       if (!start) start = now;
-      const t = Math.min((now - start) / durationMs, 1);
+      const t = Math.min((now - start) / DECODE_MS, 1);
       const settled = Math.floor(t * text.length);
       let out = "";
       for (let i = 0; i < text.length; i++) {
@@ -130,7 +113,7 @@ function DecodeText({
       clearTimeout(timer);
       cancelAnimationFrame(raf);
     };
-  }, [active, reduced, text, delayMs, durationMs]);
+  }, [active, reduced, text, delayMs]);
 
   return (
     <>
@@ -196,7 +179,7 @@ export default function Hero() {
   const state = loaderDone ? "shown" : "hidden";
 
   const eyebrowVariants = fade(reduced, T.eyebrow, 0.4);
-  const subtextVariants = fadeRise(reduced, T.subtext, 0.8);
+  const subtextVariants = fade(reduced, T.subtext, 0.8, 8);
   const secondaryVariants = fade(reduced, T.secondary, 0.5);
   const primaryLabelVariants = fade(reduced, T.primaryLabel, 0.3);
   const coverVariants = fade(reduced, T.cover, 0.9);

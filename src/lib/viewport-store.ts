@@ -5,12 +5,12 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 /**
  * Unified input / viewport / media store.
  *
- * Every component that needs the pointer position, scroll progress, tab
- * visibility, or a media-query result reads it from here instead of attaching
- * its own `window` listener. This collapses what used to be a handful of
- * independent `pointermove` / `scroll` / `visibilitychange` / `matchMedia`
- * handlers (the scene, the navbar, the media hooks, and so on) down to one
- * of each, keeping the scroll and pointer hot paths cheap and jank-free.
+ * The pointer position, the background scene's scroll tracker, tab
+ * visibility and media-query results are read from here instead of each
+ * consumer attaching its own `window` listener, so there is one
+ * `pointermove` / `scroll` / `visibilitychange` handler and one MediaQueryList
+ * per query however many components read them. (Scroll-linked Framer values
+ * use Framer's own `useScroll`.)
  *
  * Pointer and scroll are exposed as long-lived mutable objects, not React
  * state: their consumers (WebGL frame loops, spring rAF loops) read them
@@ -90,18 +90,15 @@ export function usePointerMove(callback: (p: PointerState) => void): void {
 export interface ScrollState {
   /** Scroll progress through the document in [0, 1]. */
   progress: number;
-  /** Raw scrollY in pixels. */
-  y: number;
   /**
    * Smoothed scroll velocity in px/ms, exponentially decayed toward 0 when
-   * scrolling stops. Consumers (the WebGL background) read it every frame to
-   * make the scene react to motion: star stretch, nebula swell, etc.
-   * Positive = scrolling down.
+   * scrolling stops. The WebGL background reads it every frame to streak the
+   * star field. Positive = scrolling down.
    */
   velocity: number;
 }
 
-const scroll: ScrollState = { progress: 0, y: 0, velocity: 0 };
+const scroll: ScrollState = { progress: 0, velocity: 0 };
 let scrollSubscribers = 0;
 let scrollRaf = 0;
 let scrollQueued = false;
@@ -134,7 +131,6 @@ function readScroll() {
   }
   lastScrollY = y;
   lastScrollTime = now;
-  scroll.y = y;
   scroll.progress = max > 0 ? Math.min(Math.max(y / max, 0), 1) : 0;
   // (Re)arm the decay chain
   if (velocityDecayRaf) cancelAnimationFrame(velocityDecayRaf);
@@ -152,7 +148,7 @@ function handleScroll() {
 
 /**
  * Returns the shared scroll object. The reference is stable; read `.progress`
- * / `.y` inside your frame loop each tick.
+ * and `.velocity` inside your frame loop each tick.
  */
 export function useScrollTracker(): ScrollState {
   useEffect(() => {
@@ -241,7 +237,7 @@ function getMediaQuery(query: string): MediaQueryList | null {
  * Reactive media-query hook. All consumers of the same query string share a
  * single `MediaQueryList` object instead of each allocating their own.
  */
-export function useMediaQuery(query: string, serverDefault = false): boolean {
+export function useMediaQuery(query: string): boolean {
   const subscribe = useCallback(
     (callback: () => void) => {
       const mql = getMediaQuery(query);
@@ -252,10 +248,7 @@ export function useMediaQuery(query: string, serverDefault = false): boolean {
     [query]
   );
 
-  const getSnapshot = useCallback(() => {
-    const mql = getMediaQuery(query);
-    return mql ? mql.matches : serverDefault;
-  }, [query, serverDefault]);
+  const getSnapshot = useCallback(() => getMediaQuery(query)?.matches ?? false, [query]);
 
-  return useSyncExternalStore(subscribe, getSnapshot, () => serverDefault);
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }

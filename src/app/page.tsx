@@ -68,14 +68,6 @@ const Testimonials = dynamic(() => import("@/components/Testimonials"), {
   loading: () => <SectionSkeleton className="min-h-[1048px] w-full min-[24rem]:min-h-[955px] min-[30rem]:min-h-[884px] min-[60rem]:min-h-[934px] min-[64rem]:min-h-[1053px]" />,
 });
 
-/* Flat obsidian behind the page until the scene mounts, and the permanent
-   backdrop under reduced motion, where no canvas is ever created. This used to
-   carry a gold radial gradient standing in for the nebula behind the portrait;
-   with the nebula gone the gradient was the only thing still glowing, and it
-   made the pre-mount paint and the reduced-motion view brighter than the
-   scene they were standing in for. */
-const STATIC_LIGHT = "var(--color-obsidian-0)";
-
 export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   // Defer the WebGL background until the main thread goes idle so the hero
@@ -91,11 +83,9 @@ export default function Home() {
 
   return (
     <div className="relative">
-      {mountScene ? (
-        <CosmicScene />
-      ) : (
-        <div className="fixed inset-0 z-0 pointer-events-none" style={{ background: STATIC_LIGHT }} aria-hidden />
-      )}
+      {/* Until the scene mounts, and always under reduced motion, the page's
+          own obsidian is the backdrop. */}
+      {mountScene && <CosmicScene />}
 
       <div className="grain" aria-hidden />
 

@@ -118,11 +118,9 @@ const R = 190;
 const stageAngle = (i: number) => -90 + (i * 360) / COUNT;
 
 /* Rounded so the server and the browser print the same geometry (see round3). */
-const fix = round3;
-
 function pointAt(angleDeg: number, radius = R) {
   const a = (angleDeg * Math.PI) / 180;
-  return { x: fix(CX + radius * Math.cos(a)), y: fix(CY + radius * Math.sin(a)) };
+  return { x: round3(CX + radius * Math.cos(a)), y: round3(CY + radius * Math.sin(a)) };
 }
 
 const NODES = STAGES.map((_, i) => pointAt(stageAngle(i)));
@@ -149,15 +147,9 @@ const BEZEL_TICKS = (() => {
     const fromQuarter = Math.min(...[45, 135, 225, 315].map((a) => Math.abs(deg - a)));
     if (fromStation < 14 || fromQuarter < 8) continue;
     const major = deg % 30 === 0;
-    const a = ((deg - 90) * Math.PI) / 180;
-    const r1 = major ? BEZEL_MAJOR_IN : BEZEL_IN;
-    ticks.push({
-      x1: fix(CX + r1 * Math.cos(a)),
-      y1: fix(CY + r1 * Math.sin(a)),
-      x2: fix(CX + BEZEL_OUT * Math.cos(a)),
-      y2: fix(CY + BEZEL_OUT * Math.sin(a)),
-      major,
-    });
+    const inner = pointAt(deg - 90, major ? BEZEL_MAJOR_IN : BEZEL_IN);
+    const outer = pointAt(deg - 90, BEZEL_OUT);
+    ticks.push({ x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, major });
   }
   return ticks;
 })();
@@ -205,7 +197,6 @@ function Diagram({
   const signalRef = useRef<SVGGElement>(null);
   const trailRef = useRef<SVGPathElement>(null);
   const bezelLightRef = useRef<SVGGElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
   /* Fixed ids: the loop appears once, and useId cannot be trusted inside a
      next/dynamic chunk, whose server render carries preload siblings the
      client tree does not, so the generated ids differ across hydration. */
@@ -230,21 +221,17 @@ function Diagram({
   /* The drawing leans a few degrees toward the mouse, as a plate on a desk
      does when it is picked up to be read. Its own listener, written straight
      to the node; still under reduced motion and on touch. */
-  const onTilt = useCallback(
-    (e: PointerEvent<HTMLDivElement>) => {
-      if (reduced || e.pointerType !== "mouse") return;
-      const el = tiltRef.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const nx = (e.clientX - r.left) / r.width - 0.5;
-      const ny = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(1400px) rotateX(${(-ny * 7).toFixed(2)}deg) rotateY(${(nx * 7).toFixed(2)}deg)`;
-    },
-    [reduced]
-  );
-  const onTiltEnd = useCallback(() => {
-    if (tiltRef.current) tiltRef.current.style.transform = "";
-  }, []);
+  const onTilt = (e: PointerEvent<HTMLDivElement>) => {
+    if (reduced || e.pointerType !== "mouse") return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5;
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(1400px) rotateX(${(-ny * 7).toFixed(2)}deg) rotateY(${(nx * 7).toFixed(2)}deg)`;
+  };
+  const onTiltEnd = (e: PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform = "";
+  };
 
   useMotionValueEvent(position, "change", paint);
   useEffect(() => paint(position.get()), [paint, position]);
@@ -252,7 +239,6 @@ function Diagram({
   return (
     <InViewClass amount={0.35} className="relative mx-auto w-full max-w-[620px] py-10 sm:py-6">
       <div
-        ref={tiltRef}
         onPointerMove={onTilt}
         onPointerLeave={onTiltEnd}
         className="relative transition-transform duration-700 ease-settle [transform-style:preserve-3d]"
@@ -557,7 +543,7 @@ export default function ArchitectureLoop() {
   return (
     <div className="mx-auto w-full max-w-[1280px] px-6 pb-24 lg:px-10 lg:pb-28">
       {/* The break between the architect and the method. */}
-      <Ornament className="mb-20 lg:mb-28" />
+      <Ornament />
 
       <div className="grid grid-cols-12 gap-x-6">
         <div className="col-span-12 lg:col-span-8">
@@ -635,7 +621,7 @@ export default function ArchitectureLoop() {
                     value={stage.figure}
                     className="font-display text-[2.5rem] leading-[0.95] text-aurum-200 lg:text-[3rem]"
                   />
-                  <span className="pb-1 font-mono text-[11px] uppercase leading-[1.5] tracking-[0.14em] text-ivory-300">
+                  <span className="caption pb-1 leading-[1.5] text-ivory-300">
                     {stage.figureCaption}
                   </span>
                 </div>

@@ -3,17 +3,17 @@
 import { useCallback, useEffect, useRef } from "react";
 import { usePointerMove, type PointerState } from "@/lib/viewport-store";
 
-export interface FollowOptions {
+interface FollowOptions {
   /** Fraction of the remaining distance covered per frame, 0 to 1. Lower trails further behind. */
-  lerp?: number;
+  lerp: number;
   /** When false the element stops following; the last position is kept. */
-  enabled?: boolean;
+  enabled: boolean;
   /**
    * Writes the eased position to the node. `dx` is the distance still to
    * cover horizontally, which reads as velocity for anything that leans
    * into its travel.
    */
-  write: (x: number, y: number, dx: number, dy: number) => void;
+  write: (x: number, y: number, dx: number) => void;
 }
 
 /**
@@ -26,7 +26,7 @@ export interface FollowOptions {
  * its own, and ignores touch and pen: a follower has nothing to follow on a
  * device with no hover.
  */
-export function useFollowPointer({ lerp = 0.18, enabled = true, write }: FollowOptions) {
+export function useFollowPointer({ lerp, enabled, write }: FollowOptions) {
   const state = useRef({ x: 0, y: 0, tx: 0, ty: 0, raf: 0, primed: false });
   const writeRef = useRef(write);
   const lerpRef = useRef(lerp);
@@ -56,7 +56,7 @@ export function useFollowPointer({ lerp = 0.18, enabled = true, write }: FollowO
         const k = lerpRef.current;
         s.x += dx * k;
         s.y += dy * k;
-        writeRef.current(s.x, s.y, dx, dy);
+        writeRef.current(s.x, s.y, dx);
         if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) s.raf = requestAnimationFrame(tick);
       };
       s.raf = requestAnimationFrame(tick);
@@ -70,6 +70,4 @@ export function useFollowPointer({ lerp = 0.18, enabled = true, write }: FollowO
     const s = state.current;
     return () => cancelAnimationFrame(s.raf);
   }, []);
-
-  return state;
 }

@@ -165,7 +165,7 @@ function OrbitalParticle({
 }
 
 /* Typewriter with a one-frame glitch on the newest character. */
-function TypewriterText({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
+function TypewriterText({ text, delay }: { text: string; delay: number }) {
   const [displayed, setDisplayed] = useState("");
   const [glitchIndex, setGlitchIndex] = useState(-1);
 
@@ -195,7 +195,7 @@ function TypewriterText({ text, className, delay = 0 }: { text: string; classNam
   }, [text, delay]);
 
   return (
-    <span className={className}>
+    <span>
       {displayed.split("").map((char, i) => {
         const j = JITTER[i % JITTER.length];
         const glitching = i === glitchIndex;
@@ -288,11 +288,6 @@ export default function KonamiEasterEgg() {
     [triggered, isExiting, close]
   );
 
-  const handleClick = useCallback(() => {
-    if (isExiting) return;
-    close();
-  }, [isExiting, close]);
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -305,8 +300,6 @@ export default function KonamiEasterEgg() {
       if (exitRef.current) clearTimeout(exitRef.current);
     };
   }, []);
-
-  const showEffects = !reduced;
 
   return (
     <AnimatePresence>
@@ -321,7 +314,7 @@ export default function KonamiEasterEgg() {
           exit={{ opacity: 0 }}
           transition={isExiting ? { duration: 1, ease: EASE_HEAVY } : { duration: 1, ease: EASE_SETTLE }}
           className="fixed inset-0 z-9998 cursor-pointer overflow-hidden"
-          onClick={handleClick}
+          onClick={isExiting ? undefined : close}
         >
           {/* Ground */}
           <div className="absolute inset-0 bg-obsidian-0" />
@@ -337,7 +330,7 @@ export default function KonamiEasterEgg() {
             }}
           />
 
-          {showEffects && (
+          {!reduced && (
             <>
               {/* Glyph rain */}
               <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -412,7 +405,7 @@ export default function KonamiEasterEgg() {
                 transition={{ duration: 0.9, delay: 0.3, ease: EASE_SETTLE }}
               >
                 <div className="relative">
-                  {showEffects && orbitals.map((orb) => <OrbitalParticle key={orb.id} {...orb} />)}
+                  {!reduced && orbitals.map((orb) => <OrbitalParticle key={orb.id} {...orb} />)}
 
                   {/* The PN plate: a square, hairline frame at inset 0, gold frame inside. */}
                   <div className="relative flex size-24 items-center justify-center border border-hairline-strong">

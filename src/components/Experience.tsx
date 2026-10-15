@@ -175,7 +175,7 @@ function YearDossier({ entry, index, reduced }: { entry: ExperienceEntry; index:
         {/* Where the reader is in the record: six ticks, the roles read so
             far held in ivory and the current one in gold. */}
         <div className="mt-12 flex max-w-[220px] items-center gap-4">
-          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-aurum-300">
+          <span className="ledger caption text-aurum-300">
             {pad2(index + 1)}
           </span>
           <span className="flex flex-1 gap-1">
@@ -189,7 +189,7 @@ function YearDossier({ entry, index, reduced }: { entry: ExperienceEntry; index:
               />
             ))}
           </span>
-          <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300">
+          <span className="ledger caption text-ivory-300">
             {pad2(entries.length)}
           </span>
         </div>
@@ -207,19 +207,16 @@ function Entry({
   entry,
   index,
   reduced,
-  register,
 }: {
   entry: ExperienceEntry;
   index: number;
   reduced: boolean;
-  register: (el: HTMLElement | null) => void;
 }) {
   const Icon = typeIcons[entry.type];
 
   return (
     <motion.article
-      ref={register}
-      data-entry={entry.id}
+      data-entry={index}
       /* Its own rule, so six roles read as six entries in a ledger rather
          than six paragraphs separated by air. */
       className="group border-t border-hairline pt-7 transition-colors duration-300 ease-heavy hover:border-hairline-strong"
@@ -238,7 +235,7 @@ function Entry({
       <div className="flex items-center gap-3">
         <span
           aria-hidden
-          className="ledger w-6 shrink-0 font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300"
+          className="ledger w-6 shrink-0 caption text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300"
         >
           {pad2(index + 1)}
         </span>
@@ -261,7 +258,7 @@ function Entry({
       </p>
 
       {/* The one gold fact per role, marked as such: a gold tick, then small
-          caps. It used to be mono body text carrying figures like 1,800+. */}
+          caps. */}
       <p className="mt-5 flex items-center gap-3 pl-9 caption text-aurum-300">
         <span aria-hidden className="h-px w-4 shrink-0 bg-aurum-400" />
         {entry.highlight}
@@ -312,39 +309,30 @@ function GroupLabel({ children, count }: { children: ReactNode; count: number })
 export default function Experience() {
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
-  const nodes = useRef<Map<number, HTMLElement>>(new Map());
+  const listRef = useRef<HTMLDivElement>(null);
 
   // One observer for all six entries. An entry is a candidate once half of it
-  // is visible; the topmost candidate is the chapter the reader is in. When
-  // no entry qualifies (a tall gap, or between groups) the last chapter holds.
+  // is visible; the topmost candidate (entries render in array order) is the
+  // chapter the reader is in. When no entry qualifies (a tall gap, or between
+  // groups) the last chapter holds.
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
+    const list = listRef.current;
+    if (!list || typeof IntersectionObserver === "undefined") return;
     const visible = new Set<number>();
     const observer = new IntersectionObserver(
       (records) => {
         for (const record of records) {
-          const id = Number((record.target as HTMLElement).dataset.entry);
-          if (record.isIntersecting) visible.add(id);
-          else visible.delete(id);
+          const index = Number((record.target as HTMLElement).dataset.entry);
+          if (record.isIntersecting) visible.add(index);
+          else visible.delete(index);
         }
-        if (visible.size === 0) return;
-        let next = Number.POSITIVE_INFINITY;
-        for (const id of visible) {
-          const index = entries.findIndex((e) => e.id === id);
-          if (index < next) next = index;
-        }
-        if (Number.isFinite(next)) setActive(next);
+        if (visible.size > 0) setActive(Math.min(...visible));
       },
       { threshold: 0.5 }
     );
-    for (const el of nodes.current.values()) observer.observe(el);
+    list.querySelectorAll("[data-entry]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
-
-  const register = (el: HTMLElement | null) => {
-    const id = Number(el?.dataset.entry);
-    if (el) nodes.current.set(id, el);
-  };
 
   return (
     <section id="experience" aria-labelledby="experience-heading" className="relative w-full py-32 lg:py-40">
@@ -365,23 +353,17 @@ export default function Experience() {
             <YearDossier entry={entries[active]} index={active} reduced={reduced} />
           </aside>
 
-          <div className="col-span-12 flex flex-col gap-y-24 lg:col-span-7 lg:col-start-6">
+          <div ref={listRef} className="col-span-12 flex flex-col gap-y-24 lg:col-span-7 lg:col-start-6">
             {GROUPS.map((group) => {
               const groupEntries = entries.filter((entry) => entry.group === group);
               return (
                 <div key={group}>
                   <GroupLabel count={groupEntries.length}>{group}</GroupLabel>
-                  {/* Tighter than before: each entry now carries its own rule,
-                      so the gap no longer has to do the separating. */}
+                  {/* Each entry carries its own rule, so the gap does not have
+                      to do the separating. */}
                   <div className="mt-10 flex flex-col gap-y-12 lg:gap-y-14">
                     {groupEntries.map((entry) => (
-                      <Entry
-                        key={entry.id}
-                        entry={entry}
-                        index={entries.indexOf(entry)}
-                        reduced={reduced}
-                        register={register}
-                      />
+                      <Entry key={entry.id} entry={entry} index={entries.indexOf(entry)} reduced={reduced} />
                     ))}
                   </div>
                 </div>

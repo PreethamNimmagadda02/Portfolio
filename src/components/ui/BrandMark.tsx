@@ -6,9 +6,8 @@ import { cn } from "@/lib/utils";
 /**
  * The house mark: PN struck in foil italic inside a double gold ring, with
  * four lozenges at the cardinal points. It is the small sibling of the About
- * seal and the drawing the app icons are rendered from
- * (scripts/brand/monogram.html), so the mark is one object wherever it
- * appears.
+ * seal and the drawing scripts/brand/icons.mjs renders the app icons from, so
+ * the mark is one object wherever it appears.
  *
  * The outer ring draws itself in once on arrival. Inside a `group`, hovering
  * turns the lozenges an eighth of a turn, the way a bezel clicks round.

@@ -10,7 +10,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import CodingProfiles, { LiveDataNotice, LIVE_DATA_ERROR } from "./CodingProfiles";
+import CodingProfiles, { LiveDataNotice } from "./CodingProfiles";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SectionHeading, LedgerNumber, PlateTicks } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -30,9 +30,7 @@ const GITHUB_USERNAME = "PreethamNimmagadda02";
  * keeps the live number consistent with the fallback instead of reporting a
  * millions-of-lines figure that isn't authored work.
  */
-const LOC_EXCLUDED = new Set(
-  (bakedLoc.excludedRepos ?? []).map((r) => r.toLowerCase())
-);
+const LOC_EXCLUDED = new Set(bakedLoc.excludedRepos.map((r) => r.toLowerCase()));
 /** Bounds the request burst against the unauthenticated rate limit. */
 const LOC_REPO_LIMIT = 18;
 const LOC_CONCURRENCY = 4;
@@ -59,14 +57,12 @@ interface ContributionDay {
 }
 
 interface ContributionsResponse {
-  total: Record<string, number>;
   contributions: ContributionDay[];
 }
 
 interface GitHubRepo {
   name: string;
   language: string | null;
-  stargazers_count: number;
   fork: boolean;
   size: number;
 }
@@ -97,52 +93,26 @@ interface Figure {
 }
 
 /* Data fetching */
-async function fetchContributions(): Promise<ContributionsResponse> {
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const sixMonthsAgo = new Date(today);
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 12);
-  const prevYear = sixMonthsAgo.getFullYear();
 
-  const fetchCurrent = fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${currentYear}`);
-  const fetchPrev = prevYear < currentYear
-    ? fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${prevYear}`)
-    : Promise.resolve(null);
-
-  const [resCurrent, resPrev] = await Promise.all([fetchCurrent, fetchPrev]);
-
-  if (!resCurrent.ok) throw new Error("Failed to fetch contributions");
-  const data: ContributionsResponse = await resCurrent.json();
-
-  if (resPrev && resPrev.ok) {
-    const prevData: ContributionsResponse = await resPrev.json();
-    data.contributions = [...prevData.contributions, ...data.contributions];
-    data.total = { ...prevData.total, ...data.total };
-  }
-
-  return data;
+/** Daily contributions for the trailing twelve months, which always straddle two calendar years. */
+async function fetchContributions(): Promise<ContributionDay[]> {
+  const year = new Date().getFullYear();
+  const get = (y: number) => fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${y}`);
+  const [current, prev] = await Promise.all([get(year), get(year - 1)]);
+  if (!current.ok) throw new Error("Failed to fetch contributions");
+  const { contributions }: ContributionsResponse = await current.json();
+  if (!prev.ok) return contributions;
+  const earlier: ContributionsResponse = await prev.json();
+  return [...earlier.contributions, ...contributions];
 }
 
-async function fetchRepos(): Promise<GitHubRepo[]> {
-  try {
-    const res = await fetch(
-      `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`
-    );
-    if (!res.ok) return []; // Fallback to empty array if rate limited
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
-async function fetchUserProfile(): Promise<{ public_repos: number }> {
-  try {
-    const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
-    if (!res.ok) return { public_repos: 12 }; // Fallback count
-    return res.json();
-  } catch {
-    return { public_repos: 12 };
-  }
+/**
+ * A GitHub REST read that settles on `fallback` when the request fails or is
+ * refused (rate limited). Only the fetch itself is caught: a malformed body
+ * still rejects, into fetchData's fallback.
+ */
+function githubGet<T>(path: string, fallback: T): Promise<T> {
+  return fetch(`https://api.github.com${path}`).then((res) => (res.ok ? res.json() : fallback), () => fallback);
 }
 
 /**
@@ -259,7 +229,7 @@ function aggregateLanguages(repos: GitHubRepo[]): LanguageData[] {
 
   // Normalize to 100%
   const percentSum = languages.reduce((s, l) => s + l.percentage, 0);
-  if (percentSum !== 100 && languages.length > 0) {
+  if (percentSum !== 100) {
     languages[0].percentage += 100 - percentSum;
   }
 
@@ -283,6 +253,15 @@ const langInk = (i: number) => `rgba(242, 236, 224, ${LANG_ALPHAS[Math.min(i, LA
 
 const TODAY_RING: CSSProperties = { boxShadow: "inset 0 0 0 1px var(--color-ivory-100)" };
 
+/** The Sunday opening the week `monthsBack` months before `from`, at local midnight. */
+function windowStart(from: Date, monthsBack: number) {
+  const d = new Date(from);
+  d.setMonth(d.getMonth() - monthsBack);
+  d.setDate(d.getDate() - d.getDay());
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 /* Contribution heatmap */
 function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -292,76 +271,28 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
   // Mobile shows the last 6 months so cells stay visible and tappable.
   const monthsBack = isMobile ? 6 : 12;
 
-  // Build a weekly grid from data up to today
+  // Sunday-start weeks from the window's first Sunday through today.
   const { heatmapGrid, todayKey } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayKey = today.toISOString().split("T")[0];
-
-    const rangeStart = new Date(today);
-    rangeStart.setMonth(rangeStart.getMonth() - monthsBack);
-    // Align to start of that week (Sunday)
-    const dayOfWeek = rangeStart.getDay();
-    rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
-    rangeStart.setHours(0, 0, 0, 0);
-
-    // Build date to data map
-    const dateMap = new Map<string, { level: number; count: number }>();
-    for (const d of data) {
-      dateMap.set(d.date, { level: d.level, count: d.count });
+    const byDate = new Map(data.map((d) => [d.date, d]));
+    const weeks: ContributionDay[][] = [];
+    for (const day = windowStart(today, monthsBack); day <= today; day.setDate(day.getDate() + 1)) {
+      if (weeks.length === 0 || weeks[weeks.length - 1].length === 7) weeks.push([]);
+      const date = day.toISOString().split("T")[0];
+      weeks[weeks.length - 1].push(byDate.get(date) ?? { date, count: 0, level: 0 });
     }
-
-    const weeks: { level: number; count: number; date: string }[][] = [];
-    let currentWeek: { level: number; count: number; date: string }[] = [];
-
-    // Fill in all days from rangeStart to today
-    const iter = new Date(rangeStart);
-    while (iter <= today) {
-      const dateStr = iter.toISOString().split("T")[0];
-      const dayData = dateMap.get(dateStr) ?? { level: 0, count: 0 };
-      currentWeek.push({ ...dayData, date: dateStr });
-
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
-      iter.setDate(iter.getDate() + 1);
-    }
-
-    if (currentWeek.length > 0) {
-      weeks.push(currentWeek);
-    }
-
-    return { heatmapGrid: weeks, todayKey };
+    return { heatmapGrid: weeks, todayKey: today.toISOString().split("T")[0] };
   }, [data, monthsBack]);
 
-  // Compute month labels for the window
+  // A month's label sits on the week of its first Sunday: exactly one falls on
+  // days 1 to 7. The walk runs to now rather than to midnight, as it always has.
   const monthLabels = useMemo(() => {
-    const today = new Date();
-    const rangeStart = new Date(today);
-    rangeStart.setMonth(rangeStart.getMonth() - monthsBack);
-    // Align to start of week (Sunday)
-    const dayOfWeek = rangeStart.getDay();
-    rangeStart.setDate(rangeStart.getDate() - dayOfWeek);
-    rangeStart.setHours(0, 0, 0, 0);
-
+    const now = new Date();
     const months: { label: string; weekIndex: number }[] = [];
-    const seenMonths = new Set<string>();
-
-    const iter = new Date(rangeStart);
-    let weekIndex = 0;
-    while (iter <= today) {
-      const monthKey = `${iter.getFullYear()}-${iter.getMonth()}`;
-      if (!seenMonths.has(monthKey) && iter.getDate() <= 7) {
-        seenMonths.add(monthKey);
-        months.push({
-          label: iter.toLocaleString("default", { month: "short" }),
-          weekIndex,
-        });
-      }
-      // Advance by 1 week
-      iter.setDate(iter.getDate() + 7);
-      weekIndex++;
+    const day = windowStart(now, monthsBack);
+    for (let weekIndex = 0; day <= now; day.setDate(day.getDate() + 7), weekIndex++) {
+      if (day.getDate() <= 7) months.push({ label: day.toLocaleString("default", { month: "short" }), weekIndex });
     }
     return months;
   }, [monthsBack]);
@@ -372,83 +303,77 @@ function ContributionHeatmap({ data }: { data: ContributionDay[] }) {
   const cellDelay = (wk: number, dy: number) => Math.min(wk * 12 + dy * 3, 650);
 
   return (
-    <div ref={ref} className="w-full">
-      <div className="flex w-full flex-col">
-        {/* Month labels, sparser on mobile to avoid collisions */}
-        <div className="relative mb-2 ml-0 w-full sm:ml-9" style={{ height: 14 }}>
-          {monthLabels
-            .filter((_, i) => !isMobile || i % 2 === 0)
-            .map((m, i) => {
-              const leftPercent = (m.weekIndex / heatmapGrid.length) * 100;
-              return (
-                <span
-                  key={`${m.label}-${i}`}
-                  className="ledger absolute -translate-x-1/2 font-mono text-[11px] leading-none text-ivory-300"
-                  style={{ left: `${leftPercent}%` }}
-                >
-                  {m.label}
-                </span>
-              );
-            })}
-        </div>
-        <div className="flex w-full">
-          {/* Weekday labels, hidden on mobile (unreadable at that size, steals width) */}
-          <div className="mr-3 hidden w-6 flex-col justify-between sm:flex">
-            {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
-              <span key={i} className="flex flex-1 items-center font-mono text-[11px] leading-none text-ivory-300">
-                {d}
+    <div ref={ref} className="flex w-full flex-col">
+      {/* Month labels, sparser on mobile to avoid collisions */}
+      <div className="relative mb-2 w-full sm:ml-9" style={{ height: 14 }}>
+        {monthLabels
+          .filter((_, i) => !isMobile || i % 2 === 0)
+          .map((m, i) => {
+            const leftPercent = (m.weekIndex / heatmapGrid.length) * 100;
+            return (
+              <span
+                key={`${m.label}-${i}`}
+                className="ledger absolute -translate-x-1/2 font-mono text-[11px] leading-none text-ivory-300"
+                style={{ left: `${leftPercent}%` }}
+              >
+                {m.label}
               </span>
-            ))}
-          </div>
-          {/* Weeks */}
-          <div className="flex flex-1 gap-[3px]">
-            {heatmapGrid.map((week, wk) => (
-              <div key={wk} className="flex flex-1 flex-col gap-[3px]">
-                {Array.from({ length: 7 }).map((_, dy) => {
-                  const day = dy < week.length ? week[dy] : null;
-                  if (!day) {
-                    return <div key={dy} className="aspect-square w-full" />;
-                  }
-                  const isToday = day.date === todayKey;
-                  return (
-                    <div
-                      key={dy}
-                      title={`${day.count} contributions on ${day.date}`}
-                      className={cn(
-                        "aspect-square w-full cursor-crosshair transition-opacity duration-300 hover:opacity-70",
-                        isInView ? "cell-in" : "opacity-0"
-                      )}
-                      style={{
-                        backgroundColor: CELL_COLORS[Math.min(day.level, 4)],
-                        "--d": `${cellDelay(wk, dy)}ms`,
-                        ...(isToday ? TODAY_RING : null),
-                      } as CSSProperties}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Legend, in the same small caps as every other label on the plate. */}
-        <div className="mt-5 flex items-center justify-end gap-[3px]">
-          <span className="mr-2 caption text-ivory-300">
-            Less
-          </span>
-          {CELL_COLORS.map((c, i) => (
-            <span key={i} aria-hidden className="size-3" style={{ backgroundColor: c }} />
+            );
+          })}
+      </div>
+      <div className="flex w-full">
+        {/* Weekday labels, hidden on mobile (unreadable at that size, steals width) */}
+        <div className="mr-3 hidden w-6 flex-col justify-between sm:flex">
+          {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
+            <span key={i} className="flex flex-1 items-center font-mono text-[11px] leading-none text-ivory-300">
+              {d}
+            </span>
           ))}
-          <span className="ml-2 caption text-ivory-300">
-            More
-          </span>
         </div>
+        {/* Weeks */}
+        <div className="flex flex-1 gap-[3px]">
+          {heatmapGrid.map((week, wk) => (
+            <div key={wk} className="flex flex-1 flex-col gap-[3px]">
+              {Array.from({ length: 7 }).map((_, dy) => {
+                const day = week[dy];
+                if (!day) return <div key={dy} className="aspect-square w-full" />;
+                const isToday = day.date === todayKey;
+                return (
+                  <div
+                    key={dy}
+                    title={`${day.count} contributions on ${day.date}`}
+                    className={cn(
+                      "aspect-square w-full cursor-crosshair transition-opacity duration-300 hover:opacity-70",
+                      isInView ? "cell-in" : "opacity-0"
+                    )}
+                    style={{
+                      backgroundColor: CELL_COLORS[Math.min(day.level, 4)],
+                      "--d": `${cellDelay(wk, dy)}ms`,
+                      ...(isToday ? TODAY_RING : null),
+                    } as CSSProperties}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Legend, in the same small caps as every other label on the plate. */}
+      <div className="mt-5 flex items-center justify-end gap-[3px]">
+        <span className="mr-2 caption text-ivory-300">
+          Less
+        </span>
+        {CELL_COLORS.map((c, i) => (
+          <span key={i} aria-hidden className="size-3" style={{ backgroundColor: c }} />
+        ))}
+        <span className="ml-2 caption text-ivory-300">
+          More
+        </span>
       </div>
     </div>
   );
 }
 
-/* Figure row: the ledger of four. Hairline rules divide the cells; on
-   mobile the row folds to 2x2 with a rule between the two rows. */
 /* The caption over a sub-plate. Small caps with a closing hairline, so the
    heatmap and the language gauge are introduced the way the section is,
    rather than by a line of mono body text. */
@@ -463,6 +388,8 @@ function SubCaption({ children }: { children: ReactNode }) {
   );
 }
 
+/* Figure row: the ledger of four. Hairline rules divide the cells; on
+   mobile the row folds to 2x2 with a rule between the two rows. */
 function figureCellClass(i: number) {
   return cn(
     "group flex flex-col gap-4 py-8 lg:py-10",
@@ -488,8 +415,6 @@ function FigureSkeleton() {
     </div>
   );
 }
-
-const PLATE_TRANSITION = { duration: 0.35, ease: EASE_HEAVY };
 
 const TAB_COPY = {
   github: {
@@ -518,7 +443,7 @@ export default function GitHubStats() {
   const [linesAdded, setLinesAdded] = useState(bakedLoc.linesAdded);
   const [linesAreLive, setLinesAreLive] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
   const [activeTab, setActiveTab] = useState<"github" | "competitive">("github");
 
   const hydrateLines = useCallback(async (repos: GitHubRepo[]) => {
@@ -531,9 +456,6 @@ export default function GitHubStats() {
 
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-
       // Read the lines cache before the early return below, so a stats-cache
       // hit still gets the last live figure instead of the build-time one.
       const cachedLoc = readCache<{ linesAdded: number }>(LOC_CACHE_KEY, LOC_CACHE_TTL_MS);
@@ -551,17 +473,17 @@ export default function GitHubStats() {
         return;
       }
 
-      const [contribData, repos, profile] = await Promise.all([
+      const [days, repos, profile] = await Promise.all([
         fetchContributions(),
-        fetchRepos(),
-        fetchUserProfile(),
+        githubGet<GitHubRepo[]>(`/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`, []),
+        githubGet(`/users/${GITHUB_USERNAME}`, { public_repos: 12 }),
       ]);
 
       // Filter contributions to last 1 year up to today
       const today = new Date();
       const oneYearAgo = new Date(today);
       oneYearAgo.setMonth(oneYearAgo.getMonth() - 12);
-      const filtered = contribData.contributions.filter((c) => {
+      const filtered = days.filter((c) => {
         const d = new Date(c.date);
         return d >= oneYearAgo && d <= today;
       });
@@ -597,7 +519,7 @@ export default function GitHubStats() {
       });
     } catch (err) {
       console.warn("GitHub data fetch failed (likely rate limited). Using fallback UI state.", err);
-      setError(LIVE_DATA_ERROR);
+      setFailed(true);
 
       // Fallback data
       setStats({
@@ -643,15 +565,11 @@ export default function GitHubStats() {
         label: "Lines written",
         value: linesAdded,
         href: `https://github.com/${GITHUB_USERNAME}?tab=repositories`,
-        hint: linesAreLive
-          ? `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, live from the GitHub API`
-          : `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, as of ${new Date(
-            bakedLoc.generatedAt
-          ).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}`,
+        hint: `${linesAdded.toLocaleString()} lines added across ${bakedLoc.reposCounted} repositories, ${
+          linesAreLive
+            ? "live from the GitHub API"
+            : `as of ${new Date(bakedLoc.generatedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}`
+        }`,
       },
     ].sort((a, b) => b.value - a.value);
   }, [stats, linesAdded, linesAreLive]);
@@ -667,14 +585,13 @@ export default function GitHubStats() {
       <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
         {/* Header: eyebrow, headline and subtext in columns 1 to 8 */}
         <div className="grid grid-cols-12 gap-x-6">
-          <div className="col-span-12 lg:col-span-8">
-            <SectionHeading
-              chapter="github-stats"
-              eyebrow="LIVE FROM GITHUB AND CODOLIO"
-              title={copy.title}
-              subtext={copy.subtext}
-            />
-          </div>
+          <SectionHeading
+            chapter="github-stats"
+            eyebrow="LIVE FROM GITHUB AND CODOLIO"
+            title={copy.title}
+            subtext={copy.subtext}
+            className="col-span-12 lg:col-span-8"
+          />
         </div>
 
         {/* Tab switch: two mono text toggles sharing one hairline indicator */}
@@ -688,7 +605,7 @@ export default function GitHubStats() {
                 onClick={() => setActiveTab(tab)}
                 aria-pressed={active}
                 className={cn(
-                  "ledger relative pb-4 font-mono text-[13px] leading-none tracking-[0.01em] transition-colors duration-300 ease-[var(--ease-heavy)]",
+                  "ledger relative pb-4 font-mono text-[13px] leading-none tracking-[0.01em] transition-colors duration-300 ease-heavy",
                   active ? "text-ivory-100" : "text-ivory-300 hover:text-ivory-200"
                 )}
               >
@@ -707,159 +624,147 @@ export default function GitHubStats() {
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {activeTab === "github" && (
-            <motion.div
-              key="github-tab"
-              id="activity-plate-github"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={PLATE_TRANSITION}
-              className="mt-12"
-            >
-              {error && <LiveDataNotice message={error} className="mb-6" />}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: EASE_HEAVY }}
+            className="mt-12"
+          >
+            {activeTab === "competitive" ? (
+              <CodingProfiles />
+            ) : (
+              <>
+                {failed && <LiveDataNotice />}
 
-              {/* Figure row */}
-              {loading ? (
-                <FigureSkeleton />
-              ) : (
-                <div className="grid grid-cols-2 border-y border-hairline lg:grid-cols-4">
-                  {figures.map((figure, i) => (
-                    <a
-                      key={figure.label}
-                      href={figure.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={figure.hint}
-                      className={figureCellClass(i)}
-                    >
-                      <LedgerNumber
-                        value={figure.value.toLocaleString()}
-                        label={`${figure.value.toLocaleString()} ${figure.label.toLowerCase()}`}
-                        className="font-display text-[2.5rem] leading-none text-ivory-100 lg:text-[3.5rem]"
-                      />
-                      <span className="caption text-ivory-300">
-                        {/* .rule-hover draws a gold hairline in reserved
-                            space, so the label does not shift the way a
-                            text-decoration underline does. */}
-                        <span className="rule-hover">{figure.label}</span>
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              )}
-
-              {/* Heatmap, on a framed plate: twelve months of ink sat in open
-                  space before, with nothing to say where the reading began or
-                  ended. */}
-              <div className="mt-16">
-                <SubCaption>Contributions by day</SubCaption>
+                {/* Figure row */}
                 {loading ? (
-                  <div aria-busy="true" className="flex flex-col gap-[3px]">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <span key={i} className="breathe block h-3 w-full bg-obsidian-2" />
-                    ))}
-                  </div>
-                ) : contributions.length > 0 ? (
-                  <div className="relative border-y border-hairline py-7">
-                    <PlateTicks />
-                    <div className="w-full overflow-x-auto no-scrollbar">
-                      <ContributionHeatmap data={contributions} />
-                    </div>
-                  </div>
+                  <FigureSkeleton />
                 ) : (
-                  /* The calendar is the one reading with no honest fallback:
-                     a year of days cannot be restated from a cached total. So
-                     the plate stays, and points to where the record lives. */
-                  <div className="relative border-y border-hairline py-10">
-                    <PlateTicks />
-                    <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-                      <p className="max-w-[46ch] font-display text-[1.375rem] italic leading-[1.35] text-ivory-200">
-                        The day by day record is kept on GitHub, where every square can be opened.
-                      </p>
+                  <div className="grid grid-cols-2 border-y border-hairline lg:grid-cols-4">
+                    {figures.map((figure, i) => (
                       <a
-                        href={`https://github.com/${GITHUB_USERNAME}`}
+                        key={figure.label}
+                        href={figure.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        data-cursor="Open"
-                        className="group inline-flex shrink-0 items-center gap-2 border-b border-hairline-gold pb-1 caption text-aurum-300 transition-colors duration-300 ease-heavy hover:border-aurum-200 hover:text-aurum-200"
+                        title={figure.hint}
+                        className={figureCellClass(i)}
                       >
-                        Open the calendar
-                        <span aria-hidden className="transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                          &#8599;
+                        <LedgerNumber
+                          value={figure.value.toLocaleString()}
+                          label={`${figure.value.toLocaleString()} ${figure.label.toLowerCase()}`}
+                          className="font-display text-[2.5rem] leading-none text-ivory-100 lg:text-[3.5rem]"
+                        />
+                        <span className="caption text-ivory-300">
+                          {/* .rule-hover draws a gold hairline in reserved
+                              space, so the label does not shift the way a
+                              text-decoration underline does. */}
+                          <span className="rule-hover">{figure.label}</span>
                         </span>
                       </a>
-                    </div>
+                    ))}
                   </div>
                 )}
-              </div>
 
-              {/* Language distribution */}
-              <div className="mt-16">
-                <SubCaption>Languages by repository</SubCaption>
-                {loading ? (
-                  <div aria-busy="true">
-                    {/* Matches the framed gauge: 1px rule, 4px inset, 10px of
-                        ink, 4px inset, 1px rule. */}
-                    <span className="breathe block h-5 w-full bg-obsidian-2" />
-                    <div className="mt-5 flex gap-6">
-                      {Array.from({ length: 4 }).map((_, i) => (
-                        <span key={i} className="breathe block h-3 w-20 bg-obsidian-2" />
+                {/* Heatmap, on a framed plate: twelve months of ink sat in open
+                    space before, with nothing to say where the reading began or
+                    ended. */}
+                <div className="mt-16">
+                  <SubCaption>Contributions by day</SubCaption>
+                  {loading ? (
+                    <div aria-busy="true" className="flex flex-col gap-[3px]">
+                      {Array.from({ length: 7 }).map((_, i) => (
+                        <span key={i} className="breathe block h-3 w-full bg-obsidian-2" />
                       ))}
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    {/* The gauge, framed and inset rather than a bare 6px
-                        dashboard stack: hairline box, ink sitting inside it,
-                        and a tick dropped at every boundary so the divisions
-                        can be read off the rule. */}
-                    <div className="relative border border-hairline p-1">
+                  ) : contributions.length > 0 ? (
+                    <div className="relative border-y border-hairline py-7">
                       <PlateTicks />
-                      <div
-                        role="img"
-                        aria-label={languages.map((l) => `${l.name} ${l.percentage}%`).join(", ")}
-                        className="flex h-2.5 w-full gap-px"
-                      >
-                        {languages.map((lang, i) => (
-                          <span
-                            key={lang.name}
-                            className="block h-full min-w-0"
-                            style={{ width: `${lang.percentage}%`, backgroundColor: langInk(i) }}
-                          />
+                      <div className="w-full overflow-x-auto no-scrollbar">
+                        <ContributionHeatmap data={contributions} />
+                      </div>
+                    </div>
+                  ) : (
+                    /* The calendar is the one reading with no honest fallback:
+                       a year of days cannot be restated from a cached total. So
+                       the plate stays, and points to where the record lives. */
+                    <div className="relative border-y border-hairline py-10">
+                      <PlateTicks />
+                      <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                        <p className="max-w-[46ch] font-display text-[1.375rem] italic leading-[1.35] text-ivory-200">
+                          The day by day record is kept on GitHub, where every square can be opened.
+                        </p>
+                        <a
+                          href={`https://github.com/${GITHUB_USERNAME}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-cursor="Open"
+                          className="group inline-flex shrink-0 items-center gap-2 border-b border-hairline-gold pb-1 caption text-aurum-300 transition-colors duration-300 ease-heavy hover:border-aurum-200 hover:text-aurum-200"
+                        >
+                          Open the calendar
+                          <span aria-hidden className="transition-transform duration-300 ease-heavy group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                            &#8599;
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Language distribution */}
+                <div className="mt-16">
+                  <SubCaption>Languages by repository</SubCaption>
+                  {loading ? (
+                    <div aria-busy="true">
+                      {/* Matches the framed gauge: 1px rule, 4px inset, 10px of
+                          ink, 4px inset, 1px rule. */}
+                      <span className="breathe block h-5 w-full bg-obsidian-2" />
+                      <div className="mt-5 flex gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <span key={i} className="breathe block h-3 w-20 bg-obsidian-2" />
                         ))}
                       </div>
                     </div>
+                  ) : (
+                    <div>
+                      {/* The gauge, framed and inset rather than a bare 6px
+                          dashboard stack: a hairline box with gold corner
+                          ticks, and the ink sitting inside it. */}
+                      <div className="relative border border-hairline p-1">
+                        <PlateTicks />
+                        <div
+                          role="img"
+                          aria-label={languages.map((l) => `${l.name} ${l.percentage}%`).join(", ")}
+                          className="flex h-2.5 w-full gap-px"
+                        >
+                          {languages.map((lang, i) => (
+                            <span
+                              key={lang.name}
+                              className="block h-full min-w-0"
+                              style={{ width: `${lang.percentage}%`, backgroundColor: langInk(i) }}
+                            />
+                          ))}
+                        </div>
+                      </div>
 
-                    <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 caption">
-                      {languages.map((lang, i) => (
-                        <li key={lang.name} className="flex items-center gap-2.5">
-                          <span aria-hidden className="size-2 shrink-0" style={{ backgroundColor: langInk(i) }} />
-                          <span className="text-ivory-200">{lang.name}</span>
-                          <span aria-hidden className="h-3 w-px bg-hairline" />
-                          <span className="ledger text-ivory-300">{lang.percentage}%</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === "competitive" && (
-            <motion.div
-              key="competitive-tab"
-              id="activity-plate-competitive"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={PLATE_TRANSITION}
-              className="mt-12"
-            >
-              <CodingProfiles isEmbedded={true} />
-            </motion.div>
-          )}
+                      <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 caption">
+                        {languages.map((lang, i) => (
+                          <li key={lang.name} className="flex items-center gap-2.5">
+                            <span aria-hidden className="size-2 shrink-0" style={{ backgroundColor: langInk(i) }} />
+                            <span className="text-ivory-200">{lang.name}</span>
+                            <span aria-hidden className="h-3 w-px bg-hairline" />
+                            <span className="ledger text-ivory-300">{lang.percentage}%</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </motion.div>
         </AnimatePresence>
       </div>
     </section>

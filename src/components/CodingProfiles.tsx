@@ -1,7 +1,6 @@
 "use client";
 
-import { useInView } from "@/lib/motion";
-import { useRef, useState, useEffect, useCallback, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import { Warning } from "@phosphor-icons/react";
 import { LedgerNumber } from "@/components/ui";
 import { cn, pad2 } from "@/lib/utils";
@@ -43,9 +42,6 @@ interface PlatformProfile {
     maxStreak: number | null;
     submissionCalendar?: Record<string, number> | null;
   } | null;
-  topicAnalysisStats?: {
-    topicWiseDistribution: Record<string, number> | null;
-  } | null;
   contestActivityStats?: {
     contestActivityList: unknown[];
   } | null;
@@ -69,31 +65,23 @@ const PLATFORM_NAMES: Record<string, string> = {
   tuf: "TakeUForward",
 };
 
-const getCodeChefStars = (rating: number) => {
-  if (rating <= 1399) return "1★";
-  if (rating <= 1599) return "2★";
-  if (rating <= 1799) return "3★";
-  if (rating <= 1999) return "4★";
-  if (rating <= 2199) return "5★";
-  if (rating <= 2499) return "6★";
-  return "7★";
-};
-
-export const LIVE_DATA_ERROR = "Live data is unavailable right now. Showing the last known figures.";
+/* CodeChef star bands by their top rating: 1399 and below is 1★, above 2499 is 7★. */
+const CODECHEF_BAND_TOPS = [1399, 1599, 1799, 1999, 2199, 2499];
+const getCodeChefStars = (rating: number) => `${CODECHEF_BAND_TOPS.filter((top) => rating > top).length + 1}★`;
 
 /**
  * The one plain-language error line shared by the GitHub and Codolio plates:
  * a light Warning glyph and a sentence, announced politely, no pill.
  */
-export function LiveDataNotice({ message, className }: { message: string; className?: string }) {
+export function LiveDataNotice() {
   return (
     <p
       role="status"
       aria-live="polite"
-      className={cn("flex items-center gap-2 font-sans text-[14px] leading-[1.5] text-ivory-200", className)}
+      className="mb-6 flex items-center gap-2 font-sans text-[14px] leading-[1.5] text-ivory-200"
     >
       <Warning size={16} weight="light" aria-hidden className="shrink-0 text-aurum-200" />
-      <span>{message}</span>
+      <span>Live data is unavailable right now. Showing the last known figures.</span>
     </p>
   );
 }
@@ -122,10 +110,7 @@ interface StatColumn {
   value: string;
 }
 
-/**
- * The columns a platform shows, in the order the previous card listed them.
- * The conditions are unchanged; only the presentation is.
- */
+/** The columns a platform shows, in display order. */
 function buildColumns(profile: PlatformProfile): StatColumn[] {
   const topBadge = profile.badgeStats?.badgeList?.reduce(
     (prev, curr) => ((curr.stars || 0) > (prev.stars || 0) ? curr : prev),
@@ -168,14 +153,10 @@ function buildColumns(profile: PlatformProfile): StatColumn[] {
       value: (profile.totalQuestionStats.mediumQuestionCounts || 0).toLocaleString(),
     });
   }
-  if (profile.platform === "hackerrank" && profile.badgeStats?.badgeList && profile.badgeStats.badgeList.length > 0) {
+  if (profile.platform === "hackerrank" && profile.badgeStats?.badgeList?.length) {
     columns.push({ label: "Awards", value: profile.badgeStats.badgeList.length.toLocaleString() });
   }
-  if (
-    profile.platform === "hackerrank" &&
-    profile.certificateStats?.certificates &&
-    profile.certificateStats.certificates.length > 0
-  ) {
+  if (profile.platform === "hackerrank" && profile.certificateStats?.certificates?.length) {
     columns.push({ label: "Certifications", value: profile.certificateStats.certificates.length.toLocaleString() });
   }
   if (profile.platform === "tuf" && profile.dailyActivityStatsResponse?.submissionCalendar) {
@@ -185,10 +166,7 @@ function buildColumns(profile: PlatformProfile): StatColumn[] {
     });
   }
   if (profile.platform === "tuf" && profile.totalQuestionStats?.hardQuestionCounts) {
-    columns.push({
-      label: "Hard problems",
-      value: (profile.totalQuestionStats.hardQuestionCounts || 0).toLocaleString(),
-    });
+    columns.push({ label: "Hard problems", value: profile.totalQuestionStats.hardQuestionCounts.toLocaleString() });
   }
 
   return columns;
@@ -237,11 +215,6 @@ const CODOLIO_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
    fired again each time only to fail the same way. */
 let codolioRequest: Promise<PlatformProfile[]> | null = null;
 
-function loadCodolioProfiles() {
-  codolioRequest ??= fetchCodolioProfiles();
-  return codolioRequest;
-}
-
 async function fetchCodolioProfiles(): Promise<PlatformProfile[]> {
   const res = await fetch(`https://api.codolio.com/profile?userKey=${CODOLIO_USERNAME}`);
   if (!res.ok) throw new Error("Failed to fetch Codolio stats");
@@ -252,9 +225,7 @@ async function fetchCodolioProfiles(): Promise<PlatformProfile[]> {
 
   // Filter out platforms with 0 questions and no rating to keep it clean
   const activeProfiles = rawProfiles.filter(
-    (p) =>
-      (p.totalQuestionStats?.totalQuestionCounts && p.totalQuestionStats.totalQuestionCounts > 0) ||
-      (p.userStats?.currentRating && p.userStats.currentRating > 0)
+    (p) => (p.totalQuestionStats?.totalQuestionCounts ?? 0) > 0 || (p.userStats?.currentRating ?? 0) > 0
   );
 
   // Sort: LeetCode and Codeforces first
@@ -262,34 +233,27 @@ async function fetchCodolioProfiles(): Promise<PlatformProfile[]> {
   return activeProfiles.sort((a, b) => (priority[a.platform] || 99) - (priority[b.platform] || 99));
 }
 
-export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: boolean }) {
-  const plateRef = useRef<HTMLDivElement>(null);
-  // Embedded, the parent tab already gates mounting, so fetch at once;
-  // standalone, wait until the plate is within 1000px of the viewport.
-  const inViewMargin = useInView(plateRef, { once: true, margin: "1000px" });
-  const shouldFetch = isEmbedded || inViewMargin;
-
+/* Mounted by the Competitive tab, which already gates when it appears, so the
+   fetch runs at once. */
+export default function CodingProfiles() {
   const [profiles, setProfiles] = useState<PlatformProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-
       const cached = readCache<{ profiles: PlatformProfile[] }>(CODOLIO_CACHE_KEY, CODOLIO_CACHE_TTL_MS);
       if (cached) {
         setProfiles(cached.profiles);
         return;
       }
 
-      const sorted = await loadCodolioProfiles();
+      const sorted = await (codolioRequest ??= fetchCodolioProfiles());
       setProfiles(sorted);
       writeCache(CODOLIO_CACHE_KEY, { profiles: sorted });
     } catch (err) {
       console.error("Codolio fetch error:", err);
-      setError(LIVE_DATA_ERROR);
+      setFailed(true);
       // Fallback data
       setProfiles([
         {
@@ -314,12 +278,12 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
   }, []);
 
   useEffect(() => {
-    if (shouldFetch) fetchData();
-  }, [shouldFetch, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
-  const plate = (
-    <div ref={plateRef} className="w-full">
-      {error && <LiveDataNotice message={error} className="mb-6" />}
+  return (
+    <div className="w-full">
+      {failed && <LiveDataNotice />}
 
       <div className="border-b border-hairline" aria-busy={loading || undefined}>
         {loading
@@ -341,7 +305,7 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
                 {/* Hanging index, hidden below md where the row stacks and a
                     lone numeral in the flow would read as a stat of its own. */}
                 <div className={INDEX_COL_CLASS} aria-hidden>
-                  <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-aurum-300">
+                  <span className="ledger caption text-ivory-300 transition-colors duration-500 ease-heavy group-hover:text-aurum-300">
                     {pad2(idx + 1)}
                   </span>
                 </div>
@@ -394,15 +358,5 @@ export default function CodingProfiles({ isEmbedded = false }: { isEmbedded?: bo
           })}
       </div>
     </div>
-  );
-
-  if (isEmbedded) {
-    return plate;
-  }
-
-  return (
-    <section id="coding-profiles" className="relative w-full py-32 lg:py-40">
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-10">{plate}</div>
-    </section>
   );
 }

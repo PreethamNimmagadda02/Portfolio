@@ -1,13 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { InViewClass, RiseWords } from "../Reveal";
+import type { CSSProperties, ReactNode } from "react";
+import { InViewClass } from "../Reveal";
 import { chapter as chapterFor } from "@/lib/chapters";
 import { cn } from "@/lib/utils";
 
-export interface SectionHeadingProps {
+interface SectionHeadingProps {
   /** Uppercase label rendered in Geist Mono above the title. */
-  eyebrow?: string;
+  eyebrow: string;
   /**
    * The section's id in the chapter registry. Prints the chapter numeral ahead
    * of the eyebrow, so every chapter carries the same number the letterhead
@@ -16,7 +16,7 @@ export interface SectionHeadingProps {
   chapter?: string;
   /** A numeral to print in place of the chapter's, for a movement within one ("01.2"). */
   numeral?: string;
-  title: ReactNode;
+  title: string;
   subtext?: ReactNode;
   className?: string;
   id?: string;
@@ -24,6 +24,9 @@ export interface SectionHeadingProps {
 
 /** Milliseconds between words in the headline. */
 const WORD_STEP = 62;
+
+/** Milliseconds the first word waits for the eyebrow above it. */
+const TITLE_DELAY = 120;
 
 /** Milliseconds the subtext waits once every word of the headline has begun to rise. */
 const SUBTEXT_LAG = 260;
@@ -34,10 +37,12 @@ const SUBTEXT_LAG = 260;
  * rule drawing beneath it, and an optional subtext. Left-aligned; the rule
  * spans the headline's own width.
  *
- * A string title is split into words so the line builds left to right, which
- * is how a Didone headline wants to arrive. A ReactNode title (one carrying
- * its own emphasis or markup) cannot be split safely, so it keeps the older
- * whole-line lift.
+ * The title is split into words, each rising out of its own mask on a
+ * left-to-right stagger, so the line builds the way a Didone headline wants
+ * to arrive. The mask is `.word-mask`, whose descender reserve is set in em:
+ * one shared pixel reserve would clip a "g" at 3rem and leave a gap at 22px.
+ * The space between words sits outside the masks so it stays a line break
+ * opportunity.
  *
  * The subtext follows the headline rather than waiting under it: once the
  * last word is on its way it settles into place (.ink-in), rising a fraction
@@ -52,53 +57,51 @@ export function SectionHeading({
   className,
   id,
 }: SectionHeadingProps) {
-  const splittable = typeof title === "string";
+  const words = title.split(" ");
   // Words carry their own delays, so the rule waits for the last one.
-  const ruleDelay = splittable ? (title as string).split(" ").length * WORD_STEP : 0;
+  const ruleDelay = words.length * WORD_STEP;
   const numeral = numeralOverride ?? (chapter ? chapterFor(chapter).no : null);
-  const hasLabel = Boolean(eyebrow || numeral);
 
   return (
     <InViewClass amount={0.3} className={cn("flex flex-col items-start", className)}>
-      {hasLabel ? (
-        <span className="line-mask mb-3">
-          {/* Two elements, not one: .line-rise is inline-block and would
-              override the eyebrow's inline-flex, collapsing the numeral, the
-              rule and the words into one run. */}
-          <span className="line-rise">
-            <span className="eyebrow">
-              {numeral ? (
-                <>
-                  {/* Decorative: the eyebrow carries the meaning, the numeral the order. */}
-                  <span aria-hidden className="ledger text-aurum-300">
-                    {numeral}
-                  </span>
-                  {eyebrow ? <span aria-hidden className="h-px w-6 bg-hairline-gold" /> : null}
-                </>
-              ) : null}
-              {eyebrow}
-            </span>
+      <span className="line-mask mb-3">
+        {/* Two elements, not one: .line-rise is inline-block and would
+            override the eyebrow's inline-flex, collapsing the numeral, the
+            rule and the words into one run. */}
+        <span className="line-rise">
+          <span className="eyebrow">
+            {numeral ? (
+              <>
+                {/* Decorative: the eyebrow carries the meaning, the numeral the order. */}
+                <span aria-hidden className="ledger text-aurum-300">
+                  {numeral}
+                </span>
+                <span aria-hidden className="h-px w-6 bg-hairline-gold" />
+              </>
+            ) : null}
+            {eyebrow}
           </span>
         </span>
-      ) : null}
+      </span>
 
       <div className="max-w-full">
         <h2
           id={id}
           className="font-display font-normal text-ivory-100 text-[2.125rem] lg:text-[3rem] leading-[1.1] tracking-[-0.005em]"
         >
-          {splittable ? (
-            <RiseWords text={title as string} baseDelay={hasLabel ? 120 : 0} step={WORD_STEP} />
-          ) : (
-            <span className="line-mask">
-              <span
-                className="line-rise"
-                style={{ "--rise-delay": hasLabel ? "120ms" : "0ms" } as React.CSSProperties}
-              >
-                {title}
+          {words.map((word, i) => (
+            <span key={i}>
+              <span className="word-mask">
+                <span
+                  className="line-rise"
+                  style={{ "--rise-delay": `${TITLE_DELAY + i * WORD_STEP}ms` } as CSSProperties}
+                >
+                  {word}
+                </span>
               </span>
+              {i < words.length - 1 ? " " : ""}
             </span>
-          )}
+          ))}
         </h2>
         <span
           className="rule-draw"
@@ -110,7 +113,7 @@ export function SectionHeading({
       {subtext ? (
         <p
           className="ink-in font-sans text-ivory-200 text-base leading-[1.65] max-w-[65ch] mt-6"
-          style={{ "--ink-delay": `${(hasLabel ? 120 : 0) + ruleDelay + SUBTEXT_LAG}ms` } as React.CSSProperties}
+          style={{ "--ink-delay": `${TITLE_DELAY + ruleDelay + SUBTEXT_LAG}ms` } as CSSProperties}
         >
           {subtext}
         </p>

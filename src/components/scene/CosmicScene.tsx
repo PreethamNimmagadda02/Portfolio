@@ -31,7 +31,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   usePointer,
@@ -41,9 +41,8 @@ import {
   type ScrollState,
 } from "@/lib/viewport-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { getSceneState, hexToVec3, useChapterCalibration } from "@/lib/scene-store";
-import { getActiveSkillCategories } from "@/lib/scene-store";
-import { skillsData, getCategoryColor } from "@/lib/skills-data";
+import { getSceneState, getActiveSkillCategory, useChapterCalibration } from "@/lib/scene-store";
+import { skillsData, categoryColors } from "@/lib/skills-data";
 import { markSceneWarmed, seededRandom } from "@/lib/utils";
 
 /** Foundation tokens as WebGL uniform seeds (the only hex literals allowed here). */
@@ -59,18 +58,14 @@ const AURUM_200 = "#D9BE7C";
  * elsewhere, carried across the chapter cross-fade so it dissolves on the way
  * out instead of popping.
  *
- * Chapter intensity alone is not enough for anything with an edge. The nebula
- * and the starfield can follow intensity, because gold light behind the
- * contact letter reads as ambience; geometry cannot, because it crossed the
- * form fields and read as debris over the copy.
+ * Chapter intensity alone is not enough for anything with an edge. The
+ * starfield can follow intensity, because gold light behind the contact
+ * letter reads as ambience; geometry cannot, because it crossed the form
+ * fields and read as debris over the copy.
  */
-function chapterWeight(
-  chapter: { id: string },
-  next: { id: string },
-  blend: number,
-  id: string
-): number {
-  return lerp1(chapter.id === id ? 1 : 0, next.id === id ? 1 : 0, blend);
+function chapterWeight({ chapter, next, blend }: ReturnType<typeof getSceneState>, id: string): number {
+  const from = chapter.id === id ? 1 : 0;
+  return from + ((next.id === id ? 1 : 0) - from) * blend;
 }
 
 // -----------------------------------------------------------------------------
@@ -137,7 +132,7 @@ const starsFragment = /* glsl */ `
     float d = length(c);
     float alpha = smoothstep(0.5, 0.05, d);
     float core = smoothstep(0.18, 0.0, d) * 0.9;
-    // Per-star base color crossfaded toward the chapter's umber tint.
+    // Per-star base color crossfaded toward the umber tint (uColorMod).
     // uModMix is held low (0.2) so the ivory palette still reads; the tint
     // is an ambient wash, not a recolor.
     vec3 base = mix(vColor, uColorMod * (0.7 + core + vStretch * 0.35), uModMix);
@@ -145,8 +140,8 @@ const starsFragment = /* glsl */ `
     // ones stay crisp.
     float fog = mix(0.35, 1.0, vDepth);
     vec3 col = base * vTwinkle * fog + vec3(1.0) * vGravity * 0.5;
-    // Mid-page the field settles to faint warm dust; it brightens with the
-    // nebula in the hero and contact chapters.
+    // Mid-page the field settles to faint warm dust; it brightens in the hero
+    // and contact chapters.
     float presence = 0.35 + 0.65 * uIntensity;
     gl_FragColor = vec4(col, alpha * vTwinkle * (0.5 + fog * 0.5) * presence);
   }
@@ -253,8 +248,6 @@ const guillocheVertex = /* glsl */ `
 `;
 
 const guillocheFragment = /* glsl */ `
-  precision highp float;
-
   uniform float uTime;
   uniform float uOpacity;
   uniform float uReveal;
@@ -362,8 +355,10 @@ function GuillocheField({
       uMouse: { value: new THREE.Vector2(0, 0) },
       uClearDir: { value: new THREE.Vector2(isMobile ? 0 : 1, isMobile ? 1 : 0) },
       uClearRange: { value: new THREE.Vector2(isMobile ? 0.3 : 0.16, isMobile ? 0.72 : 0.58) },
-      uGold: { value: new THREE.Vector3(...hexToVec3(AURUM_300)) },
-      uHigh: { value: new THREE.Vector3(...hexToVec3(AURUM_100)) },
+      // Raw sRGB components: tagging the hex as linear skips the conversion
+      // a plain new THREE.Color(hex) would apply, which darkens the engraving.
+      uGold: { value: new THREE.Color().setStyle(AURUM_300, THREE.LinearSRGBColorSpace) },
+      uHigh: { value: new THREE.Color().setStyle(AURUM_100, THREE.LinearSRGBColorSpace) },
     }),
     [isMobile]
   );
@@ -381,8 +376,7 @@ function GuillocheField({
     // the two read as one movement without coupling to the loader's event.
     u.uReveal.value = Math.min(1, Math.max(0, (elapsed - GUILLOCHE_CUT_DELAY) / GUILLOCHE_CUT));
 
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const target = chapterWeight(chapter, next, blend, "hero") * GUILLOCHE_INK;
+    const target = chapterWeight(getSceneState(scroll.progress), "home") * GUILLOCHE_INK;
     u.uOpacity.value += (target - u.uOpacity.value) * 0.05;
     // A full-screen shader past the hero draws nothing but black, so it stops
     // drawing at all once its ink has drained, as every other focus object does.
@@ -403,9 +397,6 @@ function GuillocheField({
       />
     </mesh>
   );
-}
-function lerp1(a: number, b: number, t: number) {
-  return a + (b - a) * t;
 }
 
 // -----------------------------------------------------------------------------
@@ -437,8 +428,7 @@ function makeStarTexture(): THREE.Texture {
   if (starSprite) return starSprite;
   const size = 64;
   const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = canvas.height = size;
   const ctx = canvas.getContext("2d")!;
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   g.addColorStop(0, "rgba(255,255,255,1)");
@@ -447,10 +437,8 @@ function makeStarTexture(): THREE.Texture {
   g.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
-  starSprite = tex;
-  return tex;
+  starSprite = new THREE.CanvasTexture(canvas);
+  return starSprite;
 }
 
 function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
@@ -470,7 +458,7 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       positions[i * 3 + 2] = radius * Math.cos(phi);
-      colorArray.push(new THREE.Color(getCategoryColor(skillsData[i].category)));
+      colorArray.push(new THREE.Color(categoryColors[skillsData[i].category]));
     }
 
     return { positions, colorArray };
@@ -489,10 +477,10 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    const { chapter, next, blend, constellationOpacity } = getSceneState(scroll.progress);
+    const scene = getSceneState(scroll.progress);
     // Pinned to Skills. Chapter intensity alone let the field bleed a long way
     // up into Experience, where a lit sphere sat behind the role dossier.
-    const target = constellationOpacity * chapterWeight(chapter, next, blend, "skills");
+    const target = scene.constellationOpacity * chapterWeight(scene, "skills-sphere");
     base.current += (target - base.current) * 0.06;
     // Normalised chapter presence: 1 inside Skills, easing to 0 either side.
     const weight = Math.min(base.current / CONSTELLATION_REST, 1);
@@ -506,8 +494,8 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
     // Hidden outside Skills: no point easing colours and re-uploading them to
     // the GPU every frame for a group that is not drawn.
     if (pointsRef.current && groupRef.current?.visible) {
-      const activeCats = getActiveSkillCategories();
-      const anyFilter = activeCats.size > 0;
+      const active = getActiveSkillCategory();
+      const anyFilter = active !== null;
       const mat = pointsRef.current.material as THREE.PointsMaterial;
       // Brightness lives in the vertex colour (fragment output is clamped to
       // [0, 1] before additive blending, so a per-point lift above the base
@@ -525,7 +513,7 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
       /* eslint-disable react-hooks/immutability */
       const colorAttr = pointsRef.current.geometry.attributes.color as THREE.BufferAttribute;
       for (let i = 0; i < skillsData.length; i++) {
-        const match = activeCats.has(skillsData[i].category);
+        const match = skillsData[i].category === active;
         const baseColor = colorArray[i];
         const target = anyFilter ? (match ? CONSTELLATION_LIFT : CONSTELLATION_DIM) : CONSTELLATION_REST;
         const idx = i * 3;
@@ -545,13 +533,13 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
           <bufferAttribute attach="attributes-color" args={[colorsAttr, 3]} />
         </bufferGeometry>
+        {/* Size and opacity are set in the frame loop before the group is
+            ever drawn. */}
         <pointsMaterial
           map={sprite}
-          size={0.075}
           vertexColors
           transparent
           opacity={0}
-          sizeAttenuation
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -561,14 +549,13 @@ function SkillsConstellation({ scroll }: { scroll: ScrollState }) {
 }
 
 // -----------------------------------------------------------------------------
-// Ember particles: a small gold flourish weighted to the flame-focus chapter.
+// Ember particles: a small gold flourish pinned to Achievements.
 // -----------------------------------------------------------------------------
 function Embers({ scroll }: { scroll: ScrollState }) {
   const pointsRef = useRef<THREE.Points>(null);
   const count = 24;
-  const { positions, phases } = useMemo(() => {
+  const positions = useMemo(() => {
     const positions = new Float32Array(count * 3);
-    const phases = new Float32Array(count);
     const rand = seededRandom(777);
     for (let i = 0; i < count; i++) {
       const r = 1.4 + rand() * 1.2;
@@ -576,15 +563,14 @@ function Embers({ scroll }: { scroll: ScrollState }) {
       positions[i * 3] = Math.cos(a) * r;
       positions[i * 3 + 1] = (rand() - 0.5) * 2;
       positions[i * 3 + 2] = Math.sin(a) * r;
-      phases[i] = rand();
+      rand(); // the retired phase draw: keeps every ember where it was
     }
-    return { positions, phases };
+    return positions;
   }, []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    const { chapter, next, blend } = getSceneState(scroll.progress);
-    const weight = chapterWeight(chapter, next, blend, "achievements");
+    const weight = chapterWeight(getSceneState(scroll.progress), "achievements");
     if (pointsRef.current) {
       pointsRef.current.visible = weight > 0.01;
       pointsRef.current.rotation.y = t * 0.1;
@@ -597,9 +583,8 @@ function Embers({ scroll }: { scroll: ScrollState }) {
     <points ref={pointsRef} visible={false}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aPhase" args={[phases, 1]} />
       </bufferGeometry>
-      <pointsMaterial size={0.05} color={AURUM_300} transparent opacity={0} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
+      <pointsMaterial size={0.05} color={AURUM_300} transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
     </points>
   );
 }
@@ -608,14 +593,13 @@ function Embers({ scroll }: { scroll: ScrollState }) {
 // Adaptive quality: watches real frame time and steps the renderer's pixel
 // ratio down (1.5 to 1.25 to 1) when the GPU can't hold 60fps, and back up
 // when there's headroom. Keeps scrolling smooth on weak or integrated GPUs.
+// Desktop only: on a phone the ratio is already pinned at 1.
 // -----------------------------------------------------------------------------
-function AdaptiveQuality({ maxDpr }: { maxDpr: number }) {
+const DPR_LEVELS = [1.5, 1.25, 1];
+
+function AdaptiveQuality() {
   const { gl } = useThree();
   const stats = useRef({ acc: 0, frames: 0, level: 0, cooldown: 0 });
-  const levels = useMemo(() => {
-    const l = [maxDpr, Math.max(1, maxDpr - 0.25), 1];
-    return [...new Set(l)];
-  }, [maxDpr]);
 
   useFrame((_, delta) => {
     const s = stats.current;
@@ -631,13 +615,13 @@ function AdaptiveQuality({ maxDpr }: { maxDpr: number }) {
       s.acc = 0;
       s.frames = 0;
       if (s.cooldown <= 0) {
-        if (avgMs > 22 && s.level < levels.length - 1) {
+        if (avgMs > 22 && s.level < DPR_LEVELS.length - 1) {
           s.level++;
-          gl.setPixelRatio(Math.min(window.devicePixelRatio, levels[s.level]));
+          gl.setPixelRatio(Math.min(window.devicePixelRatio, DPR_LEVELS[s.level]));
           s.cooldown = 3; // settle before re-evaluating
         } else if (avgMs < 12 && s.level > 0) {
           s.level--;
-          gl.setPixelRatio(Math.min(window.devicePixelRatio, levels[s.level]));
+          gl.setPixelRatio(Math.min(window.devicePixelRatio, DPR_LEVELS[s.level]));
           s.cooldown = 5; // climb back up conservatively
         }
       }
@@ -655,15 +639,13 @@ function AdaptiveQuality({ maxDpr }: { maxDpr: number }) {
 function CameraRig({ pointer, scroll }: { pointer: PointerState; scroll: ScrollState }) {
   const { camera } = useThree();
   const target = useMemo(() => new THREE.Vector3(), []);
-  const lookAt = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((_, delta) => {
     const { camera: camWaypoint, lookAt: lookWaypoint } = getSceneState(scroll.progress);
     const k = 1 - Math.exp(-1.4 * delta);
     target.set(camWaypoint[0] + pointer.nx * 0.3, camWaypoint[1] + pointer.ny * 0.2, camWaypoint[2]);
     camera.position.lerp(target, k);
-    lookAt.set(lookWaypoint[0], lookWaypoint[1], lookWaypoint[2]);
-    camera.lookAt(lookAt);
+    camera.lookAt(...lookWaypoint);
   });
 
   return null;
@@ -679,7 +661,7 @@ function SceneContents({ isMobile }: { isMobile: boolean }) {
   return (
     <>
       <CameraRig pointer={pointer} scroll={scroll} />
-      <AdaptiveQuality maxDpr={isMobile ? 1 : 1.5} />
+      {!isMobile && <AdaptiveQuality />}
       <GPUStars pointer={pointer} scroll={scroll} count={isMobile ? 120 : 360} />
       <GuillocheField pointer={pointer} scroll={scroll} isMobile={isMobile} />
       {!isMobile && <SkillsConstellation scroll={scroll} />}
@@ -692,48 +674,24 @@ export default function CosmicScene() {
   const isMobile = useIsMobile();
   const visible = useDocumentVisible();
   const prefersReducedMotion = useReducedMotion();
-  const [ready, setReady] = useState(false);
   // Chapter boundaries follow the real section positions, not a guess.
   useChapterCalibration();
 
-  useEffect(() => {
-    // Small delay lets the hero paint first; the background then fades in,
-    // avoiding competition with the initial interactivity critical path.
-    const t = setTimeout(() => setReady(true), 50);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (prefersReducedMotion) {
-    // Static, cheap fallback: a fixed gold gradient on obsidian instead of
-    // any canvas, placed where the hero lobe would sit.
-    return (
-      <div
-        className="fixed inset-0 z-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(60% 45% at 78% 30%, rgba(201,169,97,0.10), transparent 70%), #0C0A08",
-        }}
-        aria-hidden
-      />
-    );
-  }
+  // page.tsx mounts the scene only on main-thread idle and never under reduced
+  // motion; this guard keeps the canvas off even if that ever changes.
+  if (prefersReducedMotion) return null;
 
   return (
     <div className="gpu-layer fixed inset-0 z-0 pointer-events-none">
-      {ready && (
-        <Canvas
-          camera={{ position: [0.9, 0.3, 6.5], fov: 55 }}
-          gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-          dpr={[1, isMobile ? 1 : 1.5]}
-          style={{ background: "transparent" }}
-          frameloop={visible ? "always" : "never"}
-          onCreated={() => markSceneWarmed()}
-        >
-          <Suspense fallback={null}>
-            <SceneContents isMobile={isMobile} />
-          </Suspense>
-        </Canvas>
-      )}
+      <Canvas
+        camera={{ position: getSceneState(0).camera, fov: 55 }}
+        gl={{ antialias: false }}
+        dpr={[1, isMobile ? 1 : DPR_LEVELS[0]]}
+        frameloop={visible ? "always" : "never"}
+        onCreated={() => markSceneWarmed()}
+      >
+        <SceneContents isMobile={isMobile} />
+      </Canvas>
       {/* Vignette: a static CSS radial-gradient overlay, zero GPU cost.
           Darkens the frame edges and doubles as a readability aid for the
           content sitting on top. */}

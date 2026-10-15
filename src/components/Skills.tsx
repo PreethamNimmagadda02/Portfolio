@@ -23,12 +23,9 @@
  */
 
 import {
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -67,21 +64,15 @@ interface CategoryGroup {
  */
 function buildGroups(): CategoryGroup[] {
   const byCat = new Map<string, string[]>();
-  for (const { name, category } of skillsData) {
-    const list = byCat.get(category);
-    if (list) list.push(name);
-    else byCat.set(category, [name]);
-  }
-  const groups: CategoryGroup[] = [];
-  for (const [cat, names] of byCat) {
-    groups.push({
+  for (const { name, category } of skillsData) byCat.set(category, [...(byCat.get(category) ?? []), name]);
+  return [...byCat]
+    .map(([cat, names]) => ({
       cat,
       label: categoryLabels[cat] ?? cat,
       count: names.length,
-      skills: [...names].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
-    });
-  }
-  return groups.sort((a, b) => b.count - a.count || a.cat.localeCompare(b.cat, "en"));
+      skills: names.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
+    }))
+    .sort((a, b) => b.count - a.count || a.cat.localeCompare(b.cat, "en"));
 }
 
 const GROUPS = buildGroups();
@@ -94,6 +85,11 @@ const STEP = 360 / STOPS;
 /** Graduations between two stops, the way a bezel carries minutes between hours. */
 const MINORS_PER_STEP = 10;
 const MINOR_STEP = STEP / MINORS_PER_STEP;
+/** Every graduation position that is not a stop. */
+const MINORS = Array.from({ length: STOPS * MINORS_PER_STEP }, (_, i) => i).filter((i) => i % MINORS_PER_STEP !== 0);
+
+/** Arrow keys turn the dial by one stop either way. */
+const ARROW_STEPS: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
 
 /**
  * Shortest signed number of stops from a to b. A bezel never travels the long
@@ -114,7 +110,6 @@ function stopAt(rotation: number): number {
 function foldDelta(delta: number): number {
   return ((((delta + 180) % 360) + 360) % 360) - 180;
 }
-
 
 /* ------------------------------------------------------------------------
    Motion: the three ways the dial turns, each with its own character.
@@ -186,7 +181,7 @@ function RimLabel({ group, angle, selected, rotation, onSelect, register }: RimL
       tabIndex={selected ? 0 : -1}
       onClick={onSelect}
       className="absolute left-1/2 top-1/2 cursor-pointer p-2.5 focus-visible:outline-none"
-      style={{ transform: rimTransform(angle) } as CSSProperties}
+      style={{ transform: rimTransform(angle) }}
     >
       <motion.span
         className={cn(
@@ -244,20 +239,11 @@ function Dial({ index, rotation, dragging, onSelect, onStep, onDragStart, onDrag
   // would compute every repeat from the same stale stop and the dial would
   // advance once and then stall.
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const steps: Record<string, number> = {
-      ArrowRight: 1,
-      ArrowDown: 1,
-      ArrowLeft: -1,
-      ArrowUp: -1,
-    };
     let landed: number | null = null;
-    if (event.key in steps) landed = onStep(steps[event.key]);
-    else if (event.key === "Home") {
-      onSelect(0);
-      landed = 0;
-    } else if (event.key === "End") {
-      onSelect(STOPS - 1);
-      landed = STOPS - 1;
+    if (event.key in ARROW_STEPS) landed = onStep(ARROW_STEPS[event.key]);
+    else if (event.key === "Home" || event.key === "End") {
+      landed = event.key === "Home" ? 0 : STOPS - 1;
+      onSelect(landed);
     }
     if (landed === null) return;
     event.preventDefault();
@@ -327,11 +313,6 @@ function Dial({ index, rotation, dragging, onSelect, onStep, onDragStart, onDrag
     event.preventDefault();
     event.stopPropagation();
   };
-
-  const minors = useMemo(
-    () => Array.from({ length: STOPS * MINORS_PER_STEP }, (_, i) => i).filter((i) => i % MINORS_PER_STEP !== 0),
-    []
-  );
 
   const group = GROUPS[index];
 
@@ -433,7 +414,7 @@ function Dial({ index, rotation, dragging, onSelect, onStep, onDragStart, onDrag
         >
           {/* Minor graduations, the fifth in each run a touch longer, purely
               to give the rim the graduated face of an instrument. */}
-          {minors.map((i) => {
+          {MINORS.map((i) => {
             const mid = i % MINORS_PER_STEP === MINORS_PER_STEP / 2;
             return (
               <span
@@ -507,7 +488,7 @@ function Dial({ index, rotation, dragging, onSelect, onStep, onDragStart, onDrag
         <StepButton label="Previous discipline" onClick={() => onStep(-1)}>
           <CaretLeft size={16} weight="light" aria-hidden />
         </StepButton>
-        <span className="ledger font-mono text-[11px] uppercase leading-none tracking-[0.18em] text-ivory-300">
+        <span className="ledger caption tracking-[0.18em] text-ivory-300">
           <span className="text-ivory-100">{pad2(index + 1)}</span>
           <span className="mx-2 text-ivory-300/60">/</span>
           {pad2(STOPS)}
@@ -562,59 +543,50 @@ export default function Skills() {
   const target = useRef(0);
   const lastIndex = useRef(0);
 
-  const point = useCallback((next: number) => {
+  const point = (next: number) => {
     if (next === lastIndex.current) return;
     lastIndex.current = next;
     setIndex(next);
     selectSkillCategory(GROUPS[next].cat);
-  }, []);
+  };
 
   /** Turns the dial to a stop the way a hand would set a bezel: the short way round, with weight. */
-  const select = useCallback(
-    (next: number) => {
-      target.current -= shortestStepDelta(lastIndex.current, next) * STEP;
-      point(next);
-      if (reduced) rotation.set(target.current);
-      else animate(rotation, target.current, TRAVEL);
-    },
-    [point, reduced, rotation]
-  );
+  const select = (next: number) => {
+    target.current -= shortestStepDelta(lastIndex.current, next) * STEP;
+    point(next);
+    if (reduced) rotation.set(target.current);
+    else animate(rotation, target.current, TRAVEL);
+  };
 
   // The ref, not the state, is the base: it is current the moment select
   // returns, so repeated steps in one frame each move a stop.
-  const step = useCallback(
-    (delta: number) => {
-      const next = (lastIndex.current + delta + STOPS) % STOPS;
-      select(next);
-      return next;
-    },
-    [select]
-  );
+  const step = (delta: number) => {
+    const next = (lastIndex.current + delta + STOPS) % STOPS;
+    select(next);
+    return next;
+  };
 
   /* The hand. On the first movement the target is re-based to wherever the
      dial actually is, so grabbing a dial mid-turn takes it over cleanly
      instead of yanking it to the end of its journey. Each move advances the
      target and lets a tight spring carry the frame there: the spring is what
      makes a shaky pointer feel like a smooth, heavy turn. */
-  const onDragStart = useCallback(() => {
+  const onDragStart = () => {
     target.current = rotation.get();
     setDragging(true);
-  }, [rotation]);
+  };
 
-  const onDrag = useCallback(
-    (delta: number) => {
-      target.current += delta;
-      point(stopAt(target.current));
-      if (reduced) rotation.set(target.current);
-      else animate(rotation, target.current, FOLLOW);
-    },
-    [point, reduced, rotation]
-  );
+  const onDrag = (delta: number) => {
+    target.current += delta;
+    point(stopAt(target.current));
+    if (reduced) rotation.set(target.current);
+    else animate(rotation, target.current, FOLLOW);
+  };
 
   /* Lifting off. The dial keeps a fraction of the hand's speed, then seats
      itself in the nearest detent to where that carry would have taken it,
      never more than two stops on. */
-  const onDragEnd = useCallback(() => {
+  const onDragEnd = () => {
     setDragging(false);
     const here = target.current;
     const thrown = reduced ? here : here + rotation.getVelocity() * THROW;
@@ -624,7 +596,7 @@ export default function Skills() {
     point(stopAt(target.current));
     if (reduced) rotation.set(target.current);
     else animate(rotation, target.current, SEAT);
-  }, [point, reduced, rotation]);
+  };
 
   // The dial always points somewhere, so the star chart is told what it is
   // pointing at on mount rather than waiting for a first interaction.
@@ -636,20 +608,19 @@ export default function Skills() {
   const panelRef = useRef<HTMLDivElement>(null);
   const panelInView = useInView(panelRef, { once: true, amount: 0.2 });
 
-  const columns = useMemo(() => (group.skills.length > 8 ? "columns-2" : "columns-1"), [group.skills.length]);
+  const columns = group.skills.length > 8 ? "columns-2" : "columns-1";
 
   return (
     <section id="skills-sphere" className="relative w-full py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid grid-cols-12 gap-x-6">
-          <div className="col-span-12 lg:col-span-8">
-            <SectionHeading
-              chapter="skills-sphere"
-              eyebrow={`${TOTAL_TOOLS} TOOLS, ${STOPS} DISCIPLINES`}
-              title="The working toolset."
-              subtext="Turn the dial to a discipline, by hand or by the crown. The star chart behind the page follows."
-            />
-          </div>
+          <SectionHeading
+            chapter="skills-sphere"
+            eyebrow={`${TOTAL_TOOLS} TOOLS, ${STOPS} DISCIPLINES`}
+            title="The working toolset."
+            subtext="Turn the dial to a discipline, by hand or by the crown. The star chart behind the page follows."
+            className="col-span-12 lg:col-span-8"
+          />
         </div>
 
         <div className="mt-14 grid grid-cols-12 items-start gap-x-6 gap-y-14 lg:mt-20 lg:gap-x-10">

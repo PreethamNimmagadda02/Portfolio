@@ -7,5 +7,5 @@ import { useMediaQuery } from "@/lib/viewport-store";
  * store so every consumer reuses one `MediaQueryList` and one listener.
  */
 export function useReducedMotion() {
-  return useMediaQuery("(prefers-reduced-motion: reduce)", false);
+  return useMediaQuery("(prefers-reduced-motion: reduce)");
 }

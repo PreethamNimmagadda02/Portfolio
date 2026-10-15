@@ -7,7 +7,6 @@ import ScrollProgress from "@/components/ScrollProgress";
 import KonamiEasterEgg from "@/components/KonamiEasterEgg";
 import Cursor from "@/components/Cursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import PerformanceProvider from "@/components/PerformanceProvider";
 import { LazyMotion, domMax, MotionConfig } from "@/lib/motion";
 import { fontVariables } from "@/lib/fonts";
 
@@ -59,13 +58,8 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Preetham Nimmagadda, AI architect",
-    description:
-      "Architecting intelligence that acts. The thesis, the method, the selected work and the record.",
-    images: ["/og-image.png"],
-  },
+  // No twitter block: Next fills the card (summary_large_image), title,
+  // description and image from openGraph.
   robots: {
     index: true,
     follow: true,
@@ -147,7 +141,7 @@ export default function RootLayout({
     // The font variables go on <html>, not <body>: the theme's --font-sans,
     // --font-display and --font-mono tokens are declared on :root and read
     // these, so they must be defined on that same element to resolve.
-    <html lang="en" className={`dark ${fontVariables}`} suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: scrollResetScript }} />
         <script
@@ -165,22 +159,17 @@ export default function RootLayout({
         </a>
         <LazyMotion features={domMax} strict>
           <MotionConfig reducedMotion="user">
-            <PerformanceProvider>
-              <PageLoader />
-              <ScrollProgress />
-              <KonamiEasterEgg />
-              <Cursor />
-              <SmoothScroll>
-                <Navbar />
-                <main
-                  id="main-content"
-                  className="relative min-h-[100dvh] bg-obsidian-0 text-ivory-100 overflow-x-clip"
-                >
-                  {children}
-                </main>
-                <Footer />
-              </SmoothScroll>
-            </PerformanceProvider>
+            <PageLoader />
+            <ScrollProgress />
+            <KonamiEasterEgg />
+            <Cursor />
+            <SmoothScroll>
+              <Navbar />
+              <main id="main-content" className="relative min-h-[100dvh] bg-obsidian-0 overflow-x-clip">
+                {children}
+              </main>
+              <Footer />
+            </SmoothScroll>
           </MotionConfig>
         </LazyMotion>
       </body>

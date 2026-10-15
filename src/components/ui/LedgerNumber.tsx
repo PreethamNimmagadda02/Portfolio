@@ -5,7 +5,7 @@ import { motion, useInView, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-export interface LedgerNumberProps {
+interface LedgerNumberProps {
   /** The fully formatted figure, exactly as it should read: "1,800+", "Top 0.07%". */
   value: string;
   className?: string;
@@ -13,8 +13,6 @@ export interface LedgerNumberProps {
   label?: string;
   /** Delay before the first character moves, in milliseconds. */
   delayMs?: number;
-  /** Delay between characters, in milliseconds. */
-  stagger?: number;
 }
 
 /**
@@ -29,8 +27,10 @@ export function LedgerNumber(props: LedgerNumberProps) {
 
 const MASK_STYLE: CSSProperties = { paddingBottom: "0.08em" };
 const SPACE_STYLE: CSSProperties = { width: "0.3em" };
+/** Delay between characters, in milliseconds. */
+const STAGGER_MS = 40;
 
-function LedgerRoll({ value, className, label, delayMs = 0, stagger = 40 }: LedgerNumberProps) {
+function LedgerRoll({ value, className, label, delayMs = 0 }: LedgerNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const reduced = useReducedMotion();
@@ -71,7 +71,7 @@ function LedgerRoll({ value, className, label, delayMs = 0, stagger = 40 }: Ledg
               transition={{
                 duration: 0.9,
                 ease: EASE_SETTLE,
-                delay: delayMs / 1000 + (i * stagger) / 1000,
+                delay: delayMs / 1000 + (i * STAGGER_MS) / 1000,
               }}
             >
               {ch}

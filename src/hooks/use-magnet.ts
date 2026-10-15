@@ -2,7 +2,7 @@
 
 import { useCallback, type PointerEvent } from "react";
 
-export interface MagnetOptions {
+interface MagnetOptions {
   /** How far the element leans toward the hand, as a fraction of the pointer's offset from its centre. */
   pull?: number;
   /** The lean never exceeds this many pixels, so a wide element does not wander. */

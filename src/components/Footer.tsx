@@ -6,14 +6,14 @@ import { ArrowUp, EnvelopeSimple, GithubLogo, LinkedinLogo } from "@phosphor-ico
 import { motion, useScroll, useTransform, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMagnet } from "@/hooks/use-magnet";
-import { cn, smoothScrollTo } from "@/lib/utils";
+import { smoothScrollTo } from "@/lib/utils";
 import { InViewClass } from "./Reveal";
 import { chapter } from "@/lib/chapters";
 
 /* The footer lists a short run of chapters, named from the registry so a
    renamed chapter cannot drift. One label per intent: contact reads "Get in
-   touch" in the hero, the nav and here, never "Contact" in one place and
-   something else in another. */
+   touch" in the letterhead, the Index and here, never "Contact" in one place
+   and something else in another. */
 const NAV_LINKS = ["home", "about", "experience", "projects", "achievements", "contact"].map((id) => ({
   id,
   label: id === "contact" ? "Get in touch" : chapter(id).label,
@@ -34,18 +34,14 @@ const LINK =
 const DASH =
   "pointer-events-none absolute top-1/2 -left-5 h-px w-3 origin-left scale-x-0 bg-hairline-gold transition-transform duration-300 ease-heavy group-hover:scale-x-100";
 
-function Dash() {
-  return <span aria-hidden className={DASH} />;
-}
-
 /* A column heading. Three stacks of links with nothing above them read as a
    template footer; the small caps are what make them a colophon's columns. */
-function ColumnLabel({ children, className }: { children: ReactNode; className?: string }) {
+function ColumnLabel({ children }: { children: ReactNode }) {
   /* Block heading, eyebrow inside: .eyebrow is inline-flex, so it is the
      wrapper that owns the spacing and any rule, the same shape SectionHeading
      uses. */
   return (
-    <h2 className={cn("mb-4", className)}>
+    <h2 className="mb-4">
       <span className="eyebrow text-ivory-300">
         {children}
         <span aria-hidden className="h-px w-6 bg-hairline" />
@@ -59,17 +55,16 @@ function Rise({
   children,
   className,
   delay = 0,
-  reduced,
   as: Tag = "div",
   ariaLabel,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
-  reduced: boolean;
   as?: "div" | "nav";
   ariaLabel?: string;
 }) {
+  const reduced = useReducedMotion();
   const M = Tag === "nav" ? motion.nav : motion.div;
   return (
     <M
@@ -143,7 +138,7 @@ export default function Footer() {
             gap-y only bites here, since at lg all three sit on one row. */}
         <div className="grid grid-cols-12 gap-x-6 gap-y-8 lg:gap-x-8">
           {/* Brand */}
-          <Rise reduced={reduced} className="col-span-12 lg:col-span-5">
+          <Rise className="col-span-12 lg:col-span-5">
             <Link
               href="/"
               className="foil inline-block font-display font-medium text-[24px] leading-tight tracking-[-0.005em]"
@@ -158,7 +153,6 @@ export default function Footer() {
 
           {/* Links */}
           <Rise
-            reduced={reduced}
             delay={0.08}
             as="nav"
             ariaLabel="Footer"
@@ -174,7 +168,7 @@ export default function Footer() {
               {NAV_LINKS.map((link) => (
                 <li key={link.id}>
                   <a href={`#${link.id}`} onClick={(e) => handleNavClick(e, link.id)} className={LINK}>
-                    <Dash />
+                    <span aria-hidden className={DASH} />
                     {link.label}
                   </a>
                 </li>
@@ -184,7 +178,6 @@ export default function Footer() {
 
           {/* Connect */}
           <Rise
-            reduced={reduced}
             delay={0.16}
             /* The rule runs at every width here: below lg it is what divides
                the two lists sharing the row, above lg it is the third column
@@ -200,7 +193,7 @@ export default function Footer() {
                     className={LINK}
                     {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   >
-                    <Dash />
+                    <span aria-hidden className={DASH} />
                     <Icon size={16} weight="light" aria-hidden className="shrink-0" />
                     {label}
                   </a>
@@ -212,7 +205,6 @@ export default function Footer() {
 
         {/* Bottom row */}
         <Rise
-          reduced={reduced}
           delay={0.24}
           className="mt-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-5 border-t border-hairline pt-6"
         >

@@ -14,16 +14,15 @@
  */
 
 import { readdir, readFile } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "src");
 const EXTENSIONS = new Set([".ts", ".tsx", ".css", ".json", ".mjs"]);
-const SKIP_DIRS = new Set(["node_modules", ".next"]);
 
 const EM_DASH = "—";
-const EN_DASH = "–";
+const DASHES = /[—–]/g;
 
 /* Word boundaries on both sides; common inflections included so a suffix
    cannot smuggle a banned word past the check. */
@@ -45,59 +44,35 @@ const BANNED = new RegExp(
   "gi"
 );
 
-async function* walk(dir) {
-  const entries = await readdir(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      if (SKIP_DIRS.has(entry.name)) continue;
-      yield* walk(join(dir, entry.name));
-    } else if (entry.isFile()) {
-      const dot = entry.name.lastIndexOf(".");
-      if (dot !== -1 && EXTENSIONS.has(entry.name.slice(dot))) {
-        yield join(dir, entry.name);
-      }
-    }
-  }
-}
-
 function checkLine(line) {
   const hits = [];
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === EM_DASH) hits.push({ column: i + 1, reason: "em dash (U+2014)" });
-    else if (ch === EN_DASH) hits.push({ column: i + 1, reason: "en dash (U+2013)" });
+  for (const m of line.matchAll(DASHES)) {
+    hits.push({ column: m.index + 1, reason: m[0] === EM_DASH ? "em dash (U+2014)" : "en dash (U+2013)" });
   }
-  BANNED.lastIndex = 0;
-  let match;
-  while ((match = BANNED.exec(line)) !== null) {
-    hits.push({ column: match.index + 1, reason: `banned word "${match[0]}"` });
-  }
+  for (const m of line.matchAll(BANNED)) hits.push({ column: m.index + 1, reason: `banned word "${m[0]}"` });
   return hits.sort((a, b) => a.column - b.column);
 }
 
 async function main() {
+  const files = (await readdir(SRC, { recursive: true })).filter((f) => EXTENSIONS.has(extname(f)));
   const problems = [];
-  let files = 0;
 
-  for await (const file of walk(SRC)) {
-    files++;
-    const text = await readFile(file, "utf8");
-    const lines = text.split(/\r?\n/);
-    const rel = relative(ROOT, file);
+  for (const file of files) {
+    const path = join(SRC, file);
+    const lines = (await readFile(path, "utf8")).split(/\r?\n/);
+    const rel = relative(ROOT, path);
     lines.forEach((line, index) => {
-      for (const hit of checkLine(line)) {
-        problems.push(`${rel}:${index + 1}:${hit.column}: ${hit.reason}`);
-      }
+      for (const hit of checkLine(line)) problems.push(`${rel}:${index + 1}:${hit.column}: ${hit.reason}`);
     });
   }
 
   if (problems.length > 0) {
-    process.stderr.write(`[check-copy] ${problems.length} problem(s) in ${files} file(s):\n`);
+    process.stderr.write(`[check-copy] ${problems.length} problem(s) in ${files.length} file(s):\n`);
     for (const p of problems) process.stderr.write(`  ${p}\n`);
     process.exit(1);
   }
 
-  process.stdout.write(`[check-copy] ${files} files under src are clean: no dashes, no banned words.\n`);
+  process.stdout.write(`[check-copy] ${files.length} files under src are clean: no dashes, no banned words.\n`);
 }
 
 main().catch((err) => {

@@ -26,10 +26,15 @@ type Mode = "rest" | "act" | "label" | "text" | "away";
 const INTERACTIVE = 'a[href], button, [role="button"], [role="tab"], [role="radio"], label, summary, select';
 const TEXTUAL = 'input, textarea, [contenteditable="true"]';
 
+/** Centres a follower on the point it is handed. */
+const place = (el: HTMLElement | null, x: number, y: number) => {
+  if (el) el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+};
+
 export default function Cursor() {
   const reduced = useReducedMotion();
-  const fine = useMediaQuery("(hover: hover) and (pointer: fine)", false);
-  const forced = useMediaQuery("(forced-colors: active)", false);
+  const fine = useMediaQuery("(hover: hover) and (pointer: fine)");
+  const forced = useMediaQuery("(forced-colors: active)");
   const enabled = fine && !reduced && !forced;
 
   const dotRef = useRef<HTMLDivElement>(null);
@@ -39,17 +44,11 @@ export default function Cursor() {
   const [pressed, setPressed] = useState(false);
 
   /* The point: no lag at all. */
-  const writeDot = useCallback((x: number, y: number) => {
-    const el = dotRef.current;
-    if (el) el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-  }, []);
+  const writeDot = useCallback((x: number, y: number) => place(dotRef.current, x, y), []);
   useFollowPointer({ lerp: 1, enabled, write: writeDot });
 
   /* The ring: a weighted follow. */
-  const writeRing = useCallback((x: number, y: number) => {
-    const el = ringRef.current;
-    if (el) el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-  }, []);
+  const writeRing = useCallback((x: number, y: number) => place(ringRef.current, x, y), []);
   useFollowPointer({ lerp: 0.2, enabled, write: writeRing });
 
   /* What is under the hand. pointerover fires only when the target changes,
@@ -59,8 +58,8 @@ export default function Cursor() {
 
     const onOver = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      const target = e.target as Element | null;
-      if (!target || !(target instanceof Element)) return;
+      const target = e.target;
+      if (!(target instanceof Element)) return;
       const named = target.closest<HTMLElement>("[data-cursor]");
       if (named?.dataset.cursor) {
         setLabel(named.dataset.cursor);
@@ -106,7 +105,7 @@ export default function Cursor() {
 
   return (
     <>
-      <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-0 top-0 z-[10000] will-change-transform">
+      <div ref={ringRef} aria-hidden className="pointer-events-none fixed left-0 top-0 z-10000 will-change-transform">
         <div
           className={cn(
             "flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border",
@@ -131,7 +130,7 @@ export default function Cursor() {
         </div>
       </div>
 
-      <div ref={dotRef} aria-hidden className="pointer-events-none fixed left-0 top-0 z-[10000] will-change-transform">
+      <div ref={dotRef} aria-hidden className="pointer-events-none fixed left-0 top-0 z-10000 will-change-transform">
         <div
           className={cn(
             "size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-aurum-200 transition-[opacity,scale] duration-300 ease-heavy",

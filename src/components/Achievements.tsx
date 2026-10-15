@@ -10,7 +10,7 @@
  * turns its figure gold and raises the rules that border it. Nothing else moves.
  */
 
-import { useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { LedgerNumber, SectionHeading } from "@/components/ui";
 import { InViewClass } from "./Reveal";
 import { cn, pad2 } from "@/lib/utils";
@@ -22,7 +22,6 @@ interface Record {
   figure: string;
   /** Sentence read by assistive tech in place of the character spans. */
   spoken: string;
-  /** Mono caption set beneath the figure (Codeforces only). */
   /** The denominator under the figure: percentile, rating, solved. Required,
    *  so no record can ship with a bare number and no unit beside it. */
   unit: string;
@@ -136,14 +135,12 @@ function VerticalRule({ active }: { active: boolean }) {
 function RecordBlock({
   record,
   index,
-  onEnter,
-  onLeave,
+  onHover,
   children,
 }: {
   record: Record;
   index: number;
-  onEnter: (id: string, e: PointerEvent<HTMLElement>) => void;
-  onLeave: () => void;
+  onHover: (id: string | null) => void;
   children?: ReactNode;
 }) {
   const isLeft = index % 2 === 0;
@@ -151,8 +148,9 @@ function RecordBlock({
   return (
     <article
       aria-labelledby={`achievement-${record.id}`}
-      onPointerEnter={(e) => onEnter(record.id, e)}
-      onPointerLeave={onLeave}
+      // Hover is a pointer affordance; a touch should not leave a block lit.
+      onPointerEnter={(e) => e.pointerType !== "touch" && onHover(record.id)}
+      onPointerLeave={() => onHover(null)}
       className={cn(
         "group relative flex flex-col items-start py-10 lg:py-14",
         record.span === 7 ? "lg:col-span-7" : "lg:col-span-5",
@@ -163,7 +161,7 @@ function RecordBlock({
           this is, and what the figure is measured in. Every record carries a
           unit now, so the line is never half empty. */}
       <div aria-hidden className="mb-5 flex items-center gap-3">
-        <span className="ledger font-mono text-[11px] leading-none tracking-[0.14em] text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300">
+        <span className="ledger caption text-ivory-300 transition-colors duration-300 ease-heavy group-hover:text-aurum-300">
           {pad2(index + 1)}
         </span>
         <span className="h-px w-4 bg-hairline-gold" />
@@ -205,19 +203,7 @@ function RecordBlock({
 
 export default function Achievements() {
   const [hovered, setHovered] = useState<string | null>(null);
-
-  const handleEnter = (id: string, e: PointerEvent<HTMLElement>) => {
-    // Hover is a pointer affordance; a touch should not leave a block lit.
-    if (e.pointerType === "touch") return;
-    setHovered(id);
-  };
-  const handleLeave = () => setHovered(null);
-
-  const isActive = (rule: RuleId) => {
-    if (!hovered) return false;
-    const record = records.find((r) => r.id === hovered);
-    return record ? record.rules.includes(rule) : false;
-  };
+  const isActive = (rule: RuleId) => records.find((r) => r.id === hovered)?.rules.includes(rule) ?? false;
 
   const [hackerrank, codechef, codeforces, problems] = records;
 
@@ -236,21 +222,21 @@ export default function Achievements() {
 
         <InViewClass amount={0.2} className="mt-16 flex flex-col lg:mt-20 lg:grid lg:grid-cols-12">
           {/* Row one: HackerRank (1 to 7), CodeChef (8 to 12) */}
-          <RecordBlock record={hackerrank} index={0} onEnter={handleEnter} onLeave={handleLeave}>
+          <RecordBlock record={hackerrank} index={0} onHover={setHovered}>
             <VerticalRule active={isActive("v1")} />
           </RecordBlock>
           <HorizontalRule active={isActive("v1")} className="lg:hidden" />
-          <RecordBlock record={codechef} index={1} onEnter={handleEnter} onLeave={handleLeave} />
+          <RecordBlock record={codechef} index={1} onHover={setHovered} />
 
           {/* The ledger's one horizontal rule between the rows */}
           <HorizontalRule active={isActive("row")} className="lg:col-span-12" />
 
           {/* Row two: Codeforces (1 to 5), problems solved (6 to 12) */}
-          <RecordBlock record={codeforces} index={2} onEnter={handleEnter} onLeave={handleLeave}>
+          <RecordBlock record={codeforces} index={2} onHover={setHovered}>
             <VerticalRule active={isActive("v2")} />
           </RecordBlock>
           <HorizontalRule active={isActive("v2")} className="lg:hidden" />
-          <RecordBlock record={problems} index={3} onEnter={handleEnter} onLeave={handleLeave} />
+          <RecordBlock record={problems} index={3} onHover={setHovered} />
         </InViewClass>
       </div>
     </section>

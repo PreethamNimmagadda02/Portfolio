@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import withPWAInit from "next-pwa";
 
 const nextConfig: NextConfig = {
   output: 'export',
@@ -7,9 +6,6 @@ const nextConfig: NextConfig = {
     // Static export requires unoptimized: true (Next.js image optimisation
     // requires a server).
     unoptimized: true,
-  },
-  experimental: {
-    optimizeCss: true,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -49,12 +45,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withPWA = withPWAInit({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-  buildExcludes: [/middleware-manifest\.json$/],
-});
-
-export default withPWA(nextConfig);
+export default nextConfig;

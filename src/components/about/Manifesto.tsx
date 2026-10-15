@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
 /**
  * The thesis, lit by the reader's own scroll.
  *
- * The statement is pinned for a little under two screens of travel while its
- * words ignite in reading order, from a dim ghost of the line to full ink,
+ * The statement holds its place for a screen of travel (more on a desktop)
+ * while its words ignite in reading order, from a dim ghost of the line to full ink,
  * with the two sentences the page stands on set in gold. Nothing here plays
  * on its own: the reader's hand is the clock, so the pace is always theirs.
  *
@@ -98,11 +98,13 @@ function Word({
 }
 
 /* The window over which sentence r lights: from its first word's start to its last word's end. */
-const RUN_WINDOWS = STATEMENT.map((_, r) => {
-  const first = WORDS.findIndex((w) => w.run === r);
-  const last = WORDS.length - 1 - [...WORDS].reverse().findIndex((w) => w.run === r);
-  return [wordWindow(first)[0], wordWindow(last)[1]] as const;
-});
+const RUN_WINDOWS = STATEMENT.map(
+  (_, r) =>
+    [
+      wordWindow(WORDS.findIndex((w) => w.run === r))[0],
+      wordWindow(WORDS.findLastIndex((w) => w.run === r))[1],
+    ] as const
+);
 
 /**
  * The folio of the argument: five numerals that light as their sentences do,
@@ -111,11 +113,9 @@ const RUN_WINDOWS = STATEMENT.map((_, r) => {
  */
 function Movements({ progress }: { progress: MotionValue<number> }) {
   const [current, setCurrent] = useState(0);
-  useMotionValueEvent(progress, "change", (v) => {
-    let r = 0;
-    for (let i = 0; i < RUN_WINDOWS.length; i++) if (v >= RUN_WINDOWS[i][0]) r = i;
-    setCurrent((c) => (c === r ? c : r));
-  });
+  useMotionValueEvent(progress, "change", (v) =>
+    setCurrent(Math.max(0, RUN_WINDOWS.findLastIndex(([start]) => v >= start)))
+  );
   return (
     <div aria-hidden className="hidden items-center gap-5 caption sm:flex">
       <span className="flex items-center gap-3">
@@ -219,19 +219,17 @@ export default function Manifesto() {
                 )}
 
                 <p className="font-display font-normal text-ivory-100 text-[2rem] leading-[1.16] tracking-[-0.012em] min-[400px]:text-[2.25rem] md:text-[3rem] lg:text-[clamp(3rem,4.35vw,4.25rem)] lg:leading-[1.12]">
-                  {WORDS.map(({ word, gold }, i) =>
-                    reduced ? (
-                      <span key={i} className={gold ? "text-aurum-200" : undefined}>
-                        {word}{" "}
-                      </span>
-                    ) : (
-                      <span key={i}>
+                  {WORDS.map(({ word, gold }, i) => (
+                    <span key={i} className={reduced && gold ? "text-aurum-200" : undefined}>
+                      {reduced ? (
+                        word
+                      ) : (
                         <Word progress={scrollYProgress} index={i} gold={gold}>
                           {word}
-                        </Word>{" "}
-                      </span>
-                    )
-                  )}
+                        </Word>
+                      )}{" "}
+                    </span>
+                  ))}
                 </p>
               </div>
 

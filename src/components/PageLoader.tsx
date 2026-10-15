@@ -8,11 +8,9 @@ import { isSceneWarmed } from "@/lib/utils";
 /* ---------------------------------------------------------------------------
    Timing, in milliseconds unless noted.
 
-   MIN_SHOWN was 2200ms when the loader covered several WebGL sections warming
-   in parallel. The page now has one persistent CosmicScene and nothing else to
-   wait for, and the match cut into the hero carries the brand moment instead
-   of the loader dwelling on it, so the floor drops to 1400ms. One constant to
-   revert if the owner prefers the longer hold.
+   MIN_SHOWN is a short floor: the page waits on one CosmicScene, and the match
+   cut into the hero carries the brand moment rather than the loader dwelling
+   on it.
    --------------------------------------------------------------------------- */
 const MIN_SHOWN = 1400;
 const MIN_SHOWN_REDUCED = 600;
@@ -43,12 +41,10 @@ const FILL_SETTLE_FALLBACK = 600;
 
 type Phase = "loading" | "stretch";
 
-type LoaderWindow = Window & { __loaderDone?: boolean };
-
 /* Flag plus event: components mounted after the event fired can still detect
    completion via the flag (see useLoaderDone in Hero). */
 function announceLoaderDone() {
-  (window as LoaderWindow).__loaderDone = true;
+  window.__loaderDone = true;
   window.dispatchEvent(new Event("loader-done"));
 }
 
@@ -220,7 +216,6 @@ export default function PageLoader() {
           <motion.div
             aria-hidden
             className="mt-6 h-px w-60 bg-hairline"
-            style={{ transformOrigin: "50% 50%" }}
             initial={{ scaleX: 1, opacity: 1 }}
             animate={{ scaleX: stretching ? stretchFactor : 1, opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: LINE_FADE_S } }}
@@ -233,7 +228,7 @@ export default function PageLoader() {
               under a name, so the positioning is on screen from the first
               frame. It leaves with the name, before the line stretches. */}
           <motion.p
-            className="mt-5 select-none font-mono text-[11px] uppercase leading-none tracking-[0.32em] text-ivory-300"
+            className="mt-5 select-none caption tracking-[0.32em] text-ivory-300"
             initial={{ opacity: 0, y: reduced ? 0 : 6 }}
             animate={{ opacity: stretching ? 0 : 1, y: 0 }}
             transition={

@@ -1,7 +1,7 @@
 /**
- * Shared skills dataset, read by both the DOM Skills section (filter rail, index)
- * and the CosmicScene constellation flourish, so the two stay in sync
- * without duplicating the list.
+ * Shared skills dataset, read by the DOM Skills section (the dial and its
+ * index), the About profile's ledger and the CosmicScene constellation, so
+ * they stay in sync without duplicating the list.
  */
 interface SkillItem {
   name: string;
@@ -93,7 +93,7 @@ export const skillsData: SkillItem[] = [
 
 // Distinguishable tones inside the gold and ivory family only. The page has
 // exactly one hue (gold) plus obsidian and ivory neutrals.
-const categoryColors: Record<string, string> = {
+export const categoryColors: Record<string, string> = {
   AI: "#C9A961",
   Web: "#EBD9A8",
   DB: "#A8874A",
@@ -115,6 +115,3 @@ export const categoryLabels: Record<string, string> = {
   Automation: "Automation",
 };
 
-export function getCategoryColor(category: string) {
-  return categoryColors[category] || "#ffffff";
-}

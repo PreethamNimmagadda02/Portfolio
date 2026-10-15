@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { AnimatePresence, EASE_HEAVY, EASE_SETTLE, motion, useIsPresent } from "@/lib/motion";
 import { TextButton } from "@/components/ui/TextButton";
 import { BrandLockup } from "@/components/ui/BrandMark";
@@ -25,9 +24,6 @@ const ELSEWHERE = [
   { label: "LinkedIn", href: "https://linkedin.com/in/preethamnimmagadda" },
 ] as const;
 
-/* Section ids measured for the active chapter, in page order. */
-const SECTION_IDS = CHAPTERS.map((c) => c.id);
-
 /* The reading line: a band 38% down the viewport, expressed as a negative
    root margin. Sections are contiguous, so exactly one can cross it, and the
    indicator moves the instant a section's edge does. */
@@ -38,13 +34,6 @@ const READING_LINE = "-38% 0px -61% 0px";
    behind the panel happens inside this beat. */
 const CHOICE_HOLD = 160;
 
-type LenisLike = { stop: () => void; start: () => void };
-
-function getLenis(): LenisLike | undefined {
-  if (typeof window === "undefined") return undefined;
-  return (window as unknown as { lenis?: LenisLike }).lenis;
-}
-
 /* Scroll lock is idempotent so a link click can release it synchronously
    (Lenis ignores scrollTo while stopped) and the effect cleanup can release
    it again without side effects. */
@@ -54,14 +43,14 @@ function lockScroll() {
   if (lockedOverflow !== null) return;
   lockedOverflow = document.body.style.overflow;
   document.body.style.overflow = "hidden";
-  getLenis()?.stop();
+  window.lenis?.stop();
 }
 
 function unlockScroll() {
   if (lockedOverflow === null) return;
   document.body.style.overflow = lockedOverflow;
   lockedOverflow = null;
-  getLenis()?.start();
+  window.lenis?.start();
 }
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -97,7 +86,7 @@ function ChapterIndicator({ chapter, visible, reduced }: { chapter: Chapter; vis
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span
             key={chapter.id}
-            className="flex items-center gap-3 whitespace-nowrap font-mono text-[11px] uppercase leading-4 tracking-[0.14em]"
+            className="flex items-center gap-3 whitespace-nowrap caption leading-4"
             initial={reduced ? { opacity: 0 } : { y: "100%" }}
             animate={reduced ? { opacity: 1 } : { y: 0 }}
             exit={reduced ? { opacity: 0 } : { y: "-100%" }}
@@ -157,7 +146,7 @@ function IndexOverlay({
       <div className="relative mx-auto flex min-h-full w-full max-w-[1280px] flex-col px-6 pb-10 pt-24 lg:px-10 lg:pt-28">
         <div className="grid flex-1 grid-cols-12 gap-x-6 lg:gap-x-10">
           <nav aria-label="Index" className="col-span-12 lg:col-span-8">
-            <p className="mb-6 flex items-center gap-3 font-mono text-[11px] uppercase leading-none tracking-[0.18em] text-ivory-300">
+            <p className="mb-6 flex items-center gap-3 caption tracking-[0.18em] text-ivory-300">
               Index
               <span aria-hidden className="h-px w-6 bg-hairline-gold" />
               <span className="ledger">{CHAPTERS.length} chapters</span>
@@ -183,7 +172,7 @@ function IndexOverlay({
                       <span
                         aria-hidden
                         className={cn(
-                          "ledger col-span-2 flex items-center gap-2 font-mono text-[11px] leading-none tracking-[0.14em] transition-colors duration-300 ease-heavy sm:col-span-1",
+                          "ledger col-span-2 flex items-center gap-2 caption transition-colors duration-300 ease-heavy sm:col-span-1",
                           isActive ? "text-aurum-300" : "text-ivory-300 group-hover:text-aurum-300"
                         )}
                       >
@@ -279,7 +268,7 @@ function IndexOverlay({
    ------------------------------------------------------------------------ */
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
 
@@ -288,7 +277,6 @@ export default function Navbar() {
   const toggleRef = useRef<HTMLButtonElement>(null);
 
   const reducedMotion = useReducedMotion();
-  const menuOpen = isOpen;
 
   /* Letterhead state: the bar is transparent over the cover and gains its
      fill once a 1px sentinel 80px into the document leaves the viewport. */
@@ -326,22 +314,16 @@ export default function Navbar() {
       { rootMargin: READING_LINE, threshold: 0 }
     );
 
+    const track = (key: string, el: Element | null) => {
+      const previous = observed.get(key);
+      if (!el || previous === el) return;
+      if (previous) io.unobserve(previous);
+      observed.set(key, el);
+      io.observe(el);
+    };
     const attach = () => {
-      for (const id of SECTION_IDS) {
-        const el = document.getElementById(id);
-        if (!el || observed.get(id) === el) continue;
-        const previous = observed.get(id);
-        if (previous) io.unobserve(previous);
-        observed.set(id, el);
-        io.observe(el);
-      }
-      const footer = document.querySelector("footer");
-      if (footer && observed.get("footer") !== footer) {
-        const previous = observed.get("footer");
-        if (previous) io.unobserve(previous);
-        observed.set("footer", footer);
-        io.observe(footer);
-      }
+      for (const { id } of CHAPTERS) track(id, document.getElementById(id));
+      track("footer", document.querySelector("footer"));
     };
 
     attach();
@@ -379,7 +361,7 @@ export default function Navbar() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        setIsOpen(false);
+        setMenuOpen(false);
         toggleRef.current?.focus();
         return;
       }
@@ -429,14 +411,13 @@ export default function Navbar() {
       // never leave the Index up and the page locked behind it.
       const lift = () => {
         unlockScroll();
-        setIsOpen(false);
+        setMenuOpen(false);
       };
       void Promise.all([jumpTo(href), hold]).then(lift, lift);
     },
     [menuOpen, reducedMotion]
   );
 
-  const toggleMenu = () => setIsOpen((open) => !open);
   const toggleMagnet = useMagnet(!reducedMotion, { pull: 0.3, max: 5 });
 
   const filled = scrolled && !menuOpen;
@@ -510,7 +491,7 @@ export default function Navbar() {
             <button
               ref={toggleRef}
               type="button"
-              onClick={toggleMenu}
+              onClick={() => setMenuOpen((open) => !open)}
               aria-label={menuOpen ? "Close index" : "Open index"}
               aria-expanded={menuOpen}
               aria-controls={MENU_ID}

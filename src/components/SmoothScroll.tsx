@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import { frame, cancelFrame } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { smoothScrollTo } from "@/lib/utils";
+import { LETTERHEAD_BAND, smoothScrollTo } from "@/lib/utils";
 
 /** Fraction of the remaining distance the page covers each frame at 60fps. Lower is heavier. */
 const LERP = 0.07;
@@ -14,9 +14,6 @@ const KEY_LERP = 0.1;
 
 /** One arrow press, in pixels. Held, the key repeats at about 30Hz, so this also sets the cruising speed. */
 const ARROW_STEP = 60;
-
-/** The letterhead and its gap, kept out of a page step so the line the reader was on stays in view. */
-const PAGE_OVERLAP = 112;
 
 /* Where a key belongs to the element rather than to the page. */
 const EDITABLE = 'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
@@ -51,16 +48,14 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     const lenis = new Lenis({
       lerp: LERP,
-      smoothWheel: true,
       // Native momentum on touch is better than anything simulated.
       syncTouch: false,
-      wheelMultiplier: 1,
       autoRaf: false,
       anchors: false,
     });
 
     // Exposed for programmatic scrolling (smoothScrollTo, jumpTo, the Index lock).
-    (window as unknown as { lenis: Lenis }).lenis = lenis;
+    window.lenis = lenis;
 
     const tick = ({ timestamp }: { timestamp: number }) => lenis.raf(timestamp);
     frame.setup(tick, true);
@@ -72,7 +67,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       const target = e.target instanceof Element ? e.target : null;
       if (target?.closest(EDITABLE) || target?.closest("[data-lenis-prevent]")) return;
 
-      const page = Math.max(window.innerHeight - PAGE_OVERLAP, window.innerHeight * 0.6);
+      // A page less the letterhead band, so the line the reader was on stays in view.
+      const page = Math.max(window.innerHeight - LETTERHEAD_BAND, window.innerHeight * 0.6);
       let step: number;
       switch (e.key) {
         case "ArrowDown":
@@ -115,9 +111,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       window.removeEventListener("keydown", onKeyDown);
       cancelFrame(tick);
       lenis.destroy();
-      if ((window as unknown as { lenis?: Lenis }).lenis === lenis) {
-        delete (window as unknown as { lenis?: Lenis }).lenis;
-      }
+      if (window.lenis === lenis) delete window.lenis;
     };
   }, [reduced]);
 

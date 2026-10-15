@@ -13,5 +13,5 @@ const MOBILE_BREAKPOINT = 768
  * destroyed a WebGL context).
  */
 export function useIsMobile() {
-    return useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`, false)
+    return useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
 }

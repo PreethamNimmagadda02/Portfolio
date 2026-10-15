@@ -10,10 +10,10 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
 
 - **Editorial identity:** a single committed dark theme in obsidian and gold, set in Bodoni Moda (display), Geist (body) and Geist Mono (numerals), with hairline rules and zero border radius.
 - **Deliberate motion:** `framer-motion` reveals, a shared plate-lift heading, per-character ledger numerals and a loader-to-headline match cut, all with reduced-motion fallbacks.
-- **One WebGL canvas:** a gold nebula built with `three.js` and `@react-three/fiber`, full intensity only in the hero and contact chapters.
-- **Progressive Web App (PWA):** Fully installable as a native-like app on mobile and desktop devices.
+- **One WebGL canvas:** a gold star field and an engraved guilloche behind the hero, built with `three.js` and `@react-three/fiber`.
+- **Installable:** a web app manifest gives the site its name, icons and a standalone window when added to a home screen.
 - **Responsive Design:** Mobile-first layout with explicit collapses below 768px on every section.
-- **Performance Optimized:** Server-side rendered with Next.js 16 for blazing fast load times and SEO.
+- **Performance Optimized:** Statically exported with Next.js 16 for fast loads and SEO.
 
 ## 🛠️ Tech Stack
 
@@ -25,14 +25,13 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
 - **Icons:** [Phosphor Icons](https://phosphoricons.com/) (`@phosphor-icons/react`, light weight)
 - **Theme:** single dark theme, tokens in `src/app/globals.css` (`@theme inline`)
 - **3D:** [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
-- **PWA:** [next-pwa](https://www.npmjs.com/package/next-pwa)
 - **Deployment:** Firebase Hosting
 
 ## 📦 Getting Started
 
 ### Prerequisites
 
-- Node.js 18.17 or later
+- Node.js 20.9 or later
 - npm, yarn, pnpm, or bun
 
 ### Installation
@@ -52,26 +51,18 @@ A high-performance, interactive, and mobile-responsive portfolio website built w
    ```bash
    npm run dev
    ```
-   *Note: PWA features are disabled in development mode to prevent caching issues.*
 
 4. **Open your browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [http://localhost:3001](http://localhost:3001)
 
 ## 🏗️ Building for Production
 
-To create a production build with full PWA support:
+The build is a static export written to `out/`:
 
 ```bash
 npm run build
-npm start
+npx serve out
 ```
-
-## 📱 PWA Features
-
-This portfolio is a certified Progressive Web App. It allows users to:
-- Install the website as an app on iOS and Android.
-- Launch from the home screen with a custom splash screen.
-- Experience an app-like standalone interface without browser bars.
 
 ---
 

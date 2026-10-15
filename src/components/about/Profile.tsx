@@ -31,18 +31,13 @@ const RING_TEXT = "AI ARCHITECT · AUTONOMOUS SYSTEMS · IIT (ISM) DHANBAD · HY
 const C = 200;
 const TEXT_R = 158;
 const TEXT_LENGTH = Math.round(2 * Math.PI * TEXT_R);
-const fix = round3;
 const TICKS = Array.from({ length: 72 }, (_, i) => {
   const a = ((i * 5 - 90) * Math.PI) / 180;
+  const at = (r: number) => [round3(C + r * Math.cos(a)), round3(C + r * Math.sin(a))];
   const major = i % 6 === 0;
-  const r1 = major ? 130 : 134;
-  return {
-    x1: fix(C + r1 * Math.cos(a)),
-    y1: fix(C + r1 * Math.sin(a)),
-    x2: fix(C + 140 * Math.cos(a)),
-    y2: fix(C + 140 * Math.sin(a)),
-    major,
-  };
+  const [x1, y1] = at(major ? 130 : 134);
+  const [x2, y2] = at(140);
+  return { x1, y1, x2, y2, major };
 });
 
 const TOOL_COUNT = skillsData.length;
@@ -138,7 +133,7 @@ export default function Profile() {
 
   return (
     <div ref={ref} className="mx-auto w-full max-w-[1280px] px-6 pb-24 lg:px-10 lg:pb-32">
-      <Ornament className="mb-20 lg:mb-28" />
+      <Ornament />
 
       <div className="grid grid-cols-12 items-start gap-x-6 gap-y-14">
         {/* On a wide screen the seal stays beside the reader while the
@@ -215,7 +210,6 @@ export default function Profile() {
                 <dd className="order-1 m-0">
                   <LedgerNumber
                     value={entry.figure}
-                    label={entry.figure}
                     delayMs={i * 90}
                     className="font-display text-[2.25rem] leading-none text-ivory-100 transition-colors duration-500 ease-heavy group-hover/cell:text-aurum-200 lg:text-[2.75rem]"
                   />
