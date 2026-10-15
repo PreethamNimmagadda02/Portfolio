@@ -25,6 +25,9 @@ export interface SectionHeadingProps {
 /** Milliseconds between words in the headline. */
 const WORD_STEP = 62;
 
+/** Milliseconds the subtext waits once every word of the headline has begun to rise. */
+const SUBTEXT_LAG = 260;
+
 /**
  * The plate lift shared by every chapter: the chapter numeral and eyebrow,
  * the headline assembling word by word out of its clip masks, a hairline-gold
@@ -35,6 +38,10 @@ const WORD_STEP = 62;
  * is how a Didone headline wants to arrive. A ReactNode title (one carrying
  * its own emphasis or markup) cannot be split safely, so it keeps the older
  * whole-line lift.
+ *
+ * The subtext follows the headline rather than waiting under it: once the
+ * last word is on its way it settles into place (.ink-in), rising a fraction
+ * and coming into focus, so a chapter opens in reading order.
  */
 export function SectionHeading({
   eyebrow,
@@ -101,7 +108,12 @@ export function SectionHeading({
       </div>
 
       {subtext ? (
-        <p className="font-sans text-ivory-200 text-base leading-[1.65] max-w-[65ch] mt-6">{subtext}</p>
+        <p
+          className="ink-in font-sans text-ivory-200 text-base leading-[1.65] max-w-[65ch] mt-6"
+          style={{ "--ink-delay": `${(hasLabel ? 120 : 0) + ruleDelay + SUBTEXT_LAG}ms` } as React.CSSProperties}
+        >
+          {subtext}
+        </p>
       ) : null}
     </InViewClass>
   );

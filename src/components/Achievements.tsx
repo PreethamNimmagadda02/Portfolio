@@ -10,7 +10,7 @@
  * turns its figure gold and raises the rules that border it. Nothing else moves.
  */
 
-import { useState, type PointerEvent, type ReactNode } from "react";
+import { useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { LedgerNumber, SectionHeading } from "@/components/ui";
 import { InViewClass } from "./Reveal";
 import { cn, pad2 } from "@/lib/utils";
@@ -85,6 +85,9 @@ const records: Record[] = [
 
 /** Block-to-block stagger for the roll-in, in milliseconds. */
 const BLOCK_STAGGER = 120;
+
+/** How long after a block's figure starts rolling its title begins to settle, in milliseconds. */
+const INK_LAG = 420;
 
 /* Display sizes. At the 1280px design width the large figure is exactly
    7.5rem and the small one 5rem; between 1024px and 1280px both scale with
@@ -179,14 +182,21 @@ function RecordBlock({
         <LedgerNumber value={record.figure} label={record.spoken} delayMs={index * BLOCK_STAGGER} />
       </p>
 
+      {/* The title and its line settle once the figure has rolled in. */}
       <h3
         id={`achievement-${record.id}`}
-        className="mt-8 font-display text-[24px] font-medium leading-[1.2] text-ivory-100 lg:mt-10 lg:text-[26px]"
+        className="ink-in mt-8 font-display text-[24px] font-medium leading-[1.2] text-ivory-100 lg:mt-10 lg:text-[26px]"
+        style={{ "--ink-delay": `${index * BLOCK_STAGGER + INK_LAG}ms` } as CSSProperties}
       >
         {record.title}
       </h3>
 
-      <p className="mt-3 max-w-[36ch] font-sans text-[15px] leading-[1.6] text-ivory-200">{record.description}</p>
+      <p
+        className="ink-in mt-3 max-w-[36ch] font-sans text-[15px] leading-[1.6] text-ivory-200"
+        style={{ "--ink-delay": `${index * BLOCK_STAGGER + INK_LAG + 90}ms` } as CSSProperties}
+      >
+        {record.description}
+      </p>
 
       {children}
     </article>

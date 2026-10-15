@@ -1,6 +1,10 @@
 "use client";
 
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "@/lib/motion";
 import { useSheen } from "@/hooks/use-sheen";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface PortraitPlateProps {
@@ -19,6 +23,12 @@ const FALLBACK = "/ai-headshot.jpeg";
 // The enclosing figure already announces that this is a portrait, so the alt
 // carries the name alone rather than repeating it.
 const ALT = "Preetham Nimmagadda";
+
+/* The window: how far the print drifts behind the bezels, and how much
+   oversize it carries so that drift never shows an edge. A 1.06 print
+   overhangs each edge by 3% of the frame, which is exactly the drift. */
+const DRIFT = "3%";
+const OVERSIZE = 1.06;
 
 /**
  * The hero portrait as a two-layer photogravure plate.
@@ -41,12 +51,24 @@ const ALT = "Preetham Nimmagadda";
  *
  * Owners who want the image to rest in colour can set
  * --portrait-rest-color: 1 on any ancestor.
+ *
+ * On a desktop the plate is a window as the cover leaves: the frame lifts
+ * with the page while the photograph drifts the other way behind its
+ * bezels, so the sitter reads as standing back from the glass. Both
+ * pictures move as one, so the colour layer always registers with the grade.
  */
 export default function PortraitPlate({ className }: PortraitPlateProps) {
   const sheen = useSheen();
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const isMobile = useIsMobile();
+  const depth = !reduced && !isMobile;
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [`-${DRIFT}`, DRIFT]);
 
   return (
     <figure
+      ref={ref}
       {...sheen}
       tabIndex={0}
       aria-label="Portrait of Preetham Nimmagadda"
@@ -58,42 +80,48 @@ export default function PortraitPlate({ className }: PortraitPlateProps) {
         className
       )}
     >
-      {/* Resting layer: the photogravure grade. This is the LCP element. */}
-      <picture className="absolute inset-0 block">
-        <source srcSet={SOURCES} sizes={SIZES} type="image/webp" />
-        <img
-          src={FALLBACK}
-          alt={ALT}
-          className="plate-mono block h-full w-full object-cover"
-          width={864}
-          height={1184}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-        />
-      </picture>
-
-      {/* Colour layer: same decoded source, lifted on hover or focus. */}
-      <div
-        aria-hidden
-        className={cn(
-          "absolute inset-0 [opacity:var(--portrait-rest-color,0)]",
-          "transition-opacity duration-[900ms] ease-[var(--ease-heavy)]",
-          "group-hover:opacity-100 group-focus-within:opacity-100"
-        )}
+      {/* The print: both layers move together, behind the bezels. */}
+      <motion.div
+        className="absolute inset-0"
+        style={depth ? { y, scale: OVERSIZE } : undefined}
       >
+        {/* Resting layer: the photogravure grade. This is the LCP element. */}
         <picture className="absolute inset-0 block">
           <source srcSet={SOURCES} sizes={SIZES} type="image/webp" />
           <img
             src={FALLBACK}
-            alt=""
-            className="block h-full w-full object-cover"
+            alt={ALT}
+            className="plate-mono block h-full w-full object-cover"
             width={864}
             height={1184}
+            loading="eager"
+            fetchPriority="high"
             decoding="async"
           />
         </picture>
-      </div>
+
+        {/* Colour layer: same decoded source, lifted on hover or focus. */}
+        <div
+          aria-hidden
+          className={cn(
+            "absolute inset-0 [opacity:var(--portrait-rest-color,0)]",
+            "transition-opacity duration-[900ms] ease-[var(--ease-heavy)]",
+            "group-hover:opacity-100 group-focus-within:opacity-100"
+          )}
+        >
+          <picture className="absolute inset-0 block">
+            <source srcSet={SOURCES} sizes={SIZES} type="image/webp" />
+            <img
+              src={FALLBACK}
+              alt=""
+              className="block h-full w-full object-cover"
+              width={864}
+              height={1184}
+              decoding="async"
+            />
+          </picture>
+        </div>
+      </motion.div>
 
       {/* Bottom scrim so the gold light behind the plate never fights the face. */}
       <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import { ArrowDownRight } from "@phosphor-icons/react";
 import { motion, useScroll, useTransform } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -8,6 +8,7 @@ import { useSheen } from "@/hooks/use-sheen";
 import { SectionHeading, LedgerNumber, TextButton } from "@/components/ui";
 import { categoryLabels, skillsData } from "@/lib/skills-data";
 import { Ornament } from "./Ornament";
+import { InViewClass } from "../Reveal";
 import { cn, round3 } from "@/lib/utils";
 
 /**
@@ -173,13 +174,19 @@ export default function Profile() {
             title="Built to run unattended."
           />
 
-          <p className="mt-8 max-w-[56ch] font-sans text-[17px] leading-[1.7] text-ivory-200">
-            I am Preetham Nimmagadda, an AI architect based in Hyderabad and trained at IIT (ISM)
-            Dhanbad. I design systems that act on their own judgment, and I stay accountable for what
-            they do: a copilot at Matters.AI that remediates data exposures without waiting to be
-            asked, a VideoRAG companion at Introspect Labs, and agents at METAVERTEX that cut system
-            load by a fifth.
-          </p>
+          {/* The paragraph settles in behind the headline (.ink-in). */}
+          <InViewClass amount={0.3}>
+            <p
+              className="ink-in mt-8 max-w-[56ch] font-sans text-[17px] leading-[1.7] text-ivory-200"
+              style={{ "--ink-delay": "300ms" } as CSSProperties}
+            >
+              I am Preetham Nimmagadda, an AI architect based in Hyderabad and trained at IIT (ISM)
+              Dhanbad. I design systems that act on their own judgment, and I stay accountable for what
+              they do: a copilot at Matters.AI that remediates data exposures without waiting to be
+              asked, a VideoRAG companion at Introspect Labs, and agents at METAVERTEX that cut system
+              load by a fifth.
+            </p>
+          </InViewClass>
 
           {/* The record, as a ledger. Each figure rolls in on its own mask. */}
           <dl className="mt-12 grid grid-cols-2 border-t border-hairline sm:grid-cols-3">

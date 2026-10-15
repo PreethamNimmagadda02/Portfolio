@@ -28,7 +28,7 @@ import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE } from "@/l
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useLocalTime } from "@/hooks/use-local-time";
 import { cn, pad2 } from "@/lib/utils";
-import { SectionHeading, TextButton, PlateTicks } from "@/components/ui";
+import { SectionHeading, TextButton, PlateTicks, RollLabel } from "@/components/ui";
 
 /* ------------------------------------------------------------------------
    Validation (unchanged rules and messages)
@@ -623,7 +623,7 @@ export default function Contact() {
                 transition={{ duration: 0.25, ease: EASE_HEAVY }}
                 className="inline-flex items-center"
               >
-                Send message
+                <RollLabel text="Send message" />
               </motion.span>
             )}
           </AnimatePresence>

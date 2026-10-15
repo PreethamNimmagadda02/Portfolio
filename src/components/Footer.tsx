@@ -1,10 +1,11 @@
 "use client";
 
-import type { CSSProperties, MouseEvent, ReactNode } from "react";
+import { useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUp, EnvelopeSimple, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
-import { motion, EASE_SETTLE } from "@/lib/motion";
+import { motion, useScroll, useTransform, EASE_SETTLE } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useMagnet } from "@/hooks/use-magnet";
 import { cn, smoothScrollTo } from "@/lib/utils";
 import { InViewClass } from "./Reveal";
 import { chapter } from "@/lib/chapters";
@@ -84,16 +85,35 @@ function Rise({
   );
 }
 
+/* The colophon is uncovered rather than scrolled to. Its contents start this
+   far up behind the page's last edge and travel to rest as the footer comes
+   fully into view, so they move a little over half as fast as the page and
+   read as lying beneath it. */
+const UNDERLAY = "-38%";
+
 /**
  * Colophon. One hairline, a 12-column grid (brand, links, connect), a second
  * hairline, the copyright and a back-to-top control, and then the page is
  * signed: the name set once more across the full measure, rising out of its
- * masks as the reader arrives at the end. No clock, no watermark, no badges:
- * the record above has already made the argument.
+ * masks as the reader arrives at the end, and catching one pass of light the
+ * way the cover's "acts" does, so the page closes on the gesture it opened
+ * with. No clock, no watermark, no badges: the record above has already made
+ * the argument.
+ *
+ * The whole colophon rises from beneath the page (UNDERLAY) out of a shadow
+ * that lifts as it is uncovered. Transform and opacity only, clipped to the
+ * footer's own box, so the document is exactly as long as it was.
  */
 export default function Footer() {
   const reduced = useReducedMotion();
   const year = new Date().getFullYear();
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
+  const rise = useTransform(scrollYProgress, [0, 1], [UNDERLAY, "0%"]);
+  // The shadow holds at full depth while the contents are still sliding out
+  // from under the edge, so no line is ever seen cut by it, then lifts.
+  const shade = useTransform(scrollYProgress, [0, 0.6, 1], [1, 1, 0]);
+  const topMagnet = useMagnet(!reduced, { pull: 0.25, max: 5 });
 
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -101,8 +121,22 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative z-10 border-t border-hairline bg-obsidian-0 text-ivory-100">
-      <div className="mx-auto max-w-[1280px] px-6 py-12 lg:px-10 lg:py-16">
+    <footer ref={ref} className="relative z-10 overflow-clip border-t border-hairline bg-obsidian-0 text-ivory-100">
+      {reduced ? null : (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[45%]"
+          style={{
+            opacity: shade,
+            background:
+              "linear-gradient(180deg, var(--color-obsidian-0) 0%, var(--color-obsidian-0) 30%, transparent 100%)",
+          }}
+        />
+      )}
+      <motion.div
+        style={reduced ? undefined : { y: rise }}
+        className="mx-auto max-w-[1280px] px-6 py-12 lg:px-10 lg:py-16"
+      >
         {/* Below lg the brand takes a full row and the two link lists share
             the next one, six columns each: stacked, the shorter Elsewhere list
             cost the footer its own height plus a row gap for three items.
@@ -198,7 +232,8 @@ export default function Footer() {
           <button
             type="button"
             onClick={() => smoothScrollTo(0)}
-            className="group inline-flex cursor-pointer items-center gap-3 border border-hairline px-4 py-3 caption text-ivory-200 transition-colors duration-300 ease-heavy hover:border-hairline-gold hover:text-aurum-200"
+            {...topMagnet}
+            className="group inline-flex cursor-pointer items-center gap-3 border border-hairline px-4 py-3 caption text-ivory-200 transition-[color,border-color,translate,scale] duration-500 ease-heavy hover:border-hairline-gold hover:text-aurum-200 pointer-fine:active:scale-[0.97] pointer-fine:active:duration-150"
           >
             Back to top
             <ArrowUp
@@ -220,19 +255,27 @@ export default function Footer() {
             aria-hidden
             className="select-none whitespace-nowrap font-display font-normal leading-[0.9] tracking-[-0.02em] text-ivory-100 text-[calc(100cqw/6.05)] sm:text-[calc(100cqw/10.5)]"
           >
+            {/* Each word is its own foil, so the light crosses the first and
+                then the second as one pass, and either takes the hover sweep. */}
             <span className="word-mask">
-              <span className="line-rise">Preetham</span>
+              <span className="line-rise">
+                <span className="foil glint-in-view" style={{ "--glint-delay": "700ms" } as CSSProperties}>
+                  Preetham
+                </span>
+              </span>
             </span>
             <span className="hidden sm:inline"> </span>
             <br className="sm:hidden" />
             <span className="word-mask">
               <span className="line-rise" style={{ "--rise-delay": "110ms" } as CSSProperties}>
-                Nimmagadda
+                <span className="foil glint-in-view" style={{ "--glint-delay": "920ms" } as CSSProperties}>
+                  Nimmagadda
+                </span>
               </span>
             </span>
           </p>
         </InViewClass>
-      </div>
+      </motion.div>
     </footer>
   );
 }

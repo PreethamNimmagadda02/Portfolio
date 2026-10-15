@@ -243,7 +243,10 @@ function Entry({
           {pad2(index + 1)}
         </span>
         <Icon size={18} weight="light" className="shrink-0 text-ivory-300" aria-hidden />
-        <h4 className="foil font-display font-medium text-[22px] leading-[1.15] transition-transform duration-300 ease-heavy group-hover:translate-x-1.5 lg:text-[28px]">
+        {/* The transition names background-position beside translate: a
+            transition utility would replace .foil's own and the band would
+            jump past the glyphs instead of sweeping through. */}
+        <h4 className="foil font-display font-medium text-[22px] leading-[1.15] [transition:translate_300ms_var(--ease-heavy),background-position_1100ms_var(--ease-heavy)] group-hover:translate-x-1.5 lg:text-[28px]">
           {entry.role}
         </h4>
       </div>

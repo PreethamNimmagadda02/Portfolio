@@ -332,11 +332,19 @@
     transition: background-position 1100ms var(--ease-heavy);
   }
 
-  .foil:hover,
   .foil:focus-visible,
-  .group:hover .foil,
   .group:focus-visible .foil {
     background-position: 0 0;
+  }
+
+  /* Hover only where there is a hover. On touch a tap counts as one and the
+     state sticks, so the band would stay parked across the glyphs until the
+     next tap somewhere else. The same gate covers .rule-hover and .sheen. */
+  @media (hover: hover) {
+    .foil:hover,
+    .group:hover .foil {
+      background-position: 0 0;
+    }
   }
 
   /* Without background-clip: text the transparent fill would hide the words
@@ -354,8 +362,78 @@
      nothing is pinned afterwards, so the hover sweep above keeps working.
      Both ends of the travel park the band off the glyphs, so the hand-back
      from the last keyframe to the resting position is invisible. */
-  .glint.is-lit {
+  .glint.is-lit,
+  .in-view .glint-in-view {
     animation: glint 1600ms var(--ease-heavy) var(--glint-delay, 0ms) 1 backwards;
+  }
+
+  /* Ink settling: the body copy beneath a headline arrives the way the
+     thesis words do, rising a fraction and coming into focus, once the
+     headline that leads it has landed. Keyed on the .in-view wrapper; set
+     --ink-delay to follow whatever arrives first. */
+  .ink-in {
+    opacity: 0.001;
+    transform: translateY(0.75rem);
+    filter: blur(4px);
+  }
+
+  .in-view .ink-in {
+    animation: ink-in 1200ms var(--ease-settle) var(--ink-delay, 0ms) forwards;
+  }
+
+  /* Rolled label (RollLabel in TextButton). The mask holds a reserve above and
+     below for accents and descenders, and the negative margins keep that
+     reserve out of the line box. The copy sits exactly over the line, parked
+     beneath the mask; on hover each letter of the line rolls up and out while
+     its twin rises into place, one letter after another. */
+  .roll {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    padding-block: 0.22em;
+    margin-block: -0.22em;
+    vertical-align: top;
+  }
+
+  .roll-line {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .roll-copy {
+    position: absolute;
+    top: 0.22em;
+    left: 0;
+  }
+
+  /* 12ms a letter turns the longest label ("View selected work", 18 letters)
+     over in a little over 800ms, close behind the 500ms fill rising under it. */
+  .roll-char {
+    display: inline-block;
+    transition: transform 600ms var(--ease-heavy);
+    transition-delay: calc(var(--i, 0) * 12ms);
+  }
+
+  .roll-copy .roll-char {
+    transform: translateY(1.5em);
+  }
+
+  .roll-host:focus-visible .roll-line:not(.roll-copy) .roll-char {
+    transform: translateY(-1.5em);
+  }
+
+  .roll-host:focus-visible .roll-copy .roll-char {
+    transform: translateY(0);
+  }
+
+  @media (hover: hover) {
+    .roll-host:hover .roll-line:not(.roll-copy) .roll-char {
+      transform: translateY(-1.5em);
+    }
+
+    .roll-host:hover .roll-copy .roll-char {
+      transform: translateY(0);
+    }
   }
 
   /* The custom cursor owns pointing on fine pointers. Text fields keep the
@@ -429,11 +507,17 @@
       background-color 500ms var(--ease-heavy);
   }
 
-  .rule-hover:hover::after,
-  .rule-hover:focus-visible::after,
-  .group:hover .rule-hover::after {
+  .rule-hover:focus-visible::after {
     transform: scaleX(1);
     background: var(--color-aurum-200);
+  }
+
+  @media (hover: hover) {
+    .rule-hover:hover::after,
+    .group:hover .rule-hover::after {
+      transform: scaleX(1);
+      background: var(--color-aurum-200);
+    }
   }
 
   /* Raking light for the framed plates: the gold catches where the cursor is,
@@ -456,9 +540,14 @@
     );
   }
 
-  .sheen:hover::after,
   .sheen:focus-within::after {
     opacity: 1;
+  }
+
+  @media (hover: hover) {
+    .sheen:hover::after {
+      opacity: 1;
+    }
   }
 
   /* Photogravure grade for the portrait's resting layer. */
@@ -585,6 +674,20 @@
   }
 }
 
+@keyframes ink-in {
+  from {
+    opacity: 0.001;
+    transform: translateY(0.75rem);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 @keyframes seal-turn {
   to {
     transform: rotate(360deg);
@@ -671,8 +774,26 @@
     display: none;
   }
 
-  .glint.is-lit {
+  .glint.is-lit,
+  .in-view .glint-in-view {
     animation: none;
+  }
+
+  .ink-in,
+  .in-view .ink-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  /* The label holds still: one line, no twin waiting beneath it. */
+  .roll-copy {
+    display: none;
+  }
+
+  .roll-char {
+    transform: none;
   }
 
   .draw-path {

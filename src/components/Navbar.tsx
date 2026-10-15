@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
-import { AnimatePresence, EASE_HEAVY, EASE_SETTLE, motion } from "@/lib/motion";
+import { AnimatePresence, EASE_HEAVY, EASE_SETTLE, motion, useIsPresent } from "@/lib/motion";
 import { TextButton } from "@/components/ui/TextButton";
 import { BrandLockup } from "@/components/ui/BrandMark";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useMagnet } from "@/hooks/use-magnet";
 import { CHAPTERS, CHAPTER_COUNT, type Chapter } from "@/lib/chapters";
-import { cn, smoothScrollTo } from "@/lib/utils";
+import { cn, jumpTo, smoothScrollTo } from "@/lib/utils";
 
 /* The letterhead carries three things: the name, the chapter the reader is
    in, and the way out to everything else (the Index). Eight links in a row
@@ -31,6 +32,11 @@ const SECTION_IDS = CHAPTERS.map((c) => c.id);
    root margin. Sections are contiguous, so exactly one can cross it, and the
    indicator moves the instant a section's edge does. */
 const READING_LINE = "-38% 0px -61% 0px";
+
+/* How long a choice made on the Index holds before the panel lifts, in
+   milliseconds, so the click lands as a decision rather than a cut. The jump
+   behind the panel happens inside this beat. */
+const CHOICE_HOLD = 160;
 
 type LenisLike = { stop: () => void; start: () => void };
 
@@ -132,11 +138,14 @@ function IndexOverlay({
   reduced: boolean;
   onNavigate: (e: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
+  // A panel on its way out is a curtain, not a menu: nothing on it answers the
+  // hand while it lifts, so a stray click cannot cut the page mid wipe.
+  const isPresent = useIsPresent();
   return (
     <motion.div
       id={MENU_ID}
       data-lenis-prevent
-      className="fixed inset-0 z-0 overflow-y-auto bg-obsidian-0"
+      className={cn("fixed inset-0 z-0 overflow-y-auto bg-obsidian-0", !isPresent && "pointer-events-none")}
       initial={reduced ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0)" }}
       animate={reduced ? { opacity: 1 } : { clipPath: "inset(0 0 0% 0)" }}
       exit={reduced ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0)" }}
@@ -163,8 +172,14 @@ function IndexOverlay({
                       href={`#${c.id}`}
                       onClick={(e) => onNavigate(e, `#${c.id}`)}
                       aria-current={isActive ? "location" : undefined}
-                      className="group grid grid-cols-12 items-center gap-x-4 py-2.5 lg:py-3"
+                      className="group relative grid grid-cols-12 items-center gap-x-4 py-2.5 lg:py-3"
                     >
+                      {/* The hand draws a gold rule over the row's own hairline,
+                          the motif the ledger and the chapter turn share. */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-aurum-300/70 transition-transform duration-700 ease-heavy group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                      />
                       <span
                         aria-hidden
                         className={cn(
@@ -248,13 +263,9 @@ function IndexOverlay({
                 <span aria-hidden className="size-1.5 rotate-45 bg-aurum-300" />
                 Taking on new work
               </p>
-              <a
-                href={CONTACT_HREF}
-                onClick={(e) => onNavigate(e, CONTACT_HREF)}
-                className="inline-flex items-center gap-3 border border-aurum-300 px-6 py-3.5 font-sans text-[15px] font-medium leading-none text-ivory-100 transition-colors duration-300 ease-heavy hover:bg-aurum-300 hover:text-obsidian-0"
-              >
+              <TextButton variant="primary" href={CONTACT_HREF} onNavigate={onNavigate}>
                 {CONTACT_LABEL}
-              </a>
+              </TextButton>
             </div>
           </motion.aside>
         </div>
@@ -400,15 +411,33 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
-  const goTo = useCallback((e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    // Release the lock before scrolling: Lenis drops scrollTo while stopped.
-    unlockScroll();
-    setIsOpen(false);
-    smoothScrollTo(href);
-  }, []);
+  /* With the Index closed, a link flies the way every in-page link does.
+     With it open, the panel is the curtain: the page jumps to the chapter
+     behind it, then the panel lifts off a page already in place, instead of
+     lifting while the whole document races underneath. The lock holds
+     through the jump (jumpTo forces past it) so nothing can scroll the page
+     while it lands. */
+  const goTo = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault();
+      if (!menuOpen) {
+        smoothScrollTo(href);
+        return;
+      }
+      const hold = new Promise((done) => setTimeout(done, reducedMotion ? 0 : CHOICE_HOLD));
+      // The panel lifts whatever the jump reports, so a failed landing can
+      // never leave the Index up and the page locked behind it.
+      const lift = () => {
+        unlockScroll();
+        setIsOpen(false);
+      };
+      void Promise.all([jumpTo(href), hold]).then(lift, lift);
+    },
+    [menuOpen, reducedMotion]
+  );
 
   const toggleMenu = () => setIsOpen((open) => !open);
+  const toggleMagnet = useMagnet(!reducedMotion, { pull: 0.3, max: 5 });
 
   const filled = scrolled && !menuOpen;
   const current = CHAPTERS.find((c) => c.id === activeSection) ?? CHAPTERS[0];
@@ -423,15 +452,24 @@ export default function Navbar() {
         className="pointer-events-none absolute left-0 top-20 h-px w-px"
       />
 
-      <header
-        ref={headerRef}
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-350 ease-heavy",
-          filled
-            ? "border-hairline bg-obsidian-1/92 backdrop-blur-[12px]"
-            : "border-transparent bg-transparent"
-        )}
-      >
+      <header ref={headerRef} className="fixed inset-x-0 top-0 z-50">
+        {/* The bar's fill, rule and blur live on a layer of their own. A
+            backdrop-filter on the header itself makes the header the
+            containing block for the fixed Index panel inside it, so whenever
+            the blur was on or still fading (opening the Index on a scrolled
+            page, and from the instant it closed) the panel shrank to the 64px
+            bar and its wipe never reached the page. The layer runs a pixel
+            past the bar so the rule sits where the header's own border did. */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-0 h-[calc(100%+1px)] border-b transition-[background-color,border-color,backdrop-filter] duration-350 ease-heavy",
+            filled
+              ? "border-hairline bg-obsidian-1/92 backdrop-blur-[12px]"
+              : "border-transparent bg-transparent"
+          )}
+        />
+
         {/* The Index sits under the bar so the letterhead name and the toggle
             stay visible and operable above it. */}
         <AnimatePresence>
@@ -476,7 +514,8 @@ export default function Navbar() {
               aria-label={menuOpen ? "Close index" : "Open index"}
               aria-expanded={menuOpen}
               aria-controls={MENU_ID}
-              className="group relative -mr-2 flex h-11 shrink-0 items-center gap-3 px-2 text-ivory-100"
+              {...toggleMagnet}
+              className="group relative -mr-2 flex h-11 shrink-0 items-center gap-3 px-2 text-ivory-100 transition-[translate,scale] duration-500 ease-heavy pointer-fine:active:scale-[0.94] pointer-fine:active:duration-150"
             >
               <span aria-hidden className="relative block h-[14px] w-[2.6rem] overflow-hidden text-right font-sans text-[13px] leading-[14px] tracking-[-0.01em]">
                 <span

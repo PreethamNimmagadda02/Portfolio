@@ -5,6 +5,7 @@ import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView, EASE_SETTLE, EASE_HEAVY } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMagnet } from "@/hooks/use-magnet";
 import { SectionHeading, PlateTicks } from "@/components/ui";
 import { cn, pad2 } from "@/lib/utils";
 
@@ -236,8 +237,10 @@ function Seal({ name }: { name: string }) {
   );
 }
 
+/* The two steps lean toward the hand (useMagnet) and sink a fraction when
+   pressed, the way a crown gives under a thumb. */
 const STEP =
-  "inline-flex size-11 items-center justify-center border border-hairline text-ivory-200 transition-colors duration-300 ease-heavy hover:border-aurum-300 hover:text-aurum-200 focus-visible:border-aurum-300";
+  "inline-flex size-11 items-center justify-center border border-hairline text-ivory-200 transition-[color,border-color,translate,scale] duration-500 ease-heavy hover:border-aurum-300 hover:text-aurum-200 focus-visible:border-aurum-300 pointer-fine:active:scale-[0.94] pointer-fine:active:duration-150";
 
 function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) {
   const [active, setActive] = useState(0);
@@ -249,6 +252,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
 
   const running = inView && !hovered && !focused && !reduced;
   const current = testimonials[active];
+  const stepMagnet = useMagnet(!reduced, { pull: 0.3, max: 4 });
 
   /* Auto-advance: one timeout per dwell, re-armed whenever the active voice
      or the running condition changes. Pausing clears it; resuming starts a
@@ -379,7 +383,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
             )}
 
             <div className="mt-10 flex items-center gap-4">
-              <button type="button" aria-label="Previous voice" onClick={() => select(active - 1)} className={STEP}>
+              <button type="button" aria-label="Previous voice" onClick={() => select(active - 1)} className={STEP} {...stepMagnet}>
                 <CaretLeft size={16} weight="light" aria-hidden />
               </button>
               <p aria-hidden className="ledger caption text-ivory-300">
@@ -387,7 +391,7 @@ function QuoteStage({ inView, reduced }: { inView: boolean; reduced: boolean }) 
                 <span className="px-2 text-ivory-300/60">/</span>
                 {pad2(COUNT)}
               </p>
-              <button type="button" aria-label="Next voice" onClick={() => select(active + 1)} className={STEP}>
+              <button type="button" aria-label="Next voice" onClick={() => select(active + 1)} className={STEP} {...stepMagnet}>
                 <CaretRight size={16} weight="light" aria-hidden />
               </button>
             </div>

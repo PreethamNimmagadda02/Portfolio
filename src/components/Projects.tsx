@@ -20,8 +20,18 @@ import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ArrowUpRight, GithubLogo, Plus, X } from "@phosphor-icons/react";
-import { motion, AnimatePresence, useInView, EASE_HEAVY, EASE_SETTLE, type Variants } from "@/lib/motion";
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  useScroll,
+  useTransform,
+  EASE_HEAVY,
+  EASE_SETTLE,
+  type Variants,
+} from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSheen } from "@/hooks/use-sheen";
 import { useFollowPointer } from "@/hooks/use-follow-pointer";
 import { useMediaQuery } from "@/lib/viewport-store";
@@ -190,8 +200,14 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
           onPointerEnter={() => onHover(open ? null : slug)}
           onPointerLeave={() => onHover(null)}
           data-cursor={open ? "Close" : "Open"}
-          className="group w-full grid grid-cols-12 items-center h-[84px] lg:h-[112px] text-left"
+          className="group relative w-full grid grid-cols-12 items-center h-[84px] lg:h-[112px] text-left"
         >
+          {/* A gold rule drawn along the row's own hairline under the hand,
+              the motif the ledger, the Index and the chapter turn share. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-aurum-300/60 transition-transform duration-700 ease-[var(--ease-heavy)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+          />
           {/* Hanging index. Six rows in a dossier should be numbered. */}
           <span
             aria-hidden
@@ -201,12 +217,15 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
           </span>
 
           {/* No text colour utility here: .foil paints the glyphs from a
-              gradient and needs the transparent fill it sets to survive. */}
+              gradient and needs the transparent fill it sets to survive. The
+              transition names background-position beside translate for the
+              same reason: a transition utility replaces .foil's own, and the
+              band then jumps past the glyphs instead of sweeping through. */}
           <span
             className={cn(
               "col-span-11 sm:col-span-8 lg:col-span-5 pr-4",
               "font-display font-normal text-[26px] leading-none tracking-[-0.01em] lg:text-[clamp(2rem,3.1vw,2.75rem)]",
-              "foil transition-transform duration-500 ease-[var(--ease-heavy)] group-hover:translate-x-[10px]"
+              "foil [transition:translate_500ms_var(--ease-heavy),background-position_1100ms_var(--ease-heavy)] group-hover:translate-x-[10px]"
             )}
           >
             {title}
@@ -329,41 +348,59 @@ function ProjectRow({ project, index, open, ready, reduced, onToggle, onHover }:
   );
 }
 
+/* The window, as on the portrait: the print drifts this far behind its
+   bezels while the page passes, carried on this much oversize so the drift
+   never shows an edge (a 1.06 print overhangs each side by 3%). */
+const PLATE_DRIFT = "3%";
+const PLATE_OVERSIZE = 1.06;
+
 /**
  * A product screenshot as a framed plate. It rests in the photogravure grade
  * and lifts to colour under the hand (or keyboard focus) by raising a colour
  * layer's opacity, so the filter is painted once and never animated. For a
  * live product the whole plate is the way in.
+ *
+ * On a desktop the plate is a window, like the portrait on the cover: as the
+ * page passes, the print drifts the other way behind the frame, so it reads
+ * as set back from the glass. The hover lift scales inside that drift.
  */
 function ScreenshotPlate({ src, title, href }: { src: string; title: string; href?: string }) {
   const sheen = useSheen();
+  const reduced = useReducedMotion();
+  const isMobile = useIsMobile();
+  const depth = !reduced && !isMobile;
+  const bezelRef = useRef<HTMLSpanElement>(null);
+  const { scrollYProgress } = useScroll({ target: bezelRef, offset: ["start end", "end start"] });
+  const drift = useTransform(scrollYProgress, [0, 1], [`-${PLATE_DRIFT}`, PLATE_DRIFT]);
   const frame = (
     <>
-      <div className="absolute inset-0 transition-transform duration-[1400ms] ease-settle group-hover:scale-[1.035]">
-        <Image
-          src={src}
-          alt={`Screenshot of ${title}`}
-          width={1600}
-          height={1000}
-          loading="lazy"
-          decoding="async"
-          className="plate-mono block h-full w-full object-cover"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-0 transition-opacity duration-[900ms] ease-heavy group-hover:opacity-100 group-focus-visible:opacity-100"
-        >
+      <motion.div className="absolute inset-0" style={depth ? { y: drift, scale: PLATE_OVERSIZE } : undefined}>
+        <div className="absolute inset-0 transition-transform duration-[1400ms] ease-settle group-hover:scale-[1.035]">
           <Image
             src={src}
-            alt=""
+            alt={`Screenshot of ${title}`}
             width={1600}
             height={1000}
             loading="lazy"
             decoding="async"
-            className="block h-full w-full object-cover"
+            className="plate-mono block h-full w-full object-cover"
           />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-0 transition-opacity duration-[900ms] ease-heavy group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            <Image
+              src={src}
+              alt=""
+              width={1600}
+              height={1000}
+              loading="lazy"
+              decoding="async"
+              className="block h-full w-full object-cover"
+            />
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Bottom scrim, so a bright screenshot does not run straight into the
           panel tint beneath it. */}
@@ -388,7 +425,7 @@ function ScreenshotPlate({ src, title, href }: { src: string; title: string; hre
 
       {/* The same double bezel PortraitPlate carries: outer frame at the edge,
           inner frame inset 12px. One frame grammar for every plate. */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 border border-hairline" />
+      <span ref={bezelRef} aria-hidden className="pointer-events-none absolute inset-0 border border-hairline" />
       <span aria-hidden className="pointer-events-none absolute inset-3 border border-hairline" />
     </>
   );

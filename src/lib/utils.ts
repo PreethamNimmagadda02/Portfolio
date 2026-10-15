@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { cubicBezier, EASE_GLIDE } from "@/lib/motion";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -62,9 +63,17 @@ type LenisLike = {
     target: HTMLElement | number,
     options?: Record<string, unknown>
   ) => void;
+  resize: () => void;
+  limit: number;
 };
 
+function getLenis(): LenisLike | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as unknown as { lenis?: LenisLike }).lenis;
+}
+
 const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+const glide = cubicBezier(...EASE_GLIDE);
 
 /** Room left for the letterhead above a section's first line: the bar itself,
  *  then a deliberate gap so the eyebrow is not tucked against it. */
@@ -72,62 +81,93 @@ const NAV_HEIGHT = 64;
 const NAV_GAP = 48;
 const NAV_CLEARANCE = -(NAV_HEIGHT + NAV_GAP);
 
-/** Landing tolerance, and the cap on correction passes. */
+/** Landing tolerance, and the caps on correction passes for a flight and a jump. */
 const DRIFT_TOLERANCE = 6;
 const MAX_PASSES = 4;
+const MAX_JUMP_PASSES = 6;
+
+/** Flight times, in seconds. A correction is short and lands on the settle curve. */
+const MIN_FLIGHT = 0.9;
+const MAX_FLIGHT = 2.3;
+const CORRECTION = 0.45;
+
+/**
+ * How long a flight of `distance` pixels takes. Logarithmic, so one screen
+ * still reads as a deliberate move (1.2s for 900px) while the length of the
+ * page never keeps the reader waiting (1.6s for 3,000px, and the 2.3s
+ * ceiling from about 16,000px, which is the whole document).
+ */
+function flightDuration(distance: number) {
+  return Math.min(MAX_FLIGHT, MIN_FLIGHT + 0.33 * Math.log2(1 + Math.abs(distance) / 900));
+}
+
+/* Every section carries 112 to 176px of its own top padding. Aligning the
+   padding box under the letterhead therefore lands on dead air and pushes the
+   foot of the section off screen, which is how Activity used to arrive with
+   its heatmap below the fold. Spend the padding so the first line is what the
+   clearance applies to, and re-measure it per pass: the value is breakpoint
+   dependent, and a lazy section can reflow while the page is moving. */
+function landingFor(el: HTMLElement, offset: number) {
+  return offset + (parseFloat(getComputedStyle(el).paddingTop) || 0);
+}
 
 /**
  * Lenis-aware smooth scroll: the single source of truth for in-page
  * navigation. Accepts a section id (with or without "#") or a pixel offset.
- * Falls back to native smooth scrolling when Lenis isn't available.
+ *
+ * The flight's length follows its distance and it travels on the glide
+ * curve, so a long one leaves gently and lands slowly instead of throwing the
+ * middle of the page past the reader in its first frames.
  *
  * A section's document position is resolved once, when the flight starts, but
  * sections below the fold arrive lazily and the reserved heights they scroll
  * past are estimates, so the target can slide down while the flight is in the
  * air. Each pass therefore re-measures and corrects until the section sits
  * where it was asked to, or until the page runs out of scroll.
+ *
+ * Without Lenis (reduced motion, where SmoothScroll never starts it, or a
+ * click before it has mounted) the page arrives instead of flying.
  */
 export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) {
   if (typeof window === "undefined") return;
-  const lenis = (window as unknown as { lenis?: LenisLike }).lenis;
+  const lenis = getLenis();
+
+  if (!lenis) {
+    void jumpTo(target, offset);
+    return;
+  }
 
   if (typeof target === "number") {
-    if (lenis) {
-      lenis.scrollTo(target, { duration: 1.2, easing: easeOutExpo });
-    } else {
-      window.scrollTo({ top: target, behavior: "smooth" });
-    }
+    // A flight to the foot of the page follows the foot if it moves: sections
+    // rendered on the way down can lengthen the document after it was taken.
+    const toFoot = target >= lenis.limit;
+    let pass = 0;
+    const fly = (first: boolean) => {
+      lenis.scrollTo(toFoot ? lenis.limit : target, {
+        duration: first ? flightDuration(target - window.scrollY) : CORRECTION,
+        easing: first ? glide : easeOutExpo,
+        onComplete: () => {
+          if (!toFoot || ++pass >= MAX_PASSES) return;
+          lenis.resize();
+          if (lenis.limit - window.scrollY > DRIFT_TOLERANCE) fly(false);
+        },
+      });
+    };
+    fly(true);
     return;
   }
 
   const el = document.getElementById(target.replace(/^#/, ""));
   if (!el) return;
 
-  /* Every section carries 112 to 176px of its own top padding. Aligning the
-     padding box under the letterhead therefore lands on dead air and pushes
-     the foot of the section off screen, which is how Activity used to arrive
-     with its heatmap below the fold. Spend the padding so the first line is
-     what the clearance applies to, and re-measure it per pass: the value is
-     breakpoint dependent, and a lazy section can reflow while the flight is
-     still in the air. */
-  const clearance = () => offset + (parseFloat(getComputedStyle(el).paddingTop) || 0);
-
-  if (!lenis) {
-    // scrollIntoView has no notion of the fixed letterhead, so resolve the
-    // position by hand and keep the same landing as the Lenis path.
-    const top = window.scrollY + el.getBoundingClientRect().top + clearance();
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    return;
-  }
-
   let pass = 0;
-  const fly = (duration: number) => {
+  const fly = (first: boolean) => {
     const startedAt = window.scrollY;
-    const landing = clearance();
+    const landing = landingFor(el, offset);
     lenis.scrollTo(el, {
       offset: landing,
-      duration,
-      easing: easeOutExpo,
+      duration: first ? flightDuration(el.getBoundingClientRect().top + landing) : CORRECTION,
+      easing: first ? glide : easeOutExpo,
       onComplete: () => {
         pass += 1;
         // Where the section's first line actually ended up, against where the
@@ -136,10 +176,65 @@ export function smoothScrollTo(target: string | number, offset = NAV_CLEARANCE) 
         // A pass that moved nothing means the page is clamped at either end
         // and no further correction can land.
         const moved = Math.abs(window.scrollY - startedAt) > 1;
-        if (Math.abs(drift) > DRIFT_TOLERANCE && pass < MAX_PASSES && moved) fly(0.45);
+        if (Math.abs(drift) > DRIFT_TOLERANCE && pass < MAX_PASSES && moved) fly(false);
       },
     });
   };
 
-  fly(1.2);
+  fly(true);
+}
+
+/**
+ * Arrives at a section (or a pixel offset) at once, then corrects until it
+ * holds, and resolves when it does. This is the move for the moments the
+ * reader should not watch the page travel: a chapter chosen from the Index
+ * lands behind the panel, and the panel lifts off the page already in place.
+ *
+ * It runs while Lenis is stopped (the Index locks the page), since a jump
+ * made behind a closed curtain is the point of it. A newer jump retires an
+ * older one, so two quick choices never fight over the page.
+ */
+let jumpGeneration = 0;
+
+export function jumpTo(target: string | number, offset = NAV_CLEARANCE): Promise<void> {
+  const generation = ++jumpGeneration;
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve();
+    const lenis = getLenis();
+    const place = (top: number) => {
+      if (lenis) {
+        // Lenis clamps to the scroll limit it last measured, which can trail
+        // a section that has only just mounted; measure afresh so a jump to
+        // the foot of the page is not cut short.
+        lenis.resize();
+        lenis.scrollTo(top, { immediate: true, force: true });
+      } else {
+        window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      }
+    };
+
+    if (typeof target === "number") {
+      place(target);
+      return resolve();
+    }
+
+    const el = document.getElementById(target.replace(/^#/, ""));
+    if (!el) return resolve();
+
+    let pass = 0;
+    const settle = () => {
+      if (generation !== jumpGeneration) return resolve();
+      const drift = el.getBoundingClientRect().top + landingFor(el, offset);
+      if (Math.abs(drift) <= DRIFT_TOLERANCE || pass >= MAX_JUMP_PASSES) return resolve();
+      const before = window.scrollY;
+      place(before + drift);
+      pass += 1;
+      // A jump that moved nothing means the page is clamped at either end.
+      if (Math.abs(window.scrollY - before) < 1) return resolve();
+      // Two frames: one for whatever the jump brought into view to commit, one
+      // for the layout it causes to settle.
+      requestAnimationFrame(() => requestAnimationFrame(settle));
+    };
+    settle();
+  });
 }

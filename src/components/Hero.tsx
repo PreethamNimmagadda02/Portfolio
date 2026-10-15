@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform, EASE_HEAVY, EASE_SETTLE, type Variants
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocalTime } from "@/hooks/use-local-time";
-import { TextButton } from "@/components/ui";
+import { RollLabel, TextButton } from "@/components/ui";
 import { cn, smoothScrollTo } from "@/lib/utils";
 import PortraitPlate from "./PortraitPlate";
 
@@ -321,7 +321,7 @@ export default function Hero() {
                   }
                 >
                   <motion.span variants={primaryLabelVariants} className="inline-block">
-                    View selected work
+                    <RollLabel text="View selected work" />
                   </motion.span>
                 </TextButton>
               </motion.div>

@@ -49,6 +49,7 @@ import {
 import { skillsData, categoryLabels } from "@/lib/skills-data";
 import { selectSkillCategory } from "@/lib/scene-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useMagnet } from "@/hooks/use-magnet";
 import { SectionHeading } from "@/components/ui";
 import { cn, pad2 } from "@/lib/utils";
 
@@ -519,15 +520,21 @@ function Dial({ index, rotation, dragging, onSelect, onStep, onDragStart, onDrag
   );
 }
 
+/* A crown button leans toward the hand (useMagnet) and sinks a fraction when
+   pressed, the way a crown gives under a thumb. */
 function StepButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+  const reduced = useReducedMotion();
+  const magnet = useMagnet(!reduced, { pull: 0.3, max: 4 });
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
+      {...magnet}
       className={cn(
         "flex h-11 w-11 cursor-pointer items-center justify-center border border-hairline text-ivory-300",
-        "transition-colors duration-300 ease-heavy hover:border-hairline-gold hover:text-aurum-200 active:text-aurum-100"
+        "transition-[color,border-color,translate,scale] duration-500 ease-heavy hover:border-hairline-gold hover:text-aurum-200 active:text-aurum-100",
+        "pointer-fine:active:scale-[0.94] pointer-fine:active:duration-150"
       )}
     >
       {children}
