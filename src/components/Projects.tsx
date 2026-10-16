@@ -52,7 +52,7 @@ const projects: ProjectData[] = [
     description:
       "One platform for academic records, campus navigation and event coordination at IIT (ISM) Dhanbad, used daily by the student body.",
     tags: ["React", "TypeScript", "Firebase", "REST APIs", "Tailwind CSS", "Vite", "Framer Motion"],
-    links: { demo: "https://collegecentral.live/#/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
+    links: { demo: "https://college-central-7fab2.web.app/", repo: "https://github.com/PreethamNimmagadda02/College-Central" },
     status: "Live",
   },
   {
