@@ -4,8 +4,9 @@
  * Contact: the correspondence desk.
  *
  * Two columns on large screens. On the left, the invitation and the direct
- * lines, with the local time in Hyderabad so a visitor knows what hour their
- * message lands in. On the right, the letter itself: three ledger-line fields
+ * lines: a postmark that finds Hyderabad on a dotted map of the world, and
+ * the local time there so a visitor knows what hour their message lands in.
+ * On the right, the letter itself: three ledger-line fields
  * on a framed plate. A sent letter does not vanish into a toast; the plate
  * turns into a sealed receipt addressed back to the sender.
  */
@@ -26,6 +27,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useLocalTime } from "@/hooks/use-local-time";
 import { cn, pad2 } from "@/lib/utils";
 import { SectionHeading, TextButton, PlateTicks, RollLabel } from "@/components/ui";
+import world from "@/data/world-map.json";
 
 /* ------------------------------------------------------------------------
    Validation
@@ -333,7 +335,7 @@ function AddressRow({ term, children }: { term: string; children: ReactNode }) {
       <dt className="caption text-ivory-300 sm:w-24 sm:shrink-0">
         {term}
       </dt>
-      <dd className="m-0 font-sans text-[15px] leading-[1.6]">{children}</dd>
+      <dd className="m-0 grow font-sans text-[15px] leading-[1.6]">{children}</dd>
     </div>
   );
 }
@@ -402,6 +404,51 @@ function LocalTime() {
       <span className="text-ivory-100">{now ?? "--:--"}</span>
       <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ivory-300">IST</span>
     </span>
+  );
+}
+
+/* ------------------------------------------------------------------------
+   Postmark: Hyderabad on a dotted map of the world
+   ------------------------------------------------------------------------ */
+
+const degrees = (value: number, positive: string, negative: string) =>
+  `${Math.abs(value).toFixed(2)}° ${value < 0 ? negative : positive}`;
+
+const COORDINATES = `${degrees(world.place.lat, "N", "S")} · ${degrees(world.place.lng, "E", "W")}`;
+
+/**
+ * The world as a field of square dots, with a gold mark where the reply will
+ * be written and a hairline meridian and parallel crossing at it, the way a
+ * surveyor fixes a point. The land is sampled once by scripts/world-map.mjs;
+ * each row arrives as runs that the dash pattern breaks into half-unit dots.
+ * The row already names the city, so the drawing is hidden from assistive
+ * technology.
+ *
+ * It gives way on a narrow phone rather than push the row wide, and it stands
+ * aside from 1024 to 1279px, where the sticky column is narrowest: there it
+ * would wrap the city onto two lines and push the address taller than a
+ * 768px screen.
+ */
+function Postmark() {
+  const { cols, rows, marker, runs } = world;
+  const x = marker[0] + 0.5;
+  const y = marker[1] + 0.5;
+  return (
+    <svg
+      viewBox={`0 0 ${cols} ${rows}`}
+      aria-hidden
+      className="block h-auto w-34 min-w-0 sm:w-40 lg:hidden xl:block"
+    >
+      <path
+        d={`M0 ${y}H${cols}M${x} 0V${rows}`}
+        className="stroke-aurum-300/30"
+        strokeWidth={1}
+        vectorEffect="non-scaling-stroke"
+        fill="none"
+      />
+      <path d={runs} className="stroke-ivory-300/55" strokeWidth={0.5} strokeDasharray="0.5 0.5" fill="none" />
+      <rect x={x - 0.8} y={y - 0.8} width={1.6} height={1.6} className="breathe fill-aurum-300" />
+    </svg>
   );
 }
 
@@ -624,7 +671,13 @@ export default function Contact() {
                     </a>
                   </AddressRow>
                   <AddressRow term="Based">
-                    <span className="text-ivory-200">Hyderabad, Telangana</span>
+                    <div className="flex items-center justify-between gap-4 sm:gap-6">
+                      <div className="flex shrink-0 flex-col gap-1">
+                        <span className="text-ivory-200">Hyderabad, Telangana</span>
+                        <span className="caption whitespace-nowrap text-ivory-300">{COORDINATES}</span>
+                      </div>
+                      <Postmark />
+                    </div>
                   </AddressRow>
                   <AddressRow term="Local">
                     <LocalTime />
